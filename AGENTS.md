@@ -6,13 +6,45 @@ Monorepo (pnpm workspaces). Root `src/` is the Hono API; apps live in `apps/` (`
 
 **useGonche** is a **personal productivity app for a single user**: it turns messy work into concrete, executable progress and helps decide *what to do, when and how*. It is not a Notion/Todoist/Sunsama clone, not enterprise software, not collaborative and not multi-tenant.
 
-- **Flow Cycle** (provisional methodology, not scientifically validated, open to revision): Capture -> Clarify -> Prioritize -> Plan -> Execute -> Reflect. The user is never forced through every stage and can work manually at any time.
+- **Flow Cycle**: the product methodology (see below). The user is never forced through every stage and can work manually at any time.
 - **Manual-first**: the app must work fully without AI. AI/automation is optional, complementary, and must never modify user data without explicit authorization.
 - **Integrations** (GitHub first; Google Calendar/Drive, Notion, Gmail, Slack, Meet/Zoom later) feed work into useGonche without replacing those tools. External items are *not* tasks until the user converts them. The core domain must never depend on provider types (use adapters / anti-corruption layers). A repository is not a task or a project.
 - **Single user now, evolvable later**: do NOT implement workspaces, organizations, memberships, invitations, roles/permissions or multi-tenant infrastructure in the MVP. Keep a well-defined user identity, an explicit owner on every resource, and no irreversible coupling between personal data and the auth account, so multi-user can be added later by domain evolution.
 - **Keep concepts separate by lifecycle**: task status vs priority vs scheduling vs progress vs blocking vs external sync state; a Task is not a Time Block (a task can have zero or many blocks); replanning must not rewrite task history.
 - **No speculative abstractions**: do not add entities, layers or settings without a real need in the current version. Justify every new entity (entity vs value object vs relation).
 - Product/domain decisions are made with the user first; the conceptual model is agreed before any schema is written.
+
+### Flow Cycle (methodology)
+
+Provisional, not scientifically validated, open to revision. It is a loop: Reflect feeds the next Plan. **Four visible stages**; Clarify and Prioritize are internal (they run as suggestions inside Process, never as modules).
+
+| Visible stage | Internal stages | What it is |
+| --- | --- | --- |
+| **Capture** | Capture | Fast entry of anything (task, idea, project, note, reminder, reference). No organizing required. Brain Dump is one way to capture. |
+| **Process** | Clarify + Prioritize | Empty the inbox: what is it, does it need action, which project, deadline, dependencies, now/later/never. Priority is a simple level plus explainable suggestions; no mandatory Eisenhower matrix or scoring. |
+| **Today** | Plan + Execute | Pick today's work against real capacity (availability, calendar events, estimates, deadlines, dependencies), optionally time-block it, then work with task/project/note context, log progress and blockers, and replan on interruptions. Time Blocking is a tool, not a requirement. |
+| **Reflect** | Reflect | Daily and weekly review: planned vs executed, carry-over decisions, recurring blockers. It must produce decisions, not reports to maintain. |
+
+Principles: suggestions are explainable (reason codes, not opaque scores); replanning never rewrites a task's history; nothing is mandatory; AI only proposes.
+
+### MVP scope
+
+In the MVP: the Flow Cycle (inbox, projects, goals, tasks with dependencies/blockers/subtasks, notes, attachments, tags, availability, calendar events, daily plan, time blocks, functional history, daily/weekly review, "what next" suggestions).
+
+Rich text (TipTap on the frontend) is stored as a **`text` column holding the serialized TipTap JSON string** (never a `Json`/`jsonb` column). The API treats it as opaque text: validate it is parseable and bounded in size, never query inside it. Full-text search will need a separate plain-text column later. Files live in Supabase Storage. Backend first; frontend later.
+
+### Deferred features (out of the MVP, to review later)
+
+- **Recurrences** (recurring tasks, recurrence rules).
+- **Reminders** (the Reminder entity and its delivery/notifications).
+- **Third-party integrations**: GitHub (repos, issues, PRs, reviews, releases), Google Calendar, Google Drive, Notion, Gmail, Slack, Google Meet/Zoom. Needs: ExternalAccount, ExternalResource, task-resource link, sync cursors, webhooks, dedupe/conflict handling.
+- **AI** and **agents** (always as proposals the user accepts), **automations** and custom **workflows**, **planning rules**.
+- **Templates**.
+- **Productivity metrics** beyond the review snapshots.
+- **Full-text search**.
+- **Note revision history** (versioning).
+- **Enterprise-style audit log** (only the functional history exists).
+- **Multi-user and collaboration**: workspaces, organizations, memberships, invitations, roles/permissions, comments.
 
 ## Issue tracking (MANDATORY, never forget)
 
