@@ -21,8 +21,41 @@ datasource db {
 /// `id` mirrors `auth.users.id`.
 model Profile {
   id        String   @id @db.Uuid
-  email     String?
+  avatarUrl String?
+  displayName String? @db.VarChar(100) @map("display_name")
+  phoneNumber String? @db.VarChar(100) @map("phone_number")
+  websiteUrl String? @db.VarChar(255) @map("website_url")
+  bio String? @db.Text
+  jobTitle String? @db.VarChar(100) @map("job_title")
+  industry String? @db.VarChar(100)
+  company String? @db.VarChar(100)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-
   @@map("profiles")
+}
+
+model UserSettings {
+  id String @id @db.Uuid
+  language String? @db.VarChar(10)
+  theme String? @db.VarChar(10)
+  timezone String? @db.VarChar(10)
+  country String? @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  @@map("user_settings")
+}
+
+model Workspace {
+  id String @id @db.Uuid
+  name String @db.VarChar(100)
+  description String? @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  @@map("workspaces")
+}
+
+model Task {
+  id String @id @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  @@map("tasks")
 }
