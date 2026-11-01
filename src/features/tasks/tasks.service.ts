@@ -4,6 +4,7 @@ import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
 import { attachmentPaths, removeFiles } from '../attachments/attachments.service.js';
+import { diffTaskChanges, recordTaskEvents } from '../history/history.service.js';
 import { markConverted } from '../inbox/inbox.service.js';
 import type { CreateTaskInput, ListTasksFilters, UpdateTaskInput } from './tasks.schemas.js';
 
@@ -134,10 +135,11 @@ export const createTask = (prisma: PrismaClient, ownerId: string, input: CreateT
 /**
  * Completion rules: entering `done` sets `completedAt`; leaving `done` (reopen) or going to `cancelled` clears it.
  * Re-sending `done` keeps the original `completedAt`. Dates are validated against the stored ones (due >= start).
+ * Changes of status, priority, due date and project are written to the task history in the same transaction.
  */
 export const updateTask = (prisma: PrismaClient, ownerId: string, id: string, { tagIds, ...fields }: UpdateTaskInput): Promise<TaskView> =>
 	prisma.$transaction(async tx => {
-		const current = await tx.task.findFirst({ select: { dueDate: true, startDate: true, status: true }, where: scoped(ownerId, { id }) });
+		const current = await tx.task.findFirst({ select: { dueDate: true, priority: true, projectId: true, startDate: true, status: true }, where: scoped(ownerId, { id }) });
 		if (!current) throw new AppError('not_found', 404);
 
 		const startDate = fields.startDate === undefined ? current.startDate : fields.startDate;
@@ -151,6 +153,7 @@ export const updateTask = (prisma: PrismaClient, ownerId: string, id: string, { 
 
 		const completedAt = fields.status === undefined ? undefined : fields.status !== 'done' ? null : current.status === 'done' ? undefined : new Date();
 		await tx.task.updateMany({ data: { ...fields, completedAt }, where: scoped(ownerId, { id }) });
+		await recordTaskEvents(tx, ownerId, id, diffTaskChanges(current, fields));
 		if (tagIds) {
 			await tx.taskTag.deleteMany({ where: { taskId: id } });
 			await tx.taskTag.createMany({ data: tagIds.map(tagId => ({ tagId, taskId: id })) });

@@ -215,6 +215,20 @@ describe('moveBlock', () => {
 		expect(prisma.timeBlock.updateMany).toHaveBeenCalledWith({ data: { status: 'rescheduled' }, where: { id: ID, ownerId: TEST_USER_ID } });
 	});
 
+	it('writes a rescheduled event to the task history with the old and new ranges', async () => {
+		const prisma = setupMove(block());
+		await moveBlock(prisma, TEST_USER_ID, ID, range);
+		expect(prisma.taskEvent.createMany).toHaveBeenCalledWith({
+			data: [{ fromEnd: at('11:00'), fromStart: at('10:00'), ownerId: TEST_USER_ID, taskId: TASK, timeBlockId: NEW_ID, toEnd: at('11:00'), toStart: at('10:00'), type: 'rescheduled' }],
+		});
+	});
+
+	it('writes no task event for a block without a task', async () => {
+		const prisma = setupMove(block({ taskId: null, title: 'Lunch' }));
+		await moveBlock(prisma, TEST_USER_ID, ID, range);
+		expect(prisma.taskEvent.createMany).not.toHaveBeenCalled();
+	});
+
 	it.each(['missed', 'interrupted'] as const)('keeps a %s original as it was (history)', async status => {
 		const prisma = setupMove(block({ status }));
 		await moveBlock(prisma, TEST_USER_ID, ID, range);
