@@ -1,4 +1,5 @@
 import { getSupabase, requireAuth, supabaseMiddleware } from '@usegonche/auth/hono';
+import { createAuthRoutes } from '@usegonche/auth/routes';
 import { getPrisma, type PrismaClient } from '@usegonche/database';
 import { Hono } from 'hono';
 import { env, getRuntimeKey } from 'hono/adapter';
@@ -29,6 +30,20 @@ app.use(async (c, next) => {
 	// Workers: sockets cannot outlive the request, so close the per-request client after responding.
 	if (getRuntimeKey() === 'workerd') c.executionCtx.waitUntil(prisma.$disconnect());
 });
+
+app.route(
+	'/auth',
+	createAuthRoutes({
+		// Keep the app profile in sync (also creates it on the first Google sign-in).
+		onSignIn: async (user, c) => {
+			await c.get('prisma').profile.upsert({
+				create: { email: user.email, id: user.id },
+				update: { email: user.email },
+				where: { id: user.id },
+			});
+		},
+	})
+);
 
 app.get('/', c => c.text('Hello Hono!'));
 
