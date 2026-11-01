@@ -7,6 +7,7 @@ import health from './features/health/health.routes.js';
 import inbox from './features/inbox/inbox.routes.js';
 import me from './features/me/me.routes.js';
 import notes from './features/notes/notes.routes.js';
+import planning from './features/planning/planning.routes.js';
 import profile from './features/profile/profile.routes.js';
 import projects from './features/projects/projects.routes.js';
 import tags from './features/tags/tags.routes.js';
@@ -21,6 +22,7 @@ const routes = new Hono<AppEnv>()
 	.route('/inbox', inbox)
 	.route('/me', me)
 	.route('/notes', notes)
+	.route('/planning', planning)
 	.route('/profile', profile)
 	.route('/projects', projects)
 	.route('/tags', tags)

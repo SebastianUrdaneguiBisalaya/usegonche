@@ -39,15 +39,20 @@ model Profile {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  settings     UserSettings?
-  tags         Tag[]
-  inboxItems   InboxItem[]
-  goals        Goal[]
-  projects     Project[]
-  tasks        Task[]
-  taskBlockers TaskBlocker[]
-  notes        Note[]
-  attachments  Attachment[]
+  settings            UserSettings?
+  tags                Tag[]
+  inboxItems          InboxItem[]
+  goals               Goal[]
+  projects            Project[]
+  tasks               Task[]
+  taskBlockers        TaskBlocker[]
+  notes               Note[]
+  attachments         Attachment[]
+  availabilityWindows AvailabilityWindow[]
+  calendarEvents      CalendarEvent[]
+  dailyPlans          DailyPlan[]
+  dailyPlanItems      DailyPlanItem[]
+  timeBlocks          TimeBlock[]
 
   @@map("profiles")
 }
@@ -271,6 +276,8 @@ model Task {
   blockers        TaskBlocker[]
   notes           TaskNote[]
   attachments     Attachment[]
+  planItems       DailyPlanItem[]
+  timeBlocks      TimeBlock[]
 
   @@index([ownerId, status, createdAt])
   @@index([ownerId, dueDate])
@@ -400,4 +407,119 @@ model Attachment {
   @@index([noteId, createdAt])
   @@index([ownerId, createdAt])
   @@map("attachments")
+}
+
+enum CalendarEventKind {
+  event
+  out_of_office
+
+  @@map("calendar_event_kind")
+}
+
+enum TimeBlockStatus {
+  planned
+  done
+  missed
+  interrupted
+  rescheduled
+
+  @@map("time_block_status")
+}
+
+/// Weekly working hours: one row per window (a weekday can have several). Minutes are local wall-clock minutes of the
+/// day in the user's timezone (`user_settings.timezone`). `weekday` is ISO (1 = Monday ... 7 = Sunday). CHECKs in the migration.
+model AvailabilityWindow {
+  id          String   @id @default(uuid(4)) @db.Uuid
+  ownerId     String   @map("owner_id") @db.Uuid
+  weekday     Int
+  startMinute Int      @map("start_minute")
+  endMinute   Int      @map("end_minute")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, weekday])
+  @@map("availability_windows")
+}
+
+/// Manually entered calendar entry (external calendars come later through integrations). Always stored as an instant range;
+/// all-day events span the user's local day(s) at creation time. `out_of_office` removes availability; a timed `event` does too;
+/// an all-day `event` is informational only.
+model CalendarEvent {
+  id        String            @id @default(uuid(4)) @db.Uuid
+  ownerId   String            @map("owner_id") @db.Uuid
+  title     String            @db.VarChar(200)
+  kind      CalendarEventKind @default(event)
+  allDay    Boolean           @default(false) @map("all_day")
+  startsAt  DateTime          @map("starts_at") @db.Timestamptz(6)
+  endsAt    DateTime          @map("ends_at") @db.Timestamptz(6)
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, startsAt])
+  @@map("calendar_events")
+}
+
+/// The tasks chosen for one local date, in order. Created lazily when the first task is planned.
+model DailyPlan {
+  id        String   @id @default(uuid(4)) @db.Uuid
+  ownerId   String   @map("owner_id") @db.Uuid
+  date      DateTime @db.Date
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner Profile         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  items DailyPlanItem[]
+
+  @@unique([ownerId, date])
+  @@map("daily_plans")
+}
+
+model DailyPlanItem {
+  id        String   @id @default(uuid(4)) @db.Uuid
+  ownerId   String   @map("owner_id") @db.Uuid
+  planId    String   @map("plan_id") @db.Uuid
+  taskId    String   @map("task_id") @db.Uuid
+  position  Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  owner Profile   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  plan  DailyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  task  Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, taskId])
+  @@index([taskId])
+  @@map("daily_plan_items")
+}
+
+/// A slice of time, not a task: a task can have zero or many blocks, and a block can have no task (then `title` is required).
+/// Moving a block never edits it: a new `planned` block is created with `rescheduledFromId` pointing at the old one, which keeps
+/// its planned range (and becomes `rescheduled` if it was still `planned`). Overlaps are warnings in the service, not constraints.
+/// CHECKs in the migration: planned_end > planned_start, actual_end > actual_start, task or title present.
+model TimeBlock {
+  id                String          @id @default(uuid(4)) @db.Uuid
+  ownerId           String          @map("owner_id") @db.Uuid
+  taskId            String?         @map("task_id") @db.Uuid
+  title             String?         @db.VarChar(200)
+  plannedStart      DateTime        @map("planned_start") @db.Timestamptz(6)
+  plannedEnd        DateTime        @map("planned_end") @db.Timestamptz(6)
+  actualStart       DateTime?       @map("actual_start") @db.Timestamptz(6)
+  actualEnd         DateTime?       @map("actual_end") @db.Timestamptz(6)
+  status            TimeBlockStatus @default(planned)
+  rescheduledFromId String?         @map("rescheduled_from_id") @db.Uuid
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner           Profile     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  task            Task?       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  rescheduledFrom TimeBlock?  @relation("Reschedule", fields: [rescheduledFromId], references: [id], onDelete: SetNull)
+  rescheduledTo   TimeBlock[] @relation("Reschedule")
+
+  @@index([ownerId, plannedStart])
+  @@index([taskId])
+  @@index([rescheduledFromId])
+  @@map("time_blocks")
 }
