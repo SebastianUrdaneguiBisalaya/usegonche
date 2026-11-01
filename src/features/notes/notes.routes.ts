@@ -5,8 +5,9 @@ import { ok, okWithMeta } from '../../lib/http.js';
 import { toPage } from '../../lib/pagination.js';
 import { validationHook } from '../../lib/validator.js';
 import { requireUser } from '../../middleware/auth.js';
-import { createNoteSchema, listNotesQuerySchema, noteParamSchema, updateNoteSchema } from './notes.schemas.js';
-import { createNote, deleteNote, getNote, listNotes, updateNote } from './notes.service.js';
+import { getRevision, listRevisions } from './notes.revisions.service.js';
+import { createNoteSchema, listNotesQuerySchema, listRevisionsQuerySchema, noteParamSchema, revisionParamSchema, updateNoteSchema } from './notes.schemas.js';
+import { createNote, deleteNote, getNote, listNotes, restoreRevision, updateNote } from './notes.service.js';
 
 // The owner always comes from the verified claims, never from the body.
 export default new Hono<AppEnv>()
@@ -25,4 +26,17 @@ export default new Hono<AppEnv>()
 		const { id } = c.req.valid('param');
 		await deleteNote(c.get('prisma'), c.get('storage'), c.get('claims').sub, id);
 		return ok(c, { id }, 200);
+	})
+	.get('/:id/revisions', zValidator('param', noteParamSchema, validationHook), zValidator('query', listRevisionsQuerySchema, validationHook), async c => {
+		const { cursor, limit } = c.req.valid('query');
+		const { items, nextCursor } = toPage(await listRevisions(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id, limit, cursor), limit, revision => revision.createdAt);
+		return okWithMeta(c, items, { limit, nextCursor }, 200);
+	})
+	.get('/:id/revisions/:revisionId', zValidator('param', revisionParamSchema, validationHook), async c => {
+		const { id, revisionId } = c.req.valid('param');
+		return ok(c, await getRevision(c.get('prisma'), c.get('claims').sub, id, revisionId), 200);
+	})
+	.post('/:id/revisions/:revisionId/restore', zValidator('param', revisionParamSchema, validationHook), async c => {
+		const { id, revisionId } = c.req.valid('param');
+		return ok(c, await restoreRevision(c.get('prisma'), c.get('claims').sub, id, revisionId), 200);
 	});

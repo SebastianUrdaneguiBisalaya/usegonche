@@ -6,6 +6,7 @@ import { scoped } from '../../lib/owner.js';
 import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
 import { attachmentPaths, removeFiles } from '../attachments/attachments.service.js';
 import { markConverted } from '../inbox/inbox.service.js';
+import { getRevision, recordRevision } from './notes.revisions.service.js';
 import type { CreateNoteInput, ListNotesFilters, UpdateNoteInput } from './notes.schemas.js';
 
 type Db = PrismaClient | Prisma.TransactionClient;
@@ -82,7 +83,10 @@ export const createNote = (prisma: PrismaClient, ownerId: string, input: CreateN
 		return getNote(tx, ownerId, id);
 	});
 
-/** Writes only what changed (tags and tasks are compared as sets); an update that changes nothing answers with the current note and writes nothing. */
+/**
+ * Writes only what changed (tags and tasks are compared as sets); an update that changes nothing answers with the current note and writes nothing.
+ * A change of title or body first saves the previous version as a revision, in the same transaction.
+ */
 export const updateNote = (prisma: PrismaClient, ownerId: string, id: string, { tagIds, taskIds, ...fields }: UpdateNoteInput): Promise<NoteView> =>
 	prisma.$transaction(async tx => {
 		const current = await getNote(tx, ownerId, id);
@@ -96,6 +100,7 @@ export const updateNote = (prisma: PrismaClient, ownerId: string, id: string, { 
 		if (changes.projectId) await assertProject(tx, ownerId, changes.projectId);
 		if (newTagIds) await assertTags(tx, ownerId, newTagIds);
 		if (newTaskIds) await assertTasks(tx, ownerId, newTaskIds);
+		if (changes.title !== undefined || changes.body !== undefined) await recordRevision(tx, ownerId, current);
 		if (hasChanges(changes)) await tx.note.updateMany({ data: changes, where: scoped(ownerId, { id }) });
 		if (newTagIds) {
 			await tx.noteTag.deleteMany({ where: { noteId: id } });
@@ -107,6 +112,12 @@ export const updateNote = (prisma: PrismaClient, ownerId: string, id: string, { 
 		}
 		return getNote(tx, ownerId, id);
 	});
+
+/** Restores the title and body of a revision. It is a normal edit: what it replaces becomes a new revision, and restoring the current version changes nothing. */
+export const restoreRevision = async (prisma: PrismaClient, ownerId: string, noteId: string, revisionId: string): Promise<NoteView> => {
+	const { body, title } = await getRevision(prisma, ownerId, noteId, revisionId);
+	return updateNote(prisma, ownerId, noteId, { body, title });
+};
 
 /** Deletes the note; tag/task links and attachment rows cascade, and the attachment files are removed from Storage. */
 export const deleteNote = async (prisma: PrismaClient, storage: Storage, ownerId: string, id: string): Promise<void> => {

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createMockPrisma, createMockStorage, OTHER_USER_ID, TEST_USER_ID } from '../../test/helpers.js';
-import { createNote, deleteNote, getNote, listNotes, updateNote } from './notes.service.js';
+import { createNote, deleteNote, getNote, listNotes, restoreRevision, updateNote } from './notes.service.js';
 
 const ID = '5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7e';
 const PROJECT_ID = '9b7e4a10-3c52-4d8f-a1e6-0f2d3c4b5a69';
@@ -127,6 +127,7 @@ describe('updateNote', () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.note.updateMany).mockResolvedValue({ count: 1 });
 		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow(stored));
+		vi.mocked(prisma.noteRevision.findMany).mockResolvedValue([]);
 		return prisma;
 	};
 
@@ -138,6 +139,23 @@ describe('updateNote', () => {
 		expect(prisma.noteTag.deleteMany).not.toHaveBeenCalled();
 		expect(prisma.taskNote.deleteMany).toHaveBeenCalledWith({ where: { noteId: ID } });
 		expect(prisma.taskNote.createMany).toHaveBeenCalledWith({ data: [{ noteId: ID, taskId: TASK2 }] });
+	});
+
+	it('saves the previous title and body as a revision before a change of either', async () => {
+		const prisma = setup();
+		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow({ ...stored, body: 'old body' }));
+		await updateNote(prisma, TEST_USER_ID, ID, { body: 'new body' });
+		expect(prisma.noteRevision.create).toHaveBeenCalledWith({ data: { body: 'old body', noteId: ID, ownerId: TEST_USER_ID, title: 'Meeting' } });
+		await updateNote(prisma, TEST_USER_ID, ID, { title: 'Renamed' });
+		expect(prisma.noteRevision.create).toHaveBeenCalledTimes(2);
+	});
+
+	it('writes no revision when title and body do not change (links, project, same values)', async () => {
+		const prisma = setup();
+		vi.mocked(prisma.tag.count).mockResolvedValue(0);
+		await updateNote(prisma, TEST_USER_ID, ID, { projectId: null, tagIds: [] });
+		await updateNote(prisma, TEST_USER_ID, ID, { title: 'Meeting' });
+		expect(prisma.noteRevision.create).not.toHaveBeenCalled();
 	});
 
 	it('replaces the tag set when it changes', async () => {
@@ -200,5 +218,40 @@ describe('deleteNote', () => {
 		vi.mocked(prisma.note.deleteMany).mockResolvedValue({ count: 0 });
 		expect(await rejection(deleteNote(prisma, storage, OTHER_USER_ID, ID))).toMatchObject({ code: 'not_found', status: 404 });
 		expect(storage.remove).not.toHaveBeenCalled();
+	});
+});
+
+describe('restoreRevision', () => {
+	const REVISION_ID = '7e8f9a0b-1c2d-4e3f-8a4b-5c6d7e8f9a0b';
+	const setup = () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.noteRevision.findFirst).mockResolvedValue(asRow({ body: 'old body', id: REVISION_ID, noteId: ID, title: 'Old title' }));
+		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow({ ...row, body: 'current body', title: 'Current' }));
+		vi.mocked(prisma.note.updateMany).mockResolvedValue({ count: 1 });
+		vi.mocked(prisma.noteRevision.findMany).mockResolvedValue([]);
+		return prisma;
+	};
+
+	it('applies the revision as a normal edit that saves what it replaces', async () => {
+		const prisma = setup();
+		await restoreRevision(prisma, TEST_USER_ID, ID, REVISION_ID);
+		expect(prisma.noteRevision.create).toHaveBeenCalledWith({ data: { body: 'current body', noteId: ID, ownerId: TEST_USER_ID, title: 'Current' } });
+		expect(prisma.note.updateMany).toHaveBeenCalledWith({ data: { body: 'old body', title: 'Old title' }, where: { id: ID, ownerId: TEST_USER_ID } });
+		expect(prisma.noteRevision.deleteMany).not.toHaveBeenCalledWith(expect.objectContaining({ where: { id: REVISION_ID } }));
+	});
+
+	it('changes nothing when the revision equals the current version', async () => {
+		const prisma = setup();
+		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow({ ...row, body: 'old body', title: 'Old title' }));
+		await restoreRevision(prisma, TEST_USER_ID, ID, REVISION_ID);
+		expect(prisma.noteRevision.create).not.toHaveBeenCalled();
+		expect(prisma.note.updateMany).not.toHaveBeenCalled();
+	});
+
+	it('throws 404 when the revision is not found for that owner and note', async () => {
+		const prisma = setup();
+		vi.mocked(prisma.noteRevision.findFirst).mockResolvedValue(null);
+		expect(await rejection(restoreRevision(prisma, OTHER_USER_ID, ID, REVISION_ID))).toMatchObject({ code: 'not_found', status: 404 });
+		expect(prisma.note.updateMany).not.toHaveBeenCalled();
 	});
 });

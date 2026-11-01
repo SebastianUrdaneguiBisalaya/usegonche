@@ -24,6 +24,9 @@ describe.each([
 	['GET', `/notes/${ID}`, undefined],
 	['PATCH', `/notes/${ID}`, jsonRequest('PATCH', { title: 'x' })],
 	['DELETE', `/notes/${ID}`, del],
+	['GET', `/notes/${ID}/revisions`, undefined],
+	['GET', `/notes/${ID}/revisions/${OTHER}`, undefined],
+	['POST', `/notes/${ID}/revisions/${OTHER}/restore`, { method: 'POST' }],
 ] as const)('%s %s', (_method, path, init) => {
 	it('answers 401 when unauthenticated', async () => {
 		const res = await setup(null).app.request(path, init);
@@ -117,9 +120,11 @@ describe('PATCH /notes/:id', () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.note.updateMany).mockResolvedValue({ count: 1 });
 		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow({ ...row, body: '{}', projectId: OTHER }));
+		vi.mocked(prisma.noteRevision.findMany).mockResolvedValue([]);
 		const res = await app.request(`/notes/${ID}`, jsonRequest('PATCH', { body: null, projectId: null }));
 		expect(res.status).toBe(200);
 		expect(prisma.note.updateMany).toHaveBeenCalledWith({ data: { body: null, projectId: null }, where: { id: ID, ownerId: TEST_USER_ID } });
+		expect(prisma.noteRevision.create).toHaveBeenCalledWith({ data: { body: '{}', noteId: ID, ownerId: TEST_USER_ID, title: 'Meeting' } });
 	});
 
 	it('answers 200 with the note and writes nothing when nothing changes', async () => {
@@ -161,5 +166,48 @@ describe('DELETE /notes/:id', () => {
 		vi.mocked(prisma.attachment.findMany).mockResolvedValue([]);
 		vi.mocked(prisma.note.deleteMany).mockResolvedValue({ count: 0 });
 		expect((await app.request(`/notes/${ID}`, del)).status).toBe(404);
+	});
+});
+
+describe('note revisions', () => {
+	const revision = { createdAt: new Date('2026-11-01T10:00:00.000Z'), id: OTHER, noteId: ID, ownerId: TEST_USER_ID, title: 'Old' };
+
+	it('GET /notes/:id/revisions lists them with meta, scoped by the claims', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow({ id: ID }));
+		vi.mocked(prisma.noteRevision.findMany).mockResolvedValue(asRow([revision]));
+		const res = await app.request(`/notes/${ID}/revisions`);
+		expect(res.status).toBe(200);
+		expect(await res.json()).toMatchObject({ data: [{ id: OTHER }], meta: { limit: 50, nextCursor: null } });
+		expect(prisma.noteRevision.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { noteId: ID, ownerId: TEST_USER_ID } }));
+	});
+
+	it('answers 404 when the note is not the user’s and 422 for an invalid cursor or id', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.note.findFirst).mockResolvedValue(null);
+		expect((await app.request(`/notes/${ID}/revisions`)).status).toBe(404);
+		expect((await app.request(`/notes/${ID}/revisions?cursor=nope`)).status).toBe(422);
+		expect((await app.request(`/notes/nope/revisions/${OTHER}`)).status).toBe(422);
+	});
+
+	it('GET /notes/:id/revisions/:revisionId returns the revision or 404', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.noteRevision.findFirst).mockResolvedValueOnce(asRow(revision)).mockResolvedValueOnce(null);
+		const res = await app.request(`/notes/${ID}/revisions/${OTHER}`);
+		expect(res.status).toBe(200);
+		expect(await res.json()).toMatchObject({ data: { id: OTHER, title: 'Old' } });
+		expect((await app.request(`/notes/${ID}/revisions/${OTHER}`)).status).toBe(404);
+	});
+
+	it('POST /notes/:id/revisions/:revisionId/restore answers the restored note or 404', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.noteRevision.findFirst)
+			.mockResolvedValueOnce(asRow({ ...revision, body: null }))
+			.mockResolvedValueOnce(null);
+		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow({ ...row, body: null, title: 'Old' }));
+		const res = await app.request(`/notes/${ID}/revisions/${OTHER}/restore`, { method: 'POST' });
+		expect(res.status).toBe(200);
+		expect(await res.json()).toMatchObject({ data: { id: ID, title: 'Old' } });
+		expect((await app.request(`/notes/${ID}/revisions/${OTHER}/restore`, { method: 'POST' })).status).toBe(404);
 	});
 });

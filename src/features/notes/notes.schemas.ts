@@ -40,6 +40,8 @@ export const listNotesQuerySchema = z.object({
 });
 
 export const noteParamSchema = z.object({ id: z.uuid() });
+export const listRevisionsQuerySchema = z.object({ ...paginationQuery });
+export const revisionParamSchema = z.object({ id: z.uuid(), revisionId: z.uuid() });
 
 export type CreateNoteInput = z.infer<typeof createNoteSchema>;
 export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
