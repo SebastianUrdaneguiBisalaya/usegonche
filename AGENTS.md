@@ -2,6 +2,18 @@
 
 Monorepo (pnpm workspaces). Root `src/` is the Hono API; apps live in `apps/` (`desktop`, `mobile`, `web`, `www`); shared code lives in `packages/`.
 
+## Product context
+
+**useGonche** is a **personal productivity app for a single user**: it turns messy work into concrete, executable progress and helps decide *what to do, when and how*. It is not a Notion/Todoist/Sunsama clone, not enterprise software, not collaborative and not multi-tenant.
+
+- **Flow Cycle** (provisional methodology, not scientifically validated, open to revision): Capture -> Clarify -> Prioritize -> Plan -> Execute -> Reflect. The user is never forced through every stage and can work manually at any time.
+- **Manual-first**: the app must work fully without AI. AI/automation is optional, complementary, and must never modify user data without explicit authorization.
+- **Integrations** (GitHub first; Google Calendar/Drive, Notion, Gmail, Slack, Meet/Zoom later) feed work into useGonche without replacing those tools. External items are *not* tasks until the user converts them. The core domain must never depend on provider types (use adapters / anti-corruption layers). A repository is not a task or a project.
+- **Single user now, evolvable later**: do NOT implement workspaces, organizations, memberships, invitations, roles/permissions or multi-tenant infrastructure in the MVP. Keep a well-defined user identity, an explicit owner on every resource, and no irreversible coupling between personal data and the auth account, so multi-user can be added later by domain evolution.
+- **Keep concepts separate by lifecycle**: task status vs priority vs scheduling vs progress vs blocking vs external sync state; a Task is not a Time Block (a task can have zero or many blocks); replanning must not rewrite task history.
+- **No speculative abstractions**: do not add entities, layers or settings without a real need in the current version. Justify every new entity (entity vs value object vs relation).
+- Product/domain decisions are made with the user first; the conceptual model is agreed before any schema is written.
+
 ## Issue tracking (MANDATORY, never forget)
 
 **Every time the user requests a task, the agent MUST create a GitHub issue BEFORE starting any work.** No exceptions, however small the task. The issue needs:
@@ -126,6 +138,9 @@ The API does not translate. `message` is a default English fallback; clients loc
 ### Database & migrations
 
 - Supabase owns the `auth` schema (`auth.users`, sessions, identities) and `storage`; they exist in every Supabase project, no migration needed. Prisma only manages the `public` schema (e.g. `profiles`, whose `id` mirrors `auth.users.id`). Never model or migrate `auth.*` tables.
+- **No JSON/JSONB columns** (`Json` in Prisma) for domain data: they cannot be typed correctly end to end. Model structured data as typed columns, enums, value-object columns or related tables. History/audit events must be typed tables, never a generic JSON blob. Only exception: opaque third-party payloads that useGonche never queries or interprets, and only with explicit user approval.
+- **All IDs are UUID v4**, in every table and consistent with Supabase (`auth.users.id` is v4). Use `@db.Uuid` with `@default(uuid(4))` (or `gen_random_uuid()` at DB level); never `cuid`, `uuid(7)`, autoincrement or ids without a default. Tables whose `id` mirrors `auth.users.id` (e.g. `profiles`) take the value from Supabase instead of generating it.
+- Every user-owned table carries an explicit owner column referencing the user's profile id (single user today, keeps the door open for more later).
 - Migrations are **never** run by the API at startup. Create them with `pnpm --filter @usegonche/database migrate:dev` (uses `DIRECT_URL`, commit the generated `prisma/migrations/`), apply them with `migrate:deploy` as a deploy/CI step before releasing the new API version.
 
 ### Adding a feature
