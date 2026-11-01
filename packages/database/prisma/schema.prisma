@@ -42,6 +42,8 @@ model Profile {
   settings   UserSettings?
   tags       Tag[]
   inboxItems InboxItem[]
+  goals      Goal[]
+  projects   Project[]
 
   @@map("profiles")
 }
@@ -74,7 +76,8 @@ model Tag {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner    Profile      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  projects ProjectTag[]
 
   @@unique([ownerId, name])
   @@map("tags")
@@ -111,8 +114,83 @@ model InboxItem {
   createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner    Profile   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  projects Project[]
 
   @@index([ownerId, status, capturedAt])
   @@map("inbox_items")
+}
+
+enum GoalStatus {
+  active
+  achieved
+
+  @@map("goal_status")
+}
+
+/// Lifecycle status only. Being archived is separate (`archivedAt`), so an achieved goal can be archived and an archived one restored.
+enum ProjectStatus {
+  active
+  on_hold
+  completed
+
+  @@map("project_status")
+}
+
+/// Outcome the user wants to reach; groups projects (1:N). Never deleted, only archived.
+/// `description` is serialized TipTap JSON (opaque text, validated and bounded by the API).
+model Goal {
+  id          String     @id @default(uuid(4)) @db.Uuid
+  ownerId     String     @map("owner_id") @db.Uuid
+  title       String     @db.VarChar(200)
+  description String?    @db.Text
+  status      GoalStatus @default(active)
+  targetDate  DateTime?  @map("target_date") @db.Date
+  archivedAt  DateTime?  @map("archived_at") @db.Timestamptz(6)
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner    Profile   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  projects Project[]
+
+  @@index([ownerId, archivedAt, createdAt])
+  @@map("goals")
+}
+
+/// Container of tasks, optionally under a goal. Archiving it keeps its tasks. Never deleted, only archived.
+/// `originInboxItemId` is set when it was created by converting an inbox item (an item converts at most once).
+model Project {
+  id                String        @id @default(uuid(4)) @db.Uuid
+  ownerId           String        @map("owner_id") @db.Uuid
+  goalId            String?       @map("goal_id") @db.Uuid
+  originInboxItemId String?       @unique @map("origin_inbox_item_id") @db.Uuid
+  title             String        @db.VarChar(200)
+  description       String?       @db.Text
+  status            ProjectStatus @default(active)
+  archivedAt        DateTime?     @map("archived_at") @db.Timestamptz(6)
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner           Profile      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  goal            Goal?        @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  originInboxItem InboxItem?   @relation(fields: [originInboxItemId], references: [id], onDelete: SetNull)
+  tags            ProjectTag[]
+
+  @@index([ownerId, archivedAt, createdAt])
+  @@index([goalId])
+  @@map("projects")
+}
+
+/// Typed join project <-> tag. The owner is implied by the project (the service checks both belong to the same owner).
+/// Deleting either side removes the link only.
+model ProjectTag {
+  projectId String @map("project_id") @db.Uuid
+  tagId     String @map("tag_id") @db.Uuid
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, tagId])
+  @@index([tagId])
+  @@map("project_tags")
 }
