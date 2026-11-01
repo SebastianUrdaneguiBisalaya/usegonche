@@ -151,6 +151,15 @@ No `db/` folder: schema, migrations and client live in `packages/database`. Auth
 - Route/query params are strings on the wire: use `z.coerce.*` in the schema, pass strings from the client. Encode params with `encodeURIComponent`.
 - Cookies: create the client with `init: { credentials: 'include' }`; for bearer auth, pass `headers: { Authorization: ... }`.
 
+### Pagination (cursor / keyset)
+
+Every list endpoint that can grow uses `src/lib/pagination.ts` (never offset, never an unbounded list). Lists are ordered by a timestamp descending with `id` as tie-breaker.
+
+- Query: `z.object({ ...paginationQuery, ...filters })` gives `limit` (default 50, max 100) and an optional opaque `cursor` (invalid cursor -> 422).
+- Service: `findMany({ orderBy: keysetOrder('<timestampField>'), take: limit + 1, where: { ...scoped(ownerId, filters), ...keysetAfter('<timestampField>', cursor) } })`.
+- Route: `const { items, nextCursor } = toPage(rows, limit, row => row.<timestampField>)` then `okWithMeta(c, items, { limit, nextCursor })`. Clients echo `meta.nextCursor` as `?cursor=`; `null` means the last page.
+- Back the ordering with an index `(owner_id, [filters...], <timestampField>)`.
+
 ### Validation (Zod 4)
 
 - Use `zValidator` from `@hono/zod-validator` (add it to the root with `pnpm add @hono/zod-validator`; `zod` is already installed) for every input target (`json`, `form`, `query`, `param`, `header`), never read `c.req.json()` raw. Header keys are lowercase.

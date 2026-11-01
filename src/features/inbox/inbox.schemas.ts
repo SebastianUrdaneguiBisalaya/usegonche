@@ -1,9 +1,8 @@
 import { z } from 'zod';
+import { paginationQuery } from '../../lib/pagination.js';
 
 export const CONTENT_MAX = 2000;
 export const BRAIN_DUMP_MAX_ITEMS = 200;
-export const LIST_LIMIT_DEFAULT = 50;
-export const LIST_LIMIT_MAX = 100;
 
 const content = z.string().trim().min(1).max(CONTENT_MAX);
 
@@ -30,7 +29,7 @@ export const userStatuses = ['pending', 'archived', 'discarded'] as const;
 export const setStatusSchema = z.strictObject({ status: z.enum(userStatuses) });
 
 export const listQuerySchema = z.object({
-	limit: z.coerce.number().int().min(1).max(LIST_LIMIT_MAX).default(LIST_LIMIT_DEFAULT),
+	...paginationQuery,
 	status: z.enum(['pending', 'converted', 'archived', 'discarded']).default('pending'),
 });
 

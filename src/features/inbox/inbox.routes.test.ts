@@ -31,15 +31,37 @@ describe('GET /inbox', () => {
 
 		const res = await app.request('/inbox');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [item], meta: { limit: 50, status: 'pending' } });
-		expect(prisma.inboxItem.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 50, where: { ownerId: TEST_USER_ID, status: 'pending' } }));
+		expect(await res.json()).toEqual({ data: [item], meta: { limit: 50, nextCursor: null, status: 'pending' } });
+		expect(prisma.inboxItem.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51, where: { ownerId: TEST_USER_ID, status: 'pending' } }));
 	});
 
 	it('filters by status and limit', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.inboxItem.findMany).mockResolvedValue([]);
 		await app.request('/inbox?status=archived&limit=5');
-		expect(prisma.inboxItem.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 5, where: { ownerId: TEST_USER_ID, status: 'archived' } }));
+		expect(prisma.inboxItem.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 6, where: { ownerId: TEST_USER_ID, status: 'archived' } }));
+	});
+
+	it('returns nextCursor when there are more items and the cursor continues the list', async () => {
+		const { app, prisma } = setup();
+		const rows = [1, 2, 3].map(n => ({ ...item, capturedAt: new Date(`2026-11-0${n}T10:00:00.000Z`), id: `5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7${n}` }));
+		vi.mocked(prisma.inboxItem.findMany).mockResolvedValue([...rows].reverse());
+
+		const first = (await (await app.request('/inbox?limit=2')).json()) as { data: unknown[]; meta: { nextCursor: string } };
+		expect(first.data).toHaveLength(2);
+		expect(typeof first.meta.nextCursor).toBe('string');
+
+		await app.request(`/inbox?limit=2&cursor=${first.meta.nextCursor}`);
+		const where = vi.mocked(prisma.inboxItem.findMany).mock.calls[1]?.[0]?.where;
+		expect(where).toMatchObject({ OR: expect.any(Array), ownerId: TEST_USER_ID, status: 'pending' });
+	});
+
+	it('rejects an invalid cursor with 422', async () => {
+		const { app, prisma } = setup();
+		const res = await app.request('/inbox?cursor=garbage');
+		expect(res.status).toBe(422);
+		expect(await res.json()).toMatchObject({ error: { code: 'validation_error' } });
+		expect(prisma.inboxItem.findMany).not.toHaveBeenCalled();
 	});
 
 	it.each(['status=bogus', 'limit=0', 'limit=1000'])('rejects ?%s with 422', async query => {
