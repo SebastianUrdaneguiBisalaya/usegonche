@@ -3,7 +3,7 @@
 import { build } from 'esbuild';
 
 await build({
-	banner: { js: "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);" },
+	banner: { js: "import { createRequire as __createRequire } from 'node:module'; const require = __createRequire(import.meta.url);" },
 	bundle: true,
 	entryPoints: ['src/index.ts'],
 	// Optional native driver of `pg`; not used.
