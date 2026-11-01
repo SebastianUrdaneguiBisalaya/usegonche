@@ -25,7 +25,7 @@ export default new Hono<AppEnv>()
 	)
 	.delete('/:id', zValidator('param', taskParamSchema, validationHook), async c => {
 		const { id } = c.req.valid('param');
-		await deleteTask(c.get('prisma'), c.get('claims').sub, id);
+		await deleteTask(c.get('prisma'), c.get('storage'), c.get('claims').sub, id);
 		return ok(c, { id }, 200);
 	})
 	.post('/:id/dependencies', zValidator('param', taskParamSchema, validationHook), zValidator('json', addDependencySchema, validationHook), async c =>

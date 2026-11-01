@@ -46,6 +46,8 @@ model Profile {
   projects     Project[]
   tasks        Task[]
   taskBlockers TaskBlocker[]
+  notes        Note[]
+  attachments  Attachment[]
 
   @@map("profiles")
 }
@@ -81,6 +83,7 @@ model Tag {
   owner    Profile      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   projects ProjectTag[]
   tasks    TaskTag[]
+  notes    NoteTag[]
 
   @@unique([ownerId, name])
   @@map("tags")
@@ -120,6 +123,7 @@ model InboxItem {
   owner    Profile   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   projects Project[]
   tasks    Task[]
+  notes    Note[]
 
   @@index([ownerId, status, capturedAt])
   @@map("inbox_items")
@@ -181,6 +185,8 @@ model Project {
   originInboxItem InboxItem?   @relation(fields: [originInboxItemId], references: [id], onDelete: SetNull)
   tags            ProjectTag[]
   tasks           Task[]
+  notes           Note[]
+  attachments     Attachment[]
 
   @@index([ownerId, archivedAt, createdAt])
   @@index([goalId])
@@ -263,6 +269,8 @@ model Task {
   /// Tasks waiting for this one.
   dependents      TaskDependency[] @relation("Dependency")
   blockers        TaskBlocker[]
+  notes           TaskNote[]
+  attachments     Attachment[]
 
   @@index([ownerId, status, createdAt])
   @@index([ownerId, dueDate])
@@ -316,4 +324,80 @@ model TaskTag {
   @@id([taskId, tagId])
   @@index([tagId])
   @@map("task_tags")
+}
+
+/// Free-form document (the only note entity, no separate "document"). `body` is serialized TipTap JSON (opaque text,
+/// validated and bounded by the API, never queried). Deleting a project keeps its notes (unlinks them); notes are deleted explicitly.
+model Note {
+  id                String   @id @default(uuid(4)) @db.Uuid
+  ownerId           String   @map("owner_id") @db.Uuid
+  projectId         String?  @map("project_id") @db.Uuid
+  originInboxItemId String?  @unique @map("origin_inbox_item_id") @db.Uuid
+  title             String   @db.VarChar(200)
+  body              String?  @db.Text
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner           Profile      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  project         Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  originInboxItem InboxItem?   @relation(fields: [originInboxItemId], references: [id], onDelete: SetNull)
+  tags            NoteTag[]
+  tasks           TaskNote[]
+  attachments     Attachment[]
+
+  @@index([ownerId, createdAt])
+  @@index([projectId])
+  @@map("notes")
+}
+
+/// Typed join note <-> tag. Deleting either side removes the link only.
+model NoteTag {
+  noteId String @map("note_id") @db.Uuid
+  tagId  String @map("tag_id") @db.Uuid
+
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([noteId, tagId])
+  @@index([tagId])
+  @@map("note_tags")
+}
+
+/// N:M link task <-> note. The owner is implied by both sides (the service checks they belong to the same owner).
+model TaskNote {
+  taskId String @map("task_id") @db.Uuid
+  noteId String @map("note_id") @db.Uuid
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, noteId])
+  @@index([noteId])
+  @@map("task_notes")
+}
+
+/// Metadata of a file stored in Supabase Storage (the bytes never touch the API or the database).
+/// Belongs to exactly one of task / project / note (CHECK in the migration). `storagePath` is `<ownerId>/<uuid>/file`.
+model Attachment {
+  id          String   @id @default(uuid(4)) @db.Uuid
+  ownerId     String   @map("owner_id") @db.Uuid
+  taskId      String?  @map("task_id") @db.Uuid
+  projectId   String?  @map("project_id") @db.Uuid
+  noteId      String?  @map("note_id") @db.Uuid
+  storagePath String   @unique @map("storage_path") @db.VarChar(300)
+  name        String   @db.VarChar(255)
+  mimeType    String   @map("mime_type") @db.VarChar(127)
+  sizeBytes   Int      @map("size_bytes")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  owner   Profile  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  note    Note?    @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@index([taskId, createdAt])
+  @@index([projectId, createdAt])
+  @@index([noteId, createdAt])
+  @@index([ownerId, createdAt])
+  @@map("attachments")
 }
