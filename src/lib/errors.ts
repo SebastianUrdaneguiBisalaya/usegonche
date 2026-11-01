@@ -20,6 +20,7 @@ export const ERROR_MESSAGES = {
 	not_found: 'Resource not found.',
 	oauth_failed: 'Could not start sign-in with Google.',
 	provider_conflict: 'This email is already linked to another sign-in method.',
+	rate_limited: 'Too many requests. Please try again later.',
 	reset_failed: 'Could not reset the password.',
 	signup_failed: 'Could not create the account.',
 	unauthorized: 'You must sign in to continue.',

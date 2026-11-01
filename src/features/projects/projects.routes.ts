@@ -1,16 +1,16 @@
 import { zValidator } from '@hono/zod-validator';
-import { requireAuth } from '@usegonche/auth/hono';
 import { Hono } from 'hono';
 import type { AppEnv } from '../../env.js';
 import { ok, okWithMeta } from '../../lib/http.js';
 import { toPage } from '../../lib/pagination.js';
 import { validationHook } from '../../lib/validator.js';
+import { requireUser } from '../../middleware/auth.js';
 import { createProjectSchema, listProjectsQuerySchema, projectParamSchema, updateProjectSchema } from './projects.schemas.js';
 import { archiveProject, createProject, getProject, listProjects, unarchiveProject, updateProject } from './projects.service.js';
 
 // The owner always comes from the verified claims, never from the body.
 export default new Hono<AppEnv>()
-	.use(requireAuth())
+	.use(requireUser())
 	.get('/', zValidator('query', listProjectsQuerySchema, validationHook), async c => {
 		const { archived, cursor, goalId, limit, status } = c.req.valid('query');
 		const { items, nextCursor } = toPage(await listProjects(c.get('prisma'), c.get('claims').sub, { archived, goalId, status }, limit, cursor), limit, project => project.createdAt);

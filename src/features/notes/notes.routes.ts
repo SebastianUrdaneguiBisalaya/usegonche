@@ -1,16 +1,16 @@
 import { zValidator } from '@hono/zod-validator';
-import { requireAuth } from '@usegonche/auth/hono';
 import { Hono } from 'hono';
 import type { AppEnv } from '../../env.js';
 import { ok, okWithMeta } from '../../lib/http.js';
 import { toPage } from '../../lib/pagination.js';
 import { validationHook } from '../../lib/validator.js';
+import { requireUser } from '../../middleware/auth.js';
 import { createNoteSchema, listNotesQuerySchema, noteParamSchema, updateNoteSchema } from './notes.schemas.js';
 import { createNote, deleteNote, getNote, listNotes, updateNote } from './notes.service.js';
 
 // The owner always comes from the verified claims, never from the body.
 export default new Hono<AppEnv>()
-	.use(requireAuth())
+	.use(requireUser())
 	.get('/', zValidator('query', listNotesQuerySchema, validationHook), async c => {
 		const { cursor, limit, ...filters } = c.req.valid('query');
 		const { items, nextCursor } = toPage(await listNotes(c.get('prisma'), c.get('claims').sub, filters, limit, cursor), limit, note => note.createdAt);

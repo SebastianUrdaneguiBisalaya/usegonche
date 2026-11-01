@@ -1,9 +1,9 @@
 import { zValidator } from '@hono/zod-validator';
-import { requireAuth } from '@usegonche/auth/hono';
 import { Hono } from 'hono';
 import type { AppEnv } from '../../env.js';
 import { ok } from '../../lib/http.js';
 import { validationHook } from '../../lib/validator.js';
+import { requireUser } from '../../middleware/auth.js';
 import { getAvailability, setAvailability } from './planning.availability.service.js';
 import { createBlock, deleteBlock, listBlocks, moveBlock, updateBlock } from './planning.blocks.service.js';
 import { getDay, setDayItems } from './planning.days.service.js';
@@ -26,7 +26,7 @@ import {
 
 // The owner always comes from the verified claims, never from the body.
 export default new Hono<AppEnv>()
-	.use(requireAuth())
+	.use(requireUser())
 	.get('/availability', async c => ok(c, await getAvailability(c.get('prisma'), c.get('claims').sub), 200))
 	.put('/availability', zValidator('json', setAvailabilitySchema, validationHook), async c => ok(c, await setAvailability(c.get('prisma'), c.get('claims').sub, c.req.valid('json').windows), 200))
 	.get('/events', zValidator('query', listEventsQuerySchema, validationHook), async c => {
