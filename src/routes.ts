@@ -8,6 +8,7 @@ import me from './features/me/me.routes.js';
 import profile from './features/profile/profile.routes.js';
 import projects from './features/projects/projects.routes.js';
 import tags from './features/tags/tags.routes.js';
+import tasks from './features/tasks/tasks.routes.js';
 
 // Chain every `.route()` so `AppType` keeps the full API surface for RPC clients.
 const routes = new Hono<AppEnv>()
@@ -18,7 +19,8 @@ const routes = new Hono<AppEnv>()
 	.route('/me', me)
 	.route('/profile', profile)
 	.route('/projects', projects)
-	.route('/tags', tags);
+	.route('/tags', tags)
+	.route('/tasks', tasks);
 
 export type AppType = typeof routes;
 export default routes;

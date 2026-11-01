@@ -39,11 +39,13 @@ model Profile {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  settings   UserSettings?
-  tags       Tag[]
-  inboxItems InboxItem[]
-  goals      Goal[]
-  projects   Project[]
+  settings     UserSettings?
+  tags         Tag[]
+  inboxItems   InboxItem[]
+  goals        Goal[]
+  projects     Project[]
+  tasks        Task[]
+  taskBlockers TaskBlocker[]
 
   @@map("profiles")
 }
@@ -78,6 +80,7 @@ model Tag {
 
   owner    Profile      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   projects ProjectTag[]
+  tasks    TaskTag[]
 
   @@unique([ownerId, name])
   @@map("tags")
@@ -116,6 +119,7 @@ model InboxItem {
 
   owner    Profile   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   projects Project[]
+  tasks    Task[]
 
   @@index([ownerId, status, capturedAt])
   @@map("inbox_items")
@@ -152,6 +156,7 @@ model Goal {
 
   owner    Profile   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   projects Project[]
+  tasks    Task[]
 
   @@index([ownerId, archivedAt, createdAt])
   @@map("goals")
@@ -175,6 +180,7 @@ model Project {
   goal            Goal?        @relation(fields: [goalId], references: [id], onDelete: SetNull)
   originInboxItem InboxItem?   @relation(fields: [originInboxItemId], references: [id], onDelete: SetNull)
   tags            ProjectTag[]
+  tasks           Task[]
 
   @@index([ownerId, archivedAt, createdAt])
   @@index([goalId])
@@ -193,4 +199,121 @@ model ProjectTag {
   @@id([projectId, tagId])
   @@index([tagId])
   @@map("project_tags")
+}
+
+enum TaskStatus {
+  todo
+  in_progress
+  done
+  cancelled
+
+  @@map("task_status")
+}
+
+enum TaskPriority {
+  low
+  medium
+  high
+  urgent
+
+  @@map("task_priority")
+}
+
+/// How the task came to exist. Extend (integration, ai, ...) when those sources exist.
+enum TaskOrigin {
+  manual
+  inbox
+
+  @@map("task_origin")
+}
+
+/// Unit of work. Keeps lifecycle concepts apart: `status`, `priority`, dates (`startDate`/`dueDate` are the user's own
+/// deadlines, not planning), derived progress (from subtasks) and derived blocking (dependencies + open blockers) are never stored.
+/// Planning (when to work on it) lives in the daily plan / time blocks, not here.
+/// `completedAt` is set when the status becomes `done` and cleared when reopened. Subtasks are single level (`parentId`).
+/// `description` is serialized TipTap JSON (opaque text).
+model Task {
+  id                String       @id @default(uuid(4)) @db.Uuid
+  ownerId           String       @map("owner_id") @db.Uuid
+  parentId          String?      @map("parent_id") @db.Uuid
+  projectId         String?      @map("project_id") @db.Uuid
+  goalId            String?      @map("goal_id") @db.Uuid
+  originInboxItemId String?      @unique @map("origin_inbox_item_id") @db.Uuid
+  title             String       @db.VarChar(200)
+  description       String?      @db.Text
+  status            TaskStatus   @default(todo)
+  priority          TaskPriority @default(medium)
+  origin            TaskOrigin   @default(manual)
+  startDate         DateTime?    @map("start_date") @db.Date
+  dueDate           DateTime?    @map("due_date") @db.Date
+  estimatedMinutes  Int?         @map("estimated_minutes")
+  completedAt       DateTime?    @map("completed_at") @db.Timestamptz(6)
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner           Profile          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  parent          Task?            @relation("Subtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks        Task[]           @relation("Subtasks")
+  project         Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  goal            Goal?            @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  originInboxItem InboxItem?       @relation(fields: [originInboxItemId], references: [id], onDelete: SetNull)
+  tags            TaskTag[]
+  /// Tasks this one waits for.
+  dependencies    TaskDependency[] @relation("Dependent")
+  /// Tasks waiting for this one.
+  dependents      TaskDependency[] @relation("Dependency")
+  blockers        TaskBlocker[]
+
+  @@index([ownerId, status, createdAt])
+  @@index([ownerId, dueDate])
+  @@index([parentId])
+  @@index([projectId])
+  @@index([goalId])
+  @@map("tasks")
+}
+
+/// `taskId` waits for `dependsOnId`. No self-dependency (CHECK in the migration) and no cycles (checked by the service).
+/// The owner is implied by the tasks (the service checks both belong to the same owner).
+model TaskDependency {
+  taskId      String @map("task_id") @db.Uuid
+  dependsOnId String @map("depends_on_id") @db.Uuid
+
+  task      Task @relation("Dependent", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOn Task @relation("Dependency", fields: [dependsOnId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, dependsOnId])
+  @@index([dependsOnId])
+  @@map("task_dependencies")
+}
+
+/// Manual impediment with a reason. Kept after it is resolved (`resolvedAt`) so recurring blockers can be analyzed.
+model TaskBlocker {
+  id         String    @id @default(uuid(4)) @db.Uuid
+  ownerId    String    @map("owner_id") @db.Uuid
+  taskId     String    @map("task_id") @db.Uuid
+  reason     String    @db.VarChar(500)
+  startedAt  DateTime  @default(now()) @map("started_at") @db.Timestamptz(6)
+  resolvedAt DateTime? @map("resolved_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  task  Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId, resolvedAt])
+  @@index([ownerId, startedAt])
+  @@map("task_blockers")
+}
+
+/// Typed join task <-> tag. Deleting either side removes the link only.
+model TaskTag {
+  taskId String @map("task_id") @db.Uuid
+  tagId  String @map("tag_id") @db.Uuid
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tagId])
+  @@index([tagId])
+  @@map("task_tags")
 }

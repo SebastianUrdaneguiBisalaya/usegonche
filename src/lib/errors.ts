@@ -8,6 +8,7 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status';
 export const ERROR_MESSAGES = {
 	already_exists: 'A resource with this name already exists.',
 	bad_request: 'The request could not be processed.',
+	dependency_cycle: 'This dependency would create a cycle.',
 	email_not_confirmed: 'Confirm your email before signing in.',
 	forbidden: 'You do not have access to this resource.',
 	internal_error: 'Something went wrong. Please try again later.',
