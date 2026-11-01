@@ -6,6 +6,7 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status';
  * Add new codes here first: `fail()` and `AppError` only accept keys of this map.
  */
 export const ERROR_MESSAGES = {
+	already_exists: 'A resource with this name already exists.',
 	bad_request: 'The request could not be processed.',
 	email_not_confirmed: 'Confirm your email before signing in.',
 	forbidden: 'You do not have access to this resource.',
