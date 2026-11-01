@@ -17,45 +17,46 @@ datasource db {
   provider = "postgresql"
 }
 
-/// App-level profile. The identity itself lives in Supabase `auth.users`;
-/// `id` mirrors `auth.users.id`.
+// Conventions (see AGENTS.md > Database & migrations):
+// - Ids are UUID v4: `@db.Uuid @default(uuid(4))`. Only `Profile.id` is supplied by Supabase (mirrors `auth.users.id`).
+// - Every user-owned table has `ownerId` (column `owner_id`) -> `Profile.id`.
+// - No Json columns. Rich text is stored as `text`.
+// - Timestamps are `timestamptz`.
+
+/// App-level profile and the owner of every resource. The identity itself lives in
+/// Supabase `auth.users`; `id` mirrors `auth.users.id` (also a UUID v4).
 model Profile {
-  id        String   @id @db.Uuid
-  avatarUrl String?
-  displayName String? @db.VarChar(100) @map("display_name")
-  phoneNumber String? @db.VarChar(100) @map("phone_number")
-  websiteUrl String? @db.VarChar(255) @map("website_url")
-  bio String? @db.Text
-  jobTitle String? @db.VarChar(100) @map("job_title")
-  industry String? @db.VarChar(100)
-  company String? @db.VarChar(100)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id          String   @id @db.Uuid
+  email       String?  @db.VarChar(255)
+  avatarUrl   String?  @map("avatar_url")
+  displayName String?  @map("display_name") @db.VarChar(100)
+  phoneNumber String?  @map("phone_number") @db.VarChar(100)
+  websiteUrl  String?  @map("website_url") @db.VarChar(255)
+  bio         String?  @db.Text
+  jobTitle    String?  @map("job_title") @db.VarChar(100)
+  industry    String?  @db.VarChar(100)
+  company     String?  @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  settings UserSettings?
+
   @@map("profiles")
 }
 
+/// One row per profile (1:1).
 model UserSettings {
-  id String @id @db.Uuid
-  language String? @db.VarChar(10)
-  theme String? @db.VarChar(10)
-  timezone String? @db.VarChar(10)
-  country String? @db.VarChar(100)
+  id        String   @id @default(uuid(4)) @db.Uuid
+  ownerId   String   @unique @map("owner_id") @db.Uuid
+  language  String?  @db.VarChar(10)
+  theme     String?  @db.VarChar(10)
+  /// IANA time zone name, e.g. `America/Lima`.
+  timezone  String?  @db.VarChar(64)
+  country   String?  @db.VarChar(100)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
   @@map("user_settings")
-}
-
-model Workspace {
-  id String @id @db.Uuid
-  name String @db.VarChar(100)
-  description String? @db.VarChar(255)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-  @@map("workspaces")
-}
-
-model Task {
-  id String @id @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-  @@map("tasks")
 }
