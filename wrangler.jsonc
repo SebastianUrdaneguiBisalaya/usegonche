@@ -1,0 +1,12 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"compatibility_date": "2026-10-01",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": "src/worker.ts",
+	"name": "usegonche-api",
+	"observability": { "enabled": true }
+	// Secrets (never commit): `wrangler secret put DATABASE_URL`, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY.
+	// Local dev reads them from .dev.vars.
+	// Optional Hyperdrive (recommended with Supabase pooler on Workers):
+	// "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "<hyperdrive-id>" }]
+}

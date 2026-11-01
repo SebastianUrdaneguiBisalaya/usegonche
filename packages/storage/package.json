@@ -1,0 +1,25 @@
+{
+	"name": "@usegonche/storage",
+	"version": "0.0.0",
+	"private": true,
+	"author": {
+		"name": "Sebastian Marat Urdanegui Bisalaya",
+		"url": "https://www.sebastianurdanegui.com/"
+	},
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"format": "biome format --write",
+		"lint": "biome check",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@supabase/supabase-js": "2.118.0"
+	},
+	"devDependencies": {
+		"@types/node": "26.1.1",
+		"typescript": "7.0.2"
+	}
+}

@@ -1,0 +1,28 @@
+generator client {
+  provider   = "prisma-client"
+  output     = "../src/generated/node"
+  engineType = "client"
+  runtime    = "nodejs"
+}
+
+// Same models, compiled for Cloudflare Workers (wasm module import instead of base64).
+generator client_workerd {
+  provider   = "prisma-client"
+  output     = "../src/generated/workerd"
+  engineType = "client"
+  runtime    = "workerd"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// App-level profile. The identity itself lives in Supabase `auth.users`;
+/// `id` mirrors `auth.users.id`.
+model Profile {
+  id        String   @id @db.Uuid
+  email     String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("profiles")
+}
