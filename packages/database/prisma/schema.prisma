@@ -53,6 +53,7 @@ model Profile {
   dailyPlans          DailyPlan[]
   dailyPlanItems      DailyPlanItem[]
   timeBlocks          TimeBlock[]
+  taskEvents          TaskEvent[]
 
   @@map("profiles")
 }
@@ -192,6 +193,8 @@ model Project {
   tasks           Task[]
   notes           Note[]
   attachments     Attachment[]
+  eventsFrom      TaskEvent[]  @relation("TaskEventFromProject")
+  eventsTo        TaskEvent[]  @relation("TaskEventToProject")
 
   @@index([ownerId, archivedAt, createdAt])
   @@index([goalId])
@@ -278,6 +281,7 @@ model Task {
   attachments     Attachment[]
   planItems       DailyPlanItem[]
   timeBlocks      TimeBlock[]
+  events          TaskEvent[]
 
   @@index([ownerId, status, createdAt])
   @@index([ownerId, dueDate])
@@ -517,9 +521,66 @@ model TimeBlock {
   task            Task?       @relation(fields: [taskId], references: [id], onDelete: Cascade)
   rescheduledFrom TimeBlock?  @relation("Reschedule", fields: [rescheduledFromId], references: [id], onDelete: SetNull)
   rescheduledTo   TimeBlock[] @relation("Reschedule")
+  taskEvents      TaskEvent[]
 
   @@index([ownerId, plannedStart])
   @@index([taskId])
   @@index([rescheduledFromId])
   @@map("time_blocks")
+}
+
+enum TaskEventType {
+  status_changed
+  priority_changed
+  due_changed
+  project_changed
+  rescheduled
+
+  @@map("task_event_type")
+}
+
+/// Who caused the change. Only `user` is written today; the rest are reserved for automation, AI proposals the user accepted
+/// and integrations, so history can tell them apart later.
+enum TaskEventActor {
+  user
+  system
+  ai
+  integration
+
+  @@map("task_event_actor")
+}
+
+/// Functional history of a task: what changed and when, written by the services in the same transaction as the change.
+/// One typed from/to column pair per event type (no generic payload); a CHECK in the migration enforces that each type fills exactly
+/// its own columns. This is not an audit log. `rescheduled` records a time block of the task being moved (planned range from -> to).
+model TaskEvent {
+  id            String         @id @default(uuid(4)) @db.Uuid
+  ownerId       String         @map("owner_id") @db.Uuid
+  taskId        String         @map("task_id") @db.Uuid
+  type          TaskEventType
+  actor         TaskEventActor @default(user)
+  occurredAt    DateTime       @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  fromStatus    TaskStatus?    @map("from_status")
+  toStatus      TaskStatus?    @map("to_status")
+  fromPriority  TaskPriority?  @map("from_priority")
+  toPriority    TaskPriority?  @map("to_priority")
+  fromDueDate   DateTime?      @map("from_due_date") @db.Date
+  toDueDate     DateTime?      @map("to_due_date") @db.Date
+  fromProjectId String?        @map("from_project_id") @db.Uuid
+  toProjectId   String?        @map("to_project_id") @db.Uuid
+  fromStart     DateTime?      @map("from_start") @db.Timestamptz(6)
+  fromEnd       DateTime?      @map("from_end") @db.Timestamptz(6)
+  toStart       DateTime?      @map("to_start") @db.Timestamptz(6)
+  toEnd         DateTime?      @map("to_end") @db.Timestamptz(6)
+  timeBlockId   String?        @map("time_block_id") @db.Uuid
+
+  owner       Profile    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  task        Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  fromProject Project?   @relation("TaskEventFromProject", fields: [fromProjectId], references: [id], onDelete: NoAction)
+  toProject   Project?   @relation("TaskEventToProject", fields: [toProjectId], references: [id], onDelete: NoAction)
+  timeBlock   TimeBlock? @relation(fields: [timeBlockId], references: [id], onDelete: SetNull)
+
+  @@index([taskId, occurredAt])
+  @@index([ownerId, type, occurredAt])
+  @@map("task_events")
 }

@@ -4,6 +4,7 @@ import attachments from './features/attachments/attachments.routes.js';
 import auth from './features/auth/auth.routes.js';
 import goals from './features/goals/goals.routes.js';
 import health from './features/health/health.routes.js';
+import history from './features/history/history.routes.js';
 import inbox from './features/inbox/inbox.routes.js';
 import me from './features/me/me.routes.js';
 import notes from './features/notes/notes.routes.js';
@@ -26,7 +27,8 @@ const routes = new Hono<AppEnv>()
 	.route('/profile', profile)
 	.route('/projects', projects)
 	.route('/tags', tags)
-	.route('/tasks', tasks);
+	.route('/tasks', tasks)
+	.route('/tasks', history);
 
 export type AppType = typeof routes;
 export default routes;

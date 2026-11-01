@@ -2,6 +2,7 @@ import type { Prisma, PrismaClient, TimeBlock, TimeBlockStatus } from '@usegonch
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { dayRange } from '../../lib/time.js';
+import { recordTaskEvents } from '../history/history.service.js';
 import { availabilityIntervals, busyIntervals, datesTouched, overlaps, subtract, toInterval } from './planning.intervals.js';
 import type { CreateBlockInput, MoveBlockInput, UpdateBlockInput } from './planning.schemas.js';
 import { CLOSED_TASK, type Db, getTimeZone, getWindows } from './planning.shared.js';
@@ -101,7 +102,7 @@ export const updateBlock = async (prisma: PrismaClient, ownerId: string, id: str
 /**
  * Moving never edits the old block: it creates a new `planned` one linked through `rescheduledFromId`. A `planned` original becomes
  * `rescheduled`; a `missed` or `interrupted` one keeps its status (what happened stays on record) and is considered handled.
- * A block can be moved once: move the new one to move again.
+ * A block can be moved once: move the new one to move again. Moving a block of a task writes a `rescheduled` event to the task history.
  */
 export const moveBlock = (prisma: PrismaClient, ownerId: string, id: string, input: MoveBlockInput): Promise<BlockWithWarnings> =>
 	prisma.$transaction(async tx => {
@@ -114,6 +115,11 @@ export const moveBlock = (prisma: PrismaClient, ownerId: string, id: string, inp
 			data: { ownerId, plannedEnd: input.plannedEnd, plannedStart: input.plannedStart, rescheduledFromId: id, taskId: current.taskId, title: current.title },
 		});
 		if (current.status === 'planned') await tx.timeBlock.updateMany({ data: { status: 'rescheduled' }, where: scoped(ownerId, { id }) });
+		if (current.taskId) {
+			await recordTaskEvents(tx, ownerId, current.taskId, [
+				{ fromEnd: current.plannedEnd, fromStart: current.plannedStart, timeBlockId: block.id, toEnd: block.plannedEnd, toStart: block.plannedStart, type: 'rescheduled' },
+			]);
+		}
 		return { ...block, warnings: await detectWarnings(tx, ownerId, block.plannedStart, block.plannedEnd, block.id) };
 	});
 

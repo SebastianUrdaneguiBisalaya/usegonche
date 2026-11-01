@@ -172,6 +172,31 @@ describe('updateTask', () => {
 		expect(dataOf(prisma)).toEqual({ completedAt: null, status });
 	});
 
+	it('writes history events for tracked changes in the same transaction', async () => {
+		const prisma = setupUpdate(current({ priority: 'medium', projectId: null }));
+		const dueDate = new Date('2026-11-20');
+		await updateTask(prisma, TEST_USER_ID, ID, { dueDate, priority: 'urgent', projectId: null, status: 'in_progress' });
+		expect(prisma.taskEvent.createMany).toHaveBeenCalledWith({
+			data: [
+				{ fromStatus: 'todo', ownerId: TEST_USER_ID, taskId: ID, toStatus: 'in_progress', type: 'status_changed' },
+				{ fromPriority: 'medium', ownerId: TEST_USER_ID, taskId: ID, toPriority: 'urgent', type: 'priority_changed' },
+				{ fromDueDate: null, ownerId: TEST_USER_ID, taskId: ID, toDueDate: dueDate, type: 'due_changed' },
+			],
+		});
+	});
+
+	it('writes no history for untracked or unchanged fields', async () => {
+		const prisma = setupUpdate(current({ priority: 'medium', projectId: null }));
+		await updateTask(prisma, TEST_USER_ID, ID, { priority: 'medium', title: 'x' });
+		expect(prisma.taskEvent.createMany).not.toHaveBeenCalled();
+	});
+
+	it('writes no history when the update fails validation', async () => {
+		const prisma = setupUpdate(current({ startDate: new Date('2026-11-10') }));
+		await rejection(updateTask(prisma, TEST_USER_ID, ID, { dueDate: new Date('2026-11-01'), status: 'done' }));
+		expect(prisma.taskEvent.createMany).not.toHaveBeenCalled();
+	});
+
 	it('does not touch completedAt when the status is not sent', async () => {
 		const prisma = setupUpdate(current());
 		await updateTask(prisma, TEST_USER_ID, ID, { title: 'x' });
