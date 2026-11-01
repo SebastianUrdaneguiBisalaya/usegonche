@@ -15,6 +15,7 @@
 		"lint": "biome check",
 		"start": "node dist/index.js",
 		"test": "vitest run",
+		"test:coverage": "vitest run --coverage",
 		"test:watch": "vitest",
 		"typecheck": "tsc --noEmit && pnpm --filter \"./packages/*\" typecheck"
 	},
@@ -31,6 +32,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.6.4",
 		"@types/node": "26.1.1",
+		"@vitest/coverage-v8": "5.0.5",
 		"esbuild": "0.28.2",
 		"tsx": "4.23.0",
 		"typescript": "7.0.2",
