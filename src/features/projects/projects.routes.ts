@@ -1,0 +1,25 @@
+import { zValidator } from '@hono/zod-validator';
+import { requireAuth } from '@usegonche/auth/hono';
+import { Hono } from 'hono';
+import type { AppEnv } from '../../env.js';
+import { ok, okWithMeta } from '../../lib/http.js';
+import { toPage } from '../../lib/pagination.js';
+import { validationHook } from '../../lib/validator.js';
+import { createProjectSchema, listProjectsQuerySchema, projectParamSchema, updateProjectSchema } from './projects.schemas.js';
+import { archiveProject, createProject, getProject, listProjects, unarchiveProject, updateProject } from './projects.service.js';
+
+// The owner always comes from the verified claims, never from the body.
+export default new Hono<AppEnv>()
+	.use(requireAuth())
+	.get('/', zValidator('query', listProjectsQuerySchema, validationHook), async c => {
+		const { archived, cursor, goalId, limit, status } = c.req.valid('query');
+		const { items, nextCursor } = toPage(await listProjects(c.get('prisma'), c.get('claims').sub, { archived, goalId, status }, limit, cursor), limit, project => project.createdAt);
+		return okWithMeta(c, items, { limit, nextCursor }, 200);
+	})
+	.post('/', zValidator('json', createProjectSchema, validationHook), async c => ok(c, await createProject(c.get('prisma'), c.get('claims').sub, c.req.valid('json')), 201))
+	.get('/:id', zValidator('param', projectParamSchema, validationHook), async c => ok(c, await getProject(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id), 200))
+	.patch('/:id', zValidator('param', projectParamSchema, validationHook), zValidator('json', updateProjectSchema, validationHook), async c =>
+		ok(c, await updateProject(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id, c.req.valid('json')), 200)
+	)
+	.post('/:id/archive', zValidator('param', projectParamSchema, validationHook), async c => ok(c, await archiveProject(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id), 200))
+	.post('/:id/unarchive', zValidator('param', projectParamSchema, validationHook), async c => ok(c, await unarchiveProject(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id), 200));
