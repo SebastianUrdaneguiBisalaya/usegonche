@@ -54,6 +54,8 @@ model Profile {
   dailyPlanItems      DailyPlanItem[]
   timeBlocks          TimeBlock[]
   taskEvents          TaskEvent[]
+  reviews             Review[]
+  reviewDecisions     ReviewDecision[]
 
   @@map("profiles")
 }
@@ -282,6 +284,7 @@ model Task {
   planItems       DailyPlanItem[]
   timeBlocks      TimeBlock[]
   events          TaskEvent[]
+  reviewDecisions ReviewDecision[]
 
   @@index([ownerId, status, createdAt])
   @@index([ownerId, dueDate])
@@ -583,4 +586,77 @@ model TaskEvent {
   @@index([taskId, occurredAt])
   @@index([ownerId, type, occurredAt])
   @@map("task_events")
+}
+
+enum ReviewKind {
+  daily
+  weekly
+
+  @@map("review_kind")
+}
+
+enum ReviewStatus {
+  open
+  closed
+
+  @@map("review_status")
+}
+
+/// What the user decided to do with a pending task at review time. `carry_over` plans it for `targetDate`; `reschedule` moves its
+/// due date to `targetDate`; `drop` cancels it; `keep` leaves it as it is.
+enum ReviewDecisionAction {
+  carry_over
+  reschedule
+  drop
+  keep
+
+  @@map("review_decision_action")
+}
+
+/// Daily or weekly reflection. The period is a range of local dates (daily: one date; weekly: Monday..Sunday). While `open` the figures
+/// are computed live from real data (nothing is stored); `close` snapshots them in the typed counters so the review keeps meaning
+/// even if tasks change later. `reflection` and `nextFocus` are plain text. CHECKs in the migration.
+model Review {
+  id             String       @id @default(uuid(4)) @db.Uuid
+  ownerId        String       @map("owner_id") @db.Uuid
+  kind           ReviewKind
+  periodStart    DateTime     @map("period_start") @db.Date
+  periodEnd      DateTime     @map("period_end") @db.Date
+  status         ReviewStatus @default(open)
+  reflection     String?      @db.Text
+  nextFocus      String?      @map("next_focus") @db.Text
+  plannedTasks   Int?         @map("planned_tasks")
+  completedTasks Int?         @map("completed_tasks")
+  plannedMinutes Int?         @map("planned_minutes")
+  actualMinutes  Int?         @map("actual_minutes")
+  closedAt       DateTime?    @map("closed_at") @db.Timestamptz(6)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner     Profile          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  decisions ReviewDecision[]
+
+  @@unique([ownerId, kind, periodStart])
+  @@index([ownerId, status, periodStart])
+  @@map("reviews")
+}
+
+/// A decision taken in a review and already applied to the task (a `reschedule` or `drop` also wrote task history events).
+/// One per task per review.
+model ReviewDecision {
+  id         String               @id @default(uuid(4)) @db.Uuid
+  ownerId    String               @map("owner_id") @db.Uuid
+  reviewId   String               @map("review_id") @db.Uuid
+  taskId     String               @map("task_id") @db.Uuid
+  action     ReviewDecisionAction
+  targetDate DateTime?            @map("target_date") @db.Date
+  decidedAt  DateTime             @default(now()) @map("decided_at") @db.Timestamptz(6)
+
+  owner  Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  review Review  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  task   Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, taskId])
+  @@index([taskId])
+  @@map("review_decisions")
 }

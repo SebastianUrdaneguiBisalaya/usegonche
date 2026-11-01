@@ -67,5 +67,7 @@ describe('date arithmetic', () => {
 		expect(isValidDate('2026-02-28')).toBe(true);
 		expect(isValidDate('2026-02-30')).toBe(false);
 		expect(isValidDate('2026-2-3')).toBe(false);
+		expect(isValidDate('2026-13-01')).toBe(false);
+		expect(isValidDate('2026-00-10')).toBe(false);
 	});
 });
