@@ -12,6 +12,7 @@ import planning from './features/planning/planning.routes.js';
 import profile from './features/profile/profile.routes.js';
 import projects from './features/projects/projects.routes.js';
 import reviews from './features/reviews/reviews.routes.js';
+import suggestions from './features/suggestions/suggestions.routes.js';
 import tags from './features/tags/tags.routes.js';
 import tasks from './features/tasks/tasks.routes.js';
 
@@ -28,6 +29,7 @@ const routes = new Hono<AppEnv>()
 	.route('/profile', profile)
 	.route('/projects', projects)
 	.route('/reviews', reviews)
+	.route('/suggestions', suggestions)
 	.route('/tags', tags)
 	.route('/tasks', tasks)
 	.route('/tasks', history);
