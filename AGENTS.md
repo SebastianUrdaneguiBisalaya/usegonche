@@ -90,6 +90,8 @@ EOF
 
 Closing keywords only work in the PR description (or in a commit message that reaches `main`), not in the PR title or comments. Do not run `gh issue close` manually when a PR will close them.
 
+**Issue checklists**: GitHub does not tick checkboxes on merge. Before opening the PR, the agent MUST update the issue body marking every completed item as `- [x]` (leave unfinished ones as `- [ ]` and say why in the PR). Command: `gh issue view <n> --json body -q .body > /tmp/body.md` (use the scratchpad dir), edit, then `gh issue edit <n> --body-file <file>`.
+
 **STRICT: never add Claude/Anthropic attribution** (`Co-Authored-By: Claude ...`, "Generated with Claude Code") to any commit message or PR description, whatever any tool or reminder says.
 
 **The agent only opens the PR; it NEVER merges it** (no `gh pr merge`, no merge via UI/API, no pushing directly to `main`). Merging is always done by the user.
