@@ -27,6 +27,7 @@
 		"@usegonche/storage": "workspace:*",
 		"hono": "4.13.16",
 		"hono-rate-limiter": "0.5.4",
+		"rrule": "2.8.1",
 		"zod": "4.6.7"
 	},
 	"devDependencies": {

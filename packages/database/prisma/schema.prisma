@@ -56,6 +56,7 @@ model Profile {
   taskEvents          TaskEvent[]
   reviews             Review[]
   reviewDecisions     ReviewDecision[]
+  recurrenceRules     RecurrenceRule[]
 
   @@map("profiles")
 }
@@ -88,10 +89,11 @@ model Tag {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  owner    Profile      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  projects ProjectTag[]
-  tasks    TaskTag[]
-  notes    NoteTag[]
+  owner           Profile             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  projects        ProjectTag[]
+  tasks           TaskTag[]
+  notes           NoteTag[]
+  recurrenceRules RecurrenceRuleTag[]
 
   @@unique([ownerId, name])
   @@map("tags")
@@ -166,9 +168,10 @@ model Goal {
   createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  owner    Profile   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  projects Project[]
-  tasks    Task[]
+  owner           Profile          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  projects        Project[]
+  tasks           Task[]
+  recurrenceRules RecurrenceRule[]
 
   @@index([ownerId, archivedAt, createdAt])
   @@map("goals")
@@ -188,15 +191,16 @@ model Project {
   createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  owner           Profile      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  goal            Goal?        @relation(fields: [goalId], references: [id], onDelete: SetNull)
-  originInboxItem InboxItem?   @relation(fields: [originInboxItemId], references: [id], onDelete: SetNull)
+  owner           Profile          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  goal            Goal?            @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  originInboxItem InboxItem?       @relation(fields: [originInboxItemId], references: [id], onDelete: SetNull)
   tags            ProjectTag[]
   tasks           Task[]
+  recurrenceRules RecurrenceRule[]
   notes           Note[]
   attachments     Attachment[]
-  eventsFrom      TaskEvent[]  @relation("TaskEventFromProject")
-  eventsTo        TaskEvent[]  @relation("TaskEventToProject")
+  eventsFrom      TaskEvent[]      @relation("TaskEventFromProject")
+  eventsTo        TaskEvent[]      @relation("TaskEventToProject")
 
   @@index([ownerId, archivedAt, createdAt])
   @@index([goalId])
@@ -255,6 +259,9 @@ model Task {
   projectId         String?      @map("project_id") @db.Uuid
   goalId            String?      @map("goal_id") @db.Uuid
   originInboxItemId String?      @unique @map("origin_inbox_item_id") @db.Uuid
+  /// Set when this task is an occurrence of a recurrence rule; `occurrenceDate` is the day the rule produced it (unique per rule).
+  recurrenceId      String?      @map("recurrence_id") @db.Uuid
+  occurrenceDate    DateTime?    @map("occurrence_date") @db.Date
   title             String       @db.VarChar(200)
   description       String?      @db.Text
   status            TaskStatus   @default(todo)
@@ -273,6 +280,7 @@ model Task {
   project         Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
   goal            Goal?            @relation(fields: [goalId], references: [id], onDelete: SetNull)
   originInboxItem InboxItem?       @relation(fields: [originInboxItemId], references: [id], onDelete: SetNull)
+  recurrence      RecurrenceRule?  @relation(fields: [recurrenceId], references: [id], onDelete: SetNull)
   tags            TaskTag[]
   /// Tasks this one waits for.
   dependencies    TaskDependency[] @relation("Dependent")
@@ -286,6 +294,7 @@ model Task {
   events          TaskEvent[]
   reviewDecisions ReviewDecision[]
 
+  @@unique([recurrenceId, occurrenceDate])
   @@index([ownerId, status, createdAt])
   @@index([ownerId, dueDate])
   @@index([parentId])
@@ -659,4 +668,51 @@ model ReviewDecision {
   @@unique([reviewId, taskId])
   @@index([taskId])
   @@map("review_decisions")
+}
+
+/// Repeats a task on a calendar-day schedule. `rule` is an RFC 5545 RRULE string without DTSTART (`startDate` is the DTSTART),
+/// stored as opaque text and expanded by the `rrule` library. The template fields are copied into every occurrence, which is
+/// a normal Task (own status and history); changing the rule never touches past or finished occurrences.
+/// `generatedUntil` is the last day already examined, so an occurrence the user deleted is never re-created.
+/// `startMinute` + `durationMinutes` (both or none, enforced by a CHECK) put a planned TimeBlock on each occurrence at that local
+/// wall-clock time in the user's timezone ("every day at 9 am"); the Task itself stays date-only.
+model RecurrenceRule {
+  id               String       @id @default(uuid(4)) @db.Uuid
+  ownerId          String       @map("owner_id") @db.Uuid
+  rule             String       @db.VarChar(500)
+  startDate        DateTime     @map("start_date") @db.Date
+  generatedUntil   DateTime?    @map("generated_until") @db.Date
+  startMinute      Int?         @map("start_minute")
+  durationMinutes  Int?         @map("duration_minutes")
+  title            String       @db.VarChar(200)
+  description      String?      @db.Text
+  priority         TaskPriority @default(medium)
+  estimatedMinutes Int?         @map("estimated_minutes")
+  projectId        String?      @map("project_id") @db.Uuid
+  goalId           String?      @map("goal_id") @db.Uuid
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner       Profile             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  project     Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  goal        Goal?               @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  tags        RecurrenceRuleTag[]
+  occurrences Task[]
+
+  @@index([ownerId, createdAt])
+  @@index([projectId])
+  @@index([goalId])
+  @@map("recurrence_rules")
+}
+
+model RecurrenceRuleTag {
+  recurrenceRuleId String @map("recurrence_rule_id") @db.Uuid
+  tagId            String @map("tag_id") @db.Uuid
+
+  recurrenceRule RecurrenceRule @relation(fields: [recurrenceRuleId], references: [id], onDelete: Cascade)
+  tag            Tag            @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([recurrenceRuleId, tagId])
+  @@index([tagId])
+  @@map("recurrence_rule_tags")
 }

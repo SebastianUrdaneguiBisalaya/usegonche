@@ -7,6 +7,7 @@ import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
 import { attachmentPaths, removeFiles } from '../attachments/attachments.service.js';
 import { diffTaskChanges, recordTaskEvents } from '../history/history.service.js';
 import { markConverted } from '../inbox/inbox.service.js';
+import { createNextOccurrence } from '../recurrences/recurrences.service.js';
 import type { CreateTaskInput, ListTasksFilters, UpdateTaskInput } from './tasks.schemas.js';
 
 export type Db = PrismaClient | Prisma.TransactionClient;
@@ -160,6 +161,8 @@ export const updateTask = (prisma: PrismaClient, ownerId: string, id: string, { 
 			const completedAt = changes.status === undefined ? undefined : changes.status === 'done' ? new Date() : null;
 			await tx.task.updateMany({ data: { ...changes, completedAt }, where: scoped(ownerId, { id }) });
 			await recordTaskEvents(tx, ownerId, id, diffTaskChanges(current, changes));
+			if (current.recurrenceId && current.occurrenceDate && changes.status && FINISHED.includes(changes.status))
+				await createNextOccurrence(tx, ownerId, current.recurrenceId, current.occurrenceDate);
 		}
 		if (newTagIds) {
 			await tx.taskTag.deleteMany({ where: { taskId: id } });
