@@ -14,7 +14,21 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/dist", "!**/build", "!**/.next", "!**/.expo", "!**/.react-router", "!**/release", "!**/pnpm-lock.yaml", "!**/pnpm-workspace.yaml", "!**/node_modules", "!**/generated"]
+		"includes": [
+			"**",
+			"!**/dist",
+			"!**/build",
+			"!**/.next",
+			"!**/.expo",
+			"!**/.react-router",
+			"!**/release",
+			"!**/pnpm-lock.yaml",
+			"!**/pnpm-workspace.yaml",
+			"!**/node_modules",
+			"!**/generated",
+			"!**/.agents",
+			"!**/.claude"
+		]
 	},
 	"formatter": {
 		"attributePosition": "auto",
