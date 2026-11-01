@@ -153,6 +153,36 @@ describe('updateTask', () => {
 	};
 	const dataOf = (prisma: ReturnType<typeof createMockPrisma>) => vi.mocked(prisma.task.updateMany).mock.calls[0]?.[0]?.data;
 
+	describe('recurring occurrences', () => {
+		const RULE_ID = '7e8f9a0b-1c2d-4e3f-8a4b-5c6d7e8f9a0b';
+		const occurrence = (extra: object = {}) => current({ occurrenceDate: new Date('2026-11-02T00:00:00Z'), recurrenceId: RULE_ID, ...extra });
+		const withRule = (prisma: ReturnType<typeof createMockPrisma>) => {
+			vi.mocked(prisma.recurrenceRule.findFirst).mockResolvedValue(
+				asRow({ generatedUntil: null, id: RULE_ID, ownerId: TEST_USER_ID, rule: 'FREQ=WEEKLY;BYDAY=MO', startDate: new Date('2026-11-02T00:00:00Z'), tags: [] })
+			);
+			vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+			vi.mocked(prisma.task.create).mockResolvedValue(asRow({ id: 'task-1' }));
+		};
+
+		it.each(['done', 'cancelled'] as const)('creates the next occurrence when it moves to %s', async status => {
+			const prisma = setupUpdate(occurrence());
+			withRule(prisma);
+			await updateTask(prisma, TEST_USER_ID, ID, { status });
+			expect(vi.mocked(prisma.task.create).mock.calls[0]?.[0]?.data).toMatchObject({ occurrenceDate: new Date('2026-11-09T00:00:00Z'), recurrenceId: RULE_ID });
+		});
+
+		it('does nothing for other status changes or for plain tasks', async () => {
+			const started = setupUpdate(occurrence());
+			withRule(started);
+			await updateTask(started, TEST_USER_ID, ID, { status: 'in_progress' });
+			expect(started.task.create).not.toHaveBeenCalled();
+			const plain = setupUpdate(current());
+			withRule(plain);
+			await updateTask(plain, TEST_USER_ID, ID, { status: 'done' });
+			expect(plain.task.create).not.toHaveBeenCalled();
+		});
+	});
+
 	it('sets completedAt when entering done', async () => {
 		const prisma = setupUpdate(current());
 		await updateTask(prisma, TEST_USER_ID, ID, { status: 'done' });
