@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { hasChanges } from '../../lib/diff.js';
 import { paginationQuery } from '../../lib/pagination.js';
 import { richTextSchema } from '../../lib/rich-text.js';
 
@@ -51,7 +52,7 @@ export const updateTaskSchema = z
 		title,
 	})
 	.partial()
-	.refine(value => Object.keys(value).length > 0, 'empty_update')
+	.refine(hasChanges, 'empty_update')
 	.refine(dateOrder, dateOrderIssue);
 
 export const listTasksQuerySchema = z.object({

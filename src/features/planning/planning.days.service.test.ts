@@ -129,8 +129,30 @@ describe('setDayItems', () => {
 		vi.mocked(prisma.task.findMany).mockResolvedValue(asRow([{ id: T1, status: 'cancelled' }]));
 		expect(await rejection(setDayItems(prisma, TEST_USER_ID, DATE, [T1]))).toMatchObject({ details: [{ code: 'task_closed', field: 'taskIds' }], status: 422 });
 
-		vi.mocked(prisma.task.findMany).mockResolvedValue(asRow([{ id: T2, status: 'done' }]));
-		await setDayItems(prisma, TEST_USER_ID, DATE, [T2]);
+		vi.mocked(prisma.task.findMany).mockResolvedValue(
+			asRow([
+				{ id: T2, status: 'done' },
+				{ id: T3, status: 'todo' },
+			])
+		);
+		await setDayItems(prisma, TEST_USER_ID, DATE, [T3, T2]);
+		expect(prisma.dailyPlanItem.createMany).toHaveBeenCalled();
+	});
+
+	it('is idempotent: the same tasks in the same order are not rewritten, a new order is', async () => {
+		const prisma = setupSet([{ taskId: T1 }, { taskId: T2 }]);
+		vi.mocked(prisma.task.findMany).mockResolvedValue(
+			asRow([
+				{ id: T1, status: 'todo' },
+				{ id: T2, status: 'todo' },
+			])
+		);
+		await setDayItems(prisma, TEST_USER_ID, DATE, [T1, T2]);
+		expect(prisma.dailyPlanItem.deleteMany).not.toHaveBeenCalled();
+		expect(prisma.dailyPlanItem.createMany).not.toHaveBeenCalled();
+
+		await setDayItems(prisma, TEST_USER_ID, DATE, [T2, T1]);
+		expect(prisma.dailyPlanItem.deleteMany).toHaveBeenCalled();
 		expect(prisma.dailyPlanItem.createMany).toHaveBeenCalled();
 	});
 });

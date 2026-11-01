@@ -1,4 +1,5 @@
 import type { PrismaClient, Tag } from '@usegonche/database';
+import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { isUniqueViolation } from '../../lib/prisma-errors.js';
@@ -14,7 +15,11 @@ export const createTag = async (prisma: PrismaClient, ownerId: string, name: str
 	}
 };
 
+/** Renaming to the current name changes nothing and answers with the tag as it is. */
 export const renameTag = async (prisma: PrismaClient, ownerId: string, id: string, name: string): Promise<Tag> => {
+	const current = await prisma.tag.findFirst({ where: scoped(ownerId, { id }) });
+	if (!current) throw new AppError('not_found', 404);
+	if (!hasChanges(changedFields(current, { name }))) return current;
 	try {
 		const { count } = await prisma.tag.updateMany({ data: { name }, where: scoped(ownerId, { id }) });
 		if (count === 0) throw new AppError('not_found', 404);

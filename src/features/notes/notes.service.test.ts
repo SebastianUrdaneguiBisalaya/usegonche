@@ -121,23 +121,40 @@ describe('createNote', () => {
 });
 
 describe('updateNote', () => {
+	const TASK2 = '1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5e';
+	const stored = { ...row, projectId: PROJECT_ID };
 	const setup = () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.note.updateMany).mockResolvedValue({ count: 1 });
-		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow(row));
+		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow(stored));
 		return prisma;
 	};
 
-	it('updates scoped by owner and replaces tag and task sets', async () => {
+	it('writes only the changed fields and replaces the link sets that changed', async () => {
 		const prisma = setup();
-		vi.mocked(prisma.tag.count).mockResolvedValue(1);
 		vi.mocked(prisma.task.count).mockResolvedValue(1);
-		await updateNote(prisma, TEST_USER_ID, ID, { tagIds: [TAG_ID], taskIds: [TASK_ID], title: 'New' });
+		await updateNote(prisma, TEST_USER_ID, ID, { tagIds: [TAG_ID], taskIds: [TASK2], title: 'New' });
 		expect(prisma.note.updateMany).toHaveBeenCalledWith({ data: { title: 'New' }, where: { id: ID, ownerId: TEST_USER_ID } });
-		expect(prisma.noteTag.deleteMany).toHaveBeenCalledWith({ where: { noteId: ID } });
-		expect(prisma.noteTag.createMany).toHaveBeenCalledWith({ data: [{ noteId: ID, tagId: TAG_ID }] });
+		expect(prisma.noteTag.deleteMany).not.toHaveBeenCalled();
 		expect(prisma.taskNote.deleteMany).toHaveBeenCalledWith({ where: { noteId: ID } });
-		expect(prisma.taskNote.createMany).toHaveBeenCalledWith({ data: [{ noteId: ID, taskId: TASK_ID }] });
+		expect(prisma.taskNote.createMany).toHaveBeenCalledWith({ data: [{ noteId: ID, taskId: TASK2 }] });
+	});
+
+	it('replaces the tag set when it changes', async () => {
+		const prisma = setup();
+		vi.mocked(prisma.tag.count).mockResolvedValue(0);
+		await updateNote(prisma, TEST_USER_ID, ID, { tagIds: [] });
+		expect(prisma.note.updateMany).not.toHaveBeenCalled();
+		expect(prisma.noteTag.deleteMany).toHaveBeenCalledWith({ where: { noteId: ID } });
+		expect(prisma.noteTag.createMany).toHaveBeenCalledWith({ data: [] });
+	});
+
+	it('is idempotent: same values and the same link sets answer the note and write nothing', async () => {
+		const prisma = setup();
+		expect(await updateNote(prisma, TEST_USER_ID, ID, { projectId: PROJECT_ID, tagIds: [TAG_ID], taskIds: [TASK_ID], title: 'Meeting' })).toEqual({ ...view, projectId: PROJECT_ID });
+		expect(prisma.note.updateMany).not.toHaveBeenCalled();
+		expect(prisma.noteTag.deleteMany).not.toHaveBeenCalled();
+		expect(prisma.taskNote.deleteMany).not.toHaveBeenCalled();
 	});
 
 	it('leaves links alone when the sets are not sent and unlinks the project with null', async () => {
@@ -150,13 +167,14 @@ describe('updateNote', () => {
 
 	it('throws 404 for another owner’s note without touching links', async () => {
 		const prisma = createMockPrisma();
-		vi.mocked(prisma.note.updateMany).mockResolvedValue({ count: 0 });
+		vi.mocked(prisma.note.findFirst).mockResolvedValue(null);
 		expect(await rejection(updateNote(prisma, OTHER_USER_ID, ID, { taskIds: [] }))).toMatchObject({ code: 'not_found', status: 404 });
 		expect(prisma.taskNote.deleteMany).not.toHaveBeenCalled();
 	});
 
-	it('rejects a project that is not the owner’s with 422', async () => {
+	it('rejects a new project that is not the owner’s with 422', async () => {
 		const prisma = createMockPrisma();
+		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow({ ...stored, projectId: null }));
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
 		expect(await rejection(updateNote(prisma, TEST_USER_ID, ID, { projectId: PROJECT_ID }))).toMatchObject({ status: 422 });
 		expect(prisma.note.updateMany).not.toHaveBeenCalled();

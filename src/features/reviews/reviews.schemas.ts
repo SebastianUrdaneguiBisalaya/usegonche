@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { hasChanges } from '../../lib/diff.js';
 import { paginationQuery } from '../../lib/pagination.js';
 import { isValidDate } from '../../lib/time.js';
 
@@ -11,10 +12,7 @@ export const reviewKinds = ['daily', 'weekly'] as const;
 export const openReviewSchema = z.strictObject({ date: calendarDate, kind: z.enum(reviewKinds) });
 
 /** Only while the review is open. `null` clears the text. */
-export const updateReviewSchema = z
-	.strictObject({ nextFocus: text.nullable(), reflection: text.nullable() })
-	.partial()
-	.refine(value => Object.keys(value).length > 0, 'empty_update');
+export const updateReviewSchema = z.strictObject({ nextFocus: text.nullable(), reflection: text.nullable() }).partial().refine(hasChanges, 'empty_update');
 
 export const closeReviewSchema = z.strictObject({ nextFocus: text.nullable().optional(), reflection: text.nullable().optional() });
 

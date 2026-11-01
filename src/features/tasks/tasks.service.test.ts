@@ -144,7 +144,7 @@ describe('createTask', () => {
 });
 
 describe('updateTask', () => {
-	const current = (extra: object = {}) => ({ dueDate: null, startDate: null, status: 'todo', ...extra });
+	const current = (extra: object = {}) => ({ dueDate: null, priority: 'medium', projectId: null, startDate: null, status: 'todo', tags: [], ...extra });
 	const setupUpdate = (existing: object) => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findFirst).mockResolvedValueOnce(asRow(existing)).mockResolvedValue(asRow(base));
@@ -160,10 +160,26 @@ describe('updateTask', () => {
 		expect(prisma.task.updateMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: ID, ownerId: TEST_USER_ID } }));
 	});
 
-	it('keeps the original completedAt when done is re-sent', async () => {
-		const prisma = setupUpdate(current({ status: 'done' }));
+	it('keeps the original completedAt when done is re-sent: nothing is written', async () => {
+		const prisma = setupUpdate(current({ completedAt: new Date('2026-11-01'), status: 'done' }));
 		await updateTask(prisma, TEST_USER_ID, ID, { status: 'done' });
-		expect(dataOf(prisma)).toEqual({ completedAt: undefined, status: 'done' });
+		expect(prisma.task.updateMany).not.toHaveBeenCalled();
+		expect(prisma.taskEvent.createMany).not.toHaveBeenCalled();
+	});
+
+	it('is idempotent: sending the stored values (tags in any order) answers the task and writes nothing', async () => {
+		const prisma = setupUpdate(current({ tags: [{ tagId: TAG_ID }, { tagId: PARENT_ID }], title: 'Write' }));
+		expect(await updateTask(prisma, TEST_USER_ID, ID, { priority: 'medium', status: 'todo', tagIds: [PARENT_ID, TAG_ID], title: 'Write' })).toMatchObject({ id: ID });
+		expect(prisma.task.updateMany).not.toHaveBeenCalled();
+		expect(prisma.taskEvent.createMany).not.toHaveBeenCalled();
+		expect(prisma.taskTag.deleteMany).not.toHaveBeenCalled();
+		expect(prisma.taskTag.createMany).not.toHaveBeenCalled();
+	});
+
+	it('writes only the changed fields', async () => {
+		const prisma = setupUpdate(current({ title: 'Write' }));
+		await updateTask(prisma, TEST_USER_ID, ID, { priority: 'medium', title: 'Rewrite' });
+		expect(dataOf(prisma)).toEqual({ completedAt: undefined, title: 'Rewrite' });
 	});
 
 	it.each(['todo', 'in_progress', 'cancelled'] as const)('clears completedAt when a done task moves to %s', async status => {
@@ -213,6 +229,7 @@ describe('updateTask', () => {
 		const prisma = setupUpdate(current());
 		vi.mocked(prisma.tag.count).mockResolvedValue(1);
 		await updateTask(prisma, TEST_USER_ID, ID, { tagIds: [TAG_ID] });
+		expect(prisma.task.updateMany).not.toHaveBeenCalled();
 		expect(prisma.taskTag.deleteMany).toHaveBeenCalledWith({ where: { taskId: ID } });
 		expect(prisma.taskTag.createMany).toHaveBeenCalledWith({ data: [{ tagId: TAG_ID, taskId: ID }] });
 	});

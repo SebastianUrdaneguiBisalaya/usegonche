@@ -36,9 +36,28 @@ describe('setAvailability', () => {
 
 	it('clears the template with an empty list and never touches another owner', async () => {
 		const prisma = createMockPrisma();
-		vi.mocked(prisma.availabilityWindow.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.availabilityWindow.findMany).mockResolvedValue(windows);
 		await setAvailability(prisma, OTHER_USER_ID, []);
 		expect(prisma.availabilityWindow.deleteMany).toHaveBeenCalledWith({ where: { ownerId: OTHER_USER_ID } });
 		expect(prisma.availabilityWindow.createMany).not.toHaveBeenCalled();
+	});
+
+	it('is idempotent: the template that is already stored (any order) is not rewritten', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.availabilityWindow.findMany).mockResolvedValue(windows);
+		const result = await setAvailability(prisma, TEST_USER_ID, [
+			{ endMinute: 720, startMinute: 540, weekday: 2 },
+			{ endMinute: 1020, startMinute: 540, weekday: 1 },
+		]);
+		expect(result.windows).toBe(windows);
+		expect(prisma.availabilityWindow.deleteMany).not.toHaveBeenCalled();
+		expect(prisma.availabilityWindow.createMany).not.toHaveBeenCalled();
+	});
+
+	it('clearing an already empty template writes nothing', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.availabilityWindow.findMany).mockResolvedValue([]);
+		await setAvailability(prisma, TEST_USER_ID, []);
+		expect(prisma.availabilityWindow.deleteMany).not.toHaveBeenCalled();
 	});
 });

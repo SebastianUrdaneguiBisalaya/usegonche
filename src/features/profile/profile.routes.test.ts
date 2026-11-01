@@ -40,9 +40,18 @@ describe('GET /profile', () => {
 describe('PATCH /profile', () => {
 	it('updates the profile', async () => {
 		const { app, prisma } = setup();
-		const res = await app.request('/profile', jsonRequest('PATCH', { displayName: 'Ana', websiteUrl: null }));
+		vi.mocked(prisma.profile.update).mockResolvedValue({ ...profile, displayName: 'Beto' });
+		const res = await app.request('/profile', jsonRequest('PATCH', { displayName: 'Beto', websiteUrl: null }));
 		expect(res.status).toBe(200);
-		expect(vi.mocked(prisma.profile.upsert).mock.calls[0]?.[0].update).toEqual({ displayName: 'Ana', websiteUrl: null });
+		expect(prisma.profile.update).toHaveBeenCalledWith({ data: { displayName: 'Beto' }, where: { id: TEST_USER_ID } });
+	});
+
+	it('answers 200 with the profile and writes nothing when nothing changes', async () => {
+		const { app, prisma } = setup();
+		const res = await app.request('/profile', jsonRequest('PATCH', { displayName: 'Ana' }));
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ data: profile });
+		expect(prisma.profile.update).not.toHaveBeenCalled();
 	});
 
 	it('takes the user from the claims, never from the body', async () => {
@@ -83,9 +92,18 @@ describe('GET /profile/settings', () => {
 describe('PATCH /profile/settings', () => {
 	it('updates the settings', async () => {
 		const { app, prisma } = setup();
-		const res = await app.request('/profile/settings', jsonRequest('PATCH', { language: 'es', theme: 'dark', timezone: 'America/Lima' }));
+		vi.mocked(prisma.userSettings.update).mockResolvedValue({ ...settings, language: 'es' });
+		const res = await app.request('/profile/settings', jsonRequest('PATCH', { language: 'es', theme: 'system', timezone: 'America/Lima' }));
 		expect(res.status).toBe(200);
-		expect(vi.mocked(prisma.userSettings.upsert).mock.calls[0]?.[0].update).toEqual({ language: 'es', theme: 'dark', timezone: 'America/Lima' });
+		expect(prisma.userSettings.update).toHaveBeenCalledWith({ data: { language: 'es', timezone: 'America/Lima' }, where: { ownerId: TEST_USER_ID } });
+	});
+
+	it('answers 200 and writes nothing when the settings do not change', async () => {
+		const { app, prisma } = setup();
+		const res = await app.request('/profile/settings', jsonRequest('PATCH', { language: 'en', timezone: 'UTC' }));
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ data: settings });
+		expect(prisma.userSettings.update).not.toHaveBeenCalled();
 	});
 
 	it.each([

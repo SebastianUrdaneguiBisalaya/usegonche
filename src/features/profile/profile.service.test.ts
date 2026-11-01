@@ -28,13 +28,18 @@ describe('updateProfile', () => {
 	it('updates only the given fields for the user', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.profile.upsert).mockResolvedValue(profile);
+		vi.mocked(prisma.profile.update).mockResolvedValue({ ...profile, displayName: 'Ana' });
 
-		await updateProfile(prisma, user, { displayName: 'Ana', bio: null });
-		expect(prisma.profile.upsert).toHaveBeenCalledWith({
-			create: { bio: null, displayName: 'Ana', email: user.email, id: TEST_USER_ID },
-			update: { bio: null, displayName: 'Ana' },
-			where: { id: TEST_USER_ID },
-		});
+		expect(await updateProfile(prisma, user, { displayName: 'Ana', bio: null })).toMatchObject({ displayName: 'Ana' });
+		expect(prisma.profile.update).toHaveBeenCalledWith({ data: { displayName: 'Ana' }, where: { id: TEST_USER_ID } });
+	});
+
+	it('is idempotent: sending the stored values answers the profile and writes nothing', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.profile.upsert).mockResolvedValue({ ...profile, displayName: 'Ana' });
+		const result = await updateProfile(prisma, user, { bio: null, displayName: 'Ana' });
+		expect(result).toMatchObject({ displayName: 'Ana' });
+		expect(prisma.profile.update).not.toHaveBeenCalled();
 	});
 });
 
@@ -56,11 +61,17 @@ describe('updateSettings', () => {
 	it('overrides defaults on create and updates only the given fields', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.userSettings.upsert).mockResolvedValue(settings);
+		vi.mocked(prisma.userSettings.update).mockResolvedValue({ ...settings, theme: 'dark', timezone: 'America/Lima' });
 
-		await updateSettings(prisma, user, { theme: 'dark', timezone: 'America/Lima' });
-		const args = vi.mocked(prisma.userSettings.upsert).mock.calls[0]?.[0];
-		expect(args?.update).toEqual({ theme: 'dark', timezone: 'America/Lima' });
-		expect(args?.create).toMatchObject({ language: 'en', theme: 'dark', timezone: 'America/Lima' });
-		expect(args?.where).toEqual({ ownerId: TEST_USER_ID });
+		await updateSettings(prisma, user, { language: 'en', theme: 'dark', timezone: 'America/Lima' });
+		expect(prisma.userSettings.update).toHaveBeenCalledWith({ data: { theme: 'dark', timezone: 'America/Lima' }, where: { ownerId: TEST_USER_ID } });
+	});
+
+	it('creates the defaults on first access and writes nothing when the values are the defaults', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.userSettings.upsert).mockResolvedValue(settings);
+		expect(await updateSettings(prisma, user, { theme: 'system' })).toBe(settings);
+		expect(prisma.userSettings.upsert).toHaveBeenCalledWith(expect.objectContaining({ update: {}, where: { ownerId: TEST_USER_ID } }));
+		expect(prisma.userSettings.update).not.toHaveBeenCalled();
 	});
 });

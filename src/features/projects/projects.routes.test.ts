@@ -126,15 +126,24 @@ describe('PATCH /projects/:id', () => {
 	it('updates the project', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.project.updateMany).mockResolvedValue({ count: 1 });
-		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(row));
+		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow({ ...row, goalId: GOAL_ID, status: 'active' }));
 		const res = await app.request(`/projects/${ID}`, jsonRequest('PATCH', { goalId: null, status: 'completed' }));
 		expect(res.status).toBe(200);
 		expect(prisma.project.updateMany).toHaveBeenCalledWith({ data: { goalId: null, status: 'completed' }, where: { id: ID, ownerId: TEST_USER_ID } });
 	});
 
+	it('answers 200 with the project and writes nothing when nothing changes', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(row));
+		const res = await app.request(`/projects/${ID}`, jsonRequest('PATCH', { title: 'Launch' }));
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ data: body });
+		expect(prisma.project.updateMany).not.toHaveBeenCalled();
+	});
+
 	it('answers 404 when not found', async () => {
 		const { app, prisma } = setup();
-		vi.mocked(prisma.project.updateMany).mockResolvedValue({ count: 0 });
+		vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
 		expect((await app.request(`/projects/${ID}`, jsonRequest('PATCH', { title: 'x' }))).status).toBe(404);
 	});
 

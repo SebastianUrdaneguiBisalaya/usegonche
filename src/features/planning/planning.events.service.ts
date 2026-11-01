@@ -1,4 +1,5 @@
 import type { CalendarEvent, PrismaClient } from '@usegonche/database';
+import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { dayRange, localDateOf, zonedToUtc } from '../../lib/time.js';
@@ -33,6 +34,7 @@ export const createEvent = async (prisma: PrismaClient, ownerId: string, input: 
 	return prisma.calendarEvent.create({ data: { allDay: input.allDay, kind: input.kind, ownerId, title: input.title, ...range } });
 };
 
+/** Writes only what changed; an update that changes nothing answers with the current event and writes nothing. */
 export const updateEvent = async (prisma: PrismaClient, ownerId: string, id: string, input: UpdateEventInput): Promise<CalendarEvent> => {
 	const current = await findOwned(prisma, ownerId, id);
 	const timeZone = await getTimeZone(prisma, ownerId);
@@ -55,7 +57,9 @@ export const updateEvent = async (prisma: PrismaClient, ownerId: string, id: str
 		range = { endsAt, startsAt };
 	}
 
-	await prisma.calendarEvent.updateMany({ data: { allDay, ...(input.kind && { kind: input.kind }), ...(input.title && { title: input.title }), ...range }, where: scoped(ownerId, { id }) });
+	const changed = changedFields(current, { allDay, ...(input.kind && { kind: input.kind }), ...(input.title && { title: input.title }), ...range });
+	if (!hasChanges(changed)) return current;
+	await prisma.calendarEvent.updateMany({ data: changed, where: scoped(ownerId, { id }) });
 	return findOwned(prisma, ownerId, id);
 };
 

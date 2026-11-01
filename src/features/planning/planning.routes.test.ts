@@ -142,6 +142,38 @@ describe('events', () => {
 	});
 });
 
+describe('no-op updates (idempotent)', () => {
+	const event = { allDay: false, endsAt: new Date('2026-11-02T11:00:00Z'), id: ID, kind: 'event', ownerId: TEST_USER_ID, startsAt: new Date('2026-11-02T10:00:00Z'), title: 'Sync' };
+
+	it('PATCH /events/:id with the stored values answers 200 and writes nothing', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.calendarEvent.findFirst).mockResolvedValue(asRow(event));
+		const res = await app.request(`/planning/events/${ID}`, jsonRequest('PATCH', { title: 'Sync' }));
+		expect(res.status).toBe(200);
+		expect(prisma.calendarEvent.updateMany).not.toHaveBeenCalled();
+	});
+
+	it('PUT /availability with the stored template answers 200 and rewrites nothing', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.availabilityWindow.findMany).mockResolvedValue(asRow([{ endMinute: 1020, id: 'w', ownerId: TEST_USER_ID, startMinute: 540, weekday: 1 }]));
+		const res = await app.request('/planning/availability', put({ windows: [{ endMinute: 1020, startMinute: 540, weekday: 1 }] }));
+		expect(res.status).toBe(200);
+		expect(prisma.availabilityWindow.deleteMany).not.toHaveBeenCalled();
+		expect(prisma.availabilityWindow.createMany).not.toHaveBeenCalled();
+	});
+
+	it('PUT /days/:date/items with the same ordered tasks answers 200 and rewrites nothing', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findMany).mockResolvedValue(asRow([{ id: TASK, status: 'todo' }]));
+		vi.mocked(prisma.dailyPlan.upsert).mockResolvedValue(asRow({ id: 'plan', items: [{ taskId: TASK }] }));
+		vi.mocked(prisma.dailyPlan.findFirst).mockResolvedValue(null);
+		const res = await app.request(`/planning/days/${DATE}/items`, put({ taskIds: [TASK] }));
+		expect(res.status).toBe(200);
+		expect(prisma.dailyPlanItem.deleteMany).not.toHaveBeenCalled();
+		expect(prisma.dailyPlanItem.createMany).not.toHaveBeenCalled();
+	});
+});
+
 describe('days', () => {
 	it('returns the day with capacity', async () => {
 		const { app, prisma } = setup();

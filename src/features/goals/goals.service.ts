@@ -1,4 +1,5 @@
 import type { Goal, GoalStatus, PrismaClient } from '@usegonche/database';
+import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
@@ -21,9 +22,12 @@ export const getGoal = async (prisma: PrismaClient, ownerId: string, id: string)
 export const createGoal = (prisma: PrismaClient, ownerId: string, input: CreateGoalInput): Promise<Goal> =>
 	prisma.goal.create({ data: { description: input.description, ownerId, targetDate: input.targetDate, title: input.title } });
 
+/** Writes only what changed; an update that changes nothing answers with the current goal and writes nothing. */
 export const updateGoal = async (prisma: PrismaClient, ownerId: string, id: string, input: UpdateGoalInput): Promise<Goal> => {
-	const { count } = await prisma.goal.updateMany({ data: input, where: scoped(ownerId, { id }) });
-	if (count === 0) throw new AppError('not_found', 404);
+	const current = await getGoal(prisma, ownerId, id);
+	const changed = changedFields(current, input);
+	if (!hasChanges(changed)) return current;
+	await prisma.goal.updateMany({ data: changed, where: scoped(ownerId, { id }) });
 	return getGoal(prisma, ownerId, id);
 };
 

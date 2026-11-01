@@ -1,4 +1,5 @@
 import type { AvailabilityWindow, PrismaClient } from '@usegonche/database';
+import { valuesEqual } from '../../lib/diff.js';
 import { scoped } from '../../lib/owner.js';
 import type { AvailabilityInput } from './planning.schemas.js';
 import { getTimeZone, getWindows } from './planning.shared.js';
@@ -13,9 +14,16 @@ const toAvailability = (timezone: string, windows: AvailabilityWindow[]): Availa
 
 export const getAvailability = async (prisma: PrismaClient, ownerId: string): Promise<Availability> => toAvailability(await getTimeZone(prisma, ownerId), await getWindows(prisma, ownerId));
 
-/** Replaces the whole weekly template (send an empty list to clear it). Minutes are local to the user's timezone. */
+/** Replaces the whole weekly template (send an empty list to clear it). Minutes are local to the user's timezone. Sending the template that is already stored changes nothing. */
 export const setAvailability = (prisma: PrismaClient, ownerId: string, windows: AvailabilityInput): Promise<Availability> =>
 	prisma.$transaction(async tx => {
+		const current = await getWindows(tx, ownerId);
+		const same = valuesEqual(
+			current.map(({ endMinute, startMinute, weekday }) => ({ endMinute, startMinute, weekday })),
+			windows,
+			true
+		);
+		if (same) return toAvailability(await getTimeZone(tx, ownerId), current);
 		await tx.availabilityWindow.deleteMany({ where: scoped(ownerId) });
 		if (windows.length > 0) await tx.availabilityWindow.createMany({ data: windows.map(window => ({ ...window, ownerId })) });
 		return toAvailability(await getTimeZone(tx, ownerId), await getWindows(tx, ownerId));

@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient, Tag, Task, TaskStatus } from '@usegonche/database';
 import type { Storage } from '@usegonche/storage';
+import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
@@ -134,29 +135,35 @@ export const createTask = (prisma: PrismaClient, ownerId: string, input: CreateT
 
 /**
  * Completion rules: entering `done` sets `completedAt`; leaving `done` (reopen) or going to `cancelled` clears it.
- * Re-sending `done` keeps the original `completedAt`. Dates are validated against the stored ones (due >= start).
- * Changes of status, priority, due date and project are written to the task history in the same transaction.
+ * Dates are validated against the stored ones (due >= start). Changes of status, priority, due date and project are written to the task
+ * history in the same transaction. Only what really changed is written (tags are compared as a set): an update that changes nothing
+ * answers with the current task, with no write, no `updatedAt` bump and no history event.
  */
 export const updateTask = (prisma: PrismaClient, ownerId: string, id: string, { tagIds, ...fields }: UpdateTaskInput): Promise<TaskView> =>
 	prisma.$transaction(async tx => {
-		const current = await tx.task.findFirst({ select: { dueDate: true, priority: true, projectId: true, startDate: true, status: true }, where: scoped(ownerId, { id }) });
+		const current = await tx.task.findFirst({ include: { tags: { select: { tagId: true } } }, where: scoped(ownerId, { id }) });
 		if (!current) throw new AppError('not_found', 404);
 
-		const startDate = fields.startDate === undefined ? current.startDate : fields.startDate;
-		const dueDate = fields.dueDate === undefined ? current.dueDate : fields.dueDate;
+		const { tagIds: newTagIds, ...changes } = changedFields({ ...current, tagIds: current.tags.map(link => link.tagId) }, { ...fields, tagIds }, { unordered: ['tagIds'] });
+		if (!hasChanges(changes) && !newTagIds) return getTask(tx, ownerId, id);
+
+		const startDate = changes.startDate === undefined ? current.startDate : changes.startDate;
+		const dueDate = changes.dueDate === undefined ? current.dueDate : changes.dueDate;
 		if (startDate && dueDate && dueDate < startDate) throw invalidReference('dueDate', 'due_before_start');
 
-		if (fields.projectId) await assertProject(tx, ownerId, fields.projectId);
-		if (fields.goalId) await assertGoal(tx, ownerId, fields.goalId);
-		if (fields.parentId) await assertParent(tx, ownerId, fields.parentId, id);
-		if (tagIds) await assertTags(tx, ownerId, tagIds);
+		if (changes.projectId) await assertProject(tx, ownerId, changes.projectId);
+		if (changes.goalId) await assertGoal(tx, ownerId, changes.goalId);
+		if (changes.parentId) await assertParent(tx, ownerId, changes.parentId, id);
+		if (newTagIds) await assertTags(tx, ownerId, newTagIds);
 
-		const completedAt = fields.status === undefined ? undefined : fields.status !== 'done' ? null : current.status === 'done' ? undefined : new Date();
-		await tx.task.updateMany({ data: { ...fields, completedAt }, where: scoped(ownerId, { id }) });
-		await recordTaskEvents(tx, ownerId, id, diffTaskChanges(current, fields));
-		if (tagIds) {
+		if (hasChanges(changes)) {
+			const completedAt = changes.status === undefined ? undefined : changes.status === 'done' ? new Date() : null;
+			await tx.task.updateMany({ data: { ...changes, completedAt }, where: scoped(ownerId, { id }) });
+			await recordTaskEvents(tx, ownerId, id, diffTaskChanges(current, changes));
+		}
+		if (newTagIds) {
 			await tx.taskTag.deleteMany({ where: { taskId: id } });
-			await tx.taskTag.createMany({ data: tagIds.map(tagId => ({ tagId, taskId: id })) });
+			await tx.taskTag.createMany({ data: newTagIds.map(tagId => ({ tagId, taskId: id })) });
 		}
 		return getTask(tx, ownerId, id);
 	});

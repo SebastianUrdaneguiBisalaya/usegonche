@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient, Review, ReviewDecision } from '@usegonche/database';
+import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
@@ -60,11 +61,14 @@ export const openReview = async (prisma: PrismaClient, ownerId: string, input: O
 	}
 };
 
+/** Only while open (409 otherwise, even if nothing would change). Writes only what changed. */
 export const updateReview = async (prisma: PrismaClient, ownerId: string, id: string, input: UpdateReviewInput): Promise<ReviewView> => {
-	const { count } = await prisma.review.updateMany({ data: input, where: scoped(ownerId, { id, status: 'open' as const }) });
-	if (count === 0) {
-		await findOwned(prisma, ownerId, id);
-		throw new AppError('invalid_state', 409);
+	const current = await findOwned(prisma, ownerId, id);
+	if (current.status !== 'open') throw new AppError('invalid_state', 409);
+	const changed = changedFields(current, input);
+	if (hasChanges(changed)) {
+		const { count } = await prisma.review.updateMany({ data: changed, where: scoped(ownerId, { id, status: 'open' as const }) });
+		if (count === 0) throw new AppError('invalid_state', 409);
 	}
 	return getReview(prisma, ownerId, id);
 };

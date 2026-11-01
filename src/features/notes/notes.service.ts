@@ -1,5 +1,6 @@
 import type { Note, Prisma, PrismaClient, Tag } from '@usegonche/database';
 import type { Storage } from '@usegonche/storage';
+import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
@@ -81,20 +82,28 @@ export const createNote = (prisma: PrismaClient, ownerId: string, input: CreateN
 		return getNote(tx, ownerId, id);
 	});
 
+/** Writes only what changed (tags and tasks are compared as sets); an update that changes nothing answers with the current note and writes nothing. */
 export const updateNote = (prisma: PrismaClient, ownerId: string, id: string, { tagIds, taskIds, ...fields }: UpdateNoteInput): Promise<NoteView> =>
 	prisma.$transaction(async tx => {
-		if (fields.projectId) await assertProject(tx, ownerId, fields.projectId);
-		if (tagIds) await assertTags(tx, ownerId, tagIds);
-		if (taskIds) await assertTasks(tx, ownerId, taskIds);
-		const { count } = await tx.note.updateMany({ data: fields, where: scoped(ownerId, { id }) });
-		if (count === 0) throw new AppError('not_found', 404);
-		if (tagIds) {
+		const current = await getNote(tx, ownerId, id);
+		const {
+			tagIds: newTagIds,
+			taskIds: newTaskIds,
+			...changes
+		} = changedFields({ ...current, tagIds: current.tags.map(tag => tag.id) }, { ...fields, tagIds, taskIds }, { unordered: ['tagIds', 'taskIds'] });
+		if (!hasChanges(changes) && !newTagIds && !newTaskIds) return current;
+
+		if (changes.projectId) await assertProject(tx, ownerId, changes.projectId);
+		if (newTagIds) await assertTags(tx, ownerId, newTagIds);
+		if (newTaskIds) await assertTasks(tx, ownerId, newTaskIds);
+		if (hasChanges(changes)) await tx.note.updateMany({ data: changes, where: scoped(ownerId, { id }) });
+		if (newTagIds) {
 			await tx.noteTag.deleteMany({ where: { noteId: id } });
-			await tx.noteTag.createMany({ data: tagIds.map(tagId => ({ noteId: id, tagId })) });
+			await tx.noteTag.createMany({ data: newTagIds.map(tagId => ({ noteId: id, tagId })) });
 		}
-		if (taskIds) {
+		if (newTaskIds) {
 			await tx.taskNote.deleteMany({ where: { noteId: id } });
-			await tx.taskNote.createMany({ data: taskIds.map(taskId => ({ noteId: id, taskId })) });
+			await tx.taskNote.createMany({ data: newTaskIds.map(taskId => ({ noteId: id, taskId })) });
 		}
 		return getNote(tx, ownerId, id);
 	});
