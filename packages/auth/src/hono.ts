@@ -2,6 +2,7 @@ import { createServerClient, parseCookieHeader } from '@supabase/ssr';
 import type { Context, MiddlewareHandler } from 'hono';
 import { env } from 'hono/adapter';
 import { setCookie } from 'hono/cookie';
+import { HTTPException } from 'hono/http-exception';
 import type { CookieOptions } from 'hono/utils/cookie';
 
 /** Client type as returned by @supabase/ssr (avoids duplicate supabase-js type identities). */
@@ -59,7 +60,7 @@ export const supabaseMiddleware = (): MiddlewareHandler => async (c, next) => {
 /** Rejects unauthenticated requests and exposes the verified JWT claims as `c.get('claims')`. */
 export const requireAuth = (): MiddlewareHandler => async (c, next) => {
 	const { data, error } = await getSupabase(c).auth.getClaims(bearerToken(c));
-	if (error || !data) return c.json({ error: 'Unauthorized' }, 401);
+	if (error || !data) throw new HTTPException(401);
 	c.set('claims', data.claims as Claims);
 	await next();
 };

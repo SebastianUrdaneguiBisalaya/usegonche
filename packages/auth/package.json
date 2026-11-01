@@ -11,7 +11,7 @@
 		"./hono": "./src/hono.ts",
 		"./client": "./src/client.ts",
 		"./admin": "./src/admin.ts",
-		"./routes": "./src/routes.ts"
+		"./policy": "./src/policy.ts"
 	},
 	"scripts": {
 		"format": "biome format --write",
