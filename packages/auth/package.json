@@ -10,7 +10,8 @@
 	"exports": {
 		"./hono": "./src/hono.ts",
 		"./client": "./src/client.ts",
-		"./admin": "./src/admin.ts"
+		"./admin": "./src/admin.ts",
+		"./routes": "./src/routes.ts"
 	},
 	"scripts": {
 		"format": "biome format --write",
