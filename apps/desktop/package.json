@@ -1,0 +1,29 @@
+{
+	"name": "desktop",
+	"version": "1.0.0",
+	"description": "",
+	"keywords": [],
+	"license": "ISC",
+	"author": {
+		"name": "Sebastian Marat Urdanegui Bisalaya",
+		"url": "https://www.sebastianurdanegui.com/"
+	},
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"build": "tsc",
+		"dev": "tsc -w --preserveWatchOutput & electron .",
+		"dist:linux": "pnpm build && electron-builder --linux",
+		"dist:mac": "pnpm build && electron-builder --mac",
+		"dist:win": "pnpm build && electron-builder --win",
+		"format": "biome format --write",
+		"lint": "biome check",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@types/node": "26.6.6",
+		"electron": "45.2.1",
+		"electron-builder": "26.18.0",
+		"typescript": "7.0.2"
+	}
+}

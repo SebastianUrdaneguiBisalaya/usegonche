@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"jsx": "react-jsx",
+		"lib": ["DOM", "DOM.Iterable", "ES2022"],
+		"module": "ES2022",
+		"moduleResolution": "bundler",
+		"paths": {
+			"~/*": ["./app/*"]
+		},
+		"rootDirs": [".", "./.react-router/types"],
+		"types": ["node", "vite/client"]
+	},
+	"extends": "../../tsconfig.base.json",
+	"include": ["**/*", "**/.server/**/*", "**/.client/**/*", ".react-router/types/**/*"]
+}
