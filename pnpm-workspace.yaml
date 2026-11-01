@@ -5,6 +5,7 @@ allowBuilds:
   esbuild: true
   sharp: false
   unrs-resolver: false
+  workerd: true
 minimumReleaseAgeExclude:
   - hono@4.13.16
   - '@expo/cli@58.1.18'
