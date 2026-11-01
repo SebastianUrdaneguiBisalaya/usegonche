@@ -2,6 +2,52 @@
 
 Monorepo (pnpm workspaces). Root `src/` is the Hono API; apps live in `apps/` (`desktop`, `mobile`, `web`, `www`); shared code lives in `packages/`.
 
+## Issue tracking (MANDATORY, never forget)
+
+**Every time the user requests a task, the agent MUST create a GitHub issue BEFORE starting any work.** No exceptions, however small the task. The issue needs:
+
+- **Name** (title): short, imperative, specific (e.g. `Add profiles feature to the API`).
+- **Description** (body): context, goal, acceptance criteria / checklist of what will be done.
+- **Label**: the feature or area the task belongs to (e.g. `auth`, `me`, `health`, `database`, `storage`, `api-client`, `desktop`, `mobile`, `web`, `www`). Use an existing label when it fits; create it if it does not exist.
+
+Commands (run from the repo root, `gh` must be authenticated):
+
+```bash
+# 1. Check existing labels; create the feature label if it is missing
+gh label list
+gh label create "<feature>" --description "<what it covers>" --color "<hex>"
+
+# 2. Create the issue (prints the issue URL/number)
+gh issue create \
+  --title "<name>" \
+  --body "<description + acceptance criteria>" \
+  --label "<feature>"
+
+# 3. Reference it in the work: branch/commits/PR mention `#<number>`; close it with `Closes #<number>` in the PR
+gh issue list --label "<feature>"          # review open issues of a feature
+gh issue comment <number> --body "<progress>"
+gh issue close <number>                     # only when the work is done and verified
+```
+
+**New ideas raised by the agent**: if, during the conversation, the agent proposes a new idea, improvement or follow-up that it considers worth implementing, it MUST NOT implement it silently. It must tell the user explicitly (idea + suggested name/label) and ask for confirmation. Only after the user confirms may the agent create the issue (same name/description/label rules and commands as above) and implement it. Never create an issue or write code for an unconfirmed idea.
+
+**Finishing work (PR to `main`)**: when one or several issues are done, the agent MUST ask the user whether to open a PR to `main`. Never open it without confirmation. If the user confirms, the PR description must include a closing keyword followed by the issue number, **one keyword per issue** (`Closes #12, closes #13` only closes the first one on some parsers; write each separately). GitHub closes the issues automatically when the PR is merged into the default branch (`main`).
+
+```bash
+# Valid keywords (case-insensitive): close/closes/closed, fix/fixes/fixed, resolve/resolves/resolved
+gh pr create --base main --title "<title>" --body "$(cat <<'EOF'
+<summary of the changes>
+
+Closes #12
+Closes #13
+EOF
+)"
+```
+
+Closing keywords only work in the PR description (or in a commit message that reaches `main`), not in the PR title or comments. Do not run `gh issue close` manually when a PR will close them.
+
+**The agent only opens the PR; it NEVER merges it** (no `gh pr merge`, no merge via UI/API, no pushing directly to `main`). Merging is always done by the user.
+
 ## Shared packages (`packages/*`)
 
 TypeScript-source packages (no build step; `exports` point to `src/`). Import them as `@usegonche/<name>`.
