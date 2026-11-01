@@ -120,7 +120,7 @@ src/
 ├── app.ts              # Builds the app: global middleware + routes + onError. Runtime-agnostic
 ├── env.ts              # Bindings / Variables types (AppEnv) shared by every feature
 ├── routes.ts           # Aggregator: chains `.route()` per feature; exports `AppType`
-├── features/           # auth, health, me
+├── features/           # attachments, auth, goals, health, history, inbox, me, notes, planning, profile, projects, reviews, suggestions, tags, tasks
 │   └── <feature>/      # e.g. profiles, posts
 │       ├── <feature>.routes.ts    # Hono sub-app: validators + thin handlers
 │       ├── <feature>.schemas.ts   # Zod schemas (+ inferred types)
