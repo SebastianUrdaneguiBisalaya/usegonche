@@ -74,3 +74,16 @@ export const isValidDate = (value: string): boolean => {
 	const parsed = new Date(`${value}T00:00:00Z`);
 	return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
 };
+
+/** The local hour of day (0-23) of an instant. */
+export const localHourOf = (instant: Date, timeZone: string): number => partsOf(instant.getTime(), timeZone).hour ?? 0;
+
+/** Whole days from `from` to `to` (both calendar dates), negative when `to` is earlier. */
+export const daysBetween = (from: string, to: string): number => {
+	const [fy, fm, fd] = parseDate(from);
+	const [ty, tm, td] = parseDate(to);
+	return Math.round((Date.UTC(ty, tm - 1, td) - Date.UTC(fy, fm - 1, fd)) / DAY_MS);
+};
+
+/** The Monday of the ISO week of a calendar date. */
+export const weekStartOf = (date: string): string => addDays(date, 1 - isoWeekday(date));
