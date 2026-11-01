@@ -7,14 +7,86 @@ Monorepo (pnpm workspaces). Root `src/` is the Hono API; apps live in `apps/` (`
 TypeScript-source packages (no build step; `exports` point to `src/`). Import them as `@usegonche/<name>`.
 
 - `@usegonche/database`: Prisma 7 + `@prisma/adapter-pg` on Supabase Postgres. The schema generates two clients: `nodejs` (Node/Docker) and `workerd` (Cloudflare). The `workerd` export condition picks the right one, so always `import { getPrisma } from '@usegonche/database'`. Generated code is gitignored (`pnpm --filter @usegonche/database generate`, also runs on install). Runtime uses `DATABASE_URL` (pooled); migrations use `DIRECT_URL`.
-- `@usegonche/auth`: Supabase Auth. `./hono` (request-scoped SSR client, `requireAuth`; cookies or `Authorization: Bearer`), `./client` (browser client), `./admin` (service client, server only).
+- `@usegonche/auth`: Supabase Auth building blocks. `./hono` (request-scoped SSR client, `requireAuth`; cookies or `Authorization: Bearer`), `./client` (browser client), `./admin` (service client, server only), `./policy` (one-provider-per-account helpers). The HTTP endpoints (`/auth/*`) live in the API feature `src/features/auth`, not in this package.
+- `@usegonche/api-client`: typed Hono RPC client for the API. `createClient(baseUrl, opts)` returns the typed `hc` client; also re-exports `AppType`, `InferRequestType`, `InferResponseType`. Its `exports.types` points to the **built** `dist/` (precomputed client type, keeps editors fast), so run `pnpm --filter @usegonche/api-client build` after changing API routes/schemas (before typechecking client apps).
 - `@usegonche/storage`: `createStorage(supabaseClient, { public, private })` returns signed URLs only (`uploadUrl`, `readUrl`, plus `list`/`remove`). Files never go through the API: clients upload/download straight to Supabase Storage. `visibility` picks the public or private bucket.
 
 ## API runtimes
 
 `src/app.ts` is runtime-agnostic. `src/index.ts` is the Node entry (`pnpm dev`, `pnpm build` -> single-file `dist/index.js` for Docker/droplet). `src/worker.ts` is the Cloudflare Workers entry (`pnpm dev:worker`, `pnpm deploy:worker`, config in `wrangler.jsonc`). Read env through `hono/adapter`'s `env(c)`, never `process.env` inside the app.
 
-## Shared tooling
+## API architecture (Hono, feature-driven + RPC)
+
+Feature-driven (vertical slices), **not** hexagonal: no ports/adapters, no repository interfaces, no DI container. Each feature owns its HTTP, validation and business logic; Prisma (`@usegonche/database`) is used directly, it is already the data layer.
+
+```
+src/
+├── index.ts            # Node entry (adapter only)
+├── worker.ts           # Cloudflare Workers entry (adapter only)
+├── app.ts              # Builds the app: global middleware + routes + onError. Runtime-agnostic
+├── env.ts              # Bindings / Variables types (AppEnv) shared by every feature
+├── routes.ts           # Aggregator: chains `.route()` per feature; exports `AppType`
+├── features/           # auth, health, me
+│   └── <feature>/      # e.g. profiles, posts
+│       ├── <feature>.routes.ts    # Hono sub-app: validators + thin handlers
+│       ├── <feature>.schemas.ts   # Zod schemas (+ inferred types)
+│       └── <feature>.service.ts   # Business logic, HTTP-agnostic (plain functions)
+├── middleware/         # Cross-cutting only (error handler, prisma, rate limit)
+└── lib/                # Shared helpers: http (ok/fail), errors (AppError, ErrorCode + messages), validator
+```
+
+No `db/` folder: schema, migrations and client live in `packages/database`. Auth lives in `@usegonche/auth`.
+
+### Rules
+
+- **Slice isolation**: a feature never imports another feature's `routes`/`schemas`. If two features need the same logic, extract it to `lib/` or call the other feature's `service`. Anything used by one feature stays in that feature.
+- **Routes are thin**: validate (Zod) -> call service -> `c.json(data, status)`. No Prisma queries or business rules in handlers once they grow past a few lines; move them to `<feature>.service.ts`.
+- **Services are HTTP-agnostic**: plain functions receiving what they need (`prisma`, ids, parsed input), never `Context`. Throw `HTTPException` or typed domain errors; do not build `Response`s there.
+- **Env**: type the app as `new Hono<AppEnv>()` from `env.ts`; read env through `env(c)`, never `process.env`.
+
+### RPC (type-safe client)
+
+- Every feature router is a **chained** `new Hono<AppEnv>().get(...).post(...)` expression exported as default. Never `const r = new Hono(); r.get(...)` (statements break type inference).
+- `src/routes.ts` chains `.route('/profiles', profiles).route('/posts', posts)` and exports `export type AppType = typeof routes`. `app.ts` mounts `routes`. Apps never import from root `src/`: they use `createClient` from `@usegonche/api-client`.
+- Handlers must return `ok(c, data, <status>)` / `fail(c, code, <status>)` (explicit literal status: 200, 201, 404, ...) so the client infers each response by status. Never `c.notFound()` or `c.text()` for errors in RPC routes; use `fail(c, 'not_found', 404)` (see Response contract).
+- Handlers must be `async`/`await`; never return a `.then()` chain (type becomes `unknown`).
+- Global errors (`onError`, auth failures) are not inferred; wrap with `ApplyGlobalResponse` when the client needs them.
+- Service functions called from RPC handlers must have an **explicit return type** (e.g. `Promise<Profile | null>`); inferred Prisma types are not portable and break the `api-client` declaration build (TS2883).
+- Pin the same `hono` version in the API and every client app (mismatch gives "type instantiation is excessively deep"). `"strict": true` is required in both server and client tsconfigs (already in `tsconfig.base.json`).
+- IDE slowness with many routes: keep one router per feature (never one giant chain), and create per-feature clients when needed (`hc<typeof profiles>('/profiles')`). Use `$path()`/`$url()` with an absolute base URL.
+- Route/query params are strings on the wire: use `z.coerce.*` in the schema, pass strings from the client. Encode params with `encodeURIComponent`.
+- Cookies: create the client with `init: { credentials: 'include' }`; for bearer auth, pass `headers: { Authorization: ... }`.
+
+### Validation (Zod 4)
+
+- Use `zValidator` from `@hono/zod-validator` (add it to the root with `pnpm add @hono/zod-validator`; `zod` is already installed) for every input target (`json`, `form`, `query`, `param`, `header`), never read `c.req.json()` raw. Header keys are lowercase.
+- Schemas live in `<feature>.schemas.ts`; export the schema and `z.infer` type. Reuse them in clients (`InferRequestType`) instead of redefining types.
+- `json`/`form` validation requires the matching `Content-Type`; set it in tests that call `app.request()`.
+- Make unknown keys explicit (`z.strictObject` for write inputs). Never trust `c.req.valid()` data for authorization: take the user id from `c.get('claims')`, not from the body.
+- Use `.use(requireAuth())` at the router level for protected features so no handler forgets it.
+
+### Response contract (every endpoint)
+
+- Success: `{ data: T }` (+ `meta` for pagination etc.). Error: `{ error: { code, message, details?, requestId? } }`. HTTP status carries the status (no `statusCode`/`timestamp` in the body).
+- `code` is a stable, machine-readable `ErrorCode` (clients branch on it); `message` is a default English fallback (clients localize by `code`); `details` is `[{ field, code }]` for validation errors.
+- Always build responses with `ok(c, data, status?)` / `okWithMeta(...)` / `fail(c, code, status, details?)` from `src/lib/http.ts`; never hand-write `c.json({ error })` in features. Redirects/streams are the only exceptions.
+- Validation: `zValidator(target, schema, validationHook)` (`src/lib/validator.ts`) -> 422 `validation_error` with `details`. Routes with a special failure answer (login, forgot-password) pass their own hook.
+- Services signal failure by throwing `new AppError(code, status, details?)`; `onError` (`src/middleware/error.ts`) converts it, `HTTPException` and unexpected errors (always `internal_error`, never the raw message) to the envelope. 404s go through `notFound`. Thrown errors are not inferred by RPC; handlers that want typed errors `return fail(...)`.
+
+### i18n
+
+The API does not translate. `message` is a default English fallback; clients localize using the stable `code`. Do not add server-side i18n libraries (`hono-intlayer` pulled the whole build engine into the Worker bundle, +~1 MB gzip).
+
+### Database & migrations
+
+- Supabase owns the `auth` schema (`auth.users`, sessions, identities) and `storage`; they exist in every Supabase project, no migration needed. Prisma only manages the `public` schema (e.g. `profiles`, whose `id` mirrors `auth.users.id`). Never model or migrate `auth.*` tables.
+- Migrations are **never** run by the API at startup. Create them with `pnpm --filter @usegonche/database migrate:dev` (uses `DIRECT_URL`, commit the generated `prisma/migrations/`), apply them with `migrate:deploy` as a deploy/CI step before releasing the new API version.
+
+### Adding a feature
+
+1. Create `src/features/<name>/` with `schemas`, `service`, `routes`.
+2. Chain it in `src/routes.ts`.
+3. Run `pnpm typecheck` and `pnpm lint`; check the client sees the new route's types.
 
 - TypeScript: every `tsconfig.json` (root and `apps/*`) extends `tsconfig.base.json`. Put only app-specific options in each app.
 - Lint/format: a single `biome.json` at the root. Do not add per-app Biome configs or Biome dependencies.
