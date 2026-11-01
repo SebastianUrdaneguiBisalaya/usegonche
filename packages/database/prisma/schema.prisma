@@ -40,6 +40,7 @@ model Profile {
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   settings UserSettings?
+  tags     Tag[]
 
   @@map("profiles")
 }
@@ -59,4 +60,21 @@ model UserSettings {
   owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
+}
+
+/// Owner-scoped label. Names are unique per owner ignoring case via a manual-SQL index on `(owner_id, lower(name))`
+/// (see the add_tags migration); `@@unique` below only models the exact-match part.
+/// Links to tasks, projects and notes use typed join tables (added with those features),
+/// with `onDelete: Cascade` on the tag side so deleting a tag removes its links, never the targets.
+model Tag {
+  id        String   @id @default(uuid(4)) @db.Uuid
+  ownerId   String   @map("owner_id") @db.Uuid
+  name      String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerId, name])
+  @@map("tags")
 }
