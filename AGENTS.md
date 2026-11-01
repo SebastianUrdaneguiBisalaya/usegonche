@@ -4,11 +4,11 @@ Monorepo (pnpm workspaces). Root `src/` is the Hono API; apps live in `apps/` (`
 
 ## Product context
 
-**useGonche** is a **personal productivity app for a single user**: it turns messy work into concrete, executable progress and helps decide *what to do, when and how*. It is not a Notion/Todoist/Sunsama clone, not enterprise software, not collaborative and not multi-tenant.
+**useGonche** is a **personal productivity app for a single user**: it turns messy work into concrete, executable progress and helps decide _what to do, when and how_. It is not a Notion/Todoist/Sunsama clone, not enterprise software, not collaborative and not multi-tenant.
 
 - **Flow Cycle**: the product methodology (see below). The user is never forced through every stage and can work manually at any time.
 - **Manual-first**: the app must work fully without AI. AI/automation is optional, complementary, and must never modify user data without explicit authorization.
-- **Integrations** (GitHub first; Google Calendar/Drive, Notion, Gmail, Slack, Meet/Zoom later) feed work into useGonche without replacing those tools. External items are *not* tasks until the user converts them. The core domain must never depend on provider types (use adapters / anti-corruption layers). A repository is not a task or a project.
+- **Integrations** (GitHub first; Google Calendar/Drive, Notion, Gmail, Slack, Meet/Zoom later) feed work into useGonche without replacing those tools. External items are _not_ tasks until the user converts them. The core domain must never depend on provider types (use adapters / anti-corruption layers). A repository is not a task or a project.
 - **Single user now, evolvable later**: do NOT implement workspaces, organizations, memberships, invitations, roles/permissions or multi-tenant infrastructure in the MVP. Keep a well-defined user identity, an explicit owner on every resource, and no irreversible coupling between personal data and the auth account, so multi-user can be added later by domain evolution.
 - **Keep concepts separate by lifecycle**: task status vs priority vs scheduling vs progress vs blocking vs external sync state; a Task is not a Time Block (a task can have zero or many blocks); replanning must not rewrite task history.
 - **No speculative abstractions**: do not add entities, layers or settings without a real need in the current version. Justify every new entity (entity vs value object vs relation).
@@ -18,12 +18,12 @@ Monorepo (pnpm workspaces). Root `src/` is the Hono API; apps live in `apps/` (`
 
 Provisional, not scientifically validated, open to revision. It is a loop: Reflect feeds the next Plan. **Four visible stages**; Clarify and Prioritize are internal (they run as suggestions inside Process, never as modules).
 
-| Visible stage | Internal stages | What it is |
-| --- | --- | --- |
-| **Capture** | Capture | Fast entry of anything (task, idea, project, note, reminder, reference). No organizing required. Brain Dump is one way to capture. |
-| **Process** | Clarify + Prioritize | Empty the inbox: what is it, does it need action, which project, deadline, dependencies, now/later/never. Priority is a simple level plus explainable suggestions; no mandatory Eisenhower matrix or scoring. |
-| **Today** | Plan + Execute | Pick today's work against real capacity (availability, calendar events, estimates, deadlines, dependencies), optionally time-block it, then work with task/project/note context, log progress and blockers, and replan on interruptions. Time Blocking is a tool, not a requirement. |
-| **Reflect** | Reflect | Daily and weekly review: planned vs executed, carry-over decisions, recurring blockers. It must produce decisions, not reports to maintain. |
+| Visible stage | Internal stages      | What it is                                                                                                                                                                                                                                                                           |
+| ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Capture**   | Capture              | Fast entry of anything (task, idea, project, note, reminder, reference). No organizing required. Brain Dump is one way to capture.                                                                                                                                                   |
+| **Process**   | Clarify + Prioritize | Empty the inbox: what is it, does it need action, which project, deadline, dependencies, now/later/never. Priority is a simple level plus explainable suggestions; no mandatory Eisenhower matrix or scoring.                                                                        |
+| **Today**     | Plan + Execute       | Pick today's work against real capacity (availability, calendar events, estimates, deadlines, dependencies), optionally time-block it, then work with task/project/note context, log progress and blockers, and replan on interruptions. Time Blocking is a tool, not a requirement. |
+| **Reflect**   | Reflect              | Daily and weekly review: planned vs executed, carry-over decisions, recurring blockers. It must produce decisions, not reports to maintain.                                                                                                                                          |
 
 Principles: suggestions are explainable (reason codes, not opaque scores); replanning never rewrites a task's history; nothing is mandatory; AI only proposes.
 
@@ -173,6 +173,7 @@ The API does not translate. `message` is a default English fallback; clients loc
 - **No JSON/JSONB columns** (`Json` in Prisma) for domain data: they cannot be typed correctly end to end. Model structured data as typed columns, enums, value-object columns or related tables. History/audit events must be typed tables, never a generic JSON blob. Only exception: opaque third-party payloads that useGonche never queries or interprets, and only with explicit user approval.
 - **All IDs are UUID v4**, in every table and consistent with Supabase (`auth.users.id` is v4). Use `@db.Uuid` with `@default(uuid(4))` (or `gen_random_uuid()` at DB level); never `cuid`, `uuid(7)`, autoincrement or ids without a default. Tables whose `id` mirrors `auth.users.id` (e.g. `profiles`) take the value from Supabase instead of generating it.
 - Every user-owned table carries an explicit owner column referencing the user's profile id (single user today, keeps the door open for more later).
+- **The agent NEVER runs migrations or any schema-changing command against Supabase** (`migrate dev/deploy/reset`, `db push`, raw SQL). It only generates types (`prisma generate`) and migration files offline (`prisma migrate diff --from-empty --to-schema ... --script`); the user applies them.
 - Migrations are **never** run by the API at startup. Create them with `pnpm --filter @usegonche/database migrate:dev` (uses `DIRECT_URL`, commit the generated `prisma/migrations/`), apply them with `migrate:deploy` as a deploy/CI step before releasing the new API version.
 
 ### Testing (Vitest, mandatory)
@@ -180,6 +181,8 @@ The API does not translate. `message` is a default English fallback; clients loc
 - **Every service and every endpoint must have Vitest tests**, written together with the feature (a feature without tests is not done). Colocate as `<feature>.service.test.ts` and `<feature>.routes.test.ts`.
 - Service tests: business rules and invariants, success and failure paths (`AppError` codes), owner scoping (a user never reads or mutates another user's data).
 - Endpoint tests: call `app.request()` with the right `Content-Type`; cover validation (422 + `details`), auth (401), not found (404), success status and body envelope, and that the user id comes from the claims.
+- Shared helpers live in `src/test/helpers.ts`: `createMockPrisma()` (lazy `vi.fn()` per `prisma.<model>.<op>`), `createTestApp(router, { path, claims, prisma })` (real `requireAuth` with a fake Supabase; `claims: null` gives 401), `jsonRequest()`, `TEST_USER_ID`/`OTHER_USER_ID`.
+- Scope every query by owner with `scoped(ownerId, where)` from `src/lib/owner.ts`.
 - Run `pnpm test` (and `pnpm test:coverage` when relevant) along with lint and typecheck before declaring a task done.
 
 ### Adding a feature
