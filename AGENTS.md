@@ -175,11 +175,18 @@ The API does not translate. `message` is a default English fallback; clients loc
 - Every user-owned table carries an explicit owner column referencing the user's profile id (single user today, keeps the door open for more later).
 - Migrations are **never** run by the API at startup. Create them with `pnpm --filter @usegonche/database migrate:dev` (uses `DIRECT_URL`, commit the generated `prisma/migrations/`), apply them with `migrate:deploy` as a deploy/CI step before releasing the new API version.
 
+### Testing (Vitest, mandatory)
+
+- **Every service and every endpoint must have Vitest tests**, written together with the feature (a feature without tests is not done). Colocate as `<feature>.service.test.ts` and `<feature>.routes.test.ts`.
+- Service tests: business rules and invariants, success and failure paths (`AppError` codes), owner scoping (a user never reads or mutates another user's data).
+- Endpoint tests: call `app.request()` with the right `Content-Type`; cover validation (422 + `details`), auth (401), not found (404), success status and body envelope, and that the user id comes from the claims.
+- Run `pnpm test` (and `pnpm test:coverage` when relevant) along with lint and typecheck before declaring a task done.
+
 ### Adding a feature
 
-1. Create `src/features/<name>/` with `schemas`, `service`, `routes`.
+1. Create `src/features/<name>/` with `schemas`, `service`, `routes`, plus their `*.test.ts`.
 2. Chain it in `src/routes.ts`.
-3. Run `pnpm typecheck` and `pnpm lint`; check the client sees the new route's types.
+3. Run `pnpm typecheck`, `pnpm lint` and `pnpm test`; check the client sees the new route's types.
 
 - TypeScript: every `tsconfig.json` (root and `apps/*`) extends `tsconfig.base.json`. Put only app-specific options in each app.
 - Lint/format: a single `biome.json` at the root. Do not add per-app Biome configs or Biome dependencies.
