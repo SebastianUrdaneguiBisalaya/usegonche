@@ -14,6 +14,8 @@
 		"format": "biome format --write",
 		"lint": "biome check",
 		"start": "node dist/index.js",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"typecheck": "tsc --noEmit && pnpm --filter \"./packages/*\" typecheck"
 	},
 	"dependencies": {
@@ -32,6 +34,7 @@
 		"esbuild": "0.28.2",
 		"tsx": "4.23.0",
 		"typescript": "7.0.2",
+		"vitest": "5.0.5",
 		"wrangler": "4.156.0"
 	},
 	"packageManager": "pnpm@12.3.4"
