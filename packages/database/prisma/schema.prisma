@@ -39,8 +39,9 @@ model Profile {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  settings UserSettings?
-  tags     Tag[]
+  settings   UserSettings?
+  tags       Tag[]
+  inboxItems InboxItem[]
 
   @@map("profiles")
 }
@@ -77,4 +78,41 @@ model Tag {
 
   @@unique([ownerId, name])
   @@map("tags")
+}
+
+/// Where a captured item came from. Extend (share, integration, ...) when those sources exist.
+enum InboxSource {
+  quick
+  braindump
+
+  @@map("inbox_source")
+}
+
+/// `converted` is terminal: the item was turned into a task, project or note (the target keeps `origin_inbox_item_id`).
+enum InboxStatus {
+  pending
+  converted
+  archived
+  discarded
+
+  @@map("inbox_status")
+}
+
+/// Raw capture, never deleted: it is only converted, archived or discarded, so nothing is lost while classifying.
+model InboxItem {
+  id          String      @id @default(uuid(4)) @db.Uuid
+  ownerId     String      @map("owner_id") @db.Uuid
+  content     String      @db.Text
+  source      InboxSource @default(quick)
+  status      InboxStatus @default(pending)
+  capturedAt  DateTime    @default(now()) @map("captured_at") @db.Timestamptz(6)
+  /// Set when the item leaves `pending`; null again when restored.
+  processedAt DateTime?   @map("processed_at") @db.Timestamptz(6)
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, status, capturedAt])
+  @@map("inbox_items")
 }

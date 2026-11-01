@@ -15,6 +15,7 @@ export const ERROR_MESSAGES = {
 	invalid_email: 'Enter a valid email address.',
 	invalid_or_expired_code: 'The code is invalid or has expired.',
 	invalid_password: 'The password must be 8-72 characters long.',
+	invalid_state: 'The resource is not in a state that allows this action.',
 	not_found: 'Resource not found.',
 	oauth_failed: 'Could not start sign-in with Google.',
 	provider_conflict: 'This email is already linked to another sign-in method.',
