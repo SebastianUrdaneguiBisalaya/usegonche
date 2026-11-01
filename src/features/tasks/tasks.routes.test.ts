@@ -163,6 +163,8 @@ describe('PATCH /tasks/:id', () => {
 describe('DELETE /tasks/:id', () => {
 	it('deletes and answers the id', async () => {
 		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.attachment.findMany).mockResolvedValue([]);
 		vi.mocked(prisma.task.deleteMany).mockResolvedValue({ count: 1 });
 		const res = await app.request(`/tasks/${ID}`, del);
 		expect(res.status).toBe(200);
@@ -172,6 +174,8 @@ describe('DELETE /tasks/:id', () => {
 
 	it('answers 404 when not found', async () => {
 		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.attachment.findMany).mockResolvedValue([]);
 		vi.mocked(prisma.task.deleteMany).mockResolvedValue({ count: 0 });
 		expect((await app.request(`/tasks/${ID}`, del)).status).toBe(404);
 	});

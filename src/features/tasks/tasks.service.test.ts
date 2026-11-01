@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createMockPrisma, OTHER_USER_ID, TEST_USER_ID } from '../../test/helpers.js';
+import { createMockPrisma, createMockStorage, OTHER_USER_ID, TEST_USER_ID } from '../../test/helpers.js';
 import { createTask, deleteTask, getTask, listTasks, updateTask } from './tasks.service.js';
 
 const ID = '5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7e';
@@ -215,16 +215,26 @@ describe('updateTask', () => {
 });
 
 describe('deleteTask', () => {
-	it('deletes scoped by owner', async () => {
+	it('deletes scoped by owner and removes the files of the task and its subtasks', async () => {
 		const prisma = createMockPrisma();
+		const storage = createMockStorage();
+		vi.mocked(prisma.task.findMany).mockResolvedValue(asRow([{ id: PARENT_ID }]));
+		vi.mocked(prisma.attachment.findMany).mockResolvedValue(asRow([{ storagePath: 'u/1/file' }]));
 		vi.mocked(prisma.task.deleteMany).mockResolvedValue({ count: 1 });
-		await deleteTask(prisma, TEST_USER_ID, ID);
+
+		await deleteTask(prisma, storage, TEST_USER_ID, ID);
+		expect(prisma.attachment.findMany).toHaveBeenCalledWith({ select: { storagePath: true }, where: { ownerId: TEST_USER_ID, taskId: { in: [ID, PARENT_ID] } } });
 		expect(prisma.task.deleteMany).toHaveBeenCalledWith({ where: { id: ID, ownerId: TEST_USER_ID } });
+		expect(storage.remove).toHaveBeenCalledWith('private', ['u/1/file']);
 	});
 
-	it('throws 404 for another owner', async () => {
+	it('throws 404 for another owner and removes nothing', async () => {
 		const prisma = createMockPrisma();
+		const storage = createMockStorage();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.attachment.findMany).mockResolvedValue([]);
 		vi.mocked(prisma.task.deleteMany).mockResolvedValue({ count: 0 });
-		expect(await rejection(deleteTask(prisma, OTHER_USER_ID, ID))).toMatchObject({ code: 'not_found', status: 404 });
+		expect(await rejection(deleteTask(prisma, storage, OTHER_USER_ID, ID))).toMatchObject({ code: 'not_found', status: 404 });
+		expect(storage.remove).not.toHaveBeenCalled();
 	});
 });

@@ -1,7 +1,9 @@
 import type { Prisma, PrismaClient, Tag, Task, TaskStatus } from '@usegonche/database';
+import type { Storage } from '@usegonche/storage';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
+import { attachmentPaths, removeFiles } from '../attachments/attachments.service.js';
 import { markConverted } from '../inbox/inbox.service.js';
 import type { CreateTaskInput, ListTasksFilters, UpdateTaskInput } from './tasks.schemas.js';
 
@@ -156,8 +158,11 @@ export const updateTask = (prisma: PrismaClient, ownerId: string, id: string, { 
 		return getTask(tx, ownerId, id);
 	});
 
-/** Deletes the task; its subtasks, dependencies, blockers and tag links cascade in the database. */
-export const deleteTask = async (prisma: PrismaClient, ownerId: string, id: string): Promise<void> => {
+/** Deletes the task; its subtasks, dependencies, blockers, tag/note links and attachment rows cascade, and the attachment files (its and its subtasks') are removed from Storage. */
+export const deleteTask = async (prisma: PrismaClient, storage: Storage, ownerId: string, id: string): Promise<void> => {
+	const subtasks = await prisma.task.findMany({ select: { id: true }, where: scoped(ownerId, { parentId: id }) });
+	const paths = await attachmentPaths(prisma, ownerId, { taskId: { in: [id, ...subtasks.map(subtask => subtask.id)] } });
 	const { count } = await prisma.task.deleteMany({ where: scoped(ownerId, { id }) });
 	if (count === 0) throw new AppError('not_found', 404);
+	await removeFiles(storage, paths);
 };

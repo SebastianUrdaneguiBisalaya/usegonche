@@ -1,5 +1,6 @@
 import type { Claims, SupabaseClient } from '@usegonche/auth/hono';
 import type { PrismaClient } from '@usegonche/database';
+import type { Storage } from '@usegonche/storage';
 import { Hono } from 'hono';
 import { vi } from 'vitest';
 import type { AppEnv } from '../env.js';
@@ -52,7 +53,11 @@ type TestAppOptions = {
 	/** Mount point of the router under test. Defaults to `/`. */
 	path?: string;
 	prisma?: PrismaClient;
+	storage?: Storage;
 };
+
+/** Storage double: every operation is a `vi.fn()` (configure with `vi.mocked(storage.readUrl).mockResolvedValue(...)`). */
+export const createMockStorage = (): Storage => ({ list: vi.fn(), readUrl: vi.fn(), remove: vi.fn(), uploadUrl: vi.fn() }) as unknown as Storage;
 
 /**
  * Mounts a feature router in an app that mirrors production wiring (prisma + supabase variables, `onError`, `onNotFound`)
@@ -63,7 +68,7 @@ type TestAppOptions = {
  * const app = createTestApp(tags, { path: '/tags', prisma });
  * const res = await app.request('/tags');
  */
-export const createTestApp = (router: Hono<AppEnv>, { claims = { sub: TEST_USER_ID }, path = '/', prisma = createMockPrisma() }: TestAppOptions = {}) => {
+export const createTestApp = (router: Hono<AppEnv>, { claims = { sub: TEST_USER_ID }, path = '/', prisma = createMockPrisma(), storage = createMockStorage() }: TestAppOptions = {}) => {
 	const supabase = {
 		auth: {
 			getClaims: async () => (claims ? { data: { claims }, error: null } : { data: null, error: new Error('unauthenticated') }),
@@ -73,6 +78,7 @@ export const createTestApp = (router: Hono<AppEnv>, { claims = { sub: TEST_USER_
 	return new Hono<AppEnv>()
 		.use(async (c, next) => {
 			c.set('prisma', prisma);
+			c.set('storage', storage);
 			c.set('supabase', supabase);
 			await next();
 		})
