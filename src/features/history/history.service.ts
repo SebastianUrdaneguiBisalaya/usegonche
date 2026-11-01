@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient, TaskEvent, TaskPriority, TaskStatus } from '@usegonche/database';
+import { changedFields } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
@@ -15,15 +16,14 @@ export type TaskEventData =
 
 type Tracked = { dueDate: Date | null; priority: TaskPriority; projectId: string | null; status: TaskStatus };
 
-const sameDay = (a: Date | null, b: Date | null): boolean => (a === null || b === null ? a === b : a.getTime() === b.getTime());
-
 /** Events for the tracked fields that really change; a field that is absent or equal to the stored value produces nothing. */
 export const diffTaskChanges = (before: Tracked, after: Partial<Tracked>): TaskEventData[] => {
+	const changed = changedFields(before, after);
 	const events: TaskEventData[] = [];
-	if (after.status !== undefined && after.status !== before.status) events.push({ fromStatus: before.status, toStatus: after.status, type: 'status_changed' });
-	if (after.priority !== undefined && after.priority !== before.priority) events.push({ fromPriority: before.priority, toPriority: after.priority, type: 'priority_changed' });
-	if (after.dueDate !== undefined && !sameDay(after.dueDate, before.dueDate)) events.push({ fromDueDate: before.dueDate, toDueDate: after.dueDate, type: 'due_changed' });
-	if (after.projectId !== undefined && after.projectId !== before.projectId) events.push({ fromProjectId: before.projectId, toProjectId: after.projectId, type: 'project_changed' });
+	if (changed.status !== undefined) events.push({ fromStatus: before.status, toStatus: changed.status, type: 'status_changed' });
+	if (changed.priority !== undefined) events.push({ fromPriority: before.priority, toPriority: changed.priority, type: 'priority_changed' });
+	if (changed.dueDate !== undefined) events.push({ fromDueDate: before.dueDate, toDueDate: changed.dueDate, type: 'due_changed' });
+	if (changed.projectId !== undefined) events.push({ fromProjectId: before.projectId, toProjectId: changed.projectId, type: 'project_changed' });
 	return events;
 };
 

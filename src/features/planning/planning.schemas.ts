@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { hasChanges } from '../../lib/diff.js';
 import { addDays, isValidDate } from '../../lib/time.js';
 
 export const MAX_RANGE_DAYS = 62;
@@ -68,7 +69,7 @@ export const updateEventSchema = z
 		title,
 	})
 	.partial()
-	.refine(value => Object.keys(value).length > 0, 'empty_update');
+	.refine(hasChanges, 'empty_update');
 
 export const listEventsQuerySchema = z.object(rangeQuery).refine(validRange, validRangeIssue);
 
@@ -107,7 +108,7 @@ export const updateBlockSchema = z
 		title,
 	})
 	.partial()
-	.refine(value => Object.keys(value).length > 0, 'empty_update')
+	.refine(hasChanges, 'empty_update')
 	.refine(value => !(value.actualStart && value.actualEnd) || value.actualEnd > value.actualStart, { message: 'end_before_start', path: ['actualEnd'] })
 	.refine(value => value.status !== 'interrupted' || Boolean(value.actualStart && value.actualEnd), { message: 'actual_required', path: ['actualStart'] });
 

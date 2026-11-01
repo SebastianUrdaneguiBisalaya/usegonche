@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { hasChanges } from '../../lib/diff.js';
 
 const optionalText = (max: number) =>
 	z
@@ -17,8 +18,6 @@ const isIanaTimezone = (value: string): boolean => {
 	}
 };
 
-const atLeastOneField = (value: Record<string, unknown>) => Object.keys(value).length > 0;
-
 export const THEMES = ['light', 'dark', 'system'] as const;
 
 /** Partial update: only the fields sent change; `null` (or an empty string) clears a field. */
@@ -34,7 +33,7 @@ export const updateProfileSchema = z
 		websiteUrl: z.url().max(255).nullable(),
 	})
 	.partial()
-	.refine(atLeastOneField);
+	.refine(hasChanges);
 
 export const updateSettingsSchema = z
 	.strictObject({
@@ -47,7 +46,7 @@ export const updateSettingsSchema = z
 		timezone: z.string().max(64).refine(isIanaTimezone),
 	})
 	.partial()
-	.refine(atLeastOneField);
+	.refine(hasChanges);
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type UpdateSettingsInput = z.infer<typeof updateSettingsSchema>;

@@ -74,9 +74,24 @@ describe('updateGoal', () => {
 		expect(prisma.goal.updateMany).toHaveBeenCalledWith({ data: { status: 'achieved' }, where: { id: ID, ownerId: TEST_USER_ID } });
 	});
 
+	it('is idempotent: sending the stored values answers the goal and writes nothing', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.goal.findFirst).mockResolvedValue(goal);
+
+		expect(await updateGoal(prisma, TEST_USER_ID, ID, { status: 'active', targetDate: null, title: 'Ship v1' })).toBe(goal);
+		expect(prisma.goal.updateMany).not.toHaveBeenCalled();
+	});
+
+	it('writes only the fields that changed', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.goal.findFirst).mockResolvedValue(goal);
+		await updateGoal(prisma, TEST_USER_ID, ID, { status: 'achieved', title: 'Ship v1' });
+		expect(prisma.goal.updateMany).toHaveBeenCalledWith({ data: { status: 'achieved' }, where: { id: ID, ownerId: TEST_USER_ID } });
+	});
+
 	it('throws 404 when nothing matches the owner', async () => {
 		const prisma = createMockPrisma();
-		vi.mocked(prisma.goal.updateMany).mockResolvedValue({ count: 0 });
+		vi.mocked(prisma.goal.findFirst).mockResolvedValue(null);
 
 		expect(await rejection(updateGoal(prisma, OTHER_USER_ID, ID, { title: 'x' }))).toMatchObject({ code: 'not_found', status: 404 });
 	});

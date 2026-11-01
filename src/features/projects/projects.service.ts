@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient, Project, ProjectStatus, Tag } from '@usegonche/database';
+import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
@@ -74,15 +75,19 @@ export const createProject = (prisma: PrismaClient, ownerId: string, input: Crea
 		return getProject(tx, ownerId, id);
 	});
 
+/** Writes only what changed (tags are compared as a set); an update that changes nothing answers with the current project and writes nothing. */
 export const updateProject = (prisma: PrismaClient, ownerId: string, id: string, { tagIds, ...fields }: UpdateProjectInput): Promise<ProjectWithTags> =>
 	prisma.$transaction(async tx => {
-		if (fields.goalId) await assertGoal(tx, ownerId, fields.goalId);
-		if (tagIds) await assertTags(tx, ownerId, tagIds);
-		const { count } = await tx.project.updateMany({ data: fields, where: scoped(ownerId, { id }) });
-		if (count === 0) throw new AppError('not_found', 404);
-		if (tagIds) {
+		const current = await getProject(tx, ownerId, id);
+		const { tagIds: newTagIds, ...changes } = changedFields({ ...current, tagIds: current.tags.map(tag => tag.id) }, { ...fields, tagIds }, { unordered: ['tagIds'] });
+		if (!hasChanges(changes) && !newTagIds) return current;
+
+		if (changes.goalId) await assertGoal(tx, ownerId, changes.goalId);
+		if (newTagIds) await assertTags(tx, ownerId, newTagIds);
+		if (hasChanges(changes)) await tx.project.updateMany({ data: changes, where: scoped(ownerId, { id }) });
+		if (newTagIds) {
 			await tx.projectTag.deleteMany({ where: { projectId: id } });
-			await tx.projectTag.createMany({ data: tagIds.map(tagId => ({ projectId: id, tagId })) });
+			await tx.projectTag.createMany({ data: newTagIds.map(tagId => ({ projectId: id, tagId })) });
 		}
 		return getProject(tx, ownerId, id);
 	});

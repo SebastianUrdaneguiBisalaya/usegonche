@@ -77,7 +77,21 @@ describe('updateEvent', () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.calendarEvent.findFirst).mockResolvedValue(timed);
 		await updateEvent(prisma, TEST_USER_ID, ID, { title: 'New' });
-		expect(prisma.calendarEvent.updateMany).toHaveBeenCalledWith({ data: { allDay: false, title: 'New' }, where: { id: ID, ownerId: TEST_USER_ID } });
+		expect(prisma.calendarEvent.updateMany).toHaveBeenCalledWith({ data: { title: 'New' }, where: { id: ID, ownerId: TEST_USER_ID } });
+	});
+
+	it('is idempotent: the stored title and range answer the event and write nothing', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.calendarEvent.findFirst).mockResolvedValue(timed);
+		expect(await updateEvent(prisma, TEST_USER_ID, ID, { endsAt: new Date(timed.endsAt), kind: 'event', startsAt: new Date(timed.startsAt), title: 'Sync' })).toBe(timed);
+		expect(prisma.calendarEvent.updateMany).not.toHaveBeenCalled();
+	});
+
+	it('is idempotent for all-day events too (same dates)', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.calendarEvent.findFirst).mockResolvedValue(allDay);
+		expect(await updateEvent(prisma, TEST_USER_ID, ID, { allDay: true, endDate: '2026-11-03', startDate: '2026-11-02' })).toBe(allDay);
+		expect(prisma.calendarEvent.updateMany).not.toHaveBeenCalled();
 	});
 
 	it('merges a partial timed range with the stored one', async () => {
@@ -85,7 +99,7 @@ describe('updateEvent', () => {
 		vi.mocked(prisma.calendarEvent.findFirst).mockResolvedValue(timed);
 		const endsAt = new Date('2026-11-02T12:00:00Z');
 		await updateEvent(prisma, TEST_USER_ID, ID, { endsAt });
-		expect(prisma.calendarEvent.updateMany).toHaveBeenCalledWith({ data: { allDay: false, endsAt, startsAt: timed.startsAt }, where: { id: ID, ownerId: TEST_USER_ID } });
+		expect(prisma.calendarEvent.updateMany).toHaveBeenCalledWith({ data: { endsAt }, where: { id: ID, ownerId: TEST_USER_ID } });
 	});
 
 	it('rejects an end before the start', async () => {
@@ -123,7 +137,7 @@ describe('updateEvent', () => {
 		vi.mocked(prisma.calendarEvent.findFirst).mockResolvedValue(allDay);
 		await updateEvent(prisma, TEST_USER_ID, ID, { endDate: '2026-11-05' });
 		expect(prisma.calendarEvent.updateMany).toHaveBeenCalledWith({
-			data: { allDay: true, endsAt: new Date('2026-11-06T00:00:00Z'), startsAt: new Date('2026-11-02T00:00:00Z') },
+			data: { endsAt: new Date('2026-11-06T00:00:00Z') },
 			where: { id: ID, ownerId: TEST_USER_ID },
 		});
 	});

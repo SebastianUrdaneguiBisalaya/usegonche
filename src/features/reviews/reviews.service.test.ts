@@ -121,10 +121,23 @@ describe('updateReview', () => {
 		expect(prisma.review.updateMany).toHaveBeenCalledWith({ data: { reflection: 'Good day' }, where: { id: ID, ownerId: TEST_USER_ID, status: 'open' } });
 	});
 
-	it('answers 409 for a closed review and 404 for another owner', async () => {
-		const prisma = createMockPrisma();
+	it('is idempotent: the same values write nothing, null over an empty value too', async () => {
+		const prisma = withEmptyPrefill(createMockPrisma());
+		vi.mocked(prisma.review.findFirst).mockResolvedValue(asRow(review({ reflection: 'Good day' })));
+		await updateReview(prisma, TEST_USER_ID, ID, { nextFocus: null, reflection: 'Good day' });
+		expect(prisma.review.updateMany).not.toHaveBeenCalled();
+	});
+
+	it('answers 409 when a race closes the review between the read and the write', async () => {
+		const prisma = withEmptyPrefill(createMockPrisma());
+		vi.mocked(prisma.review.findFirst).mockResolvedValue(asRow(review()));
 		vi.mocked(prisma.review.updateMany).mockResolvedValue({ count: 0 });
-		vi.mocked(prisma.review.findFirst).mockResolvedValue(asRow(review({ status: 'closed' })));
+		expect(await rejection(updateReview(prisma, TEST_USER_ID, ID, { reflection: 'x' }))).toMatchObject({ code: 'invalid_state', status: 409 });
+	});
+
+	it('answers 409 for a closed review even when nothing would change, and 404 for another owner', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.review.findFirst).mockResolvedValue(asRow(review({ reflection: 'x', status: 'closed' })));
 		expect(await rejection(updateReview(prisma, TEST_USER_ID, ID, { reflection: 'x' }))).toMatchObject({ code: 'invalid_state', status: 409 });
 
 		vi.mocked(prisma.review.findFirst).mockResolvedValue(null);

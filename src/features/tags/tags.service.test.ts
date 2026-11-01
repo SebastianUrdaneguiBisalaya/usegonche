@@ -54,23 +54,33 @@ describe('renameTag', () => {
 	it('renames an owned tag and returns it', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.tag.updateMany).mockResolvedValue({ count: 1 });
-		vi.mocked(prisma.tag.findFirst).mockResolvedValue({ ...tag, name: 'home' });
+		vi.mocked(prisma.tag.findFirst)
+			.mockResolvedValueOnce(tag)
+			.mockResolvedValue({ ...tag, name: 'home' });
 
 		expect(await renameTag(prisma, TEST_USER_ID, TAG_ID, 'home')).toMatchObject({ name: 'home' });
 		expect(prisma.tag.updateMany).toHaveBeenCalledWith({ data: { name: 'home' }, where: { id: TAG_ID, ownerId: TEST_USER_ID } });
 	});
 
+	it('is idempotent: renaming to the current name answers the tag and writes nothing', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue(tag);
+		expect(await renameTag(prisma, TEST_USER_ID, TAG_ID, tag.name)).toBe(tag);
+		expect(prisma.tag.updateMany).not.toHaveBeenCalled();
+	});
+
 	it('answers not_found (404) for a tag of another owner', async () => {
 		const prisma = createMockPrisma();
-		vi.mocked(prisma.tag.updateMany).mockResolvedValue({ count: 0 });
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue(null);
 
 		expect(await rejection(renameTag(prisma, OTHER_USER_ID, TAG_ID, 'home'))).toMatchObject({ code: 'not_found', status: 404 });
-		expect(prisma.tag.updateMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: TAG_ID, ownerId: OTHER_USER_ID } }));
-		expect(prisma.tag.findFirst).not.toHaveBeenCalled();
+		expect(prisma.tag.findFirst).toHaveBeenCalledWith({ where: { id: TAG_ID, ownerId: OTHER_USER_ID } });
+		expect(prisma.tag.updateMany).not.toHaveBeenCalled();
 	});
 
 	it('answers already_exists (409) when the new name is taken', async () => {
 		const prisma = createMockPrisma();
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue(tag);
 		vi.mocked(prisma.tag.updateMany).mockRejectedValue(unique());
 		expect(await rejection(renameTag(prisma, TEST_USER_ID, TAG_ID, 'home'))).toMatchObject({ code: 'already_exists', status: 409 });
 	});

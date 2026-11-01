@@ -1,4 +1,5 @@
 import type { CalendarEvent, PrismaClient, Task, TimeBlock } from '@usegonche/database';
+import { valuesEqual } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { dayRange } from '../../lib/time.js';
@@ -96,13 +97,21 @@ export const setDayItems = (prisma: PrismaClient, ownerId: string, date: string,
 
 		const plan = await tx.dailyPlan.upsert({
 			create: { date: new Date(date), ownerId },
-			select: { id: true, items: { select: { taskId: true } } },
+			select: { id: true, items: { orderBy: { position: 'asc' }, select: { taskId: true } } },
 			update: {},
 			where: { ownerId_date: { date: new Date(date), ownerId } },
 		});
 		const already = new Set(plan.items.map(item => item.taskId));
 		if (tasks.some(task => !already.has(task.id) && (CLOSED_TASK as readonly string[]).includes(task.status)))
 			throw new AppError('validation_error', 422, [{ code: 'task_closed', field: 'taskIds' }]);
+
+		if (
+			valuesEqual(
+				plan.items.map(item => item.taskId),
+				taskIds
+			)
+		)
+			return getDay(tx, ownerId, date);
 
 		await tx.dailyPlanItem.deleteMany({ where: scoped(ownerId, { planId: plan.id }) });
 		if (taskIds.length > 0) await tx.dailyPlanItem.createMany({ data: taskIds.map((taskId, position) => ({ ownerId, planId: plan.id, position, taskId })) });

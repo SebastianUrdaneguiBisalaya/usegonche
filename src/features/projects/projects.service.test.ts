@@ -114,22 +114,44 @@ describe('createProject', () => {
 });
 
 describe('updateProject', () => {
-	it('updates fields scoped by owner and replaces the tag set', async () => {
+	const TAG2 = '1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
+	const stored = { ...row, goalId: GOAL_ID, status: 'active' };
+
+	it('writes only the changed fields and replaces the tag set when it changes', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.tag.count).mockResolvedValue(1);
 		vi.mocked(prisma.project.updateMany).mockResolvedValue({ count: 1 });
-		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(row));
+		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(stored));
 
-		expect(await updateProject(prisma, TEST_USER_ID, ID, { status: 'completed', tagIds: [TAG_ID] })).toEqual(project);
+		expect(await updateProject(prisma, TEST_USER_ID, ID, { status: 'completed', tagIds: [TAG2], title: 'Launch' })).toMatchObject({ id: ID });
 		expect(prisma.project.updateMany).toHaveBeenCalledWith({ data: { status: 'completed' }, where: { id: ID, ownerId: TEST_USER_ID } });
 		expect(prisma.projectTag.deleteMany).toHaveBeenCalledWith({ where: { projectId: ID } });
-		expect(prisma.projectTag.createMany).toHaveBeenCalledWith({ data: [{ projectId: ID, tagId: TAG_ID }] });
+		expect(prisma.projectTag.createMany).toHaveBeenCalledWith({ data: [{ projectId: ID, tagId: TAG2 }] });
+	});
+
+	it('is idempotent: same values and the same tags (any order) answer the project and write nothing', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(stored));
+		expect(await updateProject(prisma, TEST_USER_ID, ID, { goalId: GOAL_ID, status: 'active', tagIds: [TAG_ID], title: 'Launch' })).toEqual({ ...project, goalId: GOAL_ID, status: 'active' });
+		expect(prisma.project.updateMany).not.toHaveBeenCalled();
+		expect(prisma.projectTag.deleteMany).not.toHaveBeenCalled();
+		expect(prisma.projectTag.createMany).not.toHaveBeenCalled();
+	});
+
+	it('replaces only the tags when only they change', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.tag.count).mockResolvedValue(0);
+		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(stored));
+		await updateProject(prisma, TEST_USER_ID, ID, { tagIds: [] });
+		expect(prisma.project.updateMany).not.toHaveBeenCalled();
+		expect(prisma.projectTag.deleteMany).toHaveBeenCalledWith({ where: { projectId: ID } });
+		expect(prisma.projectTag.createMany).toHaveBeenCalledWith({ data: [] });
 	});
 
 	it('leaves tags alone when tagIds is not sent and unlinks the goal with null', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.project.updateMany).mockResolvedValue({ count: 1 });
-		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(row));
+		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(stored));
 
 		await updateProject(prisma, TEST_USER_ID, ID, { goalId: null });
 		expect(prisma.project.updateMany).toHaveBeenCalledWith({ data: { goalId: null }, where: { id: ID, ownerId: TEST_USER_ID } });
@@ -139,14 +161,15 @@ describe('updateProject', () => {
 
 	it('throws 404 for another owner’s project without touching tags', async () => {
 		const prisma = createMockPrisma();
-		vi.mocked(prisma.project.updateMany).mockResolvedValue({ count: 0 });
+		vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
 
 		expect(await rejection(updateProject(prisma, OTHER_USER_ID, ID, { tagIds: [] }))).toMatchObject({ code: 'not_found', status: 404 });
 		expect(prisma.projectTag.deleteMany).not.toHaveBeenCalled();
 	});
 
-	it('rejects a goal that is not the owner’s with 422', async () => {
+	it('rejects a new goal that is not the owner’s with 422', async () => {
 		const prisma = createMockPrisma();
+		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow({ ...stored, goalId: null }));
 		vi.mocked(prisma.goal.findFirst).mockResolvedValue(null);
 		expect(await rejection(updateProject(prisma, TEST_USER_ID, ID, { goalId: GOAL_ID }))).toMatchObject({ status: 422 });
 		expect(prisma.project.updateMany).not.toHaveBeenCalled();

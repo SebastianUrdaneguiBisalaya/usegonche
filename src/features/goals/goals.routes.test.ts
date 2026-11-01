@@ -102,12 +102,21 @@ describe('PATCH /goals/:id', () => {
 
 		const res = await app.request(`/goals/${ID}`, jsonRequest('PATCH', { status: 'achieved', targetDate: null }));
 		expect(res.status).toBe(200);
-		expect(prisma.goal.updateMany).toHaveBeenCalledWith({ data: { status: 'achieved', targetDate: null }, where: { id: ID, ownerId: TEST_USER_ID } });
+		expect(prisma.goal.updateMany).toHaveBeenCalledWith({ data: { status: 'achieved' }, where: { id: ID, ownerId: TEST_USER_ID } });
+	});
+
+	it('answers 200 with the goal and writes nothing when nothing changes', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.goal.findFirst).mockResolvedValue(goal);
+		const res = await app.request(`/goals/${ID}`, jsonRequest('PATCH', { title: 'Ship v1' }));
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ data: json(goal) });
+		expect(prisma.goal.updateMany).not.toHaveBeenCalled();
 	});
 
 	it('answers 404 when not found', async () => {
 		const { app, prisma } = setup();
-		vi.mocked(prisma.goal.updateMany).mockResolvedValue({ count: 0 });
+		vi.mocked(prisma.goal.findFirst).mockResolvedValue(null);
 		expect((await app.request(`/goals/${ID}`, jsonRequest('PATCH', { title: 'x' }))).status).toBe(404);
 	});
 

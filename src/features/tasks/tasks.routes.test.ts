@@ -136,7 +136,7 @@ describe('PATCH /tasks/:id', () => {
 	it('completes the task', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.task.findFirst)
-			.mockResolvedValueOnce(asRow({ dueDate: null, startDate: null, status: 'todo' }))
+			.mockResolvedValueOnce(asRow({ dueDate: null, startDate: null, status: 'todo', tags: [] }))
 			.mockResolvedValue(asRow(row));
 		vi.mocked(prisma.task.updateMany).mockResolvedValue({ count: 1 });
 		const res = await app.request(`/tasks/${ID}`, jsonRequest('PATCH', { status: 'done' }));
@@ -157,6 +157,17 @@ describe('PATCH /tasks/:id', () => {
 		['due before start', { dueDate: '2026-11-01', startDate: '2026-12-01' }],
 	])('answers 422 for %s', async (_name, body) => {
 		expect((await setup().app.request(`/tasks/${ID}`, jsonRequest('PATCH', body))).status).toBe(422);
+	});
+});
+
+describe('PATCH /tasks/:id (no-op)', () => {
+	it('answers 200 with the task and writes nothing when nothing changes', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findFirst).mockResolvedValue(asRow({ ...row, priority: 'high', tags: [] }));
+		const res = await app.request(`/tasks/${ID}`, jsonRequest('PATCH', { priority: 'high', status: 'todo' }));
+		expect(res.status).toBe(200);
+		expect(prisma.task.updateMany).not.toHaveBeenCalled();
+		expect(prisma.taskEvent.createMany).not.toHaveBeenCalled();
 	});
 });
 

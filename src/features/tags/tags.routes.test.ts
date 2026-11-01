@@ -76,16 +76,27 @@ describe('PATCH /tags/:id', () => {
 	it('renames the tag', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.tag.updateMany).mockResolvedValue({ count: 1 });
-		vi.mocked(prisma.tag.findFirst).mockResolvedValue({ ...tag, name: 'home' });
+		vi.mocked(prisma.tag.findFirst)
+			.mockResolvedValueOnce(tag)
+			.mockResolvedValue({ ...tag, name: 'home' });
 
 		const res = await app.request(`/tags/${TAG_ID}`, jsonRequest('PATCH', { name: 'home' }));
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({ data: { ...tag, name: 'home' } });
 	});
 
+	it('answers 200 with the tag and writes nothing when the name is the same', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue(tag);
+		const res = await app.request(`/tags/${TAG_ID}`, jsonRequest('PATCH', { name: tag.name }));
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ data: tag });
+		expect(prisma.tag.updateMany).not.toHaveBeenCalled();
+	});
+
 	it("answers 404 for a tag that is not the user's", async () => {
 		const { app, prisma } = setup();
-		vi.mocked(prisma.tag.updateMany).mockResolvedValue({ count: 0 });
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue(null);
 
 		const res = await app.request(`/tags/${TAG_ID}`, jsonRequest('PATCH', { name: 'home' }));
 		expect(res.status).toBe(404);
@@ -94,6 +105,7 @@ describe('PATCH /tags/:id', () => {
 
 	it('answers 409 when the new name is taken', async () => {
 		const { app, prisma } = setup();
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue(tag);
 		vi.mocked(prisma.tag.updateMany).mockRejectedValue(unique());
 		const res = await app.request(`/tags/${TAG_ID}`, jsonRequest('PATCH', { name: 'home' }));
 		expect(res.status).toBe(409);

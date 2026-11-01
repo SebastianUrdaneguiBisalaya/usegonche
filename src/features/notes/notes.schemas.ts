@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { hasChanges } from '../../lib/diff.js';
 import { paginationQuery } from '../../lib/pagination.js';
 import { richTextSchema } from '../../lib/rich-text.js';
 
@@ -28,7 +29,7 @@ export const updateNoteSchema = z
 		title,
 	})
 	.partial()
-	.refine(value => Object.keys(value).length > 0, 'empty_update');
+	.refine(hasChanges, 'empty_update');
 
 export const listNotesQuerySchema = z.object({
 	...paginationQuery,

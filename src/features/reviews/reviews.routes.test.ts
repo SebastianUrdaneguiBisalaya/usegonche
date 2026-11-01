@@ -113,7 +113,15 @@ describe('PATCH /reviews/:id', () => {
 		vi.mocked(prisma.review.findFirst).mockResolvedValue(asRow(row));
 		const res = await app.request(`/reviews/${ID}`, jsonRequest('PATCH', { nextFocus: null, reflection: 'Good' }));
 		expect(res.status).toBe(200);
-		expect(prisma.review.updateMany).toHaveBeenCalledWith({ data: { nextFocus: null, reflection: 'Good' }, where: { id: ID, ownerId: TEST_USER_ID, status: 'open' } });
+		expect(prisma.review.updateMany).toHaveBeenCalledWith({ data: { reflection: 'Good' }, where: { id: ID, ownerId: TEST_USER_ID, status: 'open' } });
+	});
+
+	it('answers 200 and writes nothing when nothing changes', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.review.findFirst).mockResolvedValue(asRow({ ...row, reflection: 'Good' }));
+		const res = await app.request(`/reviews/${ID}`, jsonRequest('PATCH', { reflection: 'Good' }));
+		expect(res.status).toBe(200);
+		expect(prisma.review.updateMany).not.toHaveBeenCalled();
 	});
 
 	it('answers 409 when closed and 404 when missing', async () => {
