@@ -60,3 +60,10 @@ apps/mobile/android/
 *.p8
 *.p12
 *.mobileprovision
+
+# cloudflare workers
+.dev.vars*
+.wrangler/
+
+# prisma generated client
+packages/database/src/generated/

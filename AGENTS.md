@@ -1,6 +1,18 @@
 # AGENTS.md
 
-Monorepo (pnpm workspaces). Root `src/` is the Hono API; apps live in `apps/` (`desktop`, `mobile`, `web`, `www`).
+Monorepo (pnpm workspaces). Root `src/` is the Hono API; apps live in `apps/` (`desktop`, `mobile`, `web`, `www`); shared code lives in `packages/`.
+
+## Shared packages (`packages/*`)
+
+TypeScript-source packages (no build step; `exports` point to `src/`). Import them as `@usegonche/<name>`.
+
+- `@usegonche/database`: Prisma 7 + `@prisma/adapter-pg` on Supabase Postgres. The schema generates two clients: `nodejs` (Node/Docker) and `workerd` (Cloudflare). The `workerd` export condition picks the right one, so always `import { getPrisma } from '@usegonche/database'`. Generated code is gitignored (`pnpm --filter @usegonche/database generate`, also runs on install). Runtime uses `DATABASE_URL` (pooled); migrations use `DIRECT_URL`.
+- `@usegonche/auth`: Supabase Auth. `./hono` (request-scoped SSR client, `requireAuth`; cookies or `Authorization: Bearer`), `./client` (browser client), `./admin` (service client, server only).
+- `@usegonche/storage`: `createStorage(supabaseClient, { public, private })` returns signed URLs only (`uploadUrl`, `readUrl`, plus `list`/`remove`). Files never go through the API: clients upload/download straight to Supabase Storage. `visibility` picks the public or private bucket.
+
+## API runtimes
+
+`src/app.ts` is runtime-agnostic. `src/index.ts` is the Node entry (`pnpm dev`, `pnpm build` -> single-file `dist/index.js` for Docker/droplet). `src/worker.ts` is the Cloudflare Workers entry (`pnpm dev:worker`, `pnpm deploy:worker`, config in `wrangler.jsonc`). Read env through `hono/adapter`'s `env(c)`, never `process.env` inside the app.
 
 ## Shared tooling
 
