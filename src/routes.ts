@@ -16,6 +16,7 @@ import reviews from './features/reviews/reviews.routes.js';
 import suggestions from './features/suggestions/suggestions.routes.js';
 import tags from './features/tags/tags.routes.js';
 import tasks from './features/tasks/tasks.routes.js';
+import templates from './features/templates/templates.routes.js';
 
 // Chain every `.route()` so `AppType` keeps the full API surface for RPC clients.
 const routes = new Hono<AppEnv>()
@@ -34,6 +35,7 @@ const routes = new Hono<AppEnv>()
 	.route('/suggestions', suggestions)
 	.route('/tags', tags)
 	.route('/tasks', tasks)
+	.route('/templates', templates)
 	.route('/tasks', history);
 
 export type AppType = typeof routes;
