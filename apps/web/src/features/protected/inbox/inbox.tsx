@@ -143,17 +143,20 @@ export default function InboxPage() {
 								allSelected={pageIds.length > 0 && selectedOnPage === pageIds.length}
 								disabled={rows.length === 0}
 								onClear={() => setSelectedIds(emptyIds)}
-								onSetStatus={status =>
+								onSetStatus={status => {
+									// Items already in the target status are left alone.
+									const ids = [...selectedIds].filter(id => rows.find(row => row.id === id)?.status !== status);
+									if (ids.length === 0) return setSelectedIds(emptyIds);
 									bulk.mutate(
-										{ ids: [...selectedIds], status },
+										{ ids, status },
 										{
 											onSuccess: count => {
 												setSelectedIds(emptyIds);
 												toast.success(t('inbox.toast.bulk', { count }));
 											},
 										}
-									)
-								}
+									);
+								}}
 								onToggleAll={checked => setSelectedIds(checked ? new Set(pageIds) : emptyIds)}
 								selectedCount={selectedIds.size}
 								someSelected={selectedOnPage > 0 && selectedOnPage < pageIds.length}
