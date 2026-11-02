@@ -46,6 +46,12 @@
         "required": "Enter your password",
         "tooShort": "At least {{min}} characters",
         "tooLong": "At most {{max}} characters"
+      },
+      "displayName": {
+        "label": "Name",
+        "placeholder": "Your name",
+        "required": "Enter your name",
+        "tooLong": "At most {{max}} characters"
       }
     },
     "signIn": {
@@ -120,5 +126,34 @@
     "validation_error": "The request data is invalid.",
     "weak_password": "The password is too weak.",
     "auth_failed": "Could not complete sign-in."
+  },
+  "protected": {
+    "nav": {
+      "inbox": "Inbox",
+      "today": "Today",
+      "projects": "Projects",
+      "goals": "Goals",
+      "tasks": "Tasks",
+      "notes": "Notes",
+      "reflect": "Reflect",
+      "tags": "Tags"
+    },
+    "menu": {
+      "open": "Open menu"
+    },
+    "command": {
+      "placeholder": "Search or jump to...",
+      "empty": "No results",
+      "navigate": "Navigate",
+      "toggle": "Open command palette",
+      "close": "Close"
+    },
+    "progress": {
+      "title": "Daily progress",
+      "summary": "{{done}} of {{total}} tasks"
+    },
+    "settings": {
+      "title": "Settings"
+    }
   }
 }
