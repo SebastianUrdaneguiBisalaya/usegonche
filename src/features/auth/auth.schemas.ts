@@ -7,7 +7,11 @@ const email = z.preprocess(v => (typeof v === 'string' ? v.trim().toLowerCase() 
 const newPassword = z.string().min(PASSWORD_MIN).max(PASSWORD_MAX);
 const otpCode = z.preprocess(v => (typeof v === 'string' ? v.trim() : v), z.string().regex(/^\d{6,10}$/));
 
-export const signupSchema = z.object({ email, password: newPassword });
+export const DISPLAY_NAME_MAX = 100;
+
+const displayName = z.string().trim().min(1).max(DISPLAY_NAME_MAX);
+
+export const signupSchema = z.object({ displayName, email, password: newPassword });
 export const loginSchema = z.object({ email, password: z.string().min(1) });
 export const forgotPasswordSchema = z.object({ email });
 export const resetPasswordSchema = z.object({ email, password: newPassword, token: otpCode });

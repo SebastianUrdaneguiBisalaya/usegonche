@@ -2,14 +2,24 @@ import type { PrismaClient, Profile } from '@usegonche/database';
 import { AppError } from '../../lib/errors.js';
 import type { GoogleLoginInput } from './auth.schemas.js';
 
-export type AuthUser = { email?: string; id: string };
+export type AuthUser = { email?: string; id: string; user_metadata?: Record<string, unknown> };
+
+/** Name chosen at sign up (`display_name`) or provided by Google (`full_name` / `name`); `null` when there is none. */
+export const displayNameOf = (user: AuthUser): string | null => {
+	const meta = user.user_metadata ?? {};
+	for (const key of ['display_name', 'full_name', 'name']) {
+		const value = meta[key];
+		if (typeof value === 'string' && value.trim() !== '') return value.trim().slice(0, 100);
+	}
+	return null;
+};
 
 export const publicUser = (user: AuthUser) => ({ email: user.email, id: user.id });
 
 /** Keeps the app profile in sync after every sign-in (also creates it on the first Google sign-in). */
 export const syncProfile = (prisma: PrismaClient, user: AuthUser): Promise<Profile> =>
 	prisma.profile.upsert({
-		create: { email: user.email, id: user.id },
+		create: { displayName: displayNameOf(user), email: user.email, id: user.id },
 		update: { email: user.email },
 		where: { id: user.id },
 	});

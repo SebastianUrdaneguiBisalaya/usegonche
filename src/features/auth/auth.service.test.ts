@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AppError } from '../../lib/errors.js';
-import { exchangeGoogleCode } from './auth.service.js';
+import { createMockPrisma } from '../../test/helpers.js';
+import { displayNameOf, exchangeGoogleCode, syncProfile } from './auth.service.js';
 
 const config = { GOOGLE_CLIENT_ID: 'web-id', GOOGLE_CLIENT_SECRET: 'web-secret', GOOGLE_DESKTOP_CLIENT_ID: 'desk-id', GOOGLE_DESKTOP_CLIENT_SECRET: 'desk-secret' };
 const answer = (body: unknown, ok = true) => vi.fn(async () => ({ json: async () => body, ok }) as Response);
@@ -40,5 +41,31 @@ describe('exchangeGoogleCode', () => {
 		const error = await exchangeGoogleCode({ code: 'c' }, config, fetchFn).catch(e => e);
 		expect(error).toBeInstanceOf(AppError);
 		expect(error).toMatchObject({ code: 'invalid_or_expired_code', status: 400 });
+	});
+});
+
+describe('displayNameOf', () => {
+	it('prefers display_name, then full_name, then name', () => {
+		expect(displayNameOf({ id: 'u', user_metadata: { display_name: ' Ana Paz ', full_name: 'X', name: 'Y' } })).toBe('Ana Paz');
+		expect(displayNameOf({ id: 'u', user_metadata: { full_name: 'Luis Gil', name: 'Y' } })).toBe('Luis Gil');
+		expect(displayNameOf({ id: 'u', user_metadata: { name: 'Eva' } })).toBe('Eva');
+	});
+
+	it('is null without a usable name', () => {
+		expect(displayNameOf({ id: 'u' })).toBeNull();
+		expect(displayNameOf({ id: 'u', user_metadata: { display_name: '  ', name: 3 } })).toBeNull();
+	});
+});
+
+describe('syncProfile', () => {
+	it('creates the profile with the display name and only refreshes the email afterwards', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.profile.upsert).mockResolvedValue({} as never);
+		await syncProfile(prisma, { email: 'a@b.co', id: 'u1', user_metadata: { display_name: 'Ana Paz' } });
+		expect(prisma.profile.upsert).toHaveBeenCalledWith({
+			create: { displayName: 'Ana Paz', email: 'a@b.co', id: 'u1' },
+			update: { email: 'a@b.co' },
+			where: { id: 'u1' },
+		});
 	});
 });
