@@ -47,14 +47,15 @@ describe('GET /recurrences', () => {
 	it('lists the rules of the user with meta', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.recurrenceRule.findMany).mockResolvedValue(asRow([row]));
+		vi.mocked(prisma.recurrenceRule.count).mockResolvedValue(1);
 		const res = await app.request('/recurrences');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toMatchObject({ data: [{ id: ID }], meta: { limit: 50, nextCursor: null } });
+		expect(await res.json()).toMatchObject({ data: [{ id: ID }], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
 		expect(prisma.recurrenceRule.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { ownerId: TEST_USER_ID } }));
 	});
 
-	it('answers 422 for an invalid cursor', async () => {
-		expect((await setup().app.request('/recurrences?cursor=nope')).status).toBe(422);
+	it('answers 422 for an invalid page', async () => {
+		expect((await setup().app.request('/recurrences?page=0')).status).toBe(422);
 	});
 });
 

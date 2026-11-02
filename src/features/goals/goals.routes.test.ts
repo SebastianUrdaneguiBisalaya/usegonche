@@ -31,24 +31,25 @@ describe('GET /goals', () => {
 	it('lists non-archived goals of the user with meta', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.goal.findMany).mockResolvedValue([goal]);
+		vi.mocked(prisma.goal.count).mockResolvedValue(1);
 
 		const res = await app.request('/goals');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [json(goal)], meta: { limit: 50, nextCursor: null } });
-		expect(prisma.goal.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51, where: { archivedAt: null, ownerId: TEST_USER_ID } }));
+		expect(await res.json()).toEqual({ data: [json(goal)], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(prisma.goal.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { archivedAt: null, ownerId: TEST_USER_ID } }));
 	});
 
 	it('applies archived and status filters', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.goal.findMany).mockResolvedValue([]);
-		await app.request('/goals?archived=true&status=achieved&limit=5');
-		expect(prisma.goal.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 6, where: { archivedAt: { not: null }, ownerId: TEST_USER_ID, status: 'achieved' } }));
+		await app.request('/goals?archived=true&status=achieved&pageSize=5');
+		expect(prisma.goal.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 5, where: { archivedAt: { not: null }, ownerId: TEST_USER_ID, status: 'achieved' } }));
 	});
 
-	it('answers 422 for an invalid filter or cursor', async () => {
+	it('answers 422 for an invalid filter or page', async () => {
 		const { app } = setup();
 		expect((await app.request('/goals?status=nope')).status).toBe(422);
-		expect((await app.request('/goals?cursor=garbage')).status).toBe(422);
+		expect((await app.request('/goals?page=0')).status).toBe(422);
 	});
 });
 

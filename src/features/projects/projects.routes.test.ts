@@ -35,11 +35,12 @@ describe('GET /projects', () => {
 	it('lists non-archived projects of the user with meta', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.project.findMany).mockResolvedValue(asRow([row]));
+		vi.mocked(prisma.project.count).mockResolvedValue(1);
 
 		const res = await app.request('/projects');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [body], meta: { limit: 50, nextCursor: null } });
-		expect(prisma.project.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51, where: { archivedAt: null, ownerId: TEST_USER_ID } }));
+		expect(await res.json()).toEqual({ data: [body], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(prisma.project.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { archivedAt: null, ownerId: TEST_USER_ID } }));
 	});
 
 	it('filters by goal, status and archived', async () => {
@@ -49,7 +50,7 @@ describe('GET /projects', () => {
 		expect(prisma.project.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { archivedAt: { not: null }, goalId: GOAL_ID, ownerId: TEST_USER_ID, status: 'on_hold' } }));
 	});
 
-	it.each(['goalId=nope', 'status=nope', 'archived=maybe', 'cursor=garbage'])('answers 422 for ?%s', async query => {
+	it.each(['goalId=nope', 'status=nope', 'archived=maybe', 'page=0'])('answers 422 for ?%s', async query => {
 		expect((await setup().app.request(`/projects?${query}`)).status).toBe(422);
 	});
 });

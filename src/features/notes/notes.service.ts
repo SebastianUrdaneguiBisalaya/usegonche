@@ -3,7 +3,7 @@ import type { Storage } from '@usegonche/storage';
 import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
+import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
 import { attachmentPaths, removeFiles } from '../attachments/attachments.service.js';
 import { markConverted } from '../inbox/inbox.service.js';
 import { getRevision, recordRevision } from './notes.revisions.service.js';
@@ -38,20 +38,12 @@ const assertTasks = async (prisma: Db, ownerId: string, taskIds: string[]): Prom
 	if (taskIds.length > 0 && (await prisma.task.count({ where: scoped(ownerId, { id: { in: taskIds } }) })) !== taskIds.length) throw invalidReference('taskIds');
 };
 
-/** Fetches `limit + 1` rows after `cursor` (newest first); pass them to `toPage`. */
-export const listNotes = async (prisma: PrismaClient, ownerId: string, filters: ListNotesFilters, limit: number, cursor?: Cursor): Promise<NoteSummary[]> => {
+/** One page of notes (newest first) with the total. */
+export const listNotes = async (prisma: PrismaClient, ownerId: string, filters: ListNotesFilters, page: PageParams): Promise<Paged<NoteSummary>> => {
 	const { projectId, tagId, taskId } = filters;
-	const rows = await prisma.note.findMany({
-		include,
-		omit: { body: true },
-		orderBy: keysetOrder('createdAt'),
-		take: limit + 1,
-		where: {
-			...scoped(ownerId, { ...(projectId && { projectId }), ...(tagId && { tags: { some: { tagId } } }), ...(taskId && { tasks: { some: { taskId } } }) }),
-			...keysetAfter('createdAt', cursor),
-		},
-	});
-	return rows.map(({ tags, tasks, ...note }) => ({ ...note, ...links({ tags, tasks }) }));
+	const where = scoped(ownerId, { ...(projectId && { projectId }), ...(tagId && { tags: { some: { tagId } } }), ...(taskId && { tasks: { some: { taskId } } }) });
+	const [rows, total] = await Promise.all([prisma.note.findMany({ include, omit: { body: true }, orderBy: pageOrder('createdAt'), ...pageArgs(page), where }), prisma.note.count({ where })]);
+	return { items: rows.map(({ tags, tasks, ...note }) => ({ ...note, ...links({ tags, tasks }) })), total };
 };
 
 export const getNote = async (prisma: Db, ownerId: string, id: string): Promise<NoteView> => {

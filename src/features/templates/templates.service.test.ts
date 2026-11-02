@@ -67,9 +67,10 @@ describe('listTemplates', () => {
 	it('scopes by owner and filters by kind', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.template.findMany).mockResolvedValue([]);
-		await listTemplates(prisma, TEST_USER_ID, 'project', 20);
-		expect(prisma.template.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 21, where: { kind: 'project', ownerId: TEST_USER_ID } }));
-		await listTemplates(prisma, TEST_USER_ID, undefined, 20);
+		vi.mocked(prisma.template.count).mockResolvedValue(0);
+		expect(await listTemplates(prisma, TEST_USER_ID, 'project', { page: 1, pageSize: 20 })).toEqual({ items: [], total: 0 });
+		expect(prisma.template.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 20, where: { kind: 'project', ownerId: TEST_USER_ID } }));
+		await listTemplates(prisma, TEST_USER_ID, undefined, { page: 1, pageSize: 20 });
 		expect(vi.mocked(prisma.template.findMany).mock.calls[1]?.[0]?.where).toEqual({ ownerId: TEST_USER_ID });
 	});
 });

@@ -77,4 +77,4 @@ export const createBlockerSchema = z.strictObject({ reason: z.string().trim().mi
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
-export type ListTasksFilters = Omit<z.infer<typeof listTasksQuerySchema>, 'cursor' | 'limit'>;
+export type ListTasksFilters = Omit<z.infer<typeof listTasksQuerySchema>, 'page' | 'pageSize'>;

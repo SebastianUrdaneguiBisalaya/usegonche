@@ -38,25 +38,53 @@ describe('brainDump', () => {
 });
 
 describe('listItems', () => {
-	it('fetches limit + 1 owner items of a status, newest first', async () => {
+	const NOW = new Date('2026-11-02T12:00:00.000Z');
+	const FIRST = { page: 1, pageSize: 20 };
+
+	it('returns a page of owner items of a status, newest first, with the counts of every status', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.inboxItem.findMany).mockResolvedValue([item]);
+		vi.mocked(prisma.inboxItem.groupBy).mockResolvedValue([
+			{ _count: { _all: 3 }, status: 'archived' },
+			{ _count: { _all: 12 }, status: 'pending' },
+		] as never);
 
-		expect(await listItems(prisma, TEST_USER_ID, 'archived', 20)).toEqual([item]);
-		expect(prisma.inboxItem.findMany).toHaveBeenCalledWith({ orderBy: [{ capturedAt: 'desc' }, { id: 'desc' }], take: 21, where: { ownerId: TEST_USER_ID, status: 'archived' } });
+		const page = await listItems(prisma, TEST_USER_ID, 'archived', 'all', FIRST, NOW);
+		expect(page).toEqual({ counts: { archived: 3, converted: 0, discarded: 0, pending: 12 }, items: [item], total: 3 });
+		expect(prisma.inboxItem.findMany).toHaveBeenCalledWith({ orderBy: [{ capturedAt: 'desc' }, { id: 'desc' }], skip: 0, take: 20, where: { ownerId: TEST_USER_ID, status: 'archived' } });
+		expect(prisma.inboxItem.groupBy).toHaveBeenCalledWith({ _count: { _all: true }, by: ['status'], where: { ownerId: TEST_USER_ID } });
 	});
 
-	it('continues after the cursor without dropping the owner scope', async () => {
+	it('zeroes the counts and the total when the owner has no items', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.inboxItem.findMany).mockResolvedValue([]);
-		const cursor = { at: new Date('2026-11-01T10:00:00.000Z'), id: ID };
+		vi.mocked(prisma.inboxItem.groupBy).mockResolvedValue([] as never);
 
-		await listItems(prisma, TEST_USER_ID, 'pending', 10, cursor);
-		expect(vi.mocked(prisma.inboxItem.findMany).mock.calls[0]?.[0]?.where).toEqual({
-			OR: [{ capturedAt: { lt: cursor.at } }, { capturedAt: cursor.at, id: { lt: ID } }],
-			ownerId: TEST_USER_ID,
-			status: 'pending',
-		});
+		expect(await listItems(prisma, TEST_USER_ID, 'pending', 'all', FIRST, NOW)).toEqual({ counts: { archived: 0, converted: 0, discarded: 0, pending: 0 }, items: [], total: 0 });
+	});
+
+	it('skips the previous pages without dropping the owner scope', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.inboxItem.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.inboxItem.groupBy).mockResolvedValue([] as never);
+
+		await listItems(prisma, TEST_USER_ID, 'pending', 'all', { page: 3, pageSize: 10 }, NOW);
+		expect(vi.mocked(prisma.inboxItem.findMany).mock.calls[0]?.[0]).toMatchObject({ skip: 20, take: 10, where: { ownerId: TEST_USER_ID, status: 'pending' } });
+	});
+
+	it.each([
+		['24h', 24],
+		['7d', 168],
+		['30d', 720],
+	] as const)('limits the list and the counts to the last %s', async (range, hours) => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.inboxItem.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.inboxItem.groupBy).mockResolvedValue([] as never);
+		const gte = new Date(NOW.getTime() - hours * 3_600_000);
+
+		await listItems(prisma, TEST_USER_ID, 'pending', range, FIRST, NOW);
+		expect(vi.mocked(prisma.inboxItem.findMany).mock.calls[0]?.[0]?.where).toEqual({ capturedAt: { gte }, ownerId: TEST_USER_ID, status: 'pending' });
+		expect(vi.mocked(prisma.inboxItem.groupBy).mock.calls[0]?.[0]?.where).toEqual({ capturedAt: { gte }, ownerId: TEST_USER_ID });
 	});
 });
 

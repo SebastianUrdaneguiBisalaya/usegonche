@@ -54,22 +54,24 @@ describe('createReminder', () => {
 });
 
 describe('listReminders', () => {
-	it('scopes by owner, applies the filters and fetches one extra row', async () => {
+	it('scopes by owner, applies the filters and returns one page', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.reminder.findMany).mockResolvedValue([]);
-		await listReminders(prisma, TEST_USER_ID, { eventId: TARGET_ID, status: 'sent' }, 20);
+		vi.mocked(prisma.reminder.count).mockResolvedValue(0);
+		expect(await listReminders(prisma, TEST_USER_ID, { eventId: TARGET_ID, status: 'sent' }, { page: 1, pageSize: 20 })).toEqual({ items: [], total: 0 });
 		expect(prisma.reminder.findMany).toHaveBeenCalledWith({
 			orderBy: [{ remindAt: 'desc' }, { id: 'desc' }],
-			take: 21,
+			skip: 0,
+			take: 20,
 			where: { calendarEventId: TARGET_ID, noteId: undefined, ownerId: TEST_USER_ID, status: 'sent', taskId: undefined },
 		});
 	});
 
-	it('continues after the cursor', async () => {
+	it('skips the previous pages', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.reminder.findMany).mockResolvedValue([]);
-		await listReminders(prisma, TEST_USER_ID, {}, 10, { at: NOW, id: ID });
-		expect(vi.mocked(prisma.reminder.findMany).mock.calls[0]?.[0]?.where).toMatchObject({ OR: [{ remindAt: { lt: NOW } }, { id: { lt: ID }, remindAt: NOW }] });
+		await listReminders(prisma, TEST_USER_ID, {}, { page: 2, pageSize: 10 });
+		expect(vi.mocked(prisma.reminder.findMany).mock.calls[0]?.[0]).toMatchObject({ skip: 10, take: 10 });
 	});
 });
 

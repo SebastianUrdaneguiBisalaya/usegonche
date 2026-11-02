@@ -2,16 +2,15 @@ import type { Goal, GoalStatus, PrismaClient } from '@usegonche/database';
 import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
+import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
 import type { CreateGoalInput, UpdateGoalInput } from './goals.schemas.js';
 
-/** Fetches `limit + 1` rows after `cursor` (newest first); pass them to `toPage`. Archived goals are hidden unless asked for. */
-export const listGoals = (prisma: PrismaClient, ownerId: string, filters: { archived: boolean; status?: GoalStatus }, limit: number, cursor?: Cursor): Promise<Goal[]> =>
-	prisma.goal.findMany({
-		orderBy: keysetOrder('createdAt'),
-		take: limit + 1,
-		where: { ...scoped(ownerId, { archivedAt: filters.archived ? { not: null } : null, ...(filters.status && { status: filters.status }) }), ...keysetAfter('createdAt', cursor) },
-	});
+/** One page of goals (newest first) with the total. Archived goals are hidden unless asked for. */
+export const listGoals = async (prisma: PrismaClient, ownerId: string, filters: { archived: boolean; status?: GoalStatus }, page: PageParams): Promise<Paged<Goal>> => {
+	const where = scoped(ownerId, { archivedAt: filters.archived ? { not: null } : null, ...(filters.status && { status: filters.status }) });
+	const [items, total] = await Promise.all([prisma.goal.findMany({ orderBy: pageOrder('createdAt'), ...pageArgs(page), where }), prisma.goal.count({ where })]);
+	return { items, total };
+};
 
 export const getGoal = async (prisma: PrismaClient, ownerId: string, id: string): Promise<Goal> => {
 	const goal = await prisma.goal.findFirst({ where: scoped(ownerId, { id }) });

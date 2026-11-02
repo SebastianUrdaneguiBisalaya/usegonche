@@ -49,22 +49,27 @@ describe('GET /tasks', () => {
 	it('lists top-level tasks of the user with meta', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.task.findMany).mockResolvedValue(asRow([row]));
+		vi.mocked(prisma.task.count).mockResolvedValue(1);
 		const res = await app.request('/tasks');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [expectedView()], meta: { limit: 50, nextCursor: null } });
-		expect(prisma.task.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51, where: { ownerId: TEST_USER_ID, parentId: null } }));
+		expect(await res.json()).toEqual({ data: [expectedView()], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(prisma.task.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { ownerId: TEST_USER_ID, parentId: null } }));
 	});
 
 	it('passes the filters to the service', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
-		await app.request(`/tasks?status=done&priority=high&projectId=${OTHER}&dueBefore=2026-12-01&limit=5`);
+		await app.request(`/tasks?status=done&priority=high&projectId=${OTHER}&dueBefore=2026-12-01&pageSize=5`);
 		expect(prisma.task.findMany).toHaveBeenCalledWith(
-			expect.objectContaining({ take: 6, where: { dueDate: { lte: new Date('2026-12-01') }, ownerId: TEST_USER_ID, parentId: null, priority: 'high', projectId: OTHER, status: 'done' } })
+			expect.objectContaining({
+				skip: 0,
+				take: 5,
+				where: { dueDate: { lte: new Date('2026-12-01') }, ownerId: TEST_USER_ID, parentId: null, priority: 'high', projectId: OTHER, status: 'done' },
+			})
 		);
 	});
 
-	it.each(['status=nope', 'priority=nope', 'projectId=nope', 'dueBefore=tomorrow', 'cursor=garbage', 'limit=0'])('answers 422 for ?%s', async query => {
+	it.each(['status=nope', 'priority=nope', 'projectId=nope', 'dueBefore=tomorrow', 'page=0', 'pageSize=0'])('answers 422 for ?%s', async query => {
 		expect((await setup().app.request(`/tasks?${query}`)).status).toBe(422);
 	});
 });

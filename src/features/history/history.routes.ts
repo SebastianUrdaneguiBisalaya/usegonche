@@ -2,7 +2,7 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import type { AppEnv } from '../../env.js';
 import { okWithMeta } from '../../lib/http.js';
-import { toPage } from '../../lib/pagination.js';
+import { pageMeta } from '../../lib/pagination.js';
 import { validationHook } from '../../lib/validator.js';
 import { requireUser } from '../../middleware/auth.js';
 import { historyParamSchema, historyQuerySchema } from './history.schemas.js';
@@ -10,7 +10,7 @@ import { listTaskHistory } from './history.service.js';
 
 // Mounted under `/tasks`: GET /tasks/:id/history. The owner always comes from the verified claims.
 export default new Hono<AppEnv>().use(requireUser()).get('/:id/history', zValidator('param', historyParamSchema, validationHook), zValidator('query', historyQuerySchema, validationHook), async c => {
-	const { cursor, limit } = c.req.valid('query');
-	const { items, nextCursor } = toPage(await listTaskHistory(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id, limit, cursor), limit, event => event.occurredAt);
-	return okWithMeta(c, items, { limit, nextCursor }, 200);
+	const { page, pageSize } = c.req.valid('query');
+	const { items, total } = await listTaskHistory(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id, { page, pageSize });
+	return okWithMeta(c, items, pageMeta({ page, pageSize }, total), 200);
 });

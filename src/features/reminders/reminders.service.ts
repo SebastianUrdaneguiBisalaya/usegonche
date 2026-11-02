@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient, Reminder } from '@usegonche/database';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
+import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
 import type { CreateReminderInput, ListRemindersQuery, SnoozeReminderInput, UpdateReminderInput } from './reminders.schemas.js';
 
 /** Reminders claimed per processor run; a backlog drains over the following runs (the job runs every minute). */
@@ -24,15 +24,11 @@ const assertTarget = async (prisma: PrismaClient, ownerId: string, input: Create
 	return { noteId: input.noteId };
 };
 
-export const listReminders = async (prisma: PrismaClient, ownerId: string, query: Omit<ListRemindersQuery, 'cursor' | 'limit'>, limit: number, cursor?: Cursor): Promise<Reminder[]> =>
-	prisma.reminder.findMany({
-		orderBy: keysetOrder('remindAt'),
-		take: limit + 1,
-		where: {
-			...scoped(ownerId, { calendarEventId: query.eventId, noteId: query.noteId, status: query.status, taskId: query.taskId }),
-			...keysetAfter('remindAt', cursor),
-		},
-	});
+export const listReminders = async (prisma: PrismaClient, ownerId: string, query: Omit<ListRemindersQuery, 'page' | 'pageSize'>, page: PageParams): Promise<Paged<Reminder>> => {
+	const where = scoped(ownerId, { calendarEventId: query.eventId, noteId: query.noteId, status: query.status, taskId: query.taskId });
+	const [items, total] = await Promise.all([prisma.reminder.findMany({ orderBy: pageOrder('remindAt'), ...pageArgs(page), where }), prisma.reminder.count({ where })]);
+	return { items, total };
+};
 
 export const getReminder = async (prisma: PrismaClient, ownerId: string, id: string): Promise<Reminder> => {
 	const reminder = await prisma.reminder.findFirst({ where: scoped(ownerId, { id }) });

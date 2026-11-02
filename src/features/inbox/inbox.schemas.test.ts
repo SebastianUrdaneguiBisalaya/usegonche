@@ -29,13 +29,18 @@ describe('setStatusSchema', () => {
 });
 
 describe('listQuerySchema', () => {
-	it('defaults to pending items and a sane limit, and coerces strings', () => {
-		expect(listQuerySchema.parse({})).toEqual({ limit: 50, status: 'pending' });
-		expect(listQuerySchema.parse({ limit: '10', status: 'archived' })).toEqual({ limit: 10, status: 'archived' });
+	it('defaults to pending items of all time on the first page, and coerces strings', () => {
+		expect(listQuerySchema.parse({})).toEqual({ page: 1, pageSize: 50, range: 'all', status: 'pending' });
+		expect(listQuerySchema.parse({ page: '2', pageSize: '10', range: '7d', status: 'archived' })).toEqual({ page: 2, pageSize: 10, range: '7d', status: 'archived' });
 	});
 
-	it('rejects limits out of range', () => {
-		expect(listQuerySchema.safeParse({ limit: '0' }).success).toBe(false);
-		expect(listQuerySchema.safeParse({ limit: '101' }).success).toBe(false);
+	it.each([
+		['page', '0'],
+		['pageSize', '0'],
+		['pageSize', '101'],
+		['range', 'forever'],
+		['status', 'bogus'],
+	])('rejects %s=%s', (key, value) => {
+		expect(listQuerySchema.safeParse({ [key]: value }).success).toBe(false);
 	});
 });

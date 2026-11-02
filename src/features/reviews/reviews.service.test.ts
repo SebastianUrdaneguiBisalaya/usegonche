@@ -68,8 +68,14 @@ describe('listReviews', () => {
 	it('lists reviews by period, newest first, with filters and owner scope', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.review.findMany).mockResolvedValue([]);
-		await listReviews(prisma, TEST_USER_ID, { kind: 'weekly', status: 'closed' }, 20);
-		expect(prisma.review.findMany).toHaveBeenCalledWith({ orderBy: [{ periodStart: 'desc' }, { id: 'desc' }], take: 21, where: { kind: 'weekly', ownerId: TEST_USER_ID, status: 'closed' } });
+		vi.mocked(prisma.review.count).mockResolvedValue(0);
+		expect(await listReviews(prisma, TEST_USER_ID, { kind: 'weekly', status: 'closed' }, { page: 1, pageSize: 20 })).toEqual({ items: [], total: 0 });
+		expect(prisma.review.findMany).toHaveBeenCalledWith({
+			orderBy: [{ periodStart: 'desc' }, { id: 'desc' }],
+			skip: 0,
+			take: 20,
+			where: { kind: 'weekly', ownerId: TEST_USER_ID, status: 'closed' },
+		});
 	});
 });
 

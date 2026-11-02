@@ -1,84 +1,39 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { cursorSchema, decodeCursor, encodeCursor, keysetAfter, keysetOrder, LIMIT_DEFAULT, LIMIT_MAX, paginationQuery, toPage } from './pagination.js';
+import { PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX, pageArgs, pageMeta, pageOrder, paginationQuery } from './pagination.js';
 
-const ID = '5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7e';
-const AT = new Date('2026-11-01T15:00:00.123Z');
 const query = z.object(paginationQuery);
 
-describe('cursor encoding', () => {
-	it('round-trips and is URL safe', () => {
-		const encoded = encodeCursor({ at: AT, id: ID });
-		expect(encoded).toMatch(/^[A-Za-z0-9_-]+$/);
-		expect(decodeCursor(encoded)).toEqual({ at: AT, id: ID });
-	});
-
-	it.each([
-		['empty', ''],
-		['garbage', '%%%'],
-		['not base64 of a cursor', btoa('hello')],
-		['bad date', btoa(`nope|${ID}`)],
-		['bad id', btoa(`${AT.toISOString()}|123`)],
-		['extra parts', btoa(`${AT.toISOString()}|${ID}|x`)],
-		['non-canonical date', btoa(`2026-11-01|${ID}`)],
-	])('rejects %s', (_label, value) => {
-		expect(decodeCursor(value)).toBeNull();
-	});
-});
-
 describe('paginationQuery', () => {
-	it('defaults the limit, coerces strings and decodes the cursor', () => {
-		expect(query.parse({})).toEqual({ limit: LIMIT_DEFAULT });
-		expect(query.parse({ cursor: encodeCursor({ at: AT, id: ID }), limit: '10' })).toEqual({ cursor: { at: AT, id: ID }, limit: 10 });
+	it('defaults to the first page and coerces strings', () => {
+		expect(query.parse({})).toEqual({ page: 1, pageSize: PAGE_SIZE_DEFAULT });
+		expect(query.parse({ page: '3', pageSize: '10' })).toEqual({ page: 3, pageSize: 10 });
 	});
 
 	it.each([
-		['limit 0', { limit: '0' }],
-		['limit over max', { limit: String(LIMIT_MAX + 1) }],
-		['invalid cursor', { cursor: 'nope' }],
+		['page 0', { page: '0' }],
+		['negative page', { page: '-1' }],
+		['fractional page', { page: '1.5' }],
+		['pageSize 0', { pageSize: '0' }],
+		['pageSize over max', { pageSize: String(PAGE_SIZE_MAX + 1) }],
 	])('rejects %s', (_label, input) => {
 		expect(query.safeParse(input).success).toBe(false);
 	});
-
-	it('exposes the cursor schema on its own', () => {
-		expect(cursorSchema.safeParse(encodeCursor({ at: AT, id: ID })).success).toBe(true);
-	});
 });
 
-describe('keyset helpers', () => {
+describe('page helpers', () => {
 	it('orders by the field then id, both descending', () => {
-		expect(keysetOrder('capturedAt')).toEqual([{ capturedAt: 'desc' }, { id: 'desc' }]);
+		expect(pageOrder('capturedAt')).toEqual([{ capturedAt: 'desc' }, { id: 'desc' }]);
 	});
 
-	it('adds nothing without a cursor', () => {
-		expect(keysetAfter('capturedAt', undefined)).toEqual({});
+	it('skips the rows of the previous pages', () => {
+		expect(pageArgs({ page: 1, pageSize: 20 })).toEqual({ skip: 0, take: 20 });
+		expect(pageArgs({ page: 3, pageSize: 20 })).toEqual({ skip: 40, take: 20 });
 	});
 
-	it('selects rows strictly after the cursor, breaking ties by id', () => {
-		expect(keysetAfter('capturedAt', { at: AT, id: ID })).toEqual({ OR: [{ capturedAt: { lt: AT } }, { capturedAt: AT, id: { lt: ID } }] });
-	});
-});
-
-describe('toPage', () => {
-	const row = (n: number) => ({ at: new Date(2026, 0, n), id: `${ID.slice(0, -1)}${n}` });
-
-	it('returns every row and no cursor on the last page', () => {
-		const rows = [row(3), row(2)];
-		expect(toPage(rows, 3, r => r.at)).toEqual({ items: rows, nextCursor: null });
-	});
-
-	it('also has no cursor when the page is exactly full', () => {
-		expect(toPage([row(2), row(1)], 2, r => r.at).nextCursor).toBeNull();
-	});
-
-	it('drops the extra row and points the cursor at the last kept one', () => {
-		const rows = [row(3), row(2), row(1)];
-		const page = toPage(rows, 2, r => r.at);
-		expect(page.items).toEqual([row(3), row(2)]);
-		expect(decodeCursor(page.nextCursor ?? '')).toEqual({ at: row(2).at, id: row(2).id });
-	});
-
-	it('handles an empty result', () => {
-		expect(toPage([], 5, () => AT)).toEqual({ items: [], nextCursor: null });
+	it('builds the meta with a page count of at least 1', () => {
+		expect(pageMeta({ page: 2, pageSize: 20 }, 45)).toEqual({ page: 2, pageCount: 3, pageSize: 20, total: 45 });
+		expect(pageMeta({ page: 1, pageSize: 20 }, 40)).toEqual({ page: 1, pageCount: 2, pageSize: 20, total: 40 });
+		expect(pageMeta({ page: 1, pageSize: 20 }, 0)).toEqual({ page: 1, pageCount: 1, pageSize: 20, total: 0 });
 	});
 });

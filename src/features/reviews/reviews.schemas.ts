@@ -43,4 +43,4 @@ export type OpenReviewInput = z.infer<typeof openReviewSchema>;
 export type UpdateReviewInput = z.infer<typeof updateReviewSchema>;
 export type CloseReviewInput = z.infer<typeof closeReviewSchema>;
 export type DecisionInput = z.infer<typeof decisionsSchema>['decisions'][number];
-export type ListReviewsFilters = Omit<z.infer<typeof listReviewsQuerySchema>, 'cursor' | 'limit'>;
+export type ListReviewsFilters = Omit<z.infer<typeof listReviewsQuerySchema>, 'page' | 'pageSize'>;

@@ -39,22 +39,23 @@ describe('GET /notes', () => {
 	it('lists notes of the user with meta', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.note.findMany).mockResolvedValue(asRow([row]));
+		vi.mocked(prisma.note.count).mockResolvedValue(1);
 		const res = await app.request('/notes');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [expected], meta: { limit: 50, nextCursor: null } });
-		expect(prisma.note.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51, where: { ownerId: TEST_USER_ID } }));
+		expect(await res.json()).toEqual({ data: [expected], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(prisma.note.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { ownerId: TEST_USER_ID } }));
 	});
 
 	it('applies filters', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.note.findMany).mockResolvedValue([]);
-		await app.request(`/notes?projectId=${OTHER}&taskId=${ID}&tagId=${OTHER}&limit=5`);
+		await app.request(`/notes?projectId=${OTHER}&taskId=${ID}&tagId=${OTHER}&pageSize=5`);
 		expect(prisma.note.findMany).toHaveBeenCalledWith(
-			expect.objectContaining({ take: 6, where: { ownerId: TEST_USER_ID, projectId: OTHER, tags: { some: { tagId: OTHER } }, tasks: { some: { taskId: ID } } } })
+			expect.objectContaining({ skip: 0, take: 5, where: { ownerId: TEST_USER_ID, projectId: OTHER, tags: { some: { tagId: OTHER } }, tasks: { some: { taskId: ID } } } })
 		);
 	});
 
-	it.each(['projectId=nope', 'taskId=nope', 'tagId=nope', 'cursor=garbage'])('answers 422 for ?%s', async query => {
+	it.each(['projectId=nope', 'taskId=nope', 'tagId=nope', 'page=0'])('answers 422 for ?%s', async query => {
 		expect((await setup().app.request(`/notes?${query}`)).status).toBe(422);
 	});
 });
@@ -176,17 +177,18 @@ describe('note revisions', () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow({ id: ID }));
 		vi.mocked(prisma.noteRevision.findMany).mockResolvedValue(asRow([revision]));
+		vi.mocked(prisma.noteRevision.count).mockResolvedValue(1);
 		const res = await app.request(`/notes/${ID}/revisions`);
 		expect(res.status).toBe(200);
-		expect(await res.json()).toMatchObject({ data: [{ id: OTHER }], meta: { limit: 50, nextCursor: null } });
+		expect(await res.json()).toMatchObject({ data: [{ id: OTHER }], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
 		expect(prisma.noteRevision.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { noteId: ID, ownerId: TEST_USER_ID } }));
 	});
 
-	it('answers 404 when the note is not the user’s and 422 for an invalid cursor or id', async () => {
+	it('answers 404 when the note is not the user’s and 422 for an invalid page or id', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.note.findFirst).mockResolvedValue(null);
 		expect((await app.request(`/notes/${ID}/revisions`)).status).toBe(404);
-		expect((await app.request(`/notes/${ID}/revisions?cursor=nope`)).status).toBe(422);
+		expect((await app.request(`/notes/${ID}/revisions?page=0`)).status).toBe(422);
 		expect((await app.request(`/notes/nope/revisions/${OTHER}`)).status).toBe(422);
 	});
 

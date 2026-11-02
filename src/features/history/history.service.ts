@@ -2,7 +2,7 @@ import type { Prisma, PrismaClient, TaskEvent, TaskPriority, TaskStatus } from '
 import { changedFields } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
+import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
 
 type Db = PrismaClient | Prisma.TransactionClient;
 
@@ -36,8 +36,10 @@ export const recordTaskEvents = async (prisma: Db, ownerId: string, taskId: stri
 	await prisma.taskEvent.createMany({ data: events.map(event => ({ ...event, ownerId, taskId })) });
 };
 
-/** Fetches `limit + 1` events after `cursor` (newest first); pass them to `toPage`. 404 when the task is not the owner's. */
-export const listTaskHistory = async (prisma: PrismaClient, ownerId: string, taskId: string, limit: number, cursor?: Cursor): Promise<TaskEvent[]> => {
+/** One page of events (newest first) with the total. 404 when the task is not the owner's. */
+export const listTaskHistory = async (prisma: PrismaClient, ownerId: string, taskId: string, page: PageParams): Promise<Paged<TaskEvent>> => {
 	if (!(await prisma.task.findFirst({ select: { id: true }, where: scoped(ownerId, { id: taskId }) }))) throw new AppError('not_found', 404);
-	return prisma.taskEvent.findMany({ orderBy: keysetOrder('occurredAt'), take: limit + 1, where: { ...scoped(ownerId, { taskId }), ...keysetAfter('occurredAt', cursor) } });
+	const where = scoped(ownerId, { taskId });
+	const [items, total] = await Promise.all([prisma.taskEvent.findMany({ orderBy: pageOrder('occurredAt'), ...pageArgs(page), where }), prisma.taskEvent.count({ where })]);
+	return { items, total };
 };

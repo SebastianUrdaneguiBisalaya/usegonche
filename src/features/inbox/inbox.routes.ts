@@ -2,7 +2,7 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import type { AppEnv } from '../../env.js';
 import { ok, okWithMeta } from '../../lib/http.js';
-import { toPage } from '../../lib/pagination.js';
+import { pageMeta } from '../../lib/pagination.js';
 import { validationHook } from '../../lib/validator.js';
 import { requireUser } from '../../middleware/auth.js';
 import { brainDumpSchema, captureSchema, inboxParamSchema, listQuerySchema, setStatusSchema } from './inbox.schemas.js';
@@ -12,9 +12,9 @@ import { brainDump, captureItem, listItems, setStatus } from './inbox.service.js
 export default new Hono<AppEnv>()
 	.use(requireUser())
 	.get('/', zValidator('query', listQuerySchema, validationHook), async c => {
-		const { cursor, limit, status } = c.req.valid('query');
-		const { items, nextCursor } = toPage(await listItems(c.get('prisma'), c.get('claims').sub, status, limit, cursor), limit, item => item.capturedAt);
-		return okWithMeta(c, items, { limit, nextCursor, status }, 200);
+		const { page, pageSize, range, status } = c.req.valid('query');
+		const { counts, items, total } = await listItems(c.get('prisma'), c.get('claims').sub, status, range, { page, pageSize });
+		return okWithMeta(c, items, { ...pageMeta({ page, pageSize }, total), counts, range, status }, 200);
 	})
 	.post('/', zValidator('json', captureSchema, validationHook), async c => ok(c, await captureItem(c.get('prisma'), c.get('claims').sub, c.req.valid('json').content), 201))
 	.post('/brain-dump', zValidator('json', brainDumpSchema, validationHook), async c => ok(c, await brainDump(c.get('prisma'), c.get('claims').sub, c.req.valid('json').text), 201))

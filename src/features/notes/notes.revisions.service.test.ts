@@ -38,14 +38,17 @@ describe('listRevisions', () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.note.findFirst).mockResolvedValue(asRow({ id: NOTE_ID }));
 		vi.mocked(prisma.noteRevision.findMany).mockResolvedValue(asRow([{ id: REVISION_ID }]));
-		expect(await listRevisions(prisma, TEST_USER_ID, NOTE_ID, 20)).toHaveLength(1);
-		expect(prisma.noteRevision.findMany).toHaveBeenCalledWith(expect.objectContaining({ omit: { body: true }, take: 21, where: { noteId: NOTE_ID, ownerId: TEST_USER_ID } }));
+		vi.mocked(prisma.noteRevision.count).mockResolvedValue(1);
+		const page = await listRevisions(prisma, TEST_USER_ID, NOTE_ID, { page: 1, pageSize: 20 });
+		expect(page.items).toHaveLength(1);
+		expect(page.total).toBe(1);
+		expect(prisma.noteRevision.findMany).toHaveBeenCalledWith(expect.objectContaining({ omit: { body: true }, skip: 0, take: 20, where: { noteId: NOTE_ID, ownerId: TEST_USER_ID } }));
 	});
 
 	it('throws 404 when the note is not the owner’s', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.note.findFirst).mockResolvedValue(null);
-		expect(await rejection(listRevisions(prisma, OTHER_USER_ID, NOTE_ID, 20))).toMatchObject({ code: 'not_found', status: 404 });
+		expect(await rejection(listRevisions(prisma, OTHER_USER_ID, NOTE_ID, { page: 1, pageSize: 20 }))).toMatchObject({ code: 'not_found', status: 404 });
 		expect(prisma.noteRevision.findMany).not.toHaveBeenCalled();
 	});
 });

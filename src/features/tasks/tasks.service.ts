@@ -3,7 +3,7 @@ import type { Storage } from '@usegonche/storage';
 import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
+import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
 import { attachmentPaths, removeFiles } from '../attachments/attachments.service.js';
 import { diffTaskChanges, recordTaskEvents } from '../history/history.service.js';
 import { markConverted } from '../inbox/inbox.service.js';
@@ -75,27 +75,20 @@ const assertParent = async (prisma: Db, ownerId: string, parentId: string, taskI
 	if (taskId && (await prisma.task.count({ where: scoped(ownerId, { parentId: taskId }) })) > 0) throw invalidReference('parentId', 'has_subtasks');
 };
 
-/** Fetches `limit + 1` rows after `cursor` (newest first); pass them to `toPage`. Without `parentId` only top-level tasks are listed. */
-export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: ListTasksFilters, limit: number, cursor?: Cursor): Promise<TaskView[]> => {
+/** One page of tasks (newest first) with the total. Without `parentId` only top-level tasks are listed. */
+export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: ListTasksFilters, page: PageParams): Promise<Paged<TaskView>> => {
 	const { dueAfter, dueBefore, goalId, parentId, priority, projectId, status, tagId } = filters;
-	const rows = await prisma.task.findMany({
-		include,
-		orderBy: keysetOrder('createdAt'),
-		take: limit + 1,
-		where: {
-			...scoped(ownerId, {
-				parentId: parentId ?? null,
-				...(dueAfter || dueBefore ? { dueDate: { ...(dueAfter && { gte: dueAfter }), ...(dueBefore && { lte: dueBefore }) } } : {}),
-				...(goalId && { goalId }),
-				...(priority && { priority }),
-				...(projectId && { projectId }),
-				...(status && { status }),
-				...(tagId && { tags: { some: { tagId } } }),
-			}),
-			...keysetAfter('createdAt', cursor),
-		},
+	const where = scoped(ownerId, {
+		parentId: parentId ?? null,
+		...(dueAfter || dueBefore ? { dueDate: { ...(dueAfter && { gte: dueAfter }), ...(dueBefore && { lte: dueBefore }) } } : {}),
+		...(goalId && { goalId }),
+		...(priority && { priority }),
+		...(projectId && { projectId }),
+		...(status && { status }),
+		...(tagId && { tags: { some: { tagId } } }),
 	});
-	return rows.map(toView);
+	const [rows, total] = await Promise.all([prisma.task.findMany({ include, orderBy: pageOrder('createdAt'), ...pageArgs(page), where }), prisma.task.count({ where })]);
+	return { items: rows.map(toView), total };
 };
 
 export const getTask = async (prisma: Db, ownerId: string, id: string): Promise<TaskView> => {

@@ -24,15 +24,17 @@ describe('listProjects', () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.project.findMany).mockResolvedValue(asRow([row]));
 
-		expect(await listProjects(prisma, TEST_USER_ID, { archived: false }, 20)).toEqual([project]);
-		expect(prisma.project.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 21, where: { archivedAt: null, ownerId: TEST_USER_ID } }));
+		vi.mocked(prisma.project.count).mockResolvedValue(1);
+
+		expect(await listProjects(prisma, TEST_USER_ID, { archived: false }, { page: 1, pageSize: 20 })).toEqual({ items: [project], total: 1 });
+		expect(prisma.project.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 20, where: { archivedAt: null, ownerId: TEST_USER_ID } }));
 	});
 
 	it('filters by goal and status', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.project.findMany).mockResolvedValue([]);
 
-		await listProjects(prisma, TEST_USER_ID, { archived: true, goalId: GOAL_ID, status: 'on_hold' }, 10);
+		await listProjects(prisma, TEST_USER_ID, { archived: true, goalId: GOAL_ID, status: 'on_hold' }, { page: 1, pageSize: 10 });
 		expect(vi.mocked(prisma.project.findMany).mock.calls[0]?.[0]?.where).toEqual({ archivedAt: { not: null }, goalId: GOAL_ID, ownerId: TEST_USER_ID, status: 'on_hold' });
 	});
 });

@@ -2,7 +2,7 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import type { AppEnv } from '../../env.js';
 import { ok, okWithMeta } from '../../lib/http.js';
-import { toPage } from '../../lib/pagination.js';
+import { pageMeta } from '../../lib/pagination.js';
 import { validationHook } from '../../lib/validator.js';
 import { requireUser } from '../../middleware/auth.js';
 import { applyDecisions } from './reviews.decisions.service.js';
@@ -13,9 +13,9 @@ import { closeReview, getReview, listReviews, openReview, updateReview } from '.
 export default new Hono<AppEnv>()
 	.use(requireUser())
 	.get('/', zValidator('query', listReviewsQuerySchema, validationHook), async c => {
-		const { cursor, limit, ...filters } = c.req.valid('query');
-		const { items, nextCursor } = toPage(await listReviews(c.get('prisma'), c.get('claims').sub, filters, limit, cursor), limit, review => review.periodStart);
-		return okWithMeta(c, items, { limit, nextCursor }, 200);
+		const { page, pageSize, ...filters } = c.req.valid('query');
+		const { items, total } = await listReviews(c.get('prisma'), c.get('claims').sub, filters, { page, pageSize });
+		return okWithMeta(c, items, pageMeta({ page, pageSize }, total), 200);
 	})
 	.post('/', zValidator('json', openReviewSchema, validationHook), async c => {
 		const { created, review } = await openReview(c.get('prisma'), c.get('claims').sub, c.req.valid('json'));

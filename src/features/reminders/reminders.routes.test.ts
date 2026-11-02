@@ -42,15 +42,16 @@ describe('GET /reminders', () => {
 	it('lists the reminders of the user with meta and filters', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.reminder.findMany).mockResolvedValue(asRow([row]));
+		vi.mocked(prisma.reminder.count).mockResolvedValue(1);
 		const res = await app.request(`/reminders?status=pending&taskId=${TARGET_ID}`);
 		expect(res.status).toBe(200);
-		expect(await res.json()).toMatchObject({ data: [{ id: ID }], meta: { limit: 50, nextCursor: null } });
+		expect(await res.json()).toMatchObject({ data: [{ id: ID }], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
 		expect(prisma.reminder.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({ where: { calendarEventId: undefined, noteId: undefined, ownerId: TEST_USER_ID, status: 'pending', taskId: TARGET_ID } })
 		);
 	});
 
-	it.each(['status=nope', 'taskId=x', 'cursor=nope', 'limit=0'])('answers 422 for ?%s', async query => {
+	it.each(['status=nope', 'taskId=x', 'page=0', 'pageSize=0'])('answers 422 for ?%s', async query => {
 		expect((await setup().app.request(`/reminders?${query}`)).status).toBe(422);
 	});
 });

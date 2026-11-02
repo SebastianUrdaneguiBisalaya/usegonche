@@ -25,46 +25,55 @@ describe.each([
 });
 
 describe('GET /inbox', () => {
-	it('lists pending items of the user by default with meta', async () => {
+	it('lists pending items of the user by default with meta and the counts of every status', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.inboxItem.findMany).mockResolvedValue([item]);
+		vi.mocked(prisma.inboxItem.groupBy).mockResolvedValue([{ _count: { _all: 1 }, status: 'pending' }] as never);
 
 		const res = await app.request('/inbox');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [item], meta: { limit: 50, nextCursor: null, status: 'pending' } });
-		expect(prisma.inboxItem.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51, where: { ownerId: TEST_USER_ID, status: 'pending' } }));
+		expect(await res.json()).toEqual({
+			data: [item],
+			meta: { counts: { archived: 0, converted: 0, discarded: 0, pending: 1 }, page: 1, pageCount: 1, pageSize: 50, range: 'all', status: 'pending', total: 1 },
+		});
+		expect(prisma.inboxItem.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { ownerId: TEST_USER_ID, status: 'pending' } }));
 	});
 
-	it('filters by status and limit', async () => {
+	it('filters by status and page size', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.inboxItem.findMany).mockResolvedValue([]);
-		await app.request('/inbox?status=archived&limit=5');
-		expect(prisma.inboxItem.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 6, where: { ownerId: TEST_USER_ID, status: 'archived' } }));
+		vi.mocked(prisma.inboxItem.groupBy).mockResolvedValue([] as never);
+		await app.request('/inbox?status=archived&pageSize=5');
+		expect(prisma.inboxItem.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 5, where: { ownerId: TEST_USER_ID, status: 'archived' } }));
 	});
 
-	it('returns nextCursor when there are more items and the cursor continues the list', async () => {
+	it('skips the previous pages and reports the page count', async () => {
 		const { app, prisma } = setup();
-		const rows = [1, 2, 3].map(n => ({ ...item, capturedAt: new Date(`2026-11-0${n}T10:00:00.000Z`), id: `5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7${n}` }));
-		vi.mocked(prisma.inboxItem.findMany).mockResolvedValue([...rows].reverse());
+		vi.mocked(prisma.inboxItem.findMany).mockResolvedValue([item]);
+		vi.mocked(prisma.inboxItem.groupBy).mockResolvedValue([{ _count: { _all: 5 }, status: 'pending' }] as never);
 
-		const first = (await (await app.request('/inbox?limit=2')).json()) as { data: unknown[]; meta: { nextCursor: string } };
-		expect(first.data).toHaveLength(2);
-		expect(typeof first.meta.nextCursor).toBe('string');
-
-		await app.request(`/inbox?limit=2&cursor=${first.meta.nextCursor}`);
-		const where = vi.mocked(prisma.inboxItem.findMany).mock.calls[1]?.[0]?.where;
-		expect(where).toMatchObject({ OR: expect.any(Array), ownerId: TEST_USER_ID, status: 'pending' });
+		const body = (await (await app.request('/inbox?page=2&pageSize=2')).json()) as { meta: { page: number; pageCount: number; total: number } };
+		expect(body.meta).toMatchObject({ page: 2, pageCount: 3, total: 5 });
+		expect(prisma.inboxItem.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 2, take: 2 }));
 	});
 
-	it('rejects an invalid cursor with 422', async () => {
+	it('limits the list to a range of capture dates', async () => {
 		const { app, prisma } = setup();
-		const res = await app.request('/inbox?cursor=garbage');
+		vi.mocked(prisma.inboxItem.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.inboxItem.groupBy).mockResolvedValue([] as never);
+		await app.request('/inbox?range=7d');
+		expect(vi.mocked(prisma.inboxItem.findMany).mock.calls[0]?.[0]?.where).toMatchObject({ capturedAt: { gte: expect.any(Date) }, ownerId: TEST_USER_ID });
+	});
+
+	it('rejects an invalid page with 422', async () => {
+		const { app, prisma } = setup();
+		const res = await app.request('/inbox?page=0');
 		expect(res.status).toBe(422);
 		expect(await res.json()).toMatchObject({ error: { code: 'validation_error' } });
 		expect(prisma.inboxItem.findMany).not.toHaveBeenCalled();
 	});
 
-	it.each(['status=bogus', 'limit=0', 'limit=1000'])('rejects ?%s with 422', async query => {
+	it.each(['status=bogus', 'range=forever', 'pageSize=0', 'pageSize=1000'])('rejects ?%s with 422', async query => {
 		const { app, prisma } = setup();
 		const res = await app.request(`/inbox?${query}`);
 		expect(res.status).toBe(422);

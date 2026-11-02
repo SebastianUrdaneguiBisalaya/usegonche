@@ -2,7 +2,7 @@ import type { Attachment, Prisma, PrismaClient } from '@usegonche/database';
 import type { Storage, UploadUrl } from '@usegonche/storage';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
+import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
 import { isUniqueViolation } from '../../lib/prisma-errors.js';
 import type { AttachmentTarget, RegisterAttachmentInput, UploadUrlInput } from './attachments.schemas.js';
 
@@ -51,10 +51,12 @@ export const registerAttachment = async (prisma: PrismaClient, storage: Storage,
 	}
 };
 
-/** Fetches `limit + 1` rows after `cursor` (newest first) for one target; pass them to `toPage`. */
-export const listAttachments = (prisma: PrismaClient, ownerId: string, target: AttachmentTarget, limit: number, cursor?: Cursor): Promise<Attachment[]> => {
+/** One page of attachments of one target (newest first) with the total. */
+export const listAttachments = async (prisma: PrismaClient, ownerId: string, target: AttachmentTarget, page: PageParams): Promise<Paged<Attachment>> => {
 	const field = targetField(target);
-	return prisma.attachment.findMany({ orderBy: keysetOrder('createdAt'), take: limit + 1, where: { ...scoped(ownerId, { [field]: target[field] }), ...keysetAfter('createdAt', cursor) } });
+	const where = scoped(ownerId, { [field]: target[field] });
+	const [items, total] = await Promise.all([prisma.attachment.findMany({ orderBy: pageOrder('createdAt'), ...pageArgs(page), where }), prisma.attachment.count({ where })]);
+	return { items, total };
 };
 
 const findOwned = async (prisma: PrismaClient, ownerId: string, id: string): Promise<Attachment> => {
