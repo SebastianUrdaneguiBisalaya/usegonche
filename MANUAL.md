@@ -36,7 +36,7 @@ Requirements: Node.js 22 or newer, and pnpm (the exact version is pinned in `pac
    | `AUTH_REDIRECT_URL` | Where the browser lands after Google sign-in or the email link (e.g. `http://localhost:5173`) |
    | `AUTH_CALLBACK_URL` | Public URL of `GET /v1/auth/callback` (e.g. `http://localhost:4000/v1/auth/callback`) |
 
-   Optional variables (`CORS_ORIGINS`, Google sign-in, storage buckets, rate limits, `INTERNAL_CRON_SECRET`, `API_DOMAIN`) are documented inside `.env.example`.
+   Optional variables (`CORS_ORIGINS`, `COOKIE_DOMAIN`, Google sign-in, storage buckets, rate limits, `INTERNAL_CRON_SECRET`, `API_DOMAIN`) are documented inside `.env.example`.
 
 4. Create the two Storage buckets in Supabase > Storage: `private` and `public` (or the names you set in `STORAGE_BUCKET_*`).
 5. Apply the database migrations (section 4.2). A fresh Supabase project needs them before the API can work.
@@ -207,7 +207,7 @@ If the migration came with a manual SQL file (section 4.3), run that in the Supa
 
 ## 5. Production
 
-Pick **one** target. Both need the same env variables.
+Pick **one** target for the API (5.1, 5.2 or 5.3). All need the same env variables. If the web app is on another domain, also read 5.4.
 
 ### 5.1 DigitalOcean droplet (Docker + Caddy)
 
@@ -266,6 +266,33 @@ Set the env variables in the host (there is no `.env` file in production images)
    ```
 3. On Workers, rate limiting uses the bindings in `wrangler.jsonc` (the `RATE_LIMIT_*` env variables are ignored).
 
+### 5.4 Web and API on different domains
+
+The session lives in cookies set by the API. A browser only sends a cookie to the host it belongs to, so how you name the domains decides what works.
+
+**Recommended: two subdomains of one domain** (e.g. web `app.example.com`, API `api.example.com`):
+
+1. In the API environment set the shared cookie domain, with the leading dot:
+   ```
+   COOKIE_DOMAIN=.example.com
+   ```
+   Now the session cookie is also sent to `app.example.com`, so the web server can check the session before rendering (a signed-in user who opens `/auth/*` is redirected to `/` with no flash).
+2. Point the API at the web app (no trailing slash needed, only the origin matters for CORS):
+   ```
+   AUTH_REDIRECT_URL=https://app.example.com
+   AUTH_CALLBACK_URL=https://api.example.com/v1/auth/callback
+   CORS_ORIGINS=            # only for extra origins, e.g. a staging web app
+   ```
+3. In the web app set `VITE_API_URL=https://api.example.com` (the web adds `/v1`).
+4. Serve both over **HTTPS**. Cookies set on a shared domain must be `Secure`, and Supabase marks them so only on HTTPS.
+5. Supabase > Authentication > URL Configuration: **Site URL** = `https://app.example.com`; **Redirect URLs** must include `https://api.example.com/v1/auth/callback`.
+6. Google Cloud (Web client): **Authorized JavaScript origins** = `https://app.example.com`; **Authorized redirect URIs** = `https://<project-ref>.supabase.co/auth/v1/callback`.
+7. Restart the API after changing the variables. Existing sessions keep their old (host-only) cookie: users sign in again once.
+
+**Two unrelated domains** (e.g. `app.foo.com` and `api.bar.com`): the cookie is third-party for the browser, and Safari and Chrome block or limit those. The web server never sees it either, so the sign-in screen can flash before redirecting. Avoid this setup: use subdomains of one domain, or serve the API through the web's own domain with a reverse proxy (e.g. `app.example.com/v1/*` forwarded to the API), which makes the cookie first-party.
+
+**Local development** needs none of this: `localhost:5173` and `localhost:4000` share the host `localhost`, and cookies are not port-specific. Leave `COOKIE_DOMAIN` empty.
+
 ## 6. Release checklist
 
 1. `pnpm typecheck && pnpm lint && pnpm test` pass.
@@ -284,6 +311,7 @@ Set the env variables in the host (there is no `.env` file in production images)
 | `Cannot find module '@usegonche/database'` or Prisma client errors | Run `pnpm --filter @usegonche/database generate` |
 | Google sign-in or the email link ends on a JSON error | `AUTH_REDIRECT_URL` / `AUTH_CALLBACK_URL` missing or wrong |
 | `401` on `/v1/internal/reminders/process` | `INTERNAL_CRON_SECRET` is unset, or differs from the one in the SQL |
+| Signed-in users still see the sign-in page for a moment in production | The web server does not receive the session cookie: set `COOKIE_DOMAIN=.example.com` on the API and use subdomains of one domain (5.4) |
 | Browser error `blocked by CORS policy` | The web origin is not allowed: the API allows the origin of `AUTH_REDIRECT_URL` (set it to the web URL, e.g. `http://localhost:5173`) plus the optional comma-separated `CORS_ORIGINS`. Restart the API after changing `.env` |
 | Web app types are stale after changing routes | `pnpm --filter @usegonche/api-client build` |
 | Too many requests (`429`) while testing | Raise `RATE_LIMIT_*_PER_MINUTE` in `.env` |
