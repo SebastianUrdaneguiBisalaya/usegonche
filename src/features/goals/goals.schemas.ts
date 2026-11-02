@@ -24,12 +24,20 @@ export const updateGoalSchema = z
 	.partial()
 	.refine(hasChanges, 'empty_update');
 
+export const goalSortFields = ['createdAt', 'updatedAt', 'targetDate', 'title'] as const;
+/** `overdue`: active with a target date before today. `soon`: active with a target date in the next `SOON_DAYS` days. */
+export const goalDueFilters = ['overdue', 'soon'] as const;
+export const SOON_DAYS = 14;
+
 export const listGoalsQuerySchema = z.object({
 	...paginationQuery,
 	archived: z
 		.enum(['true', 'false'])
 		.default('false')
 		.transform(value => value === 'true'),
+	due: z.enum(goalDueFilters).optional(),
+	order: z.enum(['asc', 'desc']).default('desc'),
+	sort: z.enum(goalSortFields).default('createdAt'),
 	status: z.enum(goalStatuses).optional(),
 });
 

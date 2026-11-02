@@ -12,9 +12,9 @@ import { archiveGoal, createGoal, getGoal, listGoals, unarchiveGoal, updateGoal 
 export default new Hono<AppEnv>()
 	.use(requireUser())
 	.get('/', zValidator('query', listGoalsQuerySchema, validationHook), async c => {
-		const { archived, page, pageSize, status } = c.req.valid('query');
-		const { items, total } = await listGoals(c.get('prisma'), c.get('claims').sub, { archived, status }, { page, pageSize });
-		return okWithMeta(c, items, pageMeta({ page, pageSize }, total), 200);
+		const { archived, due, order, page, pageSize, sort, status } = c.req.valid('query');
+		const { counts, items, total } = await listGoals(c.get('prisma'), c.get('claims').sub, { archived, due, order, sort, status }, { page, pageSize });
+		return okWithMeta(c, items, { ...pageMeta({ page, pageSize }, total), counts }, 200);
 	})
 	.post('/', zValidator('json', createGoalSchema, validationHook), async c => ok(c, await createGoal(c.get('prisma'), c.get('claims').sub, c.req.valid('json')), 201))
 	.get('/:id', zValidator('param', goalParamSchema, validationHook), async c => ok(c, await getGoal(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id), 200))

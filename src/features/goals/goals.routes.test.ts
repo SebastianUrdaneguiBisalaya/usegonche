@@ -5,10 +5,13 @@ import routes from './goals.routes.js';
 
 const ID = '5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7e';
 const goal = { createdAt: new Date('2026-11-01T10:00:00.000Z'), id: ID, ownerId: TEST_USER_ID, status: 'active', title: 'Ship v1' } as Goal;
-const json = (g: Goal) => JSON.parse(JSON.stringify(g));
+const json = (g: Goal) => ({ ...JSON.parse(JSON.stringify(g)), projectCount: 0, taskCounts: { done: 0, total: 0 } });
 
 const setup = (claims?: { sub: string } | null) => {
 	const prisma = createMockPrisma();
+	vi.mocked(prisma.project.findMany).mockResolvedValue([]);
+	vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+	vi.mocked(prisma.goal.groupBy).mockResolvedValue([] as never);
 	return { app: createTestApp(routes, { claims, path: '/goals', prisma }), prisma };
 };
 
@@ -35,7 +38,7 @@ describe('GET /goals', () => {
 
 		const res = await app.request('/goals');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [json(goal)], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(await res.json()).toEqual({ data: [json(goal)], meta: { counts: { achieved: 0, active: 0, archived: 1 }, page: 1, pageCount: 1, pageSize: 50, total: 1 } });
 		expect(prisma.goal.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { archivedAt: null, ownerId: TEST_USER_ID } }));
 	});
 
@@ -49,6 +52,7 @@ describe('GET /goals', () => {
 	it('answers 422 for an invalid filter or page', async () => {
 		const { app } = setup();
 		expect((await app.request('/goals?status=nope')).status).toBe(422);
+		for (const query of ['due=never', 'sort=nope', 'order=up']) expect((await app.request(`/goals?${query}`)).status).toBe(422);
 		expect((await app.request('/goals?page=0')).status).toBe(422);
 	});
 });
@@ -56,12 +60,13 @@ describe('GET /goals', () => {
 describe('POST /goals', () => {
 	it('creates a goal for the claims user (201)', async () => {
 		const { app, prisma } = setup();
-		vi.mocked(prisma.goal.create).mockResolvedValue(goal);
+		vi.mocked(prisma.goal.create).mockResolvedValue({ id: ID } as Goal);
+		vi.mocked(prisma.goal.findFirst).mockResolvedValue(goal);
 
 		const res = await app.request('/goals', jsonRequest('POST', { description: '{"type":"doc"}', targetDate: '2026-12-31', title: '  Ship v1  ' }));
 		expect(res.status).toBe(201);
 		expect(await res.json()).toEqual({ data: json(goal) });
-		expect(prisma.goal.create).toHaveBeenCalledWith({ data: { description: '{"type":"doc"}', ownerId: TEST_USER_ID, targetDate: new Date('2026-12-31'), title: 'Ship v1' } });
+		expect(prisma.goal.create).toHaveBeenCalledWith({ data: { description: '{"type":"doc"}', ownerId: TEST_USER_ID, targetDate: new Date('2026-12-31'), title: 'Ship v1' }, select: { id: true } });
 	});
 
 	it.each([
