@@ -16,18 +16,23 @@ export type ProjectSearchPage = OkBody<SearchResponse>;
 export type CreateProjectBody = Body<typeof api.projects.$post>;
 export type UpdateProjectBody = Body<(typeof api.projects)[':id']['$patch']>;
 
-type ListParams = Pick<ProjectsParams, 'goal' | 'page' | 'status' | 'tag'>;
+type ListParams = Pick<ProjectsParams, 'goal' | 'page' | 'sort' | 'status' | 'tag'>;
+
+const SORT_QUERY = {
+	created: { order: 'desc', sort: 'createdAt' },
+	title: { order: 'asc', sort: 'title' },
+	updated: { order: 'desc', sort: 'updatedAt' },
+} as const;
 
 export const projectsKey = (params: ListParams) => ['projects', 'list', params] as const;
 export const projectsSearchKey = ({ page, q }: Pick<ProjectsParams, 'page' | 'q'>) => ['projects', 'search', { page, q }] as const;
 
-/** Query string of `GET /projects` (values are strings on the wire). The newest changes come first. */
-export const projectsQuery = ({ goal, page, status, tag }: ListParams) => ({
+/** Query string of `GET /projects` (values are strings on the wire). The order is the one picked on the page. */
+export const projectsQuery = ({ goal, page, sort, status, tag }: ListParams) => ({
 	archived: status === 'archived' ? ('true' as const) : ('false' as const),
-	order: 'desc' as const,
+	...SORT_QUERY[sort],
 	page: String(page),
 	pageSize: String(PAGE_SIZE),
-	sort: 'updatedAt' as const,
 	...(status !== 'archived' && { status }),
 	...(goal && { goalId: goal }),
 	...(tag && { tagId: tag }),

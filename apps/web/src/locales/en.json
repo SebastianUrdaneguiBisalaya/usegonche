@@ -409,6 +409,165 @@
         "cancelled": "Cancelled"
       },
       "due": "Due {{date}}"
+    },
+    "sort": {
+      "label": "Sort by",
+      "updated": "Recently updated",
+      "created": "Newest first",
+      "title": "Title (A–Z)"
+    }
+  },
+  "goals": {
+    "title": "Goals",
+    "subtitle": "Set and track your goals.",
+    "new": "New goal",
+    "search": {
+      "placeholder": "Search in goals...",
+      "label": "Search in goals",
+      "clear": "Clear search",
+      "empty": "No goal matches your search."
+    },
+    "tabs": {
+      "label": "Goal status",
+      "active": "Active",
+      "achieved": "Achieved",
+      "archived": "Archived"
+    },
+    "status": {
+      "active": "Active",
+      "achieved": "Achieved",
+      "archived": "Archived",
+      "change": "Change status"
+    },
+    "filters": {
+      "due": {
+        "label": "Filter by target date",
+        "all": "Any target date",
+        "overdue": "Overdue",
+        "soon": "Due in 14 days"
+      },
+      "page": {
+        "label": "Page",
+        "value": "Page: {{page}}"
+      }
+    },
+    "sort": {
+      "label": "Sort by",
+      "updated": "Recently updated",
+      "created": "Newest first",
+      "targetDate": "Target date",
+      "title": "Title (A–Z)"
+    },
+    "columns": {
+      "title": "Title",
+      "description": "Description",
+      "targetDate": "Target date",
+      "progress": "Progress",
+      "projects": "Projects",
+      "status": "Status",
+      "updated": "Updated"
+    },
+    "cell": {
+      "noDate": "No target date",
+      "overdue": "Overdue",
+      "progress": "{{done}} of {{total}} tasks done",
+      "noTasks": "No tasks yet",
+      "projects_one": "{{count}} project",
+      "projects_other": "{{count}} projects"
+    },
+    "selection": {
+      "count": "{{count}} selected",
+      "total_one": "{{count}} goal",
+      "total_other": "{{count}} goals"
+    },
+    "actions": {
+      "open": "Open details",
+      "setActive": "Set active",
+      "setAchieved": "Mark achieved",
+      "archive": "Archive",
+      "restore": "Restore",
+      "more": "More actions",
+      "rowMenu": "Goal actions",
+      "clearSelection": "Clear selection"
+    },
+    "toast": {
+      "created": "Goal created",
+      "saved": "Changes saved",
+      "archived": "Goal archived",
+      "restored": "Goal restored",
+      "statusChanged": "Status updated",
+      "bulk": "{{count}} goals updated",
+      "undo": "Undo"
+    },
+    "empty": {
+      "active": {
+        "title": "No active goals",
+        "description": "Set a goal to give your projects a direction."
+      },
+      "achieved": {
+        "title": "Nothing achieved yet",
+        "description": "Goals you reach show up here."
+      },
+      "archived": {
+        "title": "Nothing archived",
+        "description": "Archive the goals you no longer pursue."
+      },
+      "filtered": "No goals match this filter."
+    },
+    "error": {
+      "title": "Could not load your goals",
+      "retry": "Retry"
+    },
+    "form": {
+      "title": {
+        "label": "Title",
+        "placeholder": "What do you want to achieve?",
+        "required": "Give the goal a title.",
+        "tooLong": "Use at most {{max}} characters."
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Why it matters, how you will know it is done... (Markdown)"
+      },
+      "targetDate": {
+        "label": "Target date",
+        "placeholder": "No target date",
+        "picker": {
+          "calendar": "Calendar",
+          "previousMonth": "Previous month",
+          "nextMonth": "Next month",
+          "clear": "Remove date",
+          "apply": "Apply",
+          "mo": "Mo",
+          "tu": "Tu",
+          "we": "We",
+          "th": "Th",
+          "fr": "Fr",
+          "sa": "Sa",
+          "su": "Su"
+        }
+      },
+      "status": {
+        "label": "Status"
+      },
+      "cancel": "Cancel",
+      "create": "Create goal",
+      "save": "Save changes"
+    },
+    "modal": {
+      "title": "New goal",
+      "description": "A goal is an outcome you want to reach. Projects group the work to get there."
+    },
+    "drawer": {
+      "close": "Close",
+      "tabsLabel": "Goal sections",
+      "details": "Details",
+      "projects": "Projects",
+      "created": "Created {{date}}",
+      "progress": "{{done}} of {{total}} tasks done",
+      "projectsEmpty": "No projects are linked to this goal yet.",
+      "loadError": "Could not load this section.",
+      "retry": "Retry"
     }
   }
 }

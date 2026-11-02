@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@usegonche/api-client';
-import { Plus } from 'lucide-react';
+import { ArrowDownUp, Plus } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router';
@@ -10,6 +10,8 @@ import { Page } from '~/components/ui/layout/page/page';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
 import { ListSearch } from '../shared/list-search';
+import { OptionSelect } from '../shared/option-select';
+import { PageSelect } from '../shared/page-select';
 import { PAGE_SIZE } from '../shared/paged';
 import { type StatusTab, StatusTabs } from '../shared/status-tabs';
 import { listStyles } from '../shared/styles';
@@ -27,16 +29,16 @@ import {
 	useTags,
 	useUpdateProject,
 } from './api';
-import { GoalFilter, PageSelect, TagFilter } from './components/filters';
+import { GoalFilter, TagFilter } from './components/filters';
 import { NewProjectModal } from './components/new-project-modal';
 import { ProjectDrawer } from './components/project-drawer';
 import { type ProjectRow, ProjectsTable } from './components/projects-table';
 import { statusColor, statusIcon } from './display';
-import { loadProjectsParams, type ProjectStatus, projectParsers, projectTabs } from './search-params';
+import { loadProjectsParams, type ProjectSort, type ProjectStatus, projectParsers, projectSorts, projectTabs } from './search-params';
 
 interface LoaderData {
 	data: ProjectsPage;
-	params: { goal: string; page: number; status: string; tag: string };
+	params: { goal: string; page: number; sort: string; status: string; tag: string };
 }
 
 /**
@@ -70,11 +72,17 @@ export default function ProjectsRoute() {
 
 	// Seeds the cache with what the loader resolved, so the first render already has the page (no extra request, no skeleton).
 	if (loaderData) {
-		const key = projectsKey({ goal: loaderData.params.goal, page: loaderData.params.page, status: loaderData.params.status as typeof params.status, tag: loaderData.params.tag });
+		const key = projectsKey({
+			goal: loaderData.params.goal,
+			page: loaderData.params.page,
+			sort: loaderData.params.sort as typeof params.sort,
+			status: loaderData.params.status as typeof params.status,
+			tag: loaderData.params.tag,
+		});
 		if (queryClient.getQueryData(key) === undefined) queryClient.setQueryData(key, loaderData.data);
 	}
 
-	const list = useProjects({ goal: params.goal, page, status: params.status, tag: params.tag }, !searching);
+	const list = useProjects({ goal: params.goal, page, sort: params.sort, status: params.status, tag: params.tag }, !searching);
 	const search = useProjectsSearch({ page, q: params.q });
 	const active = searching ? search : list;
 	const counts = list.data?.meta.counts;
@@ -158,6 +166,8 @@ export default function ProjectsRoute() {
 		[bulk, list.data, selectedIds, t]
 	);
 
+	const sortOptions = useMemo(() => projectSorts.map((value: ProjectSort) => ({ label: t(`projects.sort.${value}`), value })), [t]);
+
 	const tabs = useMemo<StatusTab<(typeof projectTabs)[number]>[]>(
 		() =>
 			projectTabs.map(value => ({
@@ -199,7 +209,16 @@ export default function ProjectsRoute() {
 						<GoalFilter onChange={goal => void setParams({ goal, page: 1 })} options={goalOptions} value={params.goal} />
 						<TagFilter onChange={tag => void setParams({ page: 1, tag })} options={tagOptions} value={params.tag} />
 					</div>
-					<PageSelect onChange={next => void setParams({ page: next })} page={meta?.page ?? page} pageCount={pageCount} />
+					<div className='flex flex-wrap items-center gap-3'>
+						<OptionSelect icon={ArrowDownUp} label={t('projects.sort.label')} onChange={sort => void setParams({ page: 1, sort })} options={sortOptions} value={params.sort} />
+						<PageSelect
+							label={t('projects.filters.page.label')}
+							onChange={next => void setParams({ page: next })}
+							page={meta?.page ?? page}
+							pageCount={pageCount}
+							valueLabel={t('projects.filters.page.value', { page: meta?.page ?? page })}
+						/>
+					</div>
 				</div>
 				<ProjectsTable
 					emptyKind={searching ? 'search' : params.status}
