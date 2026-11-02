@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { hasChanges } from '../../lib/diff.js';
+import { markdownSchema } from '../../lib/markdown.js';
 import { paginationQuery } from '../../lib/pagination.js';
-import { richTextSchema } from '../../lib/rich-text.js';
 
 const title = z.string().trim().min(1).max(200);
 const date = z.iso.date().transform(value => new Date(value));
@@ -19,7 +19,7 @@ const dateOrderIssue = { message: 'due_before_start', path: ['dueDate'] };
 
 export const createTaskSchema = z
 	.strictObject({
-		description: richTextSchema.nullish(),
+		description: markdownSchema.nullish(),
 		dueDate: date.nullish(),
 		estimatedMinutes: estimatedMinutes.nullish(),
 		goalId: z.uuid().nullish(),
@@ -39,7 +39,7 @@ export const createTaskSchema = z
 /** Moving to `done` sets `completedAt`; moving out of `done` clears it. `tagIds` replaces the whole set. */
 export const updateTaskSchema = z
 	.strictObject({
-		description: richTextSchema.nullable(),
+		description: markdownSchema.nullable(),
 		dueDate: date.nullable(),
 		estimatedMinutes: estimatedMinutes.nullable(),
 		goalId: z.uuid().nullable(),

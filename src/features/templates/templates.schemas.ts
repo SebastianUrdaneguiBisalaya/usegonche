@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { hasChanges } from '../../lib/diff.js';
+import { markdownSchema } from '../../lib/markdown.js';
 import { paginationQuery } from '../../lib/pagination.js';
-import { richTextSchema } from '../../lib/rich-text.js';
 
 const title = z.string().trim().min(1).max(200);
 const date = z.iso.date().transform(value => new Date(value));
@@ -14,7 +14,7 @@ const tagIds = z
 export const MAX_TEMPLATE_ITEMS = 200;
 
 const itemFields = {
-	description: richTextSchema.nullish(),
+	description: markdownSchema.nullish(),
 	/** Days after the start date given when instantiating (the task's due date). */
 	dueOffsetDays: z.number().int().min(0).max(3650).nullish(),
 	estimatedMinutes: z.number().int().min(1).max(100_000).nullish(),
@@ -38,7 +38,7 @@ export const createTemplateSchema = z.discriminatedUnion('kind', [
 	z.strictObject({ item: templateItemSchema, kind: z.literal('task'), name }).refine(value => withinLimit([value.item]), { ...limitIssue, path: ['item'] }),
 	z
 		.strictObject({
-			description: richTextSchema.nullish(),
+			description: markdownSchema.nullish(),
 			items: z.array(templateItemSchema).min(1).max(50),
 			kind: z.literal('project'),
 			name,
@@ -54,7 +54,7 @@ export const createTemplateSchema = z.discriminatedUnion('kind', [
  */
 export const updateTemplateSchema = z
 	.strictObject({
-		description: richTextSchema.nullable(),
+		description: markdownSchema.nullable(),
 		item: templateItemSchema,
 		items: z.array(templateItemSchema).min(1).max(50),
 		name,

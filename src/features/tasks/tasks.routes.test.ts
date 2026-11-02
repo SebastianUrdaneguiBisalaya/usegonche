@@ -106,7 +106,7 @@ describe('POST /tasks', () => {
 		['bad date', { dueDate: '01/12/2026', title: 'a' }],
 		['due before start', { dueDate: '2026-11-01', startDate: '2026-12-01', title: 'a' }],
 		['bad tag id', { tagIds: ['nope'], title: 'a' }],
-		['non-JSON description', { description: 'plain', title: 'a' }],
+		['oversized description', { description: 'x'.repeat(100_001), title: 'a' }],
 	])('answers 422 for %s', async (_name, body) => {
 		const { app, prisma } = setup();
 		const res = await app.request('/tasks', jsonRequest('POST', body));

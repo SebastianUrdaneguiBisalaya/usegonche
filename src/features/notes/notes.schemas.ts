@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { hasChanges } from '../../lib/diff.js';
+import { markdownSchema } from '../../lib/markdown.js';
 import { paginationQuery } from '../../lib/pagination.js';
-import { richTextSchema } from '../../lib/rich-text.js';
 
 const title = z.string().trim().min(1).max(200);
 const ids = z
@@ -10,7 +10,7 @@ const ids = z
 	.transform(values => [...new Set(values)]);
 
 export const createNoteSchema = z.strictObject({
-	body: richTextSchema.nullish(),
+	body: markdownSchema.nullish(),
 	/** Converts this pending inbox item into the note (atomic). */
 	originInboxItemId: z.uuid().nullish(),
 	projectId: z.uuid().nullish(),
@@ -22,7 +22,7 @@ export const createNoteSchema = z.strictObject({
 /** `tagIds` and `taskIds` replace the whole set; `projectId: null` unlinks the project. */
 export const updateNoteSchema = z
 	.strictObject({
-		body: richTextSchema.nullable(),
+		body: markdownSchema.nullable(),
 		projectId: z.uuid().nullable(),
 		tagIds: ids,
 		taskIds: ids,

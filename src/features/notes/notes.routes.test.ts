@@ -88,7 +88,7 @@ describe('POST /notes', () => {
 	it.each([
 		['empty title', { title: '' }],
 		['unknown key', { ownerId: 'x', title: 'a' }],
-		['non-JSON body', { body: '<p>x</p>', title: 'a' }],
+		['oversized body', { body: 'x'.repeat(100_001), title: 'a' }],
 		['bad task id', { taskIds: ['nope'], title: 'a' }],
 		['bad tag id', { tagIds: ['nope'], title: 'a' }],
 	])('answers 422 for %s', async (_name, payload) => {
@@ -145,7 +145,7 @@ describe('PATCH /notes/:id', () => {
 	it.each([
 		['empty body', {}],
 		['unknown key', { originInboxItemId: OTHER }],
-		['non-JSON body', { body: 'plain' }],
+		['oversized body', { body: 'x'.repeat(100_001) }],
 	])('answers 422 for %s', async (_name, payload) => {
 		expect((await setup().app.request(`/notes/${ID}`, jsonRequest('PATCH', payload))).status).toBe(422);
 	});
