@@ -153,7 +153,7 @@ These are run by you in the Supabase SQL editor. They are re-runnable.
 2. Open the SQL file and replace the two placeholders:
    - `<API_URL>`: public base URL of the API, no trailing slash (e.g. `https://api.example.com`)
    - `<SECRET>`: the same value as `INTERNAL_CRON_SECRET`
-3. Paste it into Supabase > SQL Editor and run it. It enables `pg_cron` and `pg_net` and schedules `process-reminders` every minute (calls `POST /v1/v1/internal/reminders/process`).
+3. Paste it into Supabase > SQL Editor and run it. It enables `pg_cron` and `pg_net` and schedules `process-reminders` every minute (calls `POST /v1/internal/reminders/process`).
 4. To inspect or stop it, use the queries in the comments at the bottom of the file. To rotate the secret, change the env var and re-run the script.
 
 Do not commit the file with the real URL or secret filled in.
