@@ -21,6 +21,8 @@ export type Bindings = {
 	RATE_LIMIT_AUTH_PER_MINUTE?: string;
 	RATE_LIMIT_IP_PER_MINUTE?: string;
 	RATE_LIMIT_USER_PER_MINUTE?: string;
+	/** Shared secret of the internal endpoints called by Supabase `pg_cron` (`x-internal-secret` header). Unset = they refuse everything. */
+	INTERNAL_CRON_SECRET?: string;
 	SUPABASE_PUBLISHABLE_KEY: string;
 	SUPABASE_URL: string;
 	/** `true` when a reverse proxy you control sets X-Forwarded-For (Node). Never enable it when clients can reach the API directly. */
