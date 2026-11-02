@@ -94,3 +94,34 @@ describe('POST /auth/google', () => {
 		expect(supabase.auth.signOut).toHaveBeenCalled();
 	});
 });
+
+describe('POST /auth/signup', () => {
+	const signUp = (error: { code?: string } | null = null) => vi.fn(async () => ({ data: {}, error }));
+	const build = (fn: ReturnType<typeof signUp>) => {
+		return new Hono<AppEnv>()
+			.use(async (c, next) => {
+				c.set('prisma', createMockPrisma());
+				c.set('supabase', { auth: { signUp: fn } } as unknown as SupabaseClient);
+				await next();
+			})
+			.route('/auth', routes)
+			.onError(onError)
+			.notFound(onNotFound);
+	};
+	const body = { displayName: '  Ana Paz ', email: 'A@b.co', password: 'password123' };
+
+	it('sends the trimmed display name to Supabase as user metadata and answers 202', async () => {
+		const fn = signUp();
+		const res = await build(fn).request('/auth/signup', jsonRequest('POST', body));
+		expect(res.status).toBe(202);
+		expect(fn).toHaveBeenCalledWith(expect.objectContaining({ email: 'a@b.co', options: expect.objectContaining({ data: { display_name: 'Ana Paz' } }) }));
+	});
+
+	it('answers 422 validation_error with details when the display name is missing or blank', async () => {
+		for (const displayName of [undefined, '   ']) {
+			const res = await build(signUp()).request('/auth/signup', jsonRequest('POST', { ...body, displayName }));
+			expect(res.status).toBe(422);
+			expect(await res.json()).toMatchObject({ error: { code: 'validation_error', details: [{ field: 'displayName' }] } });
+		}
+	});
+});

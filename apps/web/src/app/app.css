@@ -424,3 +424,22 @@ body {
 	background: #050505;
 	color-scheme: dark;
 }
+
+/* Browsers paint autofilled fields with their own bluish background; keep the field's own look and the theme's text colour instead.
+   The long transition delays the browser's background so it never shows (the only way to override it in Chromium/Safari). */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+	-webkit-text-fill-color: var(--foreground);
+	caret-color: var(--foreground);
+	transition: background-color 600000s 0s, color 600000s 0s;
+}
+
+input:autofill,
+textarea:autofill,
+select:autofill {
+	background-color: transparent;
+	color: var(--foreground);
+}

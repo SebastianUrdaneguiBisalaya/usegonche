@@ -1,5 +1,5 @@
 import { Google } from '@ridemountainpig/svgl-react';
-import { Lock, Mail } from 'lucide-react';
+import { Lock, Mail, User } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router';
 import { Button } from '~/components/ui/actions-controls/button/button';
@@ -31,6 +31,7 @@ export default function SignUpPage() {
 			<Form
 				className='w-full'
 				defaultValues={{
+					displayName: '',
 					email: '',
 					password: '',
 				}}
@@ -46,6 +47,14 @@ export default function SignUpPage() {
 			>
 				{({ Field }) => (
 					<Layout.Stack>
+						<Field name='displayName'>
+							{field => (
+								<Input className={authStyles.input} errorMessage={field.error}>
+									<Input.Icon icon={User} />
+									<Input.Field aria-label={t('auth.common.displayName.label')} autoComplete='name' placeholder={t('auth.common.displayName.placeholder')} {...field.inputProps} />
+								</Input>
+							)}
+						</Field>
 						<Field name='email'>
 							{field => (
 								<Input className={authStyles.input} errorMessage={field.error}>

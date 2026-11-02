@@ -42,13 +42,18 @@ export default new Hono<AppEnv>()
 		zValidator('json', signupSchema, (result, c) => {
 			if (result.success) return;
 			const field = result.error.issues[0]?.path[0];
+			if (field === 'displayName') return fail(c, 'validation_error', 422, [{ code: 'invalid', field: 'displayName' }]);
 			return fail(c, field === 'password' ? 'invalid_password' : 'invalid_email', 422);
 		}),
 		async c => {
-			const { email, password } = c.req.valid('json');
-			const { error } = await getSupabase(c).auth.signUp({ email, options: { emailRedirectTo: callbackUrl(c) }, password });
+			const { displayName, email, password } = c.req.valid('json');
+			const { error } = await getSupabase(c).auth.signUp({ email, options: { data: { display_name: displayName }, emailRedirectTo: callbackUrl(c) }, password });
 			if (error?.code === 'weak_password') return fail(c, 'weak_password', 422);
-			if (error) return fail(c, 'signup_failed', 400);
+			if (error) {
+				// The client only gets `signup_failed` (no account enumeration); the real cause goes to the server log.
+				console.error('signup failed', { code: error.code, message: error.message, status: error.status });
+				return fail(c, 'signup_failed', 400);
+			}
 
 			// Same answer whether or not the email is already registered (with Google or a password): no account enumeration.
 			return ok(c, { message: 'If the email can be registered, a confirmation was sent.' }, 202);

@@ -1,7 +1,7 @@
 import { index, layout, prefix, type RouteConfig, route } from '@react-router/dev/routes';
 
 export default [
-	index('../features/home/home.tsx'),
+	layout('../features/protected/layout.tsx', [index('../features/protected/home/home.tsx')]),
 	layout(
 		'../features/auth/layout.tsx',
 		prefix('auth', [

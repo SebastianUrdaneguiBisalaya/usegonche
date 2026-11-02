@@ -6,6 +6,8 @@ export const PASSWORD_MIN = 8;
 export const PASSWORD_MAX = 72;
 /** Digits of the recovery code Supabase emails (the API accepts 6 to 10). */
 export const OTP_LENGTH = 6;
+/** Same bound as the API (`DISPLAY_NAME_MAX`). */
+export const DISPLAY_NAME_MAX = 100;
 
 const email = (t: Translate) =>
 	z
@@ -27,6 +29,11 @@ export const createSignInSchema = (t: Translate) =>
 
 export const createSignUpSchema = (t: Translate) =>
 	z.object({
+		displayName: z
+			.string()
+			.trim()
+			.min(1, t('auth.common.displayName.required'))
+			.max(DISPLAY_NAME_MAX, t('auth.common.displayName.tooLong', { max: DISPLAY_NAME_MAX })),
 		email: email(t),
 		password: newPassword(t),
 	});

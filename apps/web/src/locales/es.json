@@ -46,6 +46,12 @@
         "required": "Ingresa tu contraseña",
         "tooShort": "Mínimo {{min}} caracteres",
         "tooLong": "Máximo {{max}} caracteres"
+      },
+      "displayName": {
+        "label": "Nombre",
+        "placeholder": "Tu nombre",
+        "required": "Ingresa tu nombre",
+        "tooLong": "Máximo {{max}} caracteres"
       }
     },
     "signIn": {
@@ -120,5 +126,34 @@
     "validation_error": "Los datos enviados no son válidos.",
     "weak_password": "La contraseña es demasiado débil.",
     "auth_failed": "No se pudo completar el inicio de sesión."
+  },
+  "protected": {
+    "nav": {
+      "inbox": "Bandeja",
+      "today": "Hoy",
+      "projects": "Proyectos",
+      "goals": "Metas",
+      "tasks": "Tareas",
+      "notes": "Notas",
+      "reflect": "Reflexión",
+      "tags": "Etiquetas"
+    },
+    "menu": {
+      "open": "Abrir menú"
+    },
+    "command": {
+      "placeholder": "Buscar o ir a...",
+      "empty": "Sin resultados",
+      "navigate": "Navegar",
+      "toggle": "Abrir paleta de comandos",
+      "close": "Cerrar"
+    },
+    "progress": {
+      "title": "Progreso diario",
+      "summary": "{{done}} de {{total}} tareas"
+    },
+    "settings": {
+      "title": "Configuración"
+    }
   }
 }
