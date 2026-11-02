@@ -31,11 +31,7 @@
 		"directories": {
 			"output": "release"
 		},
-		"files": [
-			"dist/**/*",
-			"public/**/*",
-			"package.json"
-		],
+		"files": ["dist/**/*", "public/**/*", "package.json"],
 		"mac": {
 			"icon": "public/usegonche-icon-mac.icns"
 		},

@@ -5,7 +5,7 @@
 		"module": "ES2022",
 		"moduleResolution": "bundler",
 		"paths": {
-			"~/*": ["./app/*"]
+			"~/*": ["./src/*"]
 		},
 		"rootDirs": [".", "./.react-router/types"],
 		"types": ["node", "vite/client"]

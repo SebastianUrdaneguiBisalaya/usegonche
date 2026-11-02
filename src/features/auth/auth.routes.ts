@@ -6,8 +6,8 @@ import { env } from 'hono/adapter';
 import type { AppEnv } from '../../env.js';
 import { fail, ok } from '../../lib/http.js';
 import { validationHook } from '../../lib/validator.js';
-import { callbackQuerySchema, forgotPasswordSchema, loginSchema, resetPasswordSchema, signupSchema } from './auth.schemas.js';
-import { type AuthUser, publicUser, syncProfile } from './auth.service.js';
+import { callbackQuerySchema, forgotPasswordSchema, googleLoginSchema, loginSchema, resetPasswordSchema, signupSchema } from './auth.schemas.js';
+import { type AuthUser, exchangeGoogleCode, type GoogleConfig, publicUser, syncProfile } from './auth.service.js';
 
 type AuthBindings = {
 	/** Absolute URL of `GET /auth/callback` on this API. Defaults to the request origin (set it behind proxies). */
@@ -15,6 +15,8 @@ type AuthBindings = {
 	/** Where the browser lands after Google sign-in / email confirmation. `?error=<code>` is appended on failure. */
 	AUTH_REDIRECT_URL?: string;
 };
+
+type GoogleBindings = GoogleConfig;
 
 const callbackUrl = (c: Context<AppEnv>) => env<AuthBindings>(c).AUTH_CALLBACK_URL ?? new URL('/auth/callback', c.req.url).toString();
 
@@ -80,6 +82,17 @@ export default new Hono<AppEnv>()
 		});
 		if (error || !data.url) return fail(c, 'oauth_failed', 500);
 		return c.redirect(data.url);
+	})
+	// Code flow for clients that cannot use the redirect: the web popup and the desktop app's system browser.
+	.post('/google', zValidator('json', googleLoginSchema, validationHook), async c => {
+		const idToken = await exchangeGoogleCode(c.req.valid('json'), env<GoogleBindings>(c));
+		const supabase = getSupabase(c);
+		const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: idToken });
+		if (error || !data.user) return fail(c, 'oauth_failed', 400);
+		if (await rejectMixedProviders(supabase, data.user)) return fail(c, 'provider_conflict', 409);
+
+		await signedIn(c, data.user);
+		return ok(c, { user: publicUser(data.user) });
 	})
 	// Target of Google sign-in and of the email confirmation link (PKCE `code`).
 	.get('/callback', zValidator('query', callbackQuerySchema, validationHook), async c => {

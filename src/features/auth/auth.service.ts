@@ -1,4 +1,6 @@
 import type { PrismaClient, Profile } from '@usegonche/database';
+import { AppError } from '../../lib/errors.js';
+import type { GoogleLoginInput } from './auth.schemas.js';
 
 export type AuthUser = { email?: string; id: string };
 
@@ -11,3 +13,38 @@ export const syncProfile = (prisma: PrismaClient, user: AuthUser): Promise<Profi
 		update: { email: user.email },
 		where: { id: user.id },
 	});
+
+export type GoogleConfig = {
+	GOOGLE_CLIENT_ID?: string;
+	GOOGLE_CLIENT_SECRET?: string;
+	GOOGLE_DESKTOP_CLIENT_ID?: string;
+	GOOGLE_DESKTOP_CLIENT_SECRET?: string;
+};
+
+const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
+
+/**
+ * Trades a Google authorization code for the user's `id_token`. The web popup (GIS code flow) uses the `postmessage`
+ * redirect and the web client; the desktop app sends its loopback `redirect_uri` + PKCE verifier and uses the desktop client.
+ */
+export async function exchangeGoogleCode(input: GoogleLoginInput, config: GoogleConfig, fetchFn: typeof fetch = fetch): Promise<string> {
+	const desktop = input.redirect_uri !== undefined;
+	const clientId = desktop ? config.GOOGLE_DESKTOP_CLIENT_ID : config.GOOGLE_CLIENT_ID;
+	const clientSecret = desktop ? config.GOOGLE_DESKTOP_CLIENT_SECRET : config.GOOGLE_CLIENT_SECRET;
+	if (!clientId || !clientSecret) throw new AppError('oauth_failed', 500);
+
+	const body = new URLSearchParams({
+		client_id: clientId,
+		client_secret: clientSecret,
+		code: input.code,
+		grant_type: 'authorization_code',
+		redirect_uri: input.redirect_uri ?? 'postmessage',
+	});
+	if (input.code_verifier) body.set('code_verifier', input.code_verifier);
+
+	const res = await fetchFn(GOOGLE_TOKEN_URL, { body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, method: 'POST' });
+	if (!res.ok) throw new AppError('invalid_or_expired_code', 400);
+	const { id_token } = (await res.json().catch(() => ({}))) as { id_token?: string };
+	if (!id_token) throw new AppError('invalid_or_expired_code', 400);
+	return id_token;
+}

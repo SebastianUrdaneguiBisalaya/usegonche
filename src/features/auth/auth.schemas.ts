@@ -16,3 +16,11 @@ export const callbackQuerySchema = z.object({
 	error: z.string().optional(),
 	error_code: z.string().optional(),
 });
+
+/** Authorization code from Google. `redirect_uri` + `code_verifier` are sent only by the desktop app (loopback + PKCE). */
+export const googleLoginSchema = z.strictObject({
+	code: z.string().min(1).max(2048),
+	code_verifier: z.string().min(1).max(256).optional(),
+	redirect_uri: z.url().max(2048).optional(),
+});
+export type GoogleLoginInput = z.infer<typeof googleLoginSchema>;

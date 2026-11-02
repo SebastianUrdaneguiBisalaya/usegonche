@@ -10,6 +10,7 @@ export const onError: ErrorHandler<AppEnv> = (err, c) => {
 	if (err instanceof AppError) return fail(c, err.code, err.status as 400, err.details);
 	if (err instanceof HTTPException) {
 		const status = err.status as ContentfulStatusCode;
+		if (status === 403 && err.message === 'email_not_confirmed') return fail(c, 'email_not_confirmed', 403);
 		const code = status === 401 ? 'unauthorized' : status === 403 ? 'forbidden' : status === 404 ? 'not_found' : status < 500 ? 'bad_request' : 'internal_error';
 		return fail(c, code, status as 400);
 	}
