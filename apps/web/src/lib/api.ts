@@ -3,8 +3,11 @@ import { createClient, type InferRequestType } from '@usegonche/api-client';
 /** Base URL of the API (`VITE_API_URL`), e.g. `http://localhost:4000`. */
 export const API_URL: string = import.meta.env.VITE_API_URL ?? 'http://localhost:4000';
 
+/** Base URL of the versioned API (every endpoint except `/health` lives under `/v1`). */
+export const API_BASE = `${API_URL}/v1`;
+
 /** Typed Hono RPC client. Cookies carry the session, so every request includes credentials. */
-export const api = createClient(API_URL, {
+export const api = createClient(API_BASE, {
 	init: {
 		credentials: 'include',
 	},

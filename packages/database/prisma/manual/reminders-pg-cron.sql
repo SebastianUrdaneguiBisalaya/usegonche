@@ -1,4 +1,4 @@
--- Reminders processor: every minute, Supabase calls POST /internal/reminders/process on the API.
+-- Reminders processor: every minute, Supabase calls POST /v1/internal/reminders/process on the API.
 -- Applied MANUALLY by the user (SQL editor); never run by the API, Prisma or the agent. Re-runnable.
 --
 -- Before running, replace the two placeholders below:
@@ -18,7 +18,7 @@ select cron.schedule(
   '* * * * *',
   $$
   select net.http_post(
-    url := '<API_URL>/internal/reminders/process',
+    url := '<API_URL>/v1/internal/reminders/process',
     headers := '{"Content-Type": "application/json", "x-internal-secret": "<SECRET>"}'::jsonb,
     body := '{}'::jsonb,
     timeout_milliseconds := 10000

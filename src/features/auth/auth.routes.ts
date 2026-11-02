@@ -10,7 +10,7 @@ import { callbackQuerySchema, forgotPasswordSchema, googleLoginSchema, loginSche
 import { type AuthUser, exchangeGoogleCode, type GoogleConfig, publicUser, syncProfile } from './auth.service.js';
 
 type AuthBindings = {
-	/** Absolute URL of `GET /auth/callback` on this API. Defaults to the request origin (set it behind proxies). */
+	/** Absolute URL of `GET /v1/auth/callback` on this API. Defaults to the request origin (set it behind proxies). */
 	AUTH_CALLBACK_URL?: string;
 	/** Where the browser lands after Google sign-in / email confirmation. `?error=<code>` is appended on failure. */
 	AUTH_REDIRECT_URL?: string;
@@ -18,7 +18,7 @@ type AuthBindings = {
 
 type GoogleBindings = GoogleConfig;
 
-const callbackUrl = (c: Context<AppEnv>) => env<AuthBindings>(c).AUTH_CALLBACK_URL ?? new URL('/auth/callback', c.req.url).toString();
+const callbackUrl = (c: Context<AppEnv>) => env<AuthBindings>(c).AUTH_CALLBACK_URL ?? new URL('/v1/auth/callback', c.req.url).toString();
 
 // Never throws, so it can be used directly in handlers: errors become redirects/JSON for the browser.
 const redirectToApp = (c: Context<AppEnv>, error?: string) => {

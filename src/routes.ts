@@ -3,7 +3,6 @@ import type { AppEnv } from './env.js';
 import attachments from './features/attachments/attachments.routes.js';
 import auth from './features/auth/auth.routes.js';
 import goals from './features/goals/goals.routes.js';
-import health from './features/health/health.routes.js';
 import history from './features/history/history.routes.js';
 import inbox from './features/inbox/inbox.routes.js';
 import me from './features/me/me.routes.js';
@@ -26,7 +25,6 @@ const routes = new Hono<AppEnv>()
 	.route('/attachments', attachments)
 	.route('/auth', auth)
 	.route('/goals', goals)
-	.route('/health', health)
 	.route('/inbox', inbox)
 	.route('/me', me)
 	.route('/metrics', metrics)

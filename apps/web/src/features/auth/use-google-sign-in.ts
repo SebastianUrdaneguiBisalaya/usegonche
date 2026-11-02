@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { useTranslate } from '~/hooks/use-translate';
-import { API_URL } from '~/lib/api';
+import { API_BASE } from '~/lib/api';
 import { type GoogleLoginInput, useLoginWithGoogle } from './api';
 
 /** Google OAuth client id of the web popup; must match the API's `GOOGLE_CLIENT_ID`. Without it the browser falls back to the API's redirect flow. */
@@ -84,7 +84,7 @@ export function useGoogleSignIn() {
 			return;
 		}
 		if (!googleClientId) {
-			window.location.assign(`${API_URL}/auth/google`);
+			window.location.assign(`${API_BASE}/auth/google`);
 			return;
 		}
 		try {
