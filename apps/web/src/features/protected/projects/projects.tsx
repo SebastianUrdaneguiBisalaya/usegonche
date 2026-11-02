@@ -98,7 +98,7 @@ export default function ProjectsRoute() {
 	useEffect(() => setSelectedIds(emptyIds), [page, params.status, params.goal, params.tag, params.q]);
 
 	const [creating, setCreating] = useState(false);
-	const [opened, setOpened] = useState<Project | null>(null);
+	const [opened, setOpened] = useState<Project | undefined>(undefined);
 
 	const update = useUpdateProject();
 	const setArchived = useSetArchived();
@@ -224,7 +224,7 @@ export default function ProjectsRoute() {
 				/>
 			</Page.Body>
 			<NewProjectModal onOpenChange={setCreating} open={creating} />
-			<ProjectDrawer onChange={setOpened} onClose={() => setOpened(null)} project={opened} />
+			<ProjectDrawer onChange={setOpened} onClose={() => setOpened(undefined)} project={opened} />
 		</Page.Root>
 	);
 }

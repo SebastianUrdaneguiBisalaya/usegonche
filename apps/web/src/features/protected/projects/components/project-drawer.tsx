@@ -1,5 +1,5 @@
 import { Archive, RotateCcw, X } from 'lucide-react';
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Progress } from '~/components/ui/data-display/progress/progress';
@@ -11,6 +11,7 @@ import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Drawer } from '~/components/ui/overlays-feedback/drawer/drawer';
 import { useLanguage } from '~/hooks/use-language';
+import { useRetained } from '~/hooks/use-retained';
 import { useTranslate } from '~/hooks/use-translate';
 import { diffPayload } from '~/utils/diff-payload';
 import { formatRelative } from '../../shared/relative-time';
@@ -24,7 +25,7 @@ interface ProjectDrawerProps {
 	/** Called with the saved project, so the drawer keeps showing it even if it no longer belongs to the listed tab. */
 	onChange: (project: Project) => void;
 	onClose: () => void;
-	project: Project | null;
+	project: Project | undefined;
 }
 
 const toFormValues = (project: Project): ProjectFormValues => ({
@@ -238,12 +239,10 @@ function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'
 /** Detail of a project: status and progress, an edit form (`PATCH /projects/:id`), archive / restore, and its tasks, notes and files. */
 export function ProjectDrawer({ onChange, onClose, project }: ProjectDrawerProps) {
 	// Keeps the last project while the drawer slides out, so it does not go blank mid-animation.
-	const last = useRef<Project | null>(null);
-	if (project) last.current = project;
-	const shown = project ?? last.current;
+	const shown = useRetained(project);
 
 	return (
-		<Drawer.Root onOpenChange={open => !open && onClose()} open={project !== null}>
+		<Drawer.Root onOpenChange={open => !open && onClose()} open={project !== undefined}>
 			<Drawer.Content className='sm:max-w-xl'>{shown && <Body key={shown.id} onChange={onChange} onClose={onClose} project={shown} />}</Drawer.Content>
 		</Drawer.Root>
 	);
