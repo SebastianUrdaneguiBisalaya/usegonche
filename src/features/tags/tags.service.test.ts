@@ -6,6 +6,9 @@ import { createTag, deleteTag, listTags, renameTag } from './tags.service.js';
 
 const TAG_ID = '0b9c7d1a-5e2f-4c3b-9a8d-6f4e3d2c1b0a';
 const tag = { id: TAG_ID, name: 'work', ownerId: TEST_USER_ID } as Tag;
+const usage = { notes: 1, projects: 2, tasks: 3 };
+const row = { ...tag, _count: usage };
+const withUsage = { ...tag, usage };
 const unique = () => Object.assign(new Error('unique'), { code: 'P2002' });
 
 const rejection = async (promise: Promise<unknown>) =>
@@ -15,22 +18,52 @@ const rejection = async (promise: Promise<unknown>) =>
 	);
 
 describe('listTags', () => {
-	it('lists only the owner tags sorted by name', async () => {
+	it('lists only the owner tags A–Z with their usage', async () => {
 		const prisma = createMockPrisma();
-		vi.mocked(prisma.tag.findMany).mockResolvedValue([tag]);
+		vi.mocked(prisma.tag.findMany).mockResolvedValue([row]);
+		vi.mocked(prisma.tag.count).mockResolvedValue(1);
 
-		expect(await listTags(prisma, TEST_USER_ID)).toEqual([tag]);
-		expect(prisma.tag.findMany).toHaveBeenCalledWith({ orderBy: { name: 'asc' }, where: { ownerId: TEST_USER_ID } });
+		expect(await listTags(prisma, TEST_USER_ID, {}, { page: 1, pageSize: 20 })).toEqual({ items: [withUsage], total: 1 });
+		expect(prisma.tag.findMany).toHaveBeenCalledWith({
+			include: { _count: { select: { notes: true, projects: true, tasks: true } } },
+			orderBy: [{ name: 'asc' }, { id: 'asc' }],
+			skip: 0,
+			take: 20,
+			where: { ownerId: TEST_USER_ID },
+		});
+	});
+
+	it('searches the name ignoring case, on a later page', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.tag.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.tag.count).mockResolvedValue(0);
+
+		await listTags(prisma, TEST_USER_ID, { q: 'wo' }, { page: 3, pageSize: 10 });
+		expect(prisma.tag.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 20, take: 10, where: { name: { contains: 'wo', mode: 'insensitive' }, ownerId: TEST_USER_ID } }));
+		expect(prisma.tag.count).toHaveBeenCalledWith({ where: { name: { contains: 'wo', mode: 'insensitive' }, ownerId: TEST_USER_ID } });
+	});
+
+	it.each([
+		['updatedAt', 'desc', [{ updatedAt: 'desc' }, { id: 'desc' }]],
+		['tasks', 'desc', [{ tasks: { _count: 'desc' } }, { id: 'desc' }]],
+		['notes', 'asc', [{ notes: { _count: 'asc' } }, { id: 'asc' }]],
+	] as const)('sorts by %s %s', async (sort, order, orderBy) => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.tag.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.tag.count).mockResolvedValue(0);
+
+		await listTags(prisma, TEST_USER_ID, { order, sort }, { page: 1, pageSize: 20 });
+		expect(prisma.tag.findMany).toHaveBeenCalledWith(expect.objectContaining({ orderBy }));
 	});
 });
 
 describe('createTag', () => {
 	it('creates the tag for the owner', async () => {
 		const prisma = createMockPrisma();
-		vi.mocked(prisma.tag.create).mockResolvedValue(tag);
+		vi.mocked(prisma.tag.create).mockResolvedValue({ ...tag, _count: { notes: 0, projects: 0, tasks: 0 } } as Tag);
 
-		expect(await createTag(prisma, TEST_USER_ID, 'work')).toBe(tag);
-		expect(prisma.tag.create).toHaveBeenCalledWith({ data: { name: 'work', ownerId: TEST_USER_ID } });
+		expect(await createTag(prisma, TEST_USER_ID, 'work')).toEqual({ ...tag, usage: { notes: 0, projects: 0, tasks: 0 } });
+		expect(prisma.tag.create).toHaveBeenCalledWith(expect.objectContaining({ data: { name: 'work', ownerId: TEST_USER_ID } }));
 	});
 
 	it('answers already_exists (409) when the name is taken by the same owner', async () => {
@@ -55,17 +88,17 @@ describe('renameTag', () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.tag.updateMany).mockResolvedValue({ count: 1 });
 		vi.mocked(prisma.tag.findFirst)
-			.mockResolvedValueOnce(tag)
-			.mockResolvedValue({ ...tag, name: 'home' });
+			.mockResolvedValueOnce(row)
+			.mockResolvedValue({ ...row, name: 'home' });
 
-		expect(await renameTag(prisma, TEST_USER_ID, TAG_ID, 'home')).toMatchObject({ name: 'home' });
+		expect(await renameTag(prisma, TEST_USER_ID, TAG_ID, 'home')).toMatchObject({ name: 'home', usage });
 		expect(prisma.tag.updateMany).toHaveBeenCalledWith({ data: { name: 'home' }, where: { id: TAG_ID, ownerId: TEST_USER_ID } });
 	});
 
 	it('is idempotent: renaming to the current name answers the tag and writes nothing', async () => {
 		const prisma = createMockPrisma();
-		vi.mocked(prisma.tag.findFirst).mockResolvedValue(tag);
-		expect(await renameTag(prisma, TEST_USER_ID, TAG_ID, tag.name)).toBe(tag);
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue(row);
+		expect(await renameTag(prisma, TEST_USER_ID, TAG_ID, tag.name)).toEqual(withUsage);
 		expect(prisma.tag.updateMany).not.toHaveBeenCalled();
 	});
 
@@ -74,13 +107,13 @@ describe('renameTag', () => {
 		vi.mocked(prisma.tag.findFirst).mockResolvedValue(null);
 
 		expect(await rejection(renameTag(prisma, OTHER_USER_ID, TAG_ID, 'home'))).toMatchObject({ code: 'not_found', status: 404 });
-		expect(prisma.tag.findFirst).toHaveBeenCalledWith({ where: { id: TAG_ID, ownerId: OTHER_USER_ID } });
+		expect(prisma.tag.findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: { id: TAG_ID, ownerId: OTHER_USER_ID } }));
 		expect(prisma.tag.updateMany).not.toHaveBeenCalled();
 	});
 
 	it('answers already_exists (409) when the new name is taken', async () => {
 		const prisma = createMockPrisma();
-		vi.mocked(prisma.tag.findFirst).mockResolvedValue(tag);
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue(row);
 		vi.mocked(prisma.tag.updateMany).mockRejectedValue(unique());
 		expect(await rejection(renameTag(prisma, TEST_USER_ID, TAG_ID, 'home'))).toMatchObject({ code: 'already_exists', status: 409 });
 	});
