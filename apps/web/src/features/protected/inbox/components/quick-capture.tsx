@@ -5,8 +5,8 @@ import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Kbd } from '~/components/ui/foundations/kbd/kbd';
 import { useTranslate } from '~/hooks/use-translate';
 import { shortcutKeys } from '../../shared/shortcut-keys';
+import { listStyles } from '../../shared/styles';
 import { useCapture } from '../api';
-import { inboxStyles } from '../styles';
 
 const CONTENT_MAX = 2000;
 
@@ -30,7 +30,7 @@ export function QuickCapture() {
 				submit();
 			}}
 		>
-			<Input className={`${inboxStyles.card} px-5 py-4`}>
+			<Input className={`${listStyles.card} px-5 py-4`}>
 				<Input.Icon className='text-foreground' icon={Sparkles} />
 				<Input.Field
 					aria-label={t('inbox.capture.label')}

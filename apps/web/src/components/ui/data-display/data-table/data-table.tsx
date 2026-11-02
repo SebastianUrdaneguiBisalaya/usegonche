@@ -57,6 +57,8 @@ export interface DataTableProps<TData extends Record<string, any>> {
   readonly hideHeader?: boolean;
   /** Extra classes on every body row (e.g. to change its hover tint or border). */
   readonly rowClassName?: string;
+  /** Extra classes on the sticky header row (e.g. to swap its opaque background for a translucent one). */
+  readonly headerClassName?: string;
   /** Extra classes on every body cell (e.g. to change its padding). */
   readonly cellClassName?: string;
   /** Extra classes on the scroll container that holds the table (border, radius, background). */
@@ -138,6 +140,7 @@ export function DataTable<TData extends Record<string, any>>({
   rowClassName,
   cellClassName,
   containerClassName,
+  headerClassName,
   className,
 }: DataTableProps<TData>) {
   "use no memo";
@@ -211,7 +214,10 @@ export function DataTable<TData extends Record<string, any>>({
                 // `bg-background` (opaque), not `bg-muted` — `--muted` is a
                 // translucent hover tint by design, which let scrolled rows
                 // show through this sticky header.
-                className="sticky top-0 z-10 border-b border-border bg-background"
+                className={cn(
+                  "sticky top-0 z-10 border-b border-border bg-background",
+                  headerClassName,
+                )}
                 key={hg.id}
               >
                 {selection && (

@@ -6,9 +6,6 @@ export type InboxStatus = (typeof inboxStatuses)[number];
 export const inboxRanges = ['all', '24h', '7d', '30d'] as const;
 export type InboxRange = (typeof inboxRanges)[number];
 
-/** Rows per page. Fixed: the table fills the screen and scrolls inside the page. */
-export const PAGE_SIZE = 20;
-
 /** Everything the inbox page keeps in the URL, so a reload, a shared link or the back button restore the same view. */
 export const inboxParsers = {
 	page: parseAsInteger.withDefault(1),

@@ -10,10 +10,10 @@ import { Layout } from '~/components/ui/layout/layout/layout';
 import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
+import { formatRelative } from '../../shared/relative-time';
+import { listStyles } from '../../shared/styles';
 import type { ConvertTarget, SettableStatus } from '../api';
-import { formatRelative } from '../relative-time';
 import type { InboxStatus } from '../search-params';
-import { inboxStyles } from '../styles';
 
 /** A row of the table: an inbox item, or a search hit (read-only: it has no source, status or actions). */
 export interface InboxRow {
@@ -45,7 +45,7 @@ interface InboxTableProps {
 	total: number;
 }
 
-const iconButton = `${inboxStyles.iconButton}`;
+const iconButton = `${listStyles.iconButton}`;
 
 /** The inbox list: one row per item with its source, relative time and the actions of its status, paginated and filling the available height. */
 export function InboxTable({
@@ -191,7 +191,7 @@ export function InboxTable({
 			cellClassName='px-5 py-3.5'
 			className='min-h-64'
 			columns={columns}
-			containerClassName={`${inboxStyles.card} bg-transparent`}
+			containerClassName={`${listStyles.card} bg-transparent`}
 			data={rows}
 			emptyState={empty}
 			hideHeader

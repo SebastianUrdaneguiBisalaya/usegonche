@@ -2,18 +2,21 @@ import { Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Kbd } from '~/components/ui/foundations/kbd/kbd';
-import { useTranslate } from '~/hooks/use-translate';
-import { inboxStyles } from '../styles';
+import { listStyles } from './styles';
 
-interface InboxSearchProps {
+interface ListSearchProps {
+	/** Accessible name of the "clear" button. */
+	clearLabel: string;
+	/** Accessible name of the field. */
+	label: string;
 	onChange: (q: string) => void;
+	placeholder: string;
 	/** The `?q=` of the URL. */
 	value: string;
 }
 
-/** Search box (`GET /search?types=inbox`). Typing is debounced into the URL; `/` focuses it. */
-export function InboxSearch({ onChange, value }: InboxSearchProps) {
-	const t = useTranslate();
+/** Search box of a list page (`GET /search?types=...`). Typing is debounced into the URL; `/` focuses it. */
+export function ListSearch({ clearLabel, label, onChange, placeholder, value }: ListSearchProps) {
 	const ref = useRef<HTMLInputElement>(null);
 	const [text, setText] = useState(value);
 	const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -41,12 +44,12 @@ export function InboxSearch({ onChange, value }: InboxSearchProps) {
 	}, []);
 
 	return (
-		<Input className={`${inboxStyles.pillInput} w-full sm:w-72`}>
+		<Input className={`${listStyles.pillInput} w-full sm:w-72`}>
 			<Input.Icon icon={Search} />
-			<Input.Field aria-label={t('inbox.search.label')} autoComplete='off' onChange={event => type(event.target.value)} placeholder={t('inbox.search.placeholder')} ref={ref} value={text} />
+			<Input.Field aria-label={label} autoComplete='off' onChange={event => type(event.target.value)} placeholder={placeholder} ref={ref} value={text} />
 			{text ? (
 				<button
-					aria-label={t('inbox.search.clear')}
+					aria-label={clearLabel}
 					className='flex cursor-pointer text-muted-foreground hover:text-foreground'
 					onClick={() => {
 						clearTimeout(timer.current);
