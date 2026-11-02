@@ -13,7 +13,7 @@ export default function AuthLayout() {
 	if (session) return <Navigate replace to='/' />;
 
 	return (
-		<div className='auth-dark relative isolate h-screen w-full overflow-hidden bg-[#050505]'>
+		<div className='auth-dark relative isolate h-screen w-full overflow-y-auto bg-[#050505]'>
 			<div aria-hidden className='pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_70%_50%,rgba(255,255,255,0.06),transparent_60%)]' />
 			<Layout.Grid className='h-full w-full' cols={{ base: 1, lg: 2 }} gap='none'>
 				<div className='relative hidden h-full lg:block'>
