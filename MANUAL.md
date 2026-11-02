@@ -36,7 +36,7 @@ Requirements: Node.js 22 or newer, and pnpm (the exact version is pinned in `pac
    | `AUTH_REDIRECT_URL` | Where the browser lands after Google sign-in or the email link (e.g. `http://localhost:5173`) |
    | `AUTH_CALLBACK_URL` | Public URL of `GET /v1/auth/callback` (e.g. `http://localhost:4000/v1/auth/callback`) |
 
-   Optional variables (Google sign-in, storage buckets, rate limits, `INTERNAL_CRON_SECRET`, `API_DOMAIN`) are documented inside `.env.example`.
+   Optional variables (`CORS_ORIGINS`, Google sign-in, storage buckets, rate limits, `INTERNAL_CRON_SECRET`, `API_DOMAIN`) are documented inside `.env.example`.
 
 4. Create the two Storage buckets in Supabase > Storage: `private` and `public` (or the names you set in `STORAGE_BUCKET_*`).
 5. Apply the database migrations (section 4.2). A fresh Supabase project needs them before the API can work.
@@ -284,5 +284,6 @@ Set the env variables in the host (there is no `.env` file in production images)
 | `Cannot find module '@usegonche/database'` or Prisma client errors | Run `pnpm --filter @usegonche/database generate` |
 | Google sign-in or the email link ends on a JSON error | `AUTH_REDIRECT_URL` / `AUTH_CALLBACK_URL` missing or wrong |
 | `401` on `/v1/internal/reminders/process` | `INTERNAL_CRON_SECRET` is unset, or differs from the one in the SQL |
+| Browser error `blocked by CORS policy` | The web origin is not allowed: the API allows the origin of `AUTH_REDIRECT_URL` (set it to the web URL, e.g. `http://localhost:5173`) plus the optional comma-separated `CORS_ORIGINS`. Restart the API after changing `.env` |
 | Web app types are stale after changing routes | `pnpm --filter @usegonche/api-client build` |
 | Too many requests (`429`) while testing | Raise `RATE_LIMIT_*_PER_MINUTE` in `.env` |
