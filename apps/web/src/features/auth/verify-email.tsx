@@ -17,15 +17,15 @@ export default function VerifyEmailPage() {
 
 	return (
 		<>
-			<Layout.Stack className='w-full items-center text-center' gap='sm'>
-				<Typography.H2 className='border-none'>{t('auth.verifyEmail.title')}</Typography.H2>
-				<Typography.Span className='text-foreground-secondary'>
+			<Layout.Stack className='w-full ' gap='sm'>
+				<Typography.H2 className='border-none pb-0 text-3xl font-light tracking-tight'>{t('auth.verifyEmail.title')}</Typography.H2>
+				<Typography.Span className='text-sm text-foreground-secondary'>
 					{t('auth.verifyEmail.description', {
 						email,
 					})}
 				</Typography.Span>
 			</Layout.Stack>
-			<Link as={RouterLink} className='self-center' to='/auth/sign-in'>
+			<Link as={RouterLink} className='text-sm text-foreground-secondary' to='/auth/sign-in'>
 				{t('auth.common.backToSignIn')}
 			</Link>
 		</>

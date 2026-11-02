@@ -1,6 +1,8 @@
+import { Lock } from 'lucide-react';
 import { useMemo } from 'react';
 import { Navigate, Link as RouterLink, useNavigate, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
+import { Button } from '~/components/ui/actions-controls/button/button';
 import { Form } from '~/components/ui/forms-inputs/form/form';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { InputOtp } from '~/components/ui/forms-inputs/input-otp/input-otp';
@@ -11,6 +13,7 @@ import { useTranslate } from '~/hooks/use-translate';
 import { useResetPassword } from './api';
 import { authMeta } from './meta';
 import { createResetPasswordSchema, OTP_LENGTH } from './schemas';
+import { authStyles } from './styles';
 
 export const meta = authMeta('resetPassword');
 
@@ -26,9 +29,9 @@ export default function ResetPasswordPage() {
 
 	return (
 		<>
-			<Layout.Stack className='w-full items-center text-center' gap='sm'>
-				<Typography.H2 className='border-none'>{t('auth.resetPassword.title')}</Typography.H2>
-				<Typography.Span className='text-foreground-secondary'>
+			<Layout.Stack className='w-full' gap='sm'>
+				<Typography.H2 className={authStyles.title}>{t('auth.resetPassword.title')}</Typography.H2>
+				<Typography.Span className={authStyles.subtitle}>
 					{t('auth.resetPassword.description', {
 						email,
 					})}
@@ -66,30 +69,42 @@ export default function ResetPasswordPage() {
 						<Field name='code'>{field => <InputOtp errorMessage={field.error} label={t('auth.resetPassword.code.label')} length={OTP_LENGTH} {...field.changeProps} />}</Field>
 						<Field name='password'>
 							{field => (
-								<Input errorMessage={field.error}>
-									<Input.Label required>{t('auth.resetPassword.newPassword.label')}</Input.Label>
-									<Input.Field autoComplete='off' placeholder={t('auth.resetPassword.newPassword.placeholder')} type='password' {...field.inputProps} />
+								<Input className={authStyles.input} errorMessage={field.error}>
+									<Input.Icon icon={Lock} />
+									<Input.Field
+										aria-label={t('auth.resetPassword.newPassword.label')}
+										autoComplete='off'
+										placeholder={t('auth.resetPassword.newPassword.placeholder')}
+										type='password'
+										{...field.inputProps}
+									/>
 									<Input.PasswordToggle hideLabel={t('auth.common.password.hide')} showLabel={t('auth.common.password.show')} />
 								</Input>
 							)}
 						</Field>
 						<Field name='confirm_password'>
 							{field => (
-								<Input errorMessage={field.error}>
-									<Input.Label required>{t('auth.resetPassword.confirmPassword.label')}</Input.Label>
-									<Input.Field autoComplete='off' placeholder={t('auth.resetPassword.confirmPassword.placeholder')} type='password' {...field.inputProps} />
+								<Input className={authStyles.input} errorMessage={field.error}>
+									<Input.Icon icon={Lock} />
+									<Input.Field
+										aria-label={t('auth.resetPassword.confirmPassword.label')}
+										autoComplete='off'
+										placeholder={t('auth.resetPassword.confirmPassword.placeholder')}
+										type='password'
+										{...field.inputProps}
+									/>
 									<Input.PasswordToggle hideLabel={t('auth.common.password.hide')} showLabel={t('auth.common.password.show')} />
 								</Input>
 							)}
 						</Field>
 						<Form.Submit
-							className='self-center w-full py-3'
+							className={authStyles.primary}
 							loading={resetPassword.isPending}
 							lang={{
 								loadingText: t('auth.resetPassword.submitting'),
 							}}
 						>
-							{t('auth.resetPassword.submit')}
+							<Button.Text className={authStyles.primaryText}>{t('auth.resetPassword.submit')}</Button.Text>
 						</Form.Submit>
 					</Layout.Stack>
 				)}

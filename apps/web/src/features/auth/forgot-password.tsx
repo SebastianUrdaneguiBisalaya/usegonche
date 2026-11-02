@@ -1,5 +1,7 @@
+import { Mail } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router';
+import { Button } from '~/components/ui/actions-controls/button/button';
 import { Form } from '~/components/ui/forms-inputs/form/form';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Link } from '~/components/ui/foundations/link/link';
@@ -9,6 +11,7 @@ import { useTranslate } from '~/hooks/use-translate';
 import { useForgotPassword } from './api';
 import { authMeta } from './meta';
 import { createForgotPasswordSchema } from './schemas';
+import { authStyles } from './styles';
 
 export const meta = authMeta('forgotPassword');
 
@@ -20,9 +23,9 @@ export default function ForgotPasswordPage() {
 
 	return (
 		<>
-			<Layout.Stack className='w-full items-center text-center' gap='sm'>
-				<Typography.H2 className='border-none'>{t('auth.forgotPassword.title')}</Typography.H2>
-				<Typography.Span className='text-foreground-secondary'>{t('auth.forgotPassword.description')}</Typography.Span>
+			<Layout.Stack className='w-full' gap='sm'>
+				<Typography.H2 className={authStyles.title}>{t('auth.forgotPassword.title')}</Typography.H2>
+				<Typography.Span className={authStyles.subtitle}>{t('auth.forgotPassword.description')}</Typography.Span>
 			</Layout.Stack>
 			<Form
 				className='w-full'
@@ -43,20 +46,20 @@ export default function ForgotPasswordPage() {
 					<Layout.Stack>
 						<Field name='email'>
 							{field => (
-								<Input errorMessage={field.error}>
-									<Input.Label required>{t('auth.common.email.label')}</Input.Label>
-									<Input.Field autoComplete='off' autoFocus placeholder={t('auth.common.email.placeholder')} {...field.inputProps} />
+								<Input className={authStyles.input} errorMessage={field.error}>
+									<Input.Icon icon={Mail} />
+									<Input.Field aria-label={t('auth.common.email.label')} autoComplete='off' autoFocus placeholder={t('auth.common.email.placeholder')} {...field.inputProps} />
 								</Input>
 							)}
 						</Field>
 						<Form.Submit
-							className='self-center w-full py-3'
+							className={authStyles.primary}
 							loading={forgotPassword.isPending}
 							lang={{
 								loadingText: t('auth.forgotPassword.submitting'),
 							}}
 						>
-							{t('auth.forgotPassword.submit')}
+							<Button.Text className={authStyles.primaryText}>{t('auth.forgotPassword.submit')}</Button.Text>
 						</Form.Submit>
 					</Layout.Stack>
 				)}

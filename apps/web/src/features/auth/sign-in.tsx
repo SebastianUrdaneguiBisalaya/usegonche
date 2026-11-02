@@ -1,4 +1,5 @@
 import { Google } from '@ridemountainpig/svgl-react';
+import { Lock, Mail } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -14,6 +15,7 @@ import { ApiError, getApiErrorMessage } from '~/lib/api-error';
 import { useLogin } from './api';
 import { authMeta } from './meta';
 import { createSignInSchema } from './schemas';
+import { authStyles } from './styles';
 import { useGoogleSignIn } from './use-google-sign-in';
 
 export const meta = authMeta('signIn');
@@ -34,7 +36,10 @@ export default function SignInPage() {
 
 	return (
 		<>
-			<Typography.H2 className='border-none'>{t('auth.signIn.title')}</Typography.H2>
+			<Layout.Stack className='w-full' gap='sm'>
+				<Typography.H2 className={authStyles.title}>{t('auth.signIn.title')}</Typography.H2>
+				<Typography.Span className={authStyles.subtitle}>{t('auth.signIn.description')}</Typography.Span>
+			</Layout.Stack>
 			<Form
 				className='w-full'
 				defaultValues={{
@@ -61,48 +66,54 @@ export default function SignInPage() {
 					<Layout.Stack>
 						<Field name='email'>
 							{field => (
-								<Input errorMessage={field.error}>
-									<Input.Label required>{t('auth.common.email.label')}</Input.Label>
-									<Input.Field autoComplete='off' autoFocus placeholder={t('auth.common.email.placeholder')} {...field.inputProps} />
+								<Input className={authStyles.input} errorMessage={field.error}>
+									<Input.Icon icon={Mail} />
+									<Input.Field aria-label={t('auth.common.email.label')} autoComplete='off' autoFocus placeholder={t('auth.common.email.placeholder')} {...field.inputProps} />
 								</Input>
 							)}
 						</Field>
 						<Field name='password'>
 							{field => (
-								<Input errorMessage={field.error}>
-									<Input.Label required>{t('auth.common.password.label')}</Input.Label>
-									<Input.Field autoComplete='off' placeholder={t('auth.common.password.placeholder')} type='password' {...field.inputProps} />
+								<Input className={authStyles.input} errorMessage={field.error}>
+									<Input.Icon icon={Lock} />
+									<Input.Field
+										aria-label={t('auth.common.password.label')}
+										autoComplete='off'
+										placeholder={t('auth.common.password.placeholder')}
+										type='password'
+										{...field.inputProps}
+									/>
 									<Input.PasswordToggle hideLabel={t('auth.common.password.hide')} showLabel={t('auth.common.password.show')} />
 								</Input>
 							)}
 						</Field>
 						<Form.Submit
-							className='self-center w-full py-3'
+							className={authStyles.primary}
 							loading={login.isPending}
 							lang={{
 								loadingText: t('auth.signIn.submitting'),
 							}}
 						>
-							{t('auth.signIn.submit')}
+							<Button.Text className={authStyles.primaryText}>{t('auth.signIn.submit')}</Button.Text>
 						</Form.Submit>
 					</Layout.Stack>
 				)}
 			</Form>
 			{google.enabled && (
 				<>
-					<Separator>{t('auth.common.or')}</Separator>
-					<Button className='w-full py-3' disabled={google.isPending} onClick={google.signIn} type='button' variant='secondary'>
-						<Google height={12} width={12} />
-						<Button.Text>{t('auth.signIn.google')}</Button.Text>
+					<Separator className={authStyles.separator}>{t('auth.common.or')}</Separator>
+					<Button className={authStyles.secondary} disabled={google.isPending} onClick={google.signIn} type='button' variant='secondary'>
+						<Google height={16} width={16} />
+						<Button.Text className={authStyles.secondaryText}>{t('auth.signIn.google')}</Button.Text>
 					</Button>
 				</>
 			)}
 			<Link as={RouterLink} className='self-center' to='/auth/forgot-password'>
-				<Typography.Span className='text-foreground-secondary'>{t('auth.signIn.forgotPassword')}</Typography.Span>
+				<Typography.Span className='text-xs text-foreground-secondary'>{t('auth.signIn.forgotPassword')}</Typography.Span>
 			</Link>
-			<Layout.HStack className='justify-between'>
-				<Typography.Span>{t('auth.signIn.noAccount')}</Typography.Span>
-				<Link as={RouterLink} className='text-xs' to='/auth/sign-up'>
+			<Layout.HStack className='justify-center gap-2 text-xs text-foreground-secondary'>
+				<Typography.Span className='text-xs text-foreground-secondary'>{t('auth.signIn.noAccount')}</Typography.Span>
+				<Link as={RouterLink} className='text-xs font-medium' to='/auth/sign-up'>
 					{t('auth.signIn.signUpLink')}
 				</Link>
 			</Layout.HStack>

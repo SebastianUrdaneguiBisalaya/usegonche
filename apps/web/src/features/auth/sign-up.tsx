@@ -1,4 +1,5 @@
 import { Google } from '@ridemountainpig/svgl-react';
+import { Lock, Mail } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router';
 import { Button } from '~/components/ui/actions-controls/button/button';
@@ -12,6 +13,7 @@ import { useTranslate } from '~/hooks/use-translate';
 import { useSignup } from './api';
 import { authMeta } from './meta';
 import { createSignUpSchema } from './schemas';
+import { authStyles } from './styles';
 import { useGoogleSignIn } from './use-google-sign-in';
 
 export const meta = authMeta('signUp');
@@ -25,7 +27,7 @@ export default function SignUpPage() {
 
 	return (
 		<>
-			<Typography.H2 className='border-none'>{t('auth.signUp.title')}</Typography.H2>
+			<Typography.H2 className={authStyles.title}>{t('auth.signUp.title')}</Typography.H2>
 			<Form
 				className='w-full'
 				defaultValues={{
@@ -46,45 +48,51 @@ export default function SignUpPage() {
 					<Layout.Stack>
 						<Field name='email'>
 							{field => (
-								<Input errorMessage={field.error}>
-									<Input.Label required>{t('auth.common.email.label')}</Input.Label>
-									<Input.Field autoComplete='off' placeholder={t('auth.common.email.placeholder')} {...field.inputProps} />
+								<Input className={authStyles.input} errorMessage={field.error}>
+									<Input.Icon icon={Mail} />
+									<Input.Field aria-label={t('auth.common.email.label')} autoComplete='off' placeholder={t('auth.common.email.placeholder')} {...field.inputProps} />
 								</Input>
 							)}
 						</Field>
 						<Field name='password'>
 							{field => (
-								<Input errorMessage={field.error}>
-									<Input.Label required>{t('auth.common.password.label')}</Input.Label>
-									<Input.Field autoComplete='off' placeholder={t('auth.common.password.placeholder')} type='password' {...field.inputProps} />
+								<Input className={authStyles.input} errorMessage={field.error}>
+									<Input.Icon icon={Lock} />
+									<Input.Field
+										aria-label={t('auth.common.password.label')}
+										autoComplete='off'
+										placeholder={t('auth.common.password.placeholder')}
+										type='password'
+										{...field.inputProps}
+									/>
 									<Input.PasswordToggle hideLabel={t('auth.common.password.hide')} showLabel={t('auth.common.password.show')} />
 								</Input>
 							)}
 						</Field>
 						<Form.Submit
-							className='self-center w-full py-3'
+							className={authStyles.primary}
 							loading={signup.isPending}
 							lang={{
 								loadingText: t('auth.signUp.submitting'),
 							}}
 						>
-							{t('auth.signUp.submit')}
+							<Button.Text className={authStyles.primaryText}>{t('auth.signUp.submit')}</Button.Text>
 						</Form.Submit>
 					</Layout.Stack>
 				)}
 			</Form>
 			{google.enabled && (
 				<>
-					<Separator>{t('auth.common.or')}</Separator>
-					<Button className='w-full py-3' disabled={google.isPending} onClick={google.signIn} type='button' variant='secondary'>
-						<Google height={12} width={12} />
-						<Button.Text>{t('auth.signUp.google')}</Button.Text>
+					<Separator className={authStyles.separator}>{t('auth.common.or')}</Separator>
+					<Button className={authStyles.secondary} disabled={google.isPending} onClick={google.signIn} type='button' variant='secondary'>
+						<Google height={16} width={16} />
+						<Button.Text className={authStyles.secondaryText}>{t('auth.signUp.google')}</Button.Text>
 					</Button>
 				</>
 			)}
-			<Layout.HStack className='justify-between'>
-				<Typography.Span>{t('auth.signUp.haveAccount')}</Typography.Span>
-				<Link as={RouterLink} className='text-xs' to='/auth/sign-in'>
+			<Layout.HStack className='justify-center gap-2 text-xs text-foreground-secondary'>
+				<Typography.Span className='text-xs text-foreground-secondary'>{t('auth.signUp.haveAccount')}</Typography.Span>
+				<Link as={RouterLink} className='text-xs font-medium' to='/auth/sign-in'>
 					{t('auth.signUp.signInLink')}
 				</Link>
 			</Layout.HStack>
