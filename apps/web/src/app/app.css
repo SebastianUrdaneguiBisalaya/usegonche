@@ -418,3 +418,9 @@ body {
 	color-scheme: dark;
 	background: var(--background);
 }
+
+/* Paints the page itself dark while an auth screen is mounted, so overscroll / areas outside the layout never show the light canvas. */
+:root:has(.auth-dark) {
+	background: #050505;
+	color-scheme: dark;
+}
