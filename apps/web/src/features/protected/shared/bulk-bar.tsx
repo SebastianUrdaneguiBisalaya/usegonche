@@ -42,7 +42,7 @@ export function BulkBar({ actions, clearLabel, countLabel, moreLabel, onClear, t
 			{actions.map(action => (
 				<ActionButton action={action} key={action.key} />
 			))}
-			<Separator className='mx-1 hidden h-6 sm:block' orientation='vertical' />
+			{actions.length > 0 && <Separator className='mx-1 hidden h-6 sm:block' orientation='vertical' />}
 			<ActionButton action={trailing} />
 			<Dropdown>
 				<Dropdown.Trigger>

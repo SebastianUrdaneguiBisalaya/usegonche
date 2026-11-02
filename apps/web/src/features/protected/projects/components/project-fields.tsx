@@ -5,7 +5,8 @@ import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
-import { useCreateTag, useGoals, useTags } from '../api';
+import { useCreateTag, useTagOptions } from '../../shared/tags';
+import { useGoals } from '../api';
 import { displayStatus } from '../display';
 import { TITLE_MAX } from '../schemas';
 import { projectStatuses } from '../search-params';
@@ -16,7 +17,7 @@ const NO_GOAL = '__none';
 export function ProjectFields({ withStatus }: { withStatus?: boolean }) {
 	const t = useTranslate();
 	const goals = useGoals();
-	const tags = useTags();
+	const tags = useTagOptions();
 	const createTag = useCreateTag();
 
 	return (

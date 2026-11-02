@@ -17,8 +17,9 @@ import { ListEmpty, ListTable } from '../../shared/list-table';
 import { formatRelative } from '../../shared/relative-time';
 import { StatusMenu } from '../../shared/status-pill';
 import { listStyles } from '../../shared/styles';
+import { tagColor } from '../../shared/tags';
 import type { BulkAction, Project } from '../api';
-import { displayStatus, projectIcon, statusDot, tagColor } from '../display';
+import { displayStatus, projectIcon, statusDot } from '../display';
 import { type ProjectStatus, type ProjectTab, projectStatuses } from '../search-params';
 
 /** A row of the table: a project, or a search hit (read-only: it only knows its title and date). */

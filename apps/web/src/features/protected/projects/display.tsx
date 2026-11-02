@@ -1,5 +1,4 @@
 import { Archive, BarChart3, Box, Building2, Circle, CircleCheck, FlaskConical, Landmark, type LucideIcon, Paintbrush, Pause, Rocket, ShieldCheck } from 'lucide-react';
-import type { TagColor } from '~/components/ui/data-display/tag/tag';
 import { pickBy } from '../shared/display';
 import type { ProjectTab } from './search-params';
 
@@ -28,11 +27,6 @@ export const statusDot: Record<DisplayStatus, string> = {
 };
 
 export const displayStatus = (project: { archivedAt: string | null; status: Exclude<DisplayStatus, 'archived'> }): DisplayStatus => (project.archivedAt ? 'archived' : project.status);
-
-const TAG_COLORS: readonly TagColor[] = ['blue', 'green', 'amber', 'rose', 'violet', 'teal'];
-
-/** Tags have no color of their own: each name always gets the same one, so a tag reads the same on every row. */
-export const tagColor = (name: string): TagColor => pickBy(TAG_COLORS, name.toLowerCase(), 'default');
 
 const PROJECT_ICONS: readonly LucideIcon[] = [BarChart3, Landmark, ShieldCheck, Paintbrush, Building2, FlaskConical, Rocket, Box];
 

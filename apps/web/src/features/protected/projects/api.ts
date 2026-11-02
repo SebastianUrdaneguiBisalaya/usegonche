@@ -61,10 +61,6 @@ export function useGoals() {
 	return useQuery({ queryFn: () => unwrap(api.goals.$get({ query: { pageSize: '100' } })), queryKey: ['goals', 'options'], staleTime: 60_000 });
 }
 
-export function useTags() {
-	return useQuery({ queryFn: () => unwrap(api.tags.$get()), queryKey: ['tags'], staleTime: 60_000 });
-}
-
 /** Every project query (lists, searches) refetches after a change. */
 function useRefreshProjects() {
 	const queryClient = useQueryClient();
@@ -109,15 +105,6 @@ export function useBulkAction() {
 			return ids.length;
 		},
 		onSettled: refresh,
-	});
-}
-
-/** Creates a tag on the fly (from the tag picker) and refreshes the list of tags before resolving. */
-export function useCreateTag() {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: (name: string) => unwrap(api.tags.$post({ json: { name } })),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tags'] }),
 	});
 }
 
