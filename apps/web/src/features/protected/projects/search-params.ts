@@ -4,6 +4,10 @@ import { createLoader, parseAsInteger, parseAsString, parseAsStringLiteral } fro
 export const projectTabs = ['active', 'on_hold', 'completed', 'archived'] as const;
 export type ProjectTab = (typeof projectTabs)[number];
 
+/** Orders of the list: last changed first, newest first, or by title. */
+export const projectSorts = ['updated', 'created', 'title'] as const;
+export type ProjectSort = (typeof projectSorts)[number];
+
 /** The statuses a project can be set to (everything but `archived`). */
 export const projectStatuses = ['active', 'on_hold', 'completed'] as const;
 export type ProjectStatus = (typeof projectStatuses)[number];
@@ -13,6 +17,7 @@ export const projectParsers = {
 	goal: parseAsString.withDefault(''),
 	page: parseAsInteger.withDefault(1),
 	q: parseAsString.withDefault(''),
+	sort: parseAsStringLiteral(projectSorts).withDefault('updated'),
 	status: parseAsStringLiteral(projectTabs).withDefault('active'),
 	tag: parseAsString.withDefault(''),
 };
@@ -25,6 +30,7 @@ export interface ProjectsParams {
 	goal: string;
 	page: number;
 	q: string;
+	sort: ProjectSort;
 	status: ProjectTab;
 	/** Tag id, or empty for every tag. */
 	tag: string;

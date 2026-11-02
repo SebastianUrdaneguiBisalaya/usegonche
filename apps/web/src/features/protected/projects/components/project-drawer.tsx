@@ -6,20 +6,19 @@ import { Progress } from '~/components/ui/data-display/progress/progress';
 import { Tabs } from '~/components/ui/data-display/tabs/tabs';
 import { Form } from '~/components/ui/forms-inputs/form/form';
 import { Icon } from '~/components/ui/foundations/icon/icon';
-import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
-import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Drawer } from '~/components/ui/overlays-feedback/drawer/drawer';
 import { useLanguage } from '~/hooks/use-language';
 import { useRetained } from '~/hooks/use-retained';
 import { useTranslate } from '~/hooks/use-translate';
 import { diffPayload } from '~/utils/diff-payload';
+import { DrawerSection } from '../../shared/drawer-section';
 import { formatRelative } from '../../shared/relative-time';
+import { StatusBadge } from '../../shared/status-pill';
 import { type Project, useProjectFiles, useProjectNotes, useProjectTasks, useSetArchived, useUpdateProject } from '../api';
-import { displayStatus, projectIcon } from '../display';
+import { displayStatus, projectIcon, statusDot } from '../display';
 import { createProjectFormSchema, type ProjectFormValues } from '../schemas';
 import { ProjectFields } from './project-fields';
-import { StatusPill } from './status-pill';
 
 interface ProjectDrawerProps {
 	/** Called with the saved project, so the drawer keeps showing it even if it no longer belongs to the listed tab. */
@@ -40,49 +39,6 @@ const toFormValues = (project: Project): ProjectFormValues => ({
 const comparable = (values: ProjectFormValues): ProjectFormValues => ({ ...values, tagIds: [...values.tagIds].sort() });
 
 const formatSize = (bytes: number): string => (bytes < 1024 ? `${bytes} B` : bytes < 1_048_576 ? `${(bytes / 1024).toFixed(0)} KB` : `${(bytes / 1_048_576).toFixed(1)} MB`);
-
-interface SectionProps<T> {
-	empty: string;
-	error: boolean;
-	isLoading: boolean;
-	items: readonly T[] | undefined;
-	onRetry: () => void;
-	render: (item: T) => React.ReactNode;
-}
-
-/** One read-only list of the drawer (tasks, notes, files): skeleton while loading, an empty state, or a retry on error. */
-function Section<T extends { id: string }>({ empty, error, isLoading, items, onRetry, render }: SectionProps<T>) {
-	const t = useTranslate();
-	if (isLoading) {
-		return (
-			<Skeleton className='gap-3'>
-				{[0, 1, 2, 3].map(key => (
-					<Skeleton.Item className='h-12 w-full rounded-xl' key={key} />
-				))}
-			</Skeleton>
-		);
-	}
-	if (error) {
-		return (
-			<Layout.Stack align='center' className='py-10 text-center' gap='sm'>
-				<Typography.Span className='text-sm text-muted-foreground'>{t('projects.drawer.loadError')}</Typography.Span>
-				<Button onClick={onRetry} variant='secondary'>
-					<Button.Text>{t('projects.drawer.retry')}</Button.Text>
-				</Button>
-			</Layout.Stack>
-		);
-	}
-	if (!items || items.length === 0) return <Typography.Span className='block py-10 text-center text-sm text-muted-foreground'>{empty}</Typography.Span>;
-	return (
-		<ul className='flex flex-col gap-2'>
-			{items.map(item => (
-				<li className='flex items-center justify-between gap-3 rounded-xl border border-border bg-foreground/[0.03] px-4 py-3 text-sm' key={item.id}>
-					{render(item)}
-				</li>
-			))}
-		</ul>
-	);
-}
 
 function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'> & { project: Project }) {
 	const t = useTranslate();
@@ -128,7 +84,7 @@ function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'
 			</Drawer.Header>
 			<Drawer.Body className='flex flex-col gap-5'>
 				<Layout.HStack gap='md' wrap>
-					<StatusPill status={status} />
+					<StatusBadge look={{ dotClassName: statusDot[status], label: t(`projects.status.${status}`) }} />
 					<Progress
 						aria-label={t('projects.drawer.progress', { done, total })}
 						className='w-48'
@@ -186,8 +142,10 @@ function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'
 						</Form>
 					</Tabs.Content>
 					<Tabs.Content className='pt-5' value='tasks'>
-						<Section
+						<DrawerSection
 							empty={t('projects.drawer.tasksEmpty')}
+							errorLabel={t('projects.drawer.loadError')}
+							retryLabel={t('projects.drawer.retry')}
 							error={tasks.isError}
 							isLoading={tasks.isPending}
 							items={tasks.data}
@@ -201,8 +159,10 @@ function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'
 						/>
 					</Tabs.Content>
 					<Tabs.Content className='pt-5' value='notes'>
-						<Section
+						<DrawerSection
 							empty={t('projects.drawer.notesEmpty')}
+							errorLabel={t('projects.drawer.loadError')}
+							retryLabel={t('projects.drawer.retry')}
 							error={notes.isError}
 							isLoading={notes.isPending}
 							items={notes.data}
@@ -216,8 +176,10 @@ function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'
 						/>
 					</Tabs.Content>
 					<Tabs.Content className='pt-5' value='files'>
-						<Section
+						<DrawerSection
 							empty={t('projects.drawer.filesEmpty')}
+							errorLabel={t('projects.drawer.loadError')}
+							retryLabel={t('projects.drawer.retry')}
 							error={files.isError}
 							isLoading={files.isPending}
 							items={files.data}

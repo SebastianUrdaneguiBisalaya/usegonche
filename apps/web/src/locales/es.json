@@ -409,6 +409,12 @@
         "cancelled": "Cancelada"
       },
       "due": "Vence {{date}}"
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "updated": "Actualizados recientemente",
+      "created": "Más nuevos primero",
+      "title": "Título (A–Z)"
     }
   }
 }

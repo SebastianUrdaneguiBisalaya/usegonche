@@ -55,30 +55,3 @@ export function TagFilter({ onChange, options, value }: IdFilterProps) {
 	const t = useTranslate();
 	return <FilterSelect allLabel={t('projects.filters.tag.all')} icon={Tag} label={t('projects.filters.tag.label')} onChange={onChange} options={options} value={value} />;
 }
-
-interface PageSelectProps {
-	onChange: (page: number) => void;
-	page: number;
-	pageCount: number;
-}
-
-/** "Page: 3" jump list, next to the pagination at the bottom. */
-export function PageSelect({ onChange, page, pageCount }: PageSelectProps) {
-	const t = useTranslate();
-	return (
-		<Select.Root onChange={next => onChange(Number(next))} value={String(page)}>
-			<Select.Trigger aria-label={t('projects.filters.page.label')} className={`${listStyles.pillTrigger} min-w-28`}>
-				<span className='text-sm'>{t('projects.filters.page.value', { page })}</span>
-			</Select.Trigger>
-			<Select.Content>
-				<Select.ItemList>
-					{Array.from({ length: pageCount }, (_, index) => index + 1).map(number => (
-						<Select.Item key={number} value={String(number)}>
-							{number}
-						</Select.Item>
-					))}
-				</Select.ItemList>
-			</Select.Content>
-		</Select.Root>
-	);
-}

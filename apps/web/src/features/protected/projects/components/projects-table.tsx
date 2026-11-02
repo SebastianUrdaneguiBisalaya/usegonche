@@ -2,8 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { Archive, FolderKanban, MoreHorizontal, RotateCcw, SearchX } from 'lucide-react';
 import { useMemo } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
-import { DataTable, type DataTableFeatures } from '~/components/ui/data-display/data-table/data-table';
-import { Pagination } from '~/components/ui/data-display/pagination/pagination';
+import type { DataTableFeatures } from '~/components/ui/data-display/data-table/data-table';
 import { Progress } from '~/components/ui/data-display/progress/progress';
 import { Tag } from '~/components/ui/data-display/tag/tag';
 import { Icon } from '~/components/ui/foundations/icon/icon';
@@ -12,13 +11,15 @@ import { Layout } from '~/components/ui/layout/layout/layout';
 import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
+import { BulkBar, type BulkBarAction } from '../../shared/bulk-bar';
+import { plainText } from '../../shared/display';
+import { ListEmpty, ListTable } from '../../shared/list-table';
 import { formatRelative } from '../../shared/relative-time';
+import { StatusMenu } from '../../shared/status-pill';
 import { listStyles } from '../../shared/styles';
 import type { BulkAction, Project } from '../api';
-import { displayStatus, plainText, projectIcon, tagColor } from '../display';
-import { type ProjectStatus, type ProjectTab } from '../search-params';
-import { BulkBar } from './bulk-bar';
-import { StatusMenu } from './status-pill';
+import { displayStatus, projectIcon, statusDot, tagColor } from '../display';
+import { type ProjectStatus, type ProjectTab, projectStatuses } from '../search-params';
 
 /** A row of the table: a project, or a search hit (read-only: it only knows its title and date). */
 export interface ProjectRow {
@@ -55,6 +56,8 @@ interface ProjectsTableProps {
 }
 
 const stopRow = (event: { stopPropagation: () => void }) => event.stopPropagation();
+
+const setLabel = { active: 'projects.actions.setActive', completed: 'projects.actions.setCompleted', on_hold: 'projects.actions.setOnHold' } as const;
 
 /** The projects list: icon, title and progress, description, goal, colored tags, status and last change, paginated and filling the available height. */
 export function ProjectsTable({
@@ -156,9 +159,17 @@ export function ProjectsTable({
 				cell: ({ row }) => {
 					const project = row.original.project;
 					if (!project) return null;
+					const status = displayStatus(project);
 					return (
 						<div className='w-fit' onClick={stopRow} onKeyDown={stopRow}>
-							<StatusMenu onChange={status => onSetStatus(project, status)} status={displayStatus(project)} />
+							<StatusMenu
+								ariaLabel={t('projects.status.change')}
+								current={{ dotClassName: statusDot[status], label: t(`projects.status.${status}`) }}
+								onChange={next => onSetStatus(project, next)}
+								options={projectStatuses.map(value => ({ dotClassName: statusDot[value], label: t(`projects.status.${value}`), value }))}
+								readOnly={status === 'archived'}
+								selected={project.status}
+							/>
 						</div>
 					);
 				},
@@ -206,54 +217,52 @@ export function ProjectsTable({
 		[goalTitles, locale, onOpen, onSetArchived, onSetStatus, t]
 	);
 
-	const empty = error ? (
-		<Layout.Stack align='center' className='px-4 py-16 text-center' gap='sm'>
-			<Typography.Span className='text-sm text-muted-foreground'>{t('projects.error.title')}</Typography.Span>
-			<Button onClick={onRetry} variant='secondary'>
-				<Button.Text>{t('projects.error.retry')}</Button.Text>
-			</Button>
-		</Layout.Stack>
-	) : (
-		<Layout.Stack align='center' className='px-4 py-16 text-center' gap='sm'>
-			<Icon aria-hidden className='text-muted-foreground' icon={emptyKind === 'search' ? SearchX : FolderKanban} size='xl' />
-			{emptyKind === 'search' ? (
-				<Typography.Span className='text-sm text-muted-foreground'>{t('projects.search.empty')}</Typography.Span>
-			) : (
-				<>
-					<Typography.Span className='text-sm font-medium'>{t(`projects.empty.${emptyKind}.title`)}</Typography.Span>
-					<Typography.Span className='text-xs text-muted-foreground'>{filtered ? t('projects.empty.filtered') : t(`projects.empty.${emptyKind}.description`)}</Typography.Span>
-				</>
-			)}
-		</Layout.Stack>
-	);
-
+	const archivedTab = emptyKind === 'archived';
+	const actions: BulkBarAction[] = archivedTab
+		? []
+		: projectStatuses.map(status => ({ dotClassName: statusDot[status], key: status, label: t(setLabel[status]), onClick: () => onBulkAction({ status }) }));
 	const hasSelection = selectable && selectedIds.size > 0;
 
 	return (
-		<div className={`${listStyles.card} flex min-h-64 min-h-0 flex-1 flex-col overflow-hidden`}>
-			<DataTable
-				cellClassName='px-5 py-3'
-				className='min-h-0'
-				columns={columns}
-				containerClassName='rounded-none border-0 bg-transparent'
-				data={rows}
-				emptyState={empty}
-				headerClassName='bg-transparent backdrop-blur'
-				isLoading={isLoading}
-				onRowClick={row => row.project && onOpen(row.project)}
-				rowClassName='border-border/60'
-				selection={selectable ? { getRowId: row => row.id, onSelectedIdsChange, selectedIds } : undefined}
-			/>
-			<div className='flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-3'>
-				{hasSelection ? (
-					<BulkBar archived={emptyKind === 'archived'} count={selectedIds.size} disabled={false} onAction={onBulkAction} onClear={() => onSelectedIdsChange(new Set())} />
+		<ListTable
+			columns={columns}
+			empty={
+				<ListEmpty
+					description={emptyKind === 'search' ? t('projects.search.empty') : filtered ? t('projects.empty.filtered') : t(`projects.empty.${emptyKind}.description`)}
+					error={error}
+					errorTitle={t('projects.error.title')}
+					icon={emptyKind === 'search' ? SearchX : FolderKanban}
+					onRetry={onRetry}
+					retryLabel={t('projects.error.retry')}
+					title={emptyKind === 'search' ? undefined : t(`projects.empty.${emptyKind}.title`)}
+				/>
+			}
+			footer={
+				hasSelection ? (
+					<BulkBar
+						actions={actions}
+						clearLabel={t('projects.actions.clearSelection')}
+						countLabel={t('projects.selection.count', { count: selectedIds.size })}
+						moreLabel={t('projects.actions.more')}
+						onClear={() => onSelectedIdsChange(new Set())}
+						trailing={{
+							icon: archivedTab ? RotateCcw : Archive,
+							key: 'archive',
+							label: archivedTab ? t('projects.actions.restore') : t('projects.actions.archive'),
+							onClick: () => onBulkAction({ archived: !archivedTab }),
+						}}
+					/>
 				) : (
 					<Typography.Span className='text-sm text-muted-foreground tabular-nums'>
 						{isLoading ? '' : t(total === 1 ? 'projects.selection.total_one' : 'projects.selection.total_other', { count: total })}
 					</Typography.Span>
-				)}
-				<Pagination className='ml-auto' onPageChange={onPageChange} page={page} pageCount={pageCount} pageSize={pageSize} showEdges={false} showSummary={false} total={total} />
-			</div>
-		</div>
+				)
+			}
+			isLoading={isLoading}
+			onRowClick={row => row.project && onOpen(row.project)}
+			pagination={{ onPageChange, page, pageCount, pageSize, total }}
+			rows={rows}
+			selection={selectable ? { getRowId: row => row.id, onSelectedIdsChange, selectedIds } : undefined}
+		/>
 	);
 }
