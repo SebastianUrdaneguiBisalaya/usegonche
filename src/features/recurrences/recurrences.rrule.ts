@@ -1,6 +1,9 @@
-import { Frequency, RRule } from 'rrule';
+import rrule, { type Frequency, type RRule } from 'rrule';
 
-const FREQUENCIES: Frequency[] = [Frequency.DAILY, Frequency.WEEKLY, Frequency.MONTHLY, Frequency.YEARLY];
+// `rrule` is CommonJS: Node ESM only exposes its default export, so the values come from it (the named imports above are types only).
+const { RRule: RRuleClass, Frequency: Freq } = rrule;
+
+const FREQUENCIES: Frequency[] = [Freq.DAILY, Freq.WEEKLY, Freq.MONTHLY, Freq.YEARLY];
 const MAX_INTERVAL = 1000;
 
 /**
@@ -11,10 +14,10 @@ const MAX_INTERVAL = 1000;
 export const buildRule = (rule: string, startDate: Date): RRule | null => {
 	if (/DTSTART|TZID|RDATE|EXDATE/i.test(rule)) return null;
 	try {
-		const options = RRule.parseString(rule);
+		const options = RRuleClass.parseString(rule);
 		if (options.freq === undefined || !FREQUENCIES.includes(options.freq)) return null;
 		if ((options.interval ?? 1) > MAX_INTERVAL) return null;
-		return new RRule({ ...options, dtstart: startDate });
+		return new RRuleClass({ ...options, dtstart: startDate });
 	} catch {
 		return null;
 	}
