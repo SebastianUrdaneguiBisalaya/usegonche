@@ -96,7 +96,7 @@ describe('POST /projects', () => {
 		['unknown key', { ownerId: 'x', title: 'a' }],
 		['bad goal id', { goalId: 'nope', title: 'a' }],
 		['bad tag id', { tagIds: ['nope'], title: 'a' }],
-		['non-JSON description', { description: 'plain', title: 'a' }],
+		['oversized description', { description: 'x'.repeat(100_001), title: 'a' }],
 	])('answers 422 for %s', async (_name, payload) => {
 		const { app, prisma } = setup();
 		const res = await app.request('/projects', jsonRequest('POST', payload));

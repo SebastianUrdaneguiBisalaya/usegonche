@@ -67,7 +67,7 @@ describe('POST /goals', () => {
 		['empty title', { title: ' ' }],
 		['unknown key', { ownerId: 'x', title: 'a' }],
 		['bad date', { targetDate: '31/12/2026', title: 'a' }],
-		['non-JSON description', { description: '<p>x</p>', title: 'a' }],
+		['oversized description', { description: 'x'.repeat(100_001), title: 'a' }],
 	])('answers 422 for %s', async (_name, body) => {
 		const { app, prisma } = setup();
 		const res = await app.request('/goals', jsonRequest('POST', body));

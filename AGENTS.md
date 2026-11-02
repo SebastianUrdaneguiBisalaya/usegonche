@@ -31,7 +31,7 @@ Principles: suggestions are explainable (reason codes, not opaque scores); repla
 
 In the MVP: the Flow Cycle (inbox, projects, goals, tasks with dependencies/blockers/subtasks, notes, attachments, tags, availability, calendar events, daily plan, time blocks, functional history, daily/weekly review, "what next" suggestions).
 
-Rich text (TipTap on the frontend) is stored as a **`text` column holding the serialized TipTap JSON string** (never a `Json`/`jsonb` column). The API treats it as opaque text: validate it is parseable and bounded in size, never query inside it. Full-text search will need a separate plain-text column later. Files live in Supabase Storage. Backend first; frontend later.
+Rich text (TipTap on the frontend) is converted to **Markdown on the client** and stored as a plain **`text` column** (never a `Json`/`jsonb` column). The API only bounds its size (`markdownSchema`, `src/lib/markdown.ts`); it does not parse it. Being plain text, it is searchable directly by full-text search (no separate plain-text column). Files live in Supabase Storage. Backend first; frontend later.
 
 ### Deferred features (out of the MVP, to review later)
 

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { hasChanges } from '../../lib/diff.js';
+import { markdownSchema } from '../../lib/markdown.js';
 import { paginationQuery } from '../../lib/pagination.js';
-import { richTextSchema } from '../../lib/rich-text.js';
 import { buildRule } from './recurrences.rrule.js';
 
 const date = z.iso.date().transform(value => new Date(value));
@@ -24,7 +24,7 @@ const priority = z.enum(['low', 'medium', 'high', 'urgent']);
 
 export const createRecurrenceSchema = z
 	.strictObject({
-		description: richTextSchema.nullish(),
+		description: markdownSchema.nullish(),
 		durationMinutes: durationMinutes.nullish(),
 		estimatedMinutes: z.number().int().min(1).max(100_000).nullish(),
 		goalId: z.uuid().nullish(),
@@ -43,7 +43,7 @@ export const createRecurrenceSchema = z
 /** `startMinute` and `durationMinutes` must end up both set or both null. Applies to future occurrences that are still `todo`; past, started and finished occurrences are never touched. `tagIds` replaces the whole set. */
 export const updateRecurrenceSchema = z
 	.strictObject({
-		description: richTextSchema.nullable(),
+		description: markdownSchema.nullable(),
 		durationMinutes: durationMinutes.nullable(),
 		estimatedMinutes: z.number().int().min(1).max(100_000).nullable(),
 		goalId: z.uuid().nullable(),

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { hasChanges } from '../../lib/diff.js';
+import { markdownSchema } from '../../lib/markdown.js';
 import { paginationQuery } from '../../lib/pagination.js';
-import { richTextSchema } from '../../lib/rich-text.js';
 
 const title = z.string().trim().min(1).max(200);
 const tagIds = z
@@ -12,7 +12,7 @@ const tagIds = z
 export const projectStatuses = ['active', 'on_hold', 'completed'] as const;
 
 export const createProjectSchema = z.strictObject({
-	description: richTextSchema.nullish(),
+	description: markdownSchema.nullish(),
 	goalId: z.uuid().nullish(),
 	/** Converts this pending inbox item into the project (atomic). */
 	originInboxItemId: z.uuid().nullish(),
@@ -23,7 +23,7 @@ export const createProjectSchema = z.strictObject({
 /** `tagIds` replaces the whole tag set; `goalId: null` unlinks the goal. */
 export const updateProjectSchema = z
 	.strictObject({
-		description: richTextSchema.nullable(),
+		description: markdownSchema.nullable(),
 		goalId: z.uuid().nullable(),
 		status: z.enum(projectStatuses),
 		tagIds,

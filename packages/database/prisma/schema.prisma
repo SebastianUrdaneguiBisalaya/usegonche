@@ -20,7 +20,7 @@ datasource db {
 // Conventions (see AGENTS.md > Database & migrations):
 // - Ids are UUID v4: `@db.Uuid @default(uuid(4))`. Only `Profile.id` is supplied by Supabase (mirrors `auth.users.id`).
 // - Every user-owned table has `ownerId` (column `owner_id`) -> `Profile.id`.
-// - No Json columns. Rich text is stored as `text`.
+// - No Json columns. Rich text is stored as Markdown in `text` columns.
 // - Timestamps are `timestamptz`.
 
 /// App-level profile and the owner of every resource. The identity itself lives in
@@ -162,7 +162,7 @@ enum ProjectStatus {
 }
 
 /// Outcome the user wants to reach; groups projects (1:N). Never deleted, only archived.
-/// `description` is serialized TipTap JSON (opaque text, validated and bounded by the API).
+/// `description` is Markdown (bounded by the API).
 model Goal {
   id          String     @id @default(uuid(4)) @db.Uuid
   ownerId     String     @map("owner_id") @db.Uuid
@@ -258,7 +258,7 @@ enum TaskOrigin {
 /// deadlines, not planning), derived progress (from subtasks) and derived blocking (dependencies + open blockers) are never stored.
 /// Planning (when to work on it) lives in the daily plan / time blocks, not here.
 /// `completedAt` is set when the status becomes `done` and cleared when reopened. Subtasks are single level (`parentId`).
-/// `description` is serialized TipTap JSON (opaque text).
+/// `description` is Markdown.
 model Task {
   id                String       @id @default(uuid(4)) @db.Uuid
   ownerId           String       @map("owner_id") @db.Uuid
@@ -357,8 +357,8 @@ model TaskTag {
   @@map("task_tags")
 }
 
-/// Free-form document (the only note entity, no separate "document"). `body` is serialized TipTap JSON (opaque text,
-/// validated and bounded by the API, never queried). Deleting a project keeps its notes (unlinks them); notes are deleted explicitly.
+/// Free-form document (the only note entity, no separate "document"). `body` is Markdown (bounded by the API).
+/// Deleting a project keeps its notes (unlinks them); notes are deleted explicitly.
 model Note {
   id                String   @id @default(uuid(4)) @db.Uuid
   ownerId           String   @map("owner_id") @db.Uuid
