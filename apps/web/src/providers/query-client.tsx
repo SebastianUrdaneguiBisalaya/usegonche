@@ -1,4 +1,5 @@
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { getApiErrorMessage, isNotFound, isSessionExpired } from '~/lib/api-error';
 
@@ -17,38 +18,49 @@ function handleError(error: Error, id?: string) {
 	});
 }
 
+function makeQueryClient() {
+	return new QueryClient({
+		defaultOptions: {
+			mutations: {
+				retry: false,
+			},
+			queries: {
+				gcTime: 30 * 60 * 1000,
+				networkMode: 'online',
+				refetchOnMount: true,
+				refetchOnReconnect: true,
+				refetchOnWindowFocus: false,
+				retry: 1,
+				staleTime: 15 * 60 * 1000,
+			},
+		},
+		mutationCache: new MutationCache({
+			onError: error => handleError(error),
+		}),
+		// One toast per failing resource. A query with `meta: { optional: true }` reads something that may not exist yet, so its 404 is an answer, not a failure.
+		queryCache: new QueryCache({
+			onError: (error, query) => {
+				// `silent` queries (the session check) report their failure through their own state.
+				if (query.meta?.silent || (query.meta?.optional && isNotFound(error))) return;
+				handleError(error, `query-${String(query.queryKey[0])}`);
+			},
+		}),
+	});
+}
+
+let browserQueryClient: QueryClient | undefined;
+
 /**
- * Module singleton so non-React code (route loaders, session-expiry handler)
- * shares the same cache as the hooks.
+ * One client per request on the server (a shared one would hand one user's cached data to the next), one for the whole life of the tab in the
+ * browser, so every hook and the session-expiry handler share the same cache.
  */
-const queryClient = new QueryClient({
-	defaultOptions: {
-		mutations: {
-			retry: false,
-		},
-		queries: {
-			gcTime: 30 * 60 * 1000,
-			networkMode: 'online',
-			refetchOnMount: true,
-			refetchOnReconnect: true,
-			refetchOnWindowFocus: false,
-			retry: 1,
-			staleTime: 15 * 60 * 1000,
-		},
-	},
-	mutationCache: new MutationCache({
-		onError: error => handleError(error),
-	}),
-	// One toast per failing resource. A query with `meta: { optional: true }` reads something that may not exist yet, so its 404 is an answer, not a failure.
-	queryCache: new QueryCache({
-		onError: (error, query) => {
-			// `silent` queries (the session check) report their failure through their own state.
-			if (query.meta?.silent || (query.meta?.optional && isNotFound(error))) return;
-			handleError(error, `query-${String(query.queryKey[0])}`);
-		},
-	}),
-});
+function getQueryClient(): QueryClient {
+	if (typeof window === 'undefined') return makeQueryClient();
+	browserQueryClient ??= makeQueryClient();
+	return browserQueryClient;
+}
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
+	const [queryClient] = useState(getQueryClient);
 	return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }
