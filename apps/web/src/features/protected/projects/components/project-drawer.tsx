@@ -12,6 +12,7 @@ import { Layout } from '~/components/ui/layout/layout/layout';
 import { Drawer } from '~/components/ui/overlays-feedback/drawer/drawer';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
+import { diffPayload } from '~/utils/diff-payload';
 import { formatRelative } from '../../shared/relative-time';
 import { type Project, useProjectFiles, useProjectNotes, useProjectTasks, useSetArchived, useUpdateProject } from '../api';
 import { displayStatus, projectIcon } from '../display';
@@ -33,6 +34,9 @@ const toFormValues = (project: Project): ProjectFormValues => ({
 	tagIds: project.tags.map(tag => tag.id),
 	title: project.title,
 });
+
+/** Same values with the tags in a fixed order, so picking them in another order is not a change. */
+const comparable = (values: ProjectFormValues): ProjectFormValues => ({ ...values, tagIds: [...values.tagIds].sort() });
 
 const formatSize = (bytes: number): string => (bytes < 1024 ? `${bytes} B` : bytes < 1_048_576 ? `${(bytes / 1024).toFixed(0)} KB` : `${(bytes / 1_048_576).toFixed(1)} MB`);
 
@@ -154,8 +158,12 @@ function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'
 							defaultValues={toFormValues(project)}
 							mode='onSubmit'
 							onSubmit={async values => {
+								// Only what changed is sent (tags compared as a set); nothing changed, nothing requested.
+								const changed = diffPayload<ProjectFormValues>(comparable(toFormValues(project)), comparable(values));
+								if (Object.keys(changed).length === 0) return;
+								const { description, goalId, ...rest } = changed;
 								const next = await update.mutateAsync({
-									changes: { description: values.description || null, goalId: values.goalId || null, status: values.status, tagIds: values.tagIds, title: values.title },
+									changes: { ...rest, ...(description !== undefined && { description: description || null }), ...(goalId !== undefined && { goalId: goalId || null }) },
 									id: project.id,
 								});
 								onChange(next);

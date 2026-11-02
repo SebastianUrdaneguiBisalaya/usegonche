@@ -137,8 +137,16 @@ export default function ProjectsRoute() {
 
 	const onBulkAction = useCallback(
 		(action: BulkAction) => {
+			// Projects already in the target state are left alone.
+			const byId = new Map((list.data?.data ?? []).map(project => [project.id, project]));
+			const ids = [...selectedIds].filter(id => {
+				const project = byId.get(id);
+				if (!project) return true;
+				return 'status' in action ? project.status !== action.status : Boolean(project.archivedAt) !== action.archived;
+			});
+			if (ids.length === 0) return setSelectedIds(emptyIds);
 			bulk.mutate(
-				{ action, ids: [...selectedIds] },
+				{ action, ids },
 				{
 					onSuccess: count => {
 						setSelectedIds(emptyIds);
@@ -147,7 +155,7 @@ export default function ProjectsRoute() {
 				}
 			);
 		},
-		[bulk, selectedIds, t]
+		[bulk, list.data, selectedIds, t]
 	);
 
 	const tabs = useMemo<StatusTab<(typeof projectTabs)[number]>[]>(
