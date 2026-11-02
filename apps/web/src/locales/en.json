@@ -569,5 +569,97 @@
       "loadError": "Could not load this section.",
       "retry": "Retry"
     }
+  },
+  "tags": {
+    "title": "Tags",
+    "subtitle": "Organize your content with tags.",
+    "new": "New tag",
+    "search": {
+      "placeholder": "Search tags...",
+      "label": "Search tags",
+      "clear": "Clear search",
+      "empty": "No tag matches your search."
+    },
+    "add": {
+      "placeholder": "Add a tag name...",
+      "label": "New tag name",
+      "submit": "Add tag"
+    },
+    "sort": {
+      "label": "Sort by",
+      "name": "Name (A–Z)",
+      "updated": "Recently updated",
+      "created": "Newest first",
+      "tasks": "Most tasks",
+      "projects": "Most projects",
+      "notes": "Most notes"
+    },
+    "filters": {
+      "page": {
+        "label": "Page",
+        "value": "Page: {{page}}"
+      }
+    },
+    "columns": {
+      "tag": "Tag",
+      "usedIn": "Used in",
+      "created": "Created",
+      "updated": "Updated"
+    },
+    "usage": {
+      "tasks_one": "{{count}} task",
+      "tasks_other": "{{count}} tasks",
+      "projects_one": "{{count}} project",
+      "projects_other": "{{count}} projects",
+      "notes_one": "{{count}} note",
+      "notes_other": "{{count}} notes",
+      "openProjects": "Show projects with this tag"
+    },
+    "selection": {
+      "count": "{{count}} selected",
+      "total_one": "{{count}} tag",
+      "total_other": "{{count}} tags"
+    },
+    "actions": {
+      "rename": "Rename",
+      "delete": "Delete",
+      "deleteSelected": "Delete selected",
+      "more": "More actions",
+      "clearSelection": "Clear selection"
+    },
+    "toast": {
+      "created": "Tag created",
+      "updated": "Tag updated successfully",
+      "deleted_one": "Tag deleted",
+      "deleted_other": "{{count}} tags deleted"
+    },
+    "empty": {
+      "title": "No tags yet",
+      "description": "Add your first tag above to start organizing."
+    },
+    "error": {
+      "title": "Could not load your tags",
+      "retry": "Retry"
+    },
+    "rename": {
+      "title": "Rename tag",
+      "description": "The new name shows everywhere the tag is used.",
+      "label": "Name",
+      "placeholder": "Tag name",
+      "required": "Give the tag a name.",
+      "tooLong": "Use at most {{max}} characters.",
+      "exists": "You already have a tag with this name.",
+      "save": "Save name",
+      "cancel": "Cancel"
+    },
+    "delete": {
+      "title_one": "Delete this tag?",
+      "title_other": "Delete {{count}} tags?",
+      "unused": "No item uses it. This can't be undone.",
+      "used_one": "It will be removed from {{count}} item; the items stay. This can't be undone.",
+      "used_other": "It will be removed from {{count}} items; the items stay. This can't be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    }
   }
 }
