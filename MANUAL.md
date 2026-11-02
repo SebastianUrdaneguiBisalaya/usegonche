@@ -157,6 +157,53 @@ These are run by you in the Supabase SQL editor. They are re-runnable.
 
 Do not commit the file with the real URL or secret filled in.
 
+### 4.4 Checklist: what to run after a new migration
+
+Follow this whenever a migration is created (by you or by someone else).
+
+**If you created it (developer who changed `schema.prisma`):**
+
+```bash
+# 1. Create and apply it to YOUR Supabase project (asks for a name)
+pnpm --filter @usegonche/database migrate:dev
+
+# 2. Regenerate the Prisma clients
+pnpm --filter @usegonche/database generate
+
+# 3. Rebuild the typed client if routes or schemas changed
+pnpm --filter @usegonche/api-client build
+
+# 4. Check everything still compiles and passes
+pnpm typecheck && pnpm lint && pnpm test
+
+# 5. Commit the schema AND the new migration folder together
+git add packages/database/prisma
+```
+
+**If you pulled a branch that contains new migrations:**
+
+```bash
+pnpm install                                        # also regenerates the Prisma clients
+pnpm --filter @usegonche/database migrate:deploy    # applies the pending migrations to your database
+pnpm --filter @usegonche/api-client build           # if the API changed
+```
+
+If your API fails with Prisma errors after a pull, you skipped `migrate:deploy` or `generate`.
+
+**Releasing to production (after the PR is merged):**
+
+```bash
+# 1. FIRST, with the production DIRECT_URL (your machine or CI). Never from the API container
+pnpm --filter @usegonche/database migrate:deploy
+
+# 2. THEN deploy the new API version (section 5)
+./scripts/deploy.prod.sh
+```
+
+Why this order: the new code expects the new tables or columns, so the database must change first. Write migrations so the **previous** API version still works against them (add columns or tables; remove or rename in a later release), because there is a short window where the old code runs on the new schema.
+
+If the migration came with a manual SQL file (section 4.3), run that in the Supabase SQL editor too.
+
 ## 5. Production
 
 Pick **one** target. Both need the same env variables.
@@ -225,6 +272,7 @@ Set the env variables in the host (there is no `.env` file in production images)
 3. New env variables are added to `.env.example` and to the production environment.
 4. Deploy (5.1, 5.2 or 5.3) and check `/health`.
 5. Any new manual SQL (4.3) was run by you.
+6. For a migration, follow the checklist in 4.4.
 
 ## 7. Troubleshooting
 
