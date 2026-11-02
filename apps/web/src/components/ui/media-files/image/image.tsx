@@ -79,10 +79,22 @@ function ImageImg({
   ...props
 }: ImageImgProps) {
   const { status, setStatus } = useImageContext();
+  const imgRef = React.useRef<HTMLImageElement>(null);
+
+  // With SSR the image can finish loading before hydration, so React never
+  // sees the `load` event. Sync the status from the DOM on mount.
+  React.useEffect(() => {
+    const img = imgRef.current;
+    if (!img?.complete) return;
+    setStatus(img.naturalWidth > 0 ? "loaded" : "error");
+  }, [
+    setStatus,
+  ]);
 
   return (
     // biome-ignore lint/performance/noImgElement: this library isn't Next.js-only; `next/image` can't be assumed. Fill/lazy-loading are handled with plain CSS/HTML instead.
     <img
+      ref={imgRef}
       className={cn(
         "object-cover transition-opacity duration-300 ease-in-out",
         fill && "absolute inset-0 h-full w-full",
