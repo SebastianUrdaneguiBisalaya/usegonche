@@ -9,7 +9,10 @@ export type ForgotPasswordInput = Body<(typeof api.auth)['forgot-password']['$po
 export type GoogleLoginInput = Body<typeof api.auth.google.$post>;
 export type ResetPasswordInput = Body<(typeof api.auth)['reset-password']['$post']>;
 
-const sessionKey = ['session'] as const;
+export const sessionKey = ['session'] as const;
+
+/** What `GET /me` answers: the signed-in user with the profile. */
+export type Session = Data<Awaited<ReturnType<typeof api.me.$get>>>;
 
 /**
  * Who is signed in, straight from `GET /me`: the tokens are httpOnly cookies the page cannot read, so the API is the only source of truth
