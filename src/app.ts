@@ -1,6 +1,7 @@
 import { supabaseMiddleware } from '@usegonche/auth/hono';
 import { Hono } from 'hono';
 import type { AppEnv } from './env.js';
+import internalReminders from './features/reminders/reminders.internal.routes.js';
 import { onError, onNotFound } from './middleware/error.js';
 import { prismaMiddleware } from './middleware/prisma.js';
 import { rateLimit } from './middleware/rate-limit.js';
@@ -14,6 +15,7 @@ const app = new Hono<AppEnv>()
 	.use(prismaMiddleware())
 	.use(storageMiddleware())
 	.get('/', c => c.text('Hello Hono!'))
+	.route('/internal/reminders', internalReminders)
 	.route('/', routes)
 	.onError(onError)
 	.notFound(onNotFound);

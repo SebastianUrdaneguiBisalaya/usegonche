@@ -60,6 +60,7 @@ model Profile {
   noteRevisions       NoteRevision[]
   templates           Template[]
   templateItems       TemplateItem[]
+  reminders           Reminder[]
 
   @@map("profiles")
 }
@@ -299,6 +300,7 @@ model Task {
   timeBlocks      TimeBlock[]
   events          TaskEvent[]
   reviewDecisions ReviewDecision[]
+  reminders       Reminder[]
 
   @@unique([recurrenceId, occurrenceDate])
   @@index([ownerId, status, createdAt])
@@ -374,6 +376,7 @@ model Note {
   tasks           TaskNote[]
   attachments     Attachment[]
   revisions       NoteRevision[]
+  reminders       Reminder[]
 
   @@index([ownerId, createdAt])
   @@index([projectId])
@@ -480,7 +483,8 @@ model CalendarEvent {
   createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner     Profile    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  reminders Reminder[]
 
   @@index([ownerId, startsAt])
   @@map("calendar_events")
@@ -819,4 +823,41 @@ model TemplateItemTag {
   @@id([itemId, tagId])
   @@index([tagId])
   @@map("template_item_tags")
+}
+
+enum ReminderStatus {
+  pending
+  sent
+  dismissed
+}
+
+/// A fire time attached to exactly one task, calendar event or note (CHECK in the migration). Not a deadline: it never reads or
+/// changes a task's due date. `pending` reminders whose `remindAt` has passed are claimed by the processor (`pending -> sent`,
+/// one conditional update per reminder, so overlapping runs never deliver twice). Snoozing moves `remindAt` forward and returns
+/// the reminder to `pending`. Deleting the target deletes its reminders.
+model Reminder {
+  id              String         @id @default(uuid(4)) @db.Uuid
+  ownerId         String         @map("owner_id") @db.Uuid
+  taskId          String?        @map("task_id") @db.Uuid
+  calendarEventId String?        @map("calendar_event_id") @db.Uuid
+  noteId          String?        @map("note_id") @db.Uuid
+  remindAt        DateTime       @map("remind_at") @db.Timestamptz(6)
+  status          ReminderStatus @default(pending)
+  snoozeCount     Int            @default(0) @map("snooze_count")
+  sentAt          DateTime?      @map("sent_at") @db.Timestamptz(6)
+  dismissedAt     DateTime?      @map("dismissed_at") @db.Timestamptz(6)
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner         Profile        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  task          Task?          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  calendarEvent CalendarEvent? @relation(fields: [calendarEventId], references: [id], onDelete: Cascade)
+  note          Note?          @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, status, remindAt])
+  @@index([status, remindAt])
+  @@index([taskId])
+  @@index([calendarEventId])
+  @@index([noteId])
+  @@map("reminders")
 }
