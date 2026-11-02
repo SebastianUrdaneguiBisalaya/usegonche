@@ -1,10 +1,27 @@
-import { Navigate, Outlet } from 'react-router';
+import { createClient } from '@usegonche/api-client';
+import { type LoaderFunctionArgs, Navigate, Outlet, redirect } from 'react-router';
 import authBg from '~/assets/bg-auth.webp';
 import icon from '~/assets/usegonche-icon.png';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Image } from '~/components/ui/media-files/image/image';
+import { API_BASE } from '~/lib/api';
 import { useSession } from './api';
+
+/**
+ * Signed-in visitors never see the auth pages: the session cookie of the request is forwarded to `GET /v1/me` and a valid one redirects to `/`
+ * before anything renders. It only works when the browser sends that cookie to the web server too (same host in dev, a shared cookie domain
+ * in production, see MANUAL.md); otherwise this stays silent and the client-side check in the component takes over.
+ */
+export async function loader({ request }: LoaderFunctionArgs) {
+	const cookie = request.headers.get('cookie');
+	if (!cookie) return null;
+	const res = await createClient(API_BASE, { headers: { cookie } })
+		.me.$get()
+		.catch(() => undefined);
+	if (res?.ok) throw redirect('/');
+	return null;
+}
 
 /** Wraps every `/auth/*` page: dark-only split screen with the artwork on the left and a glass card on the right. */
 export default function AuthLayout() {

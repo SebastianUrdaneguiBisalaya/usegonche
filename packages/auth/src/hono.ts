@@ -9,6 +9,8 @@ import type { CookieOptions } from 'hono/utils/cookie';
 export type SupabaseClient = ReturnType<typeof createServerClient>;
 
 export type SupabaseBindings = {
+	/** Domain of the session cookies (e.g. `.example.com`) so a web app on another subdomain can read them. Unset = host-only cookies. */
+	COOKIE_DOMAIN?: string;
 	SUPABASE_PUBLISHABLE_KEY: string;
 	SUPABASE_URL: string;
 };
@@ -35,12 +37,13 @@ export const getSupabase = (c: Context): SupabaseClient => c.get('supabase');
  * Works on Node and Cloudflare Workers: variables are read with `hono/adapter` (process.env or bindings).
  */
 export const supabaseMiddleware = (): MiddlewareHandler => async (c, next) => {
-	const { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = env<SupabaseBindings>(c);
+	const { COOKIE_DOMAIN, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = env<SupabaseBindings>(c);
 	if (!SUPABASE_URL) throw new Error('SUPABASE_URL missing!');
 	if (!SUPABASE_PUBLISHABLE_KEY) throw new Error('SUPABASE_PUBLISHABLE_KEY missing!');
 
 	const token = bearerToken(c);
 	const supabase = createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+		cookieOptions: COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : undefined,
 		cookies: {
 			getAll() {
 				return parseCookieHeader(c.req.header('Cookie') ?? '');
