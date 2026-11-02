@@ -2,17 +2,43 @@ import type { Prisma, PrismaClient, Project, ProjectStatus, Tag } from '@usegonc
 import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
+import { type PageParams, pageArgs } from '../../lib/pagination.js';
 import { markConverted } from '../inbox/inbox.service.js';
-import type { CreateProjectInput, UpdateProjectInput } from './projects.schemas.js';
+import type { CreateProjectInput, projectSortFields, UpdateProjectInput } from './projects.schemas.js';
+
+type ProjectSort = (typeof projectSortFields)[number];
 
 type Db = PrismaClient | Prisma.TransactionClient;
 
-export type ProjectWithTags = Project & { tags: Tag[] };
+/** Progress of a project: tasks that count (cancelled ones do not) and how many of them are done. */
+export type TaskCounts = { done: number; total: number };
+export type ProjectWithTags = Project & { tags: Tag[]; taskCounts: TaskCounts };
+export type ProjectListFilters = { archived: boolean; goalId?: string; order?: 'asc' | 'desc'; sort?: ProjectSort; status?: ProjectStatus; tagId?: string };
+/** Projects per tab: one counter per status (not archived) plus the archived ones. */
+export type ProjectCounts = Record<ProjectStatus | 'archived', number>;
+export type ProjectPage = { counts: ProjectCounts; items: ProjectWithTags[]; total: number };
 
 const withTags = { tags: { include: { tag: true }, orderBy: { tag: { name: 'asc' as const } } } };
 type Row = Project & { tags: { tag: Tag }[] };
-const flatten = ({ tags, ...project }: Row): ProjectWithTags => ({ ...project, tags: tags.map(link => link.tag) });
+
+/** Done / counting tasks of each project, from one grouped query (cancelled tasks are left out of the total). */
+const attachTaskCounts = async (prisma: Db, ownerId: string, rows: Row[]): Promise<ProjectWithTags[]> => {
+	if (rows.length === 0) return [];
+	const grouped = await prisma.task.groupBy({
+		_count: { _all: true },
+		by: ['projectId', 'status'],
+		where: scoped(ownerId, { projectId: { in: rows.map(row => row.id) }, status: { not: 'cancelled' as const } }),
+	});
+	const counts = new Map<string, TaskCounts>();
+	for (const group of grouped) {
+		if (!group.projectId) continue;
+		const current = counts.get(group.projectId) ?? { done: 0, total: 0 };
+		current.total += group._count._all;
+		if (group.status === 'done') current.done += group._count._all;
+		counts.set(group.projectId, current);
+	}
+	return rows.map(({ tags, ...project }) => ({ ...project, tags: tags.map(link => link.tag), taskCounts: counts.get(project.id) ?? { done: 0, total: 0 } }));
+};
 
 const invalidReference = (field: string): AppError => new AppError('validation_error', 422, [{ code: 'not_found', field }]);
 
@@ -29,22 +55,34 @@ const assertTags = async (prisma: Db, ownerId: string, tagIds: string[]): Promis
 	if (count !== tagIds.length) throw invalidReference('tagIds');
 };
 
-/** One page of projects (newest first) with the total. Archived projects are hidden unless asked for. */
-export const listProjects = async (
-	prisma: PrismaClient,
-	ownerId: string,
-	filters: { archived: boolean; goalId?: string; status?: ProjectStatus },
-	page: PageParams
-): Promise<Paged<ProjectWithTags>> => {
-	const where = scoped(ownerId, { archivedAt: filters.archived ? { not: null } : null, ...(filters.goalId && { goalId: filters.goalId }), ...(filters.status && { status: filters.status }) });
-	const [rows, total] = await Promise.all([prisma.project.findMany({ include: withTags, orderBy: pageOrder('createdAt'), ...pageArgs(page), where }), prisma.project.count({ where })]);
-	return { items: rows.map(flatten), total };
+const tagFilter = (tagId?: string) => (tagId ? { tags: { some: { tagId } } } : {});
+
+/**
+ * One page of projects (archived ones only when asked for) with the counter of every tab. The counters follow the goal and tag
+ * filters but not the status, so each tab shows how many projects it would hold. `total` is the count of the requested tab.
+ */
+export const listProjects = async (prisma: PrismaClient, ownerId: string, filters: ProjectListFilters, page: PageParams): Promise<ProjectPage> => {
+	const shared = { ...(filters.goalId && { goalId: filters.goalId }), ...tagFilter(filters.tagId) };
+	const where = scoped(ownerId, { archivedAt: filters.archived ? { not: null } : null, ...shared, ...(filters.status && { status: filters.status }) });
+	const sort = filters.sort ?? 'createdAt';
+	const order = filters.order ?? 'desc';
+	const orderBy = [{ [sort]: order } as Record<ProjectSort, 'asc' | 'desc'>, { id: order }];
+	const [rows, total, grouped, archived] = await Promise.all([
+		prisma.project.findMany({ include: withTags, orderBy, ...pageArgs(page), where }),
+		prisma.project.count({ where }),
+		prisma.project.groupBy({ _count: { _all: true }, by: ['status'], where: scoped(ownerId, { archivedAt: null, ...shared }) }),
+		prisma.project.count({ where: scoped(ownerId, { archivedAt: { not: null }, ...shared }) }),
+	]);
+	const counts: ProjectCounts = { active: 0, archived, completed: 0, on_hold: 0 };
+	for (const group of grouped) counts[group.status] = group._count._all;
+	return { counts, items: await attachTaskCounts(prisma, ownerId, rows), total };
 };
 
 export const getProject = async (prisma: Db, ownerId: string, id: string): Promise<ProjectWithTags> => {
 	const project = await prisma.project.findFirst({ include: withTags, where: scoped(ownerId, { id }) });
 	if (!project) throw new AppError('not_found', 404);
-	return flatten(project);
+	const [withCounts] = await attachTaskCounts(prisma, ownerId, [project]);
+	return withCounts as ProjectWithTags;
 };
 
 /** With `originInboxItemId` the inbox item is marked converted in the same transaction (404 if not the owner's, 409 if not pending). */

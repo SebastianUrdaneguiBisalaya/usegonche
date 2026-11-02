@@ -8,7 +8,14 @@ const TAG_ID = 'c4d5e6f7-1a2b-4c3d-8e9f-a0b1c2d3e4f5';
 const INBOX_ID = 'e1f2a3b4-5c6d-4e7f-8a9b-0c1d2e3f4a5b';
 const tag = { id: TAG_ID, name: 'work', ownerId: TEST_USER_ID };
 const row = { id: ID, ownerId: TEST_USER_ID, tags: [{ tag }], title: 'Launch' };
-const project = { id: ID, ownerId: TEST_USER_ID, tags: [tag], title: 'Launch' };
+const project = { id: ID, ownerId: TEST_USER_ID, tags: [tag], taskCounts: { done: 0, total: 0 }, title: 'Launch' };
+
+/** A mock client whose projects have no tasks unless a test says otherwise. */
+const createPrisma = () => {
+	const prisma = createMockPrisma();
+	vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+	return prisma;
+};
 
 // biome-ignore lint/suspicious/noExplicitAny: the mock rows are partial on purpose
 const asRow = (value: unknown): any => value;
@@ -21,18 +28,57 @@ const rejection = (promise: Promise<unknown>) =>
 
 describe('listProjects', () => {
 	it('hides archived by default, scopes by owner and flattens tags', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.project.findMany).mockResolvedValue(asRow([row]));
 
 		vi.mocked(prisma.project.count).mockResolvedValue(1);
+		vi.mocked(prisma.project.groupBy).mockResolvedValue([] as never);
 
-		expect(await listProjects(prisma, TEST_USER_ID, { archived: false }, { page: 1, pageSize: 20 })).toEqual({ items: [project], total: 1 });
-		expect(prisma.project.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 20, where: { archivedAt: null, ownerId: TEST_USER_ID } }));
+		expect(await listProjects(prisma, TEST_USER_ID, { archived: false }, { page: 1, pageSize: 20 })).toEqual({
+			counts: { active: 0, archived: 1, completed: 0, on_hold: 0 },
+			items: [project],
+			total: 1,
+		});
+		expect(prisma.project.findMany).toHaveBeenCalledWith(
+			expect.objectContaining({ orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: 0, take: 20, where: { archivedAt: null, ownerId: TEST_USER_ID } })
+		);
+	});
+
+	it('counts every tab with the goal and tag filters but not the status, and sorts as asked', async () => {
+		const prisma = createPrisma();
+		vi.mocked(prisma.project.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.project.count).mockResolvedValue(0);
+		vi.mocked(prisma.project.groupBy).mockResolvedValue([
+			{ _count: { _all: 3 }, status: 'active' },
+			{ _count: { _all: 2 }, status: 'on_hold' },
+		] as never);
+
+		const page = await listProjects(prisma, TEST_USER_ID, { archived: false, goalId: GOAL_ID, order: 'asc', sort: 'title', status: 'active', tagId: TAG_ID }, { page: 1, pageSize: 20 });
+		expect(page.counts).toEqual({ active: 3, archived: 0, completed: 0, on_hold: 2 });
+		const shared = { goalId: GOAL_ID, ownerId: TEST_USER_ID, tags: { some: { tagId: TAG_ID } } };
+		expect(prisma.project.groupBy).toHaveBeenCalledWith(expect.objectContaining({ where: { archivedAt: null, ...shared } }));
+		expect(prisma.project.findMany).toHaveBeenCalledWith(expect.objectContaining({ orderBy: [{ title: 'asc' }, { id: 'asc' }], where: { archivedAt: null, ...shared, status: 'active' } }));
+	});
+
+	it('attaches done / counting task totals per project (cancelled tasks are excluded by the query)', async () => {
+		const prisma = createPrisma();
+		vi.mocked(prisma.project.findMany).mockResolvedValue(asRow([row]));
+		vi.mocked(prisma.project.count).mockResolvedValue(1);
+		vi.mocked(prisma.project.groupBy).mockResolvedValue([] as never);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([
+			{ _count: { _all: 3 }, projectId: ID, status: 'done' },
+			{ _count: { _all: 1 }, projectId: ID, status: 'todo' },
+		] as never);
+
+		const { items } = await listProjects(prisma, TEST_USER_ID, { archived: false }, { page: 1, pageSize: 20 });
+		expect(items[0]?.taskCounts).toEqual({ done: 3, total: 4 });
+		expect(prisma.task.groupBy).toHaveBeenCalledWith(expect.objectContaining({ where: { ownerId: TEST_USER_ID, projectId: { in: [ID] }, status: { not: 'cancelled' } } }));
 	});
 
 	it('filters by goal and status', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.project.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.project.groupBy).mockResolvedValue([] as never);
 
 		await listProjects(prisma, TEST_USER_ID, { archived: true, goalId: GOAL_ID, status: 'on_hold' }, { page: 1, pageSize: 10 });
 		expect(vi.mocked(prisma.project.findMany).mock.calls[0]?.[0]?.where).toEqual({ archivedAt: { not: null }, goalId: GOAL_ID, ownerId: TEST_USER_ID, status: 'on_hold' });
@@ -41,13 +87,13 @@ describe('listProjects', () => {
 
 describe('getProject', () => {
 	it('returns the project with flattened tags', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(row));
 		expect(await getProject(prisma, TEST_USER_ID, ID)).toEqual(project);
 	});
 
 	it('throws 404 for another owner', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
 		expect(await rejection(getProject(prisma, OTHER_USER_ID, ID))).toMatchObject({ code: 'not_found', status: 404 });
 		expect(vi.mocked(prisma.project.findFirst).mock.calls[0]?.[0]?.where).toEqual({ id: ID, ownerId: OTHER_USER_ID });
@@ -58,7 +104,7 @@ describe('createProject', () => {
 	const input = { tagIds: [], title: 'Launch' };
 
 	it('creates a project with tags after checking goal and tags belong to the owner', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.goal.findFirst).mockResolvedValue(asRow({ id: GOAL_ID }));
 		vi.mocked(prisma.tag.count).mockResolvedValue(1);
 		vi.mocked(prisma.project.create).mockResolvedValue(asRow({ id: ID }));
@@ -73,7 +119,7 @@ describe('createProject', () => {
 	});
 
 	it('rejects a goal that is not the owner’s with 422', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.goal.findFirst).mockResolvedValue(null);
 
 		expect(await rejection(createProject(prisma, TEST_USER_ID, { ...input, goalId: GOAL_ID }))).toMatchObject({
@@ -85,7 +131,7 @@ describe('createProject', () => {
 	});
 
 	it('rejects tags that are not all the owner’s with 422', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.tag.count).mockResolvedValue(0);
 
 		expect(await rejection(createProject(prisma, TEST_USER_ID, { ...input, tagIds: [TAG_ID] }))).toMatchObject({ details: [{ code: 'not_found', field: 'tagIds' }], status: 422 });
@@ -93,7 +139,7 @@ describe('createProject', () => {
 	});
 
 	it('converts the origin inbox item in the same transaction', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.inboxItem.updateMany).mockResolvedValue({ count: 1 });
 		vi.mocked(prisma.project.create).mockResolvedValue(asRow({ id: ID }));
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(row));
@@ -104,7 +150,7 @@ describe('createProject', () => {
 	});
 
 	it('fails with 404 / 409 and creates nothing when the inbox item cannot be converted', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.inboxItem.updateMany).mockResolvedValue({ count: 0 });
 		vi.mocked(prisma.inboxItem.findFirst).mockResolvedValue(null);
 		expect(await rejection(createProject(prisma, TEST_USER_ID, { ...input, originInboxItemId: INBOX_ID }))).toMatchObject({ code: 'not_found', status: 404 });
@@ -120,7 +166,7 @@ describe('updateProject', () => {
 	const stored = { ...row, goalId: GOAL_ID, status: 'active' };
 
 	it('writes only the changed fields and replaces the tag set when it changes', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.tag.count).mockResolvedValue(1);
 		vi.mocked(prisma.project.updateMany).mockResolvedValue({ count: 1 });
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(stored));
@@ -132,7 +178,7 @@ describe('updateProject', () => {
 	});
 
 	it('is idempotent: same values and the same tags (any order) answer the project and write nothing', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(stored));
 		expect(await updateProject(prisma, TEST_USER_ID, ID, { goalId: GOAL_ID, status: 'active', tagIds: [TAG_ID], title: 'Launch' })).toEqual({ ...project, goalId: GOAL_ID, status: 'active' });
 		expect(prisma.project.updateMany).not.toHaveBeenCalled();
@@ -141,7 +187,7 @@ describe('updateProject', () => {
 	});
 
 	it('replaces only the tags when only they change', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.tag.count).mockResolvedValue(0);
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(stored));
 		await updateProject(prisma, TEST_USER_ID, ID, { tagIds: [] });
@@ -151,7 +197,7 @@ describe('updateProject', () => {
 	});
 
 	it('leaves tags alone when tagIds is not sent and unlinks the goal with null', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.project.updateMany).mockResolvedValue({ count: 1 });
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(stored));
 
@@ -162,7 +208,7 @@ describe('updateProject', () => {
 	});
 
 	it('throws 404 for another owner’s project without touching tags', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
 
 		expect(await rejection(updateProject(prisma, OTHER_USER_ID, ID, { tagIds: [] }))).toMatchObject({ code: 'not_found', status: 404 });
@@ -170,7 +216,7 @@ describe('updateProject', () => {
 	});
 
 	it('rejects a new goal that is not the owner’s with 422', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow({ ...stored, goalId: null }));
 		vi.mocked(prisma.goal.findFirst).mockResolvedValue(null);
 		expect(await rejection(updateProject(prisma, TEST_USER_ID, ID, { goalId: GOAL_ID }))).toMatchObject({ status: 422 });
@@ -180,7 +226,7 @@ describe('updateProject', () => {
 
 describe('archiveProject / unarchiveProject', () => {
 	it('archives only non-archived projects and touches nothing else (tasks stay)', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.project.updateMany).mockResolvedValue({ count: 1 });
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(row));
 
@@ -189,7 +235,7 @@ describe('archiveProject / unarchiveProject', () => {
 	});
 
 	it('unarchives only archived projects', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.project.updateMany).mockResolvedValue({ count: 1 });
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(asRow(row));
 
@@ -198,7 +244,7 @@ describe('archiveProject / unarchiveProject', () => {
 	});
 
 	it('throws 404 for another owner', async () => {
-		const prisma = createMockPrisma();
+		const prisma = createPrisma();
 		vi.mocked(prisma.project.updateMany).mockResolvedValue({ count: 0 });
 		vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
 		expect(await rejection(archiveProject(prisma, OTHER_USER_ID, ID))).toMatchObject({ code: 'not_found', status: 404 });

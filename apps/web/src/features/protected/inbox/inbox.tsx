@@ -7,15 +7,16 @@ import { toast } from 'sonner';
 import { Page } from '~/components/ui/layout/page/page';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
+import { ListSearch } from '../shared/list-search';
+import { PAGE_SIZE } from '../shared/paged';
+import { StatusTabs } from '../shared/status-tabs';
 import { type ConvertTarget, type InboxPage, inboxKey, inboxQuery, type SettableStatus, useBulkSetStatus, useConvert, useInbox, useInboxSearch, useSetStatus } from './api';
 import { BrainDump } from './components/brain-dump';
-import { InboxSearch } from './components/inbox-search';
 import { type InboxRow, InboxTable } from './components/inbox-table';
 import { QuickCapture } from './components/quick-capture';
 import { RangeSelect } from './components/range-select';
 import { SelectionBar } from './components/selection-bar';
-import { StatusTabs } from './components/status-tabs';
-import { inboxParsers, loadInboxParams, PAGE_SIZE } from './search-params';
+import { inboxParsers, inboxStatuses, loadInboxParams } from './search-params';
 
 interface LoaderData {
 	data: InboxPage;
@@ -105,6 +106,8 @@ export default function InboxPage() {
 		[convert, t]
 	);
 
+	const statusTabs = useMemo(() => inboxStatuses.map(value => ({ label: t(`inbox.tabs.${value}`), value })), [t]);
+
 	const pageIds = rows.map(row => row.id);
 	const selectedOnPage = pageIds.filter(id => selectedIds.has(id)).length;
 	const selectable = !searching && params.status !== 'converted';
@@ -119,7 +122,13 @@ export default function InboxPage() {
 					<Page.Description>{t('inbox.subtitle')}</Page.Description>
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
-					<InboxSearch onChange={q => void setParams({ page: 1, q })} value={params.q} />
+					<ListSearch
+						clearLabel={t('inbox.search.clear')}
+						label={t('inbox.search.label')}
+						onChange={q => void setParams({ page: 1, q })}
+						placeholder={t('inbox.search.placeholder')}
+						value={params.q}
+					/>
 					<RangeSelect onChange={range => void setParams({ page: 1, range })} value={params.range} />
 				</Page.Actions>
 			</Page.Header>
@@ -128,7 +137,7 @@ export default function InboxPage() {
 				<BrainDump />
 				<div className='flex min-h-0 flex-1 flex-col gap-4'>
 					<div className='flex flex-wrap items-center justify-between gap-3'>
-						<StatusTabs counts={counts} onChange={status => void setParams({ page: 1, q: '', status })} value={params.status} />
+						<StatusTabs ariaLabel={t('inbox.tabs.label')} counts={counts} onChange={status => void setParams({ page: 1, q: '', status })} tabs={statusTabs} value={params.status} />
 						{selectable && (
 							<SelectionBar
 								allSelected={pageIds.length > 0 && selectedOnPage === pageIds.length}

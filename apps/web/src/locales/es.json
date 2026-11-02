@@ -254,5 +254,161 @@
       "retry": "Reintentar"
     },
     "readOnly": "Los ítems convertidos son de solo lectura"
+  },
+  "projects": {
+    "title": "Proyectos",
+    "subtitle": "Planifica, organiza y sigue tus proyectos.",
+    "new": "Nuevo proyecto",
+    "search": {
+      "placeholder": "Buscar en proyectos...",
+      "label": "Buscar en proyectos",
+      "clear": "Borrar búsqueda",
+      "empty": "Ningún proyecto coincide con tu búsqueda."
+    },
+    "tabs": {
+      "label": "Estado del proyecto",
+      "active": "Activos",
+      "on_hold": "En pausa",
+      "completed": "Completados",
+      "archived": "Archivados"
+    },
+    "status": {
+      "active": "Activo",
+      "on_hold": "En pausa",
+      "completed": "Completado",
+      "archived": "Archivado",
+      "change": "Cambiar estado"
+    },
+    "filters": {
+      "goal": {
+        "label": "Filtrar por meta",
+        "all": "Todas las metas"
+      },
+      "tag": {
+        "label": "Filtrar por etiqueta",
+        "all": "Todas las etiquetas"
+      },
+      "page": {
+        "label": "Página",
+        "value": "Página: {{page}}"
+      }
+    },
+    "columns": {
+      "title": "Título",
+      "description": "Descripción",
+      "goal": "Meta",
+      "tags": "Etiquetas",
+      "status": "Estado",
+      "updated": "Actualizado"
+    },
+    "cell": {
+      "noGoal": "Sin meta",
+      "progress": "{{done}} de {{total}} tareas hechas",
+      "noTasks": "Aún sin tareas"
+    },
+    "selection": {
+      "count": "{{count}} seleccionados",
+      "total_one": "{{count}} proyecto",
+      "total_other": "{{count}} proyectos"
+    },
+    "actions": {
+      "open": "Abrir detalle",
+      "setActive": "Marcar activo",
+      "setOnHold": "Poner en pausa",
+      "setCompleted": "Marcar completado",
+      "archive": "Archivar",
+      "restore": "Restaurar",
+      "more": "Más acciones",
+      "rowMenu": "Acciones del proyecto",
+      "clearSelection": "Limpiar selección"
+    },
+    "toast": {
+      "created": "Proyecto creado",
+      "saved": "Cambios guardados",
+      "archived": "Proyecto archivado",
+      "restored": "Proyecto restaurado",
+      "statusChanged": "Estado actualizado",
+      "bulk": "{{count}} proyectos actualizados",
+      "undo": "Deshacer",
+      "tagCreated": "Etiqueta creada"
+    },
+    "empty": {
+      "active": {
+        "title": "Sin proyectos activos",
+        "description": "Crea un proyecto o convierte un elemento de la bandeja para empezar."
+      },
+      "on_hold": {
+        "title": "Nada en pausa",
+        "description": "Los proyectos que pauses aparecen aquí."
+      },
+      "completed": {
+        "title": "Nada completado todavía",
+        "description": "Los proyectos terminados aparecen aquí."
+      },
+      "archived": {
+        "title": "Nada archivado",
+        "description": "Archiva los proyectos en los que ya no trabajas."
+      },
+      "filtered": "Ningún proyecto coincide con estos filtros."
+    },
+    "error": {
+      "title": "No se pudieron cargar tus proyectos",
+      "retry": "Reintentar"
+    },
+    "form": {
+      "title": {
+        "label": "Título",
+        "placeholder": "¿De qué trata este proyecto?",
+        "required": "Ponle un título al proyecto.",
+        "tooLong": "Usa como máximo {{max}} caracteres."
+      },
+      "description": {
+        "label": "Descripción",
+        "placeholder": "Objetivo, alcance, notas... (Markdown)"
+      },
+      "goal": {
+        "label": "Meta",
+        "none": "Sin meta",
+        "placeholder": "Elige una meta"
+      },
+      "tags": {
+        "label": "Etiquetas",
+        "placeholder": "Busca o crea etiquetas...",
+        "empty": "Aún no hay etiquetas. Escribe para crear una.",
+        "create": "Crear “{{name}}”"
+      },
+      "status": {
+        "label": "Estado"
+      },
+      "cancel": "Cancelar",
+      "create": "Crear proyecto",
+      "save": "Guardar cambios"
+    },
+    "modal": {
+      "title": "Nuevo proyecto",
+      "description": "Un proyecto agrupa las tareas necesarias para llegar a una meta."
+    },
+    "drawer": {
+      "close": "Cerrar",
+      "tabsLabel": "Secciones del proyecto",
+      "details": "Detalle",
+      "tasks": "Tareas",
+      "notes": "Notas",
+      "files": "Archivos",
+      "created": "Creado {{date}}",
+      "progress": "{{done}} de {{total}} tareas hechas",
+      "tasksEmpty": "Este proyecto aún no tiene tareas.",
+      "notesEmpty": "Este proyecto aún no tiene notas.",
+      "filesEmpty": "Este proyecto aún no tiene archivos.",
+      "loadError": "No se pudo cargar esta sección.",
+      "retry": "Reintentar",
+      "taskStatus": {
+        "todo": "Por hacer",
+        "in_progress": "En curso",
+        "done": "Hecha",
+        "cancelled": "Cancelada"
+      },
+      "due": "Vence {{date}}"
+    }
   }
 }

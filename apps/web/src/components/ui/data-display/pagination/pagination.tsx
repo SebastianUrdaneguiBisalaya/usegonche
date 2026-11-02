@@ -63,6 +63,16 @@ export interface PaginationProps {
    */
   readonly lang?: Partial<PaginationLang>;
   readonly className?: string;
+  /**
+   * Shows the "showing X–Y of Z" text next to the buttons.
+   * @default true
+   */
+  readonly showSummary?: boolean;
+  /**
+   * Shows the first/last page buttons next to previous/next.
+   * @default true
+   */
+  readonly showEdges?: boolean;
 }
 
 function generatePageNumbers(
@@ -162,6 +172,8 @@ export function Pagination({
   onPageChange,
   lang,
   className,
+  showSummary = true,
+  showEdges = true,
 }: PaginationProps) {
   const resolvedLang = { ...defaultPaginationLang, ...lang };
   const resolvedPageCount =
@@ -177,31 +189,35 @@ export function Pagination({
         className,
       )}
     >
-      <p
-        aria-live="polite"
-        className="text-xs font-primary text-muted-foreground"
-      >
-        {resolvedLang.summary(
-          (page - 1) * pageSize + 1,
-          Math.min(page * pageSize, total),
-          total,
-        )}
-      </p>
+      {showSummary && (
+        <p
+          aria-live="polite"
+          className="text-xs font-primary text-muted-foreground"
+        >
+          {resolvedLang.summary(
+            (page - 1) * pageSize + 1,
+            Math.min(page * pageSize, total),
+            total,
+          )}
+        </p>
+      )}
 
       <nav
         aria-label={resolvedLang.navigationLabel}
         className="flex items-center"
       >
-        <PageButton
-          aria-label={resolvedLang.firstPage}
-          disabled={page === 1}
-          onClick={() => onPageChange(1)}
-        >
-          <Icon
-            icon={ChevronsLeft}
-            size="sm"
-          />
-        </PageButton>
+        {showEdges && (
+          <PageButton
+            aria-label={resolvedLang.firstPage}
+            disabled={page === 1}
+            onClick={() => onPageChange(1)}
+          >
+            <Icon
+              icon={ChevronsLeft}
+              size="sm"
+            />
+          </PageButton>
+        )}
         <PageButton
           aria-label={resolvedLang.previousPage}
           disabled={page === 1}
@@ -245,16 +261,18 @@ export function Pagination({
             size="sm"
           />
         </PageButton>
-        <PageButton
-          aria-label={resolvedLang.lastPage}
-          disabled={page === resolvedPageCount}
-          onClick={() => onPageChange(resolvedPageCount)}
-        >
-          <Icon
-            icon={ChevronsRight}
-            size="sm"
-          />
-        </PageButton>
+        {showEdges && (
+          <PageButton
+            aria-label={resolvedLang.lastPage}
+            disabled={page === resolvedPageCount}
+            onClick={() => onPageChange(resolvedPageCount)}
+          >
+            <Icon
+              icon={ChevronsRight}
+              size="sm"
+            />
+          </PageButton>
+        )}
       </nav>
     </div>
   );

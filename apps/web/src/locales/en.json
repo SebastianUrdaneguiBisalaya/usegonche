@@ -254,5 +254,161 @@
       "retry": "Try again"
     },
     "readOnly": "Converted items are read-only"
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Plan, organize and track your projects.",
+    "new": "New project",
+    "search": {
+      "placeholder": "Search in projects...",
+      "label": "Search in projects",
+      "clear": "Clear search",
+      "empty": "No project matches your search."
+    },
+    "tabs": {
+      "label": "Project status",
+      "active": "Active",
+      "on_hold": "On hold",
+      "completed": "Completed",
+      "archived": "Archived"
+    },
+    "status": {
+      "active": "Active",
+      "on_hold": "On hold",
+      "completed": "Completed",
+      "archived": "Archived",
+      "change": "Change status"
+    },
+    "filters": {
+      "goal": {
+        "label": "Filter by goal",
+        "all": "All goals"
+      },
+      "tag": {
+        "label": "Filter by tag",
+        "all": "All tags"
+      },
+      "page": {
+        "label": "Page",
+        "value": "Page: {{page}}"
+      }
+    },
+    "columns": {
+      "title": "Title",
+      "description": "Description",
+      "goal": "Goal",
+      "tags": "Tags",
+      "status": "Status",
+      "updated": "Updated"
+    },
+    "cell": {
+      "noGoal": "No goal",
+      "progress": "{{done}} of {{total}} tasks done",
+      "noTasks": "No tasks yet"
+    },
+    "selection": {
+      "count": "{{count}} selected",
+      "total_one": "{{count}} project",
+      "total_other": "{{count}} projects"
+    },
+    "actions": {
+      "open": "Open details",
+      "setActive": "Set active",
+      "setOnHold": "Set on hold",
+      "setCompleted": "Set completed",
+      "archive": "Archive",
+      "restore": "Restore",
+      "more": "More actions",
+      "rowMenu": "Project actions",
+      "clearSelection": "Clear selection"
+    },
+    "toast": {
+      "created": "Project created",
+      "saved": "Changes saved",
+      "archived": "Project archived",
+      "restored": "Project restored",
+      "statusChanged": "Status updated",
+      "bulk": "{{count}} projects updated",
+      "undo": "Undo",
+      "tagCreated": "Tag created"
+    },
+    "empty": {
+      "active": {
+        "title": "No active projects",
+        "description": "Create a project or convert an inbox item to start one."
+      },
+      "on_hold": {
+        "title": "Nothing on hold",
+        "description": "Projects you pause show up here."
+      },
+      "completed": {
+        "title": "Nothing completed yet",
+        "description": "Finished projects show up here."
+      },
+      "archived": {
+        "title": "Nothing archived",
+        "description": "Archive the projects you no longer work on."
+      },
+      "filtered": "No projects match these filters."
+    },
+    "error": {
+      "title": "Could not load your projects",
+      "retry": "Retry"
+    },
+    "form": {
+      "title": {
+        "label": "Title",
+        "placeholder": "What is this project about?",
+        "required": "Give the project a title.",
+        "tooLong": "Use at most {{max}} characters."
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Goal, scope, notes... (Markdown)"
+      },
+      "goal": {
+        "label": "Goal",
+        "none": "No goal",
+        "placeholder": "Pick a goal"
+      },
+      "tags": {
+        "label": "Tags",
+        "placeholder": "Search or create tags...",
+        "empty": "No tags yet. Type to create one.",
+        "create": "Create “{{name}}”"
+      },
+      "status": {
+        "label": "Status"
+      },
+      "cancel": "Cancel",
+      "create": "Create project",
+      "save": "Save changes"
+    },
+    "modal": {
+      "title": "New project",
+      "description": "A project groups the tasks needed to reach a goal."
+    },
+    "drawer": {
+      "close": "Close",
+      "tabsLabel": "Project sections",
+      "details": "Details",
+      "tasks": "Tasks",
+      "notes": "Notes",
+      "files": "Files",
+      "created": "Created {{date}}",
+      "progress": "{{done}} of {{total}} tasks done",
+      "tasksEmpty": "This project has no tasks yet.",
+      "notesEmpty": "This project has no notes yet.",
+      "filesEmpty": "This project has no files yet.",
+      "loadError": "Could not load this section.",
+      "retry": "Retry",
+      "taskStatus": {
+        "todo": "To do",
+        "in_progress": "In progress",
+        "done": "Done",
+        "cancelled": "Cancelled"
+      },
+      "due": "Due {{date}}"
+    }
   }
 }

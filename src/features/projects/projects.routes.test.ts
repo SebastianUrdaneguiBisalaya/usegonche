@@ -6,13 +6,15 @@ const ID = '5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7e';
 const GOAL_ID = '9b7e4a10-3c52-4d8f-a1e6-0f2d3c4b5a69';
 const TAG_ID = 'c4d5e6f7-1a2b-4c3d-8e9f-a0b1c2d3e4f5';
 const row = { createdAt: new Date('2026-11-01T10:00:00.000Z'), id: ID, ownerId: TEST_USER_ID, tags: [], title: 'Launch' };
-const body = JSON.parse(JSON.stringify(row));
+const body = { ...JSON.parse(JSON.stringify(row)), taskCounts: { done: 0, total: 0 } };
 
 // biome-ignore lint/suspicious/noExplicitAny: the mock rows are partial on purpose
 const asRow = (value: unknown): any => value;
 
 const setup = (claims?: { sub: string } | null) => {
 	const prisma = createMockPrisma();
+	vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+	vi.mocked(prisma.project.groupBy).mockResolvedValue([] as never);
 	return { app: createTestApp(routes, { claims, path: '/projects', prisma }), prisma };
 };
 
@@ -39,7 +41,7 @@ describe('GET /projects', () => {
 
 		const res = await app.request('/projects');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [body], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(await res.json()).toEqual({ data: [body], meta: { counts: { active: 0, archived: 1, completed: 0, on_hold: 0 }, page: 1, pageCount: 1, pageSize: 50, total: 1 } });
 		expect(prisma.project.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { archivedAt: null, ownerId: TEST_USER_ID } }));
 	});
 
@@ -50,7 +52,16 @@ describe('GET /projects', () => {
 		expect(prisma.project.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { archivedAt: { not: null }, goalId: GOAL_ID, ownerId: TEST_USER_ID, status: 'on_hold' } }));
 	});
 
-	it.each(['goalId=nope', 'status=nope', 'archived=maybe', 'page=0'])('answers 422 for ?%s', async query => {
+	it('filters by tag and sorts as asked', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.project.findMany).mockResolvedValue([]);
+		await app.request(`/projects?tagId=${TAG_ID}&sort=updatedAt&order=asc`);
+		expect(prisma.project.findMany).toHaveBeenCalledWith(
+			expect.objectContaining({ orderBy: [{ updatedAt: 'asc' }, { id: 'asc' }], where: { archivedAt: null, ownerId: TEST_USER_ID, tags: { some: { tagId: TAG_ID } } } })
+		);
+	});
+
+	it.each(['goalId=nope', 'status=nope', 'archived=maybe', 'page=0', 'tagId=nope', 'sort=nope', 'order=up'])('answers 422 for ?%s', async query => {
 		expect((await setup().app.request(`/projects?${query}`)).status).toBe(422);
 	});
 });

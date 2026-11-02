@@ -8,8 +8,8 @@ import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
 import { useTranslate } from '~/hooks/use-translate';
+import { listStyles } from '../../shared/styles';
 import { useBrainDump } from '../api';
-import { inboxStyles } from '../styles';
 
 /** Same limit as the API (`BRAIN_DUMP_MAX_ITEMS`). */
 const MAX_ITEMS = 200;
@@ -43,7 +43,7 @@ export function BrainDump() {
 
 	return (
 		<>
-			<Layout.HStack className={`${inboxStyles.card} px-6 py-5`} collapseBelow='sm' justify='between'>
+			<Layout.HStack className={`${listStyles.card} px-6 py-5`} collapseBelow='sm' justify='between'>
 				<Layout.HStack gap='lg'>
 					<Icon aria-hidden className='text-foreground' icon={Layers} size='xl' />
 					<Layout.Stack gap='xs'>
@@ -51,7 +51,7 @@ export function BrainDump() {
 						<Typography.Span className='text-xs text-muted-foreground'>{t('inbox.brainDump.description', { max: MAX_ITEMS })}</Typography.Span>
 					</Layout.Stack>
 				</Layout.HStack>
-				<Button className={inboxStyles.pillTrigger} onClick={() => setOpen(true)} variant='secondary'>
+				<Button className={listStyles.pillTrigger} onClick={() => setOpen(true)} variant='secondary'>
 					<Button.Text>{t('inbox.brainDump.open')}</Button.Text>
 					<Button.Icon icon={ArrowRight} />
 				</Button>

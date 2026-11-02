@@ -1,10 +1,8 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type Body } from '~/lib/api';
-import { ApiError, unwrap } from '~/lib/api-error';
-import { type InboxParams, type InboxStatus, PAGE_SIZE } from './search-params';
-
-type JsonOf<R extends { json: () => Promise<unknown> }> = Awaited<ReturnType<R['json']>>;
-type OkBody<R extends { json: () => Promise<unknown> }> = Extract<JsonOf<R>, { data: unknown }>;
+import { unwrap } from '~/lib/api-error';
+import { type OkBody, PAGE_SIZE, unwrapPage } from '../shared/paged';
+import type { InboxParams, InboxStatus } from './search-params';
 
 type InboxResponse = Awaited<ReturnType<typeof api.inbox.$get>>;
 type SearchResponse = Awaited<ReturnType<typeof api.search.$get>>;
@@ -18,14 +16,6 @@ export type InboxSearchHit = InboxSearchPage['data'][number];
 
 export const inboxKey = ({ page, range, status }: Pick<InboxParams, 'page' | 'range' | 'status'>) => ['inbox', 'list', { page, range, status }] as const;
 export const inboxSearchKey = ({ page, q }: Pick<InboxParams, 'page' | 'q'>) => ['inbox', 'search', { page, q }] as const;
-
-/** Like `unwrap`, but keeps `meta` (pagination and counters) next to `data`. */
-async function unwrapPage<R extends { json: () => Promise<unknown>; ok: boolean; status: number }>(request: Promise<R>): Promise<OkBody<R>> {
-	const res = await request;
-	const body = (await res.json().catch(() => ({}))) as { error?: { code?: string; message?: string } };
-	if (!res.ok) throw new ApiError(res.status, body.error?.code ?? 'internal_error', body.error?.message ?? '');
-	return body as OkBody<R>;
-}
 
 /** Query string of `GET /inbox` (values are strings on the wire). */
 export const inboxQuery = ({ page, range, status }: Pick<InboxParams, 'page' | 'range' | 'status'>) => ({ page: String(page), pageSize: String(PAGE_SIZE), range, status });
