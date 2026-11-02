@@ -1,0 +1,123 @@
+{
+	"meta": {
+		"title": "useGonche",
+		"description": "Convierte el trabajo desordenado en progreso concreto.",
+		"auth": {
+			"signIn": {
+				"title": "Iniciar sesión | useGonche",
+				"description": "Accede a tu cuenta de useGonche."
+			},
+			"signUp": {
+				"title": "Crear cuenta | useGonche",
+				"description": "Crea tu cuenta de useGonche."
+			},
+			"verifyEmail": {
+				"title": "Confirma tu correo | useGonche",
+				"description": "Confirma tu correo para activar tu cuenta."
+			},
+			"forgotPassword": {
+				"title": "Recuperar contraseña | useGonche",
+				"description": "Recibe un código para restablecer tu contraseña."
+			},
+			"resetPassword": {
+				"title": "Restablecer contraseña | useGonche",
+				"description": "Elige una nueva contraseña."
+			}
+		}
+	},
+	"home": {
+		"welcome": "Hola, {{email}}",
+		"signOut": "Cerrar sesión"
+	},
+	"auth": {
+		"common": {
+			"or": "o",
+			"backToSignIn": "Volver a iniciar sesión",
+			"email": {
+				"label": "Correo electrónico",
+				"placeholder": "tu@correo.com",
+				"invalid": "Ingresa un correo válido"
+			},
+			"password": {
+				"label": "Contraseña",
+				"placeholder": "Tu contraseña",
+				"show": "Mostrar contraseña",
+				"hide": "Ocultar contraseña",
+				"required": "Ingresa tu contraseña",
+				"tooShort": "Mínimo {{min}} caracteres",
+				"tooLong": "Máximo {{max}} caracteres"
+			}
+		},
+		"signIn": {
+			"title": "Iniciar sesión",
+			"submit": "Iniciar sesión",
+			"submitting": "Iniciando sesión...",
+			"google": "Continuar con Google",
+			"forgotPassword": "¿Olvidaste tu contraseña?",
+			"noAccount": "¿No tienes cuenta?",
+			"signUpLink": "Crear cuenta"
+		},
+		"signUp": {
+			"title": "Crear cuenta",
+			"submit": "Crear cuenta",
+			"submitting": "Creando cuenta...",
+			"google": "Registrarse con Google",
+			"haveAccount": "¿Ya tienes cuenta?",
+			"signInLink": "Iniciar sesión"
+		},
+		"verifyEmail": {
+			"title": "Revisa tu correo",
+			"description": "Enviamos un enlace de confirmación a {{email}}. Ábrelo para activar tu cuenta y luego inicia sesión."
+		},
+		"forgotPassword": {
+			"title": "Recuperar contraseña",
+			"description": "Te enviaremos un código a tu correo.",
+			"submit": "Enviar código",
+			"submitting": "Enviando..."
+		},
+		"resetPassword": {
+			"title": "Restablecer contraseña",
+			"description": "Ingresa el código que enviamos a {{email}} y tu nueva contraseña.",
+			"submit": "Restablecer contraseña",
+			"submitting": "Restableciendo...",
+			"success": "Contraseña actualizada",
+			"code": {
+				"label": "Código",
+				"invalid": "Ingresa el código completo"
+			},
+			"newPassword": {
+				"label": "Nueva contraseña",
+				"placeholder": "Tu nueva contraseña"
+			},
+			"confirmPassword": {
+				"label": "Confirmar contraseña",
+				"placeholder": "Repite la contraseña",
+				"mismatch": "Las contraseñas no coinciden"
+			}
+		}
+	},
+	"errors": {
+		"generic": "Algo salió mal. Inténtalo de nuevo.",
+		"already_exists": "Ya existe un recurso con este nombre.",
+		"bad_request": "No se pudo procesar la solicitud.",
+		"dependency_cycle": "Esta dependencia crearía un ciclo.",
+		"email_not_confirmed": "Confirma tu correo antes de continuar.",
+		"forbidden": "No tienes acceso a este recurso.",
+		"internal_error": "Algo salió mal. Inténtalo más tarde.",
+		"invalid_credentials": "Correo o contraseña incorrectos.",
+		"invalid_email": "Ingresa un correo válido.",
+		"invalid_or_expired_code": "El código no es válido o expiró.",
+		"invalid_password": "La contraseña debe tener entre 8 y 72 caracteres.",
+		"invalid_state": "El recurso no permite esta acción en su estado actual.",
+		"not_found": "Recurso no encontrado.",
+		"oauth_failed": "No se pudo iniciar sesión con Google.",
+		"provider_conflict": "Este correo ya está vinculado a otro método de acceso.",
+		"rate_limited": "Demasiadas solicitudes. Inténtalo más tarde.",
+		"reset_failed": "No se pudo restablecer la contraseña.",
+		"signup_failed": "No se pudo crear la cuenta.",
+		"unauthorized": "Inicia sesión para continuar.",
+		"validation_error": "Los datos enviados no son válidos.",
+		"weak_password": "La contraseña es demasiado débil.",
+		"auth_failed": "No se pudo completar el inicio de sesión."
+	}
+}

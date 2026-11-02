@@ -57,10 +57,22 @@ export const supabaseMiddleware = (): MiddlewareHandler => async (c, next) => {
 	await next();
 };
 
-/** Rejects unauthenticated requests and exposes the verified JWT claims as `c.get('claims')`. */
+/** Message of the 403 raised for an unconfirmed email; `onError` maps it to the `email_not_confirmed` error code. */
+export const EMAIL_NOT_CONFIRMED = 'email_not_confirmed';
+
+/**
+ * Rejects unauthenticated requests and exposes the verified JWT claims as `c.get('claims')`.
+ * Users who have not confirmed their email get a 403, even if they somehow hold a valid session.
+ */
 export const requireAuth = (): MiddlewareHandler => async (c, next) => {
-	const { data, error } = await getSupabase(c).auth.getClaims(bearerToken(c));
+	const supabase = getSupabase(c);
+	const token = bearerToken(c);
+	const { data, error } = await supabase.auth.getClaims(token);
 	if (error || !data) throw new HTTPException(401);
+	// The JWT does not say whether the email is confirmed; the auth server does.
+	const { data: userData, error: userError } = await supabase.auth.getUser(token);
+	if (userError || !userData.user) throw new HTTPException(401);
+	if (!userData.user.email_confirmed_at) throw new HTTPException(403, { message: EMAIL_NOT_CONFIRMED });
 	c.set('claims', data.claims as Claims);
 	await next();
 };

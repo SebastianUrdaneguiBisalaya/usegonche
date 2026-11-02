@@ -50,6 +50,8 @@ export const createMockPrisma = (): PrismaClient => {
 type TestAppOptions = {
 	/** Verified JWT claims. `null` simulates an unauthenticated request (requireAuth answers 401). Defaults to `TEST_USER_ID`. */
 	claims?: Claims | null;
+	/** `false` simulates a user who has not confirmed their email (requireAuth answers 403). Defaults to `true`. */
+	emailConfirmed?: boolean;
 	/** Mount point of the router under test. Defaults to `/`. */
 	path?: string;
 	prisma?: PrismaClient;
@@ -68,10 +70,17 @@ export const createMockStorage = (): Storage => ({ list: vi.fn(), readUrl: vi.fn
  * const app = createTestApp(tags, { path: '/tags', prisma });
  * const res = await app.request('/tags');
  */
-export const createTestApp = (router: Hono<AppEnv>, { claims = { sub: TEST_USER_ID }, path = '/', prisma = createMockPrisma(), storage = createMockStorage() }: TestAppOptions = {}) => {
+export const createTestApp = (
+	router: Hono<AppEnv>,
+	{ claims = { sub: TEST_USER_ID }, emailConfirmed = true, path = '/', prisma = createMockPrisma(), storage = createMockStorage() }: TestAppOptions = {}
+) => {
 	const supabase = {
 		auth: {
 			getClaims: async () => (claims ? { data: { claims }, error: null } : { data: null, error: new Error('unauthenticated') }),
+			getUser: async () =>
+				claims
+					? { data: { user: { email_confirmed_at: emailConfirmed ? '2026-01-01T00:00:00Z' : null, id: claims.sub } }, error: null }
+					: { data: { user: null }, error: new Error('unauthenticated') },
 		},
 	} as unknown as SupabaseClient;
 
