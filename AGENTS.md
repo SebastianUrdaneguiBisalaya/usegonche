@@ -41,7 +41,7 @@ Rich text (TipTap on the frontend) is converted to **Markdown on the client** an
 - **AI** and **agents** (always as proposals the user accepts), **automations** and custom **workflows**, **planning rules**.
 - **Templates**.
 - **Productivity metrics** beyond the review snapshots.
-- **Full-text search**.
+- **Full-text search**: implemented in `src/features/search` (#37): `GET /search?q=&types=` over tasks, notes, projects, goals and inbox items (Postgres `websearch_to_tsquery`, config `simple`, generated `search_vector` columns + GIN; Markdown text is indexed as is). Not tested against a real database in CI (raw SQL is unit-tested for shape only).
 - **Note revision history** (versioning).
 - **Enterprise-style audit log** (only the functional history exists).
 - **Multi-user and collaboration**: workspaces, organizations, memberships, invitations, roles/permissions, comments.
@@ -120,7 +120,7 @@ src/
 ├── app.ts              # Builds the app: global middleware + routes + onError. Runtime-agnostic
 ├── env.ts              # Bindings / Variables types (AppEnv) shared by every feature
 ├── routes.ts           # Aggregator: chains `.route()` per feature; exports `AppType`
-├── features/           # attachments, auth, goals, health, history, inbox, me, notes, planning, profile, projects, reminders, reviews, suggestions, tags, tasks
+├── features/           # attachments, auth, goals, health, history, inbox, me, notes, planning, profile, projects, reminders, reviews, search, suggestions, tags, tasks
 │   └── <feature>/      # e.g. profiles, posts
 │       ├── <feature>.routes.ts    # Hono sub-app: validators + thin handlers
 │       ├── <feature>.schemas.ts   # Zod schemas (+ inferred types)

@@ -15,6 +15,7 @@ import projects from './features/projects/projects.routes.js';
 import recurrences from './features/recurrences/recurrences.routes.js';
 import reminders from './features/reminders/reminders.routes.js';
 import reviews from './features/reviews/reviews.routes.js';
+import search from './features/search/search.routes.js';
 import suggestions from './features/suggestions/suggestions.routes.js';
 import tags from './features/tags/tags.routes.js';
 import tasks from './features/tasks/tasks.routes.js';
@@ -36,6 +37,7 @@ const routes = new Hono<AppEnv>()
 	.route('/recurrences', recurrences)
 	.route('/reminders', reminders)
 	.route('/reviews', reviews)
+	.route('/search', search)
 	.route('/suggestions', suggestions)
 	.route('/tags', tags)
 	.route('/tasks', tasks)
