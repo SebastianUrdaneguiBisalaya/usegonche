@@ -5,6 +5,10 @@ import type { Storage } from '@usegonche/storage';
 export type RateLimitBinding = { limit: (options: { key: string }) => Promise<{ success: boolean }> };
 
 export type Bindings = {
+	/** Where the browser lands after Google sign-in / email confirmation; its origin is also allowed by CORS. */
+	AUTH_REDIRECT_URL?: string;
+	/** Extra browser origins allowed by CORS, comma separated (e.g. a staging web app). */
+	CORS_ORIGINS?: string;
 	DATABASE_URL: string;
 	/** Cloudflare Hyperdrive binding (optional). Takes precedence over DATABASE_URL on Workers. */
 	HYPERDRIVE?: { connectionString: string };
