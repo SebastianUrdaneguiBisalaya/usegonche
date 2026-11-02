@@ -1,0 +1,23 @@
+# Keep the build context small and never ship secrets.
+.git
+.github
+.claude
+.cursor
+.agents
+.env*
+!.env.example
+**/node_modules
+**/dist
+**/build
+**/.react-router
+**/.expo
+**/release
+coverage
+*.log
+.DS_Store
+Dockerfile*
+docker-compose*.yml
+# The API image only needs the root `src/`, `scripts/` and `packages/*`; app sources stay out
+# (their package.json files are kept so the pnpm workspace and lockfile still resolve).
+apps/*/*
+!apps/*/package.json

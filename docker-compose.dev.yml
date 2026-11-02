@@ -1,0 +1,33 @@
+# Local development with hot reload: docker compose -f docker-compose.dev.yml up --build
+# The database is Supabase (see DATABASE_URL in .env); nothing else runs here.
+name: usegonche-dev
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file: .env
+    environment:
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      # Keep the container's node_modules (Linux binaries) instead of the host's.
+      - node_modules_root:/app/node_modules
+      - node_modules_auth:/app/packages/auth/node_modules
+      - node_modules_database:/app/packages/database/node_modules
+      - node_modules_storage:/app/packages/storage/node_modules
+      - node_modules_api_client:/app/packages/api-client/node_modules
+      # Prisma clients generated at image build time (gitignored, so the host may not have them).
+      - prisma_generated:/app/packages/database/src/generated
+    init: true
+
+volumes:
+  node_modules_root:
+  node_modules_auth:
+  node_modules_database:
+  node_modules_storage:
+  node_modules_api_client:
+  prisma_generated:

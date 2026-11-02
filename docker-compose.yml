@@ -1,0 +1,47 @@
+# Production on a DigitalOcean droplet: the API behind Caddy, which gets and renews the HTTPS certificate by itself.
+#
+# One-time setup on the droplet:
+#   1. Point an A record for API_DOMAIN to the droplet and open ports 80 and 443 (443/udp for HTTP/3).
+#   2. Copy .env.example to .env and fill it in. Besides the API variables, set API_DOMAIN (e.g. api.example.com)
+#      and AUTH_CALLBACK_URL=https://<API_DOMAIN>/auth/callback.
+#   3. docker compose up -d --build
+# Update: git pull && docker compose up -d --build
+# Apply database migrations before releasing a new version (from CI or your machine, never from this container).
+name: usegonche
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: usegonche-api:latest
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      # Caddy is the reverse proxy in front of the API and sets X-Forwarded-For, so rate limiting can trust it.
+      TRUST_PROXY: "true"
+    # Only reachable from Caddy through the compose network, never published on the droplet.
+    expose:
+      - "3000"
+    init: true
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    command: caddy reverse-proxy --from ${API_DOMAIN:?Set API_DOMAIN in .env} --to api:3000
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
