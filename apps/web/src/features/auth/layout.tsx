@@ -2,7 +2,7 @@ import { createClient } from '@usegonche/api-client';
 import { type LoaderFunctionArgs, Navigate, Outlet, redirect } from 'react-router';
 import authBg from '~/assets/bg-auth.webp';
 import icon from '~/assets/usegonche-icon.png';
-import { Typography } from '~/components/ui/foundations/typography/typography';
+import { Logo } from '~/components/ui/foundations/logo/logo';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Image } from '~/components/ui/media-files/image/image';
 import { API_BASE } from '~/lib/api';
@@ -46,11 +46,13 @@ export default function AuthLayout() {
 						className='w-full max-w-126 rounded-[28px] border border-white/10 bg-linear-to-b from-white/[0.07] to-white/2 p-5 md:p-10 shadow-[0_24px_80px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl'
 						gap='lg'
 					>
-						<Layout.HStack className='items-center justify-center gap-2'>
+						<Layout.HStack className='w-full items-center justify-center gap-2'>
 							<Image className='-my-8 size-16 overflow-visible'>
-								<Image.Img alt='Logo' className='mix-blend-screen' src={icon} />
+								<Image.Img alt='' className='mix-blend-screen' src={icon} />
 							</Image>
-							<Typography.Span className='-ml-5 text-xl font-medium tracking-tight'>gonche</Typography.Span>
+							<Logo className='-ml-5' size='lg'>
+								<Logo.Text className='font-medium'>gonche</Logo.Text>
+							</Logo>
 						</Layout.HStack>
 						<Outlet />
 					</Layout.Stack>
