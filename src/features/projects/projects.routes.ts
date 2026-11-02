@@ -12,9 +12,9 @@ import { archiveProject, createProject, getProject, listProjects, unarchiveProje
 export default new Hono<AppEnv>()
 	.use(requireUser())
 	.get('/', zValidator('query', listProjectsQuerySchema, validationHook), async c => {
-		const { archived, goalId, page, pageSize, status } = c.req.valid('query');
-		const { items, total } = await listProjects(c.get('prisma'), c.get('claims').sub, { archived, goalId, status }, { page, pageSize });
-		return okWithMeta(c, items, pageMeta({ page, pageSize }, total), 200);
+		const { archived, goalId, order, page, pageSize, sort, status, tagId } = c.req.valid('query');
+		const { counts, items, total } = await listProjects(c.get('prisma'), c.get('claims').sub, { archived, goalId, order, sort, status, tagId }, { page, pageSize });
+		return okWithMeta(c, items, { ...pageMeta({ page, pageSize }, total), counts }, 200);
 	})
 	.post('/', zValidator('json', createProjectSchema, validationHook), async c => ok(c, await createProject(c.get('prisma'), c.get('claims').sub, c.req.valid('json')), 201))
 	.get('/:id', zValidator('param', projectParamSchema, validationHook), async c => ok(c, await getProject(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id), 200))

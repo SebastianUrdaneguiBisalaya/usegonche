@@ -32,6 +32,8 @@ export const updateProjectSchema = z
 	.partial()
 	.refine(hasChanges, 'empty_update');
 
+export const projectSortFields = ['createdAt', 'updatedAt', 'title'] as const;
+
 export const listProjectsQuerySchema = z.object({
 	...paginationQuery,
 	archived: z
@@ -39,7 +41,10 @@ export const listProjectsQuerySchema = z.object({
 		.default('false')
 		.transform(value => value === 'true'),
 	goalId: z.uuid().optional(),
+	order: z.enum(['asc', 'desc']).default('desc'),
+	sort: z.enum(projectSortFields).default('createdAt'),
 	status: z.enum(projectStatuses).optional(),
+	tagId: z.uuid().optional(),
 });
 
 export const projectParamSchema = z.object({ id: z.uuid() });
