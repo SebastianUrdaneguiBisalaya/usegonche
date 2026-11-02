@@ -80,7 +80,7 @@ export function InputOtp({
           aria-invalid={Boolean(errorMessage)}
           aria-label={label ? undefined : fallbackLabel}
           autoComplete="one-time-code"
-          className="absolute inset-0 h-full w-full cursor-text opacity-0 disabled:cursor-not-allowed"
+          className="absolute inset-0 z-1000 h-full w-full cursor-text opacity-0 disabled:cursor-not-allowed"
           disabled={disabled}
           id={inputId}
           inputMode="numeric"

@@ -1,123 +1,124 @@
 {
-	"meta": {
-		"title": "useGonche",
-		"description": "Turn messy work into concrete progress.",
-		"auth": {
-			"signIn": {
-				"title": "Sign in | useGonche",
-				"description": "Access your useGonche account."
-			},
-			"signUp": {
-				"title": "Create account | useGonche",
-				"description": "Create your useGonche account."
-			},
-			"verifyEmail": {
-				"title": "Confirm your email | useGonche",
-				"description": "Confirm your email to activate your account."
-			},
-			"forgotPassword": {
-				"title": "Forgot password | useGonche",
-				"description": "Get a code to reset your password."
-			},
-			"resetPassword": {
-				"title": "Reset password | useGonche",
-				"description": "Choose a new password."
-			}
-		}
-	},
-	"home": {
-		"welcome": "Hi, {{email}}",
-		"signOut": "Sign out"
-	},
-	"auth": {
-		"common": {
-			"or": "or",
-			"backToSignIn": "Back to sign in",
-			"email": {
-				"label": "Email",
-				"placeholder": "you@email.com",
-				"invalid": "Enter a valid email"
-			},
-			"password": {
-				"label": "Password",
-				"placeholder": "Your password",
-				"show": "Show password",
-				"hide": "Hide password",
-				"required": "Enter your password",
-				"tooShort": "At least {{min}} characters",
-				"tooLong": "At most {{max}} characters"
-			}
-		},
-		"signIn": {
-			"title": "Sign in",
-			"submit": "Sign in",
-			"submitting": "Signing in...",
-			"google": "Continue with Google",
-			"forgotPassword": "Forgot your password?",
-			"noAccount": "Don't have an account?",
-			"signUpLink": "Create account"
-		},
-		"signUp": {
-			"title": "Create account",
-			"submit": "Create account",
-			"submitting": "Creating account...",
-			"google": "Sign up with Google",
-			"haveAccount": "Already have an account?",
-			"signInLink": "Sign in"
-		},
-		"verifyEmail": {
-			"title": "Check your email",
-			"description": "We sent a confirmation link to {{email}}. Open it to activate your account, then sign in."
-		},
-		"forgotPassword": {
-			"title": "Forgot password",
-			"description": "We'll email you a code.",
-			"submit": "Send code",
-			"submitting": "Sending..."
-		},
-		"resetPassword": {
-			"title": "Reset password",
-			"description": "Enter the code we sent to {{email}} and your new password.",
-			"submit": "Reset password",
-			"submitting": "Resetting...",
-			"success": "Password updated",
-			"code": {
-				"label": "Code",
-				"invalid": "Enter the full code"
-			},
-			"newPassword": {
-				"label": "New password",
-				"placeholder": "Your new password"
-			},
-			"confirmPassword": {
-				"label": "Confirm password",
-				"placeholder": "Repeat the password",
-				"mismatch": "Passwords do not match"
-			}
-		}
-	},
-	"errors": {
-		"generic": "Something went wrong. Please try again.",
-		"already_exists": "A resource with this name already exists.",
-		"bad_request": "The request could not be processed.",
-		"dependency_cycle": "This dependency would create a cycle.",
-		"email_not_confirmed": "Confirm your email to continue.",
-		"forbidden": "You do not have access to this resource.",
-		"internal_error": "Something went wrong. Please try again later.",
-		"invalid_credentials": "Incorrect email or password.",
-		"invalid_email": "Enter a valid email address.",
-		"invalid_or_expired_code": "The code is invalid or has expired.",
-		"invalid_password": "The password must be 8-72 characters long.",
-		"invalid_state": "The resource is not in a state that allows this action.",
-		"not_found": "Resource not found.",
-		"oauth_failed": "Could not start sign-in with Google.",
-		"provider_conflict": "This email is already linked to another sign-in method.",
-		"rate_limited": "Too many requests. Please try again later.",
-		"reset_failed": "Could not reset the password.",
-		"signup_failed": "Could not create the account.",
-		"unauthorized": "You must sign in to continue.",
-		"validation_error": "The request data is invalid.",
-		"weak_password": "The password is too weak.",
-		"auth_failed": "Could not complete sign-in."
-	}
+  "meta": {
+    "title": "useGonche",
+    "description": "Turn messy work into concrete progress.",
+    "auth": {
+      "signIn": {
+        "title": "Sign in | useGonche",
+        "description": "Access your useGonche account."
+      },
+      "signUp": {
+        "title": "Create account | useGonche",
+        "description": "Create your useGonche account."
+      },
+      "verifyEmail": {
+        "title": "Confirm your email | useGonche",
+        "description": "Confirm your email to activate your account."
+      },
+      "forgotPassword": {
+        "title": "Forgot password | useGonche",
+        "description": "Get a code to reset your password."
+      },
+      "resetPassword": {
+        "title": "Reset password | useGonche",
+        "description": "Choose a new password."
+      }
+    }
+  },
+  "home": {
+    "welcome": "Hi, {{email}}",
+    "signOut": "Sign out"
+  },
+  "auth": {
+    "common": {
+      "or": "or",
+      "backToSignIn": "Back to sign in",
+      "email": {
+        "label": "Email",
+        "placeholder": "you@domain.com",
+        "invalid": "Enter a valid email"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Your password",
+        "show": "Show password",
+        "hide": "Hide password",
+        "required": "Enter your password",
+        "tooShort": "At least {{min}} characters",
+        "tooLong": "At most {{max}} characters"
+      }
+    },
+    "signIn": {
+      "title": "Welcome back",
+      "description": "Sign in to continue to your workspace.",
+      "submit": "Continue",
+      "submitting": "Signing in...",
+      "google": "Continue with Google",
+      "forgotPassword": "Forgot your password?",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign up"
+    },
+    "signUp": {
+      "title": "Create account",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "google": "Sign up with Google",
+      "haveAccount": "Already have an account?",
+      "signInLink": "Sign in"
+    },
+    "verifyEmail": {
+      "title": "Check your email",
+      "description": "We sent a confirmation link to {{email}}. Open it to activate your account, then sign in."
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "description": "We'll email you a code.",
+      "submit": "Send code",
+      "submitting": "Sending..."
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "description": "Enter the code we sent to {{email}} and your new password.",
+      "submit": "Reset password",
+      "submitting": "Resetting...",
+      "success": "Password updated",
+      "code": {
+        "label": "Code",
+        "invalid": "Enter the full code"
+      },
+      "newPassword": {
+        "label": "New password",
+        "placeholder": "Your new password"
+      },
+      "confirmPassword": {
+        "label": "Confirm password",
+        "placeholder": "Repeat the password",
+        "mismatch": "Passwords do not match"
+      }
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "already_exists": "A resource with this name already exists.",
+    "bad_request": "The request could not be processed.",
+    "dependency_cycle": "This dependency would create a cycle.",
+    "email_not_confirmed": "Confirm your email to continue.",
+    "forbidden": "You do not have access to this resource.",
+    "internal_error": "Something went wrong. Please try again later.",
+    "invalid_credentials": "Incorrect email or password.",
+    "invalid_email": "Enter a valid email address.",
+    "invalid_or_expired_code": "The code is invalid or has expired.",
+    "invalid_password": "The password must be 8-72 characters long.",
+    "invalid_state": "The resource is not in a state that allows this action.",
+    "not_found": "Resource not found.",
+    "oauth_failed": "Could not start sign-in with Google.",
+    "provider_conflict": "This email is already linked to another sign-in method.",
+    "rate_limited": "Too many requests. Please try again later.",
+    "reset_failed": "Could not reset the password.",
+    "signup_failed": "Could not create the account.",
+    "unauthorized": "You must sign in to continue.",
+    "validation_error": "The request data is invalid.",
+    "weak_password": "The password is too weak.",
+    "auth_failed": "Could not complete sign-in."
+  }
 }
