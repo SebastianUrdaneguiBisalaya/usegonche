@@ -155,5 +155,104 @@
     "settings": {
       "title": "Configuración"
     }
+  },
+  "inbox": {
+    "title": "Bandeja",
+    "subtitle": "Captura lo que sea, organiza después.",
+    "search": {
+      "placeholder": "Buscar en la bandeja...",
+      "label": "Buscar en la bandeja",
+      "clear": "Limpiar búsqueda",
+      "results": "Resultados para “{{q}}”",
+      "empty": "Nada coincide con tu búsqueda."
+    },
+    "range": {
+      "label": "Rango de tiempo",
+      "all": "Todo el tiempo",
+      "24h": "Últimas 24 horas",
+      "7d": "Últimos 7 días",
+      "30d": "Últimos 30 días"
+    },
+    "capture": {
+      "placeholder": "Captura rápida... (tareas, ideas, notas, recordatorios)",
+      "label": "Captura rápida",
+      "submit": "Capturar"
+    },
+    "brainDump": {
+      "title": "Brain Dump",
+      "description": "Pega varias ideas, una por línea. Máx. {{max}} ítems.",
+      "open": "Abrir Brain Dump",
+      "placeholder": "Una idea por línea...",
+      "count_one": "{{count}} ítem",
+      "count_other": "{{count}} ítems",
+      "tooMany": "Máx. {{max}} ítems por volcado.",
+      "submit": "Añadir a la bandeja",
+      "cancel": "Cancelar",
+      "added": "{{count}} ítems capturados"
+    },
+    "tabs": {
+      "pending": "Pendientes",
+      "archived": "Archivados",
+      "discarded": "Descartados",
+      "converted": "Convertidos",
+      "label": "Estado de la bandeja"
+    },
+    "source": {
+      "quick": "rápida",
+      "braindump": "braindump"
+    },
+    "selection": {
+      "all": "Seleccionar todo",
+      "count": "{{count}} seleccionados",
+      "row": "Seleccionar ítem"
+    },
+    "actions": {
+      "convert": "Convertir",
+      "toTask": "En tarea",
+      "toProject": "En proyecto",
+      "toNote": "En nota",
+      "archive": "Archivar",
+      "discard": "Descartar",
+      "restore": "Restaurar",
+      "more": "Más acciones",
+      "archiveSelected": "Archivar seleccionados",
+      "discardSelected": "Descartar seleccionados",
+      "restoreSelected": "Restaurar seleccionados",
+      "clearSelection": "Limpiar selección"
+    },
+    "toast": {
+      "archived": "Movido a archivados",
+      "discarded": "Descartado",
+      "restored": "Restaurado a pendientes",
+      "undo": "Deshacer",
+      "convertedTask": "Convertido en tarea",
+      "convertedProject": "Convertido en proyecto",
+      "convertedNote": "Convertido en nota",
+      "bulk": "{{count}} ítems actualizados"
+    },
+    "empty": {
+      "pending": {
+        "title": "Bandeja a cero",
+        "description": "Todo está procesado. Captura algo nuevo arriba."
+      },
+      "archived": {
+        "title": "Nada archivado",
+        "description": "Archiva lo que quieras guardar para después."
+      },
+      "discarded": {
+        "title": "Nada descartado",
+        "description": "Los ítems descartados aparecen aquí."
+      },
+      "converted": {
+        "title": "Nada convertido todavía",
+        "description": "Los ítems convertidos en tareas, proyectos o notas aparecen aquí."
+      },
+      "range": "No hay ítems en este rango de tiempo."
+    },
+    "error": {
+      "title": "No se pudo cargar tu bandeja",
+      "retry": "Reintentar"
+    },
+    "readOnly": "Los ítems convertidos son de solo lectura"
   }
 }

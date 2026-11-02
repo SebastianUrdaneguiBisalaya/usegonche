@@ -155,5 +155,104 @@
     "settings": {
       "title": "Settings"
     }
+  },
+  "inbox": {
+    "title": "Inbox",
+    "subtitle": "Capture anything, organize later.",
+    "search": {
+      "placeholder": "Search in inbox...",
+      "label": "Search in inbox",
+      "clear": "Clear search",
+      "results": "Results for “{{q}}”",
+      "empty": "Nothing matches your search."
+    },
+    "range": {
+      "label": "Time range",
+      "all": "All time",
+      "24h": "Last 24 hours",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days"
+    },
+    "capture": {
+      "placeholder": "Quick capture... (tasks, ideas, notes, reminders)",
+      "label": "Quick capture",
+      "submit": "Capture"
+    },
+    "brainDump": {
+      "title": "Brain Dump",
+      "description": "Paste multiple ideas, one per line. Max {{max}} items.",
+      "open": "Open Brain Dump",
+      "placeholder": "One idea per line...",
+      "count_one": "{{count}} item",
+      "count_other": "{{count}} items",
+      "tooMany": "Max {{max}} items per dump.",
+      "submit": "Add to inbox",
+      "cancel": "Cancel",
+      "added": "{{count}} items captured"
+    },
+    "tabs": {
+      "pending": "Pending",
+      "archived": "Archived",
+      "discarded": "Discarded",
+      "converted": "Converted",
+      "label": "Inbox status"
+    },
+    "source": {
+      "quick": "quick",
+      "braindump": "braindump"
+    },
+    "selection": {
+      "all": "Select all",
+      "count": "{{count}} selected",
+      "row": "Select item"
+    },
+    "actions": {
+      "convert": "Convert",
+      "toTask": "To task",
+      "toProject": "To project",
+      "toNote": "To note",
+      "archive": "Archive",
+      "discard": "Discard",
+      "restore": "Restore",
+      "more": "More actions",
+      "archiveSelected": "Archive selected",
+      "discardSelected": "Discard selected",
+      "restoreSelected": "Restore selected",
+      "clearSelection": "Clear selection"
+    },
+    "toast": {
+      "archived": "Moved to archived",
+      "discarded": "Discarded",
+      "restored": "Restored to pending",
+      "undo": "Undo",
+      "convertedTask": "Converted to a task",
+      "convertedProject": "Converted to a project",
+      "convertedNote": "Converted to a note",
+      "bulk": "{{count}} items updated"
+    },
+    "empty": {
+      "pending": {
+        "title": "Inbox zero",
+        "description": "Everything is processed. Capture something new above."
+      },
+      "archived": {
+        "title": "Nothing archived",
+        "description": "Archive what you want to keep for later."
+      },
+      "discarded": {
+        "title": "Nothing discarded",
+        "description": "Discarded items show up here."
+      },
+      "converted": {
+        "title": "Nothing converted yet",
+        "description": "Items turned into tasks, projects or notes show up here."
+      },
+      "range": "No items in this time range."
+    },
+    "error": {
+      "title": "Could not load your inbox",
+      "retry": "Try again"
+    },
+    "readOnly": "Converted items are read-only"
   }
 }

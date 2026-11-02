@@ -1,3 +1,4 @@
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v8';
 import { I18nextProvider } from 'react-i18next';
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteLoaderData } from 'react-router';
 import { Layout as L } from '~/components/ui/layout/layout/layout';
@@ -41,7 +42,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<L.Container className='flex h-screen w-full flex-col overflow-hidden p-0 sm:p-0 lg:p-0' size='full'>
 					<I18nextProvider i18n={i18n}>
 						<QueryProvider>
-							<HotkeysClientProvider>{children}</HotkeysClientProvider>
+							<NuqsAdapter>
+								<HotkeysClientProvider>{children}</HotkeysClientProvider>
+							</NuqsAdapter>
 						</QueryProvider>
 					</I18nextProvider>
 					<ToasterProvider />
