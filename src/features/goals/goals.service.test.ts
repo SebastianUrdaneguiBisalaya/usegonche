@@ -16,19 +16,20 @@ describe('listGoals', () => {
 	it('hides archived goals by default and scopes by owner', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.goal.findMany).mockResolvedValue([goal]);
+		vi.mocked(prisma.goal.count).mockResolvedValue(1);
 
-		expect(await listGoals(prisma, TEST_USER_ID, { archived: false }, 20)).toEqual([goal]);
-		expect(prisma.goal.findMany).toHaveBeenCalledWith({ orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 21, where: { archivedAt: null, ownerId: TEST_USER_ID } });
+		expect(await listGoals(prisma, TEST_USER_ID, { archived: false }, { page: 1, pageSize: 20 })).toEqual({ items: [goal], total: 1 });
+		expect(prisma.goal.findMany).toHaveBeenCalledWith({ orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: 0, take: 20, where: { archivedAt: null, ownerId: TEST_USER_ID } });
+		expect(prisma.goal.count).toHaveBeenCalledWith({ where: { archivedAt: null, ownerId: TEST_USER_ID } });
 	});
 
-	it('lists archived goals filtered by status after a cursor', async () => {
+	it('lists archived goals filtered by status on a later page', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.goal.findMany).mockResolvedValue([]);
-		const cursor = { at: new Date('2026-11-01T10:00:00.000Z'), id: ID };
 
-		await listGoals(prisma, TEST_USER_ID, { archived: true, status: 'achieved' }, 10, cursor);
+		await listGoals(prisma, TEST_USER_ID, { archived: true, status: 'achieved' }, { page: 3, pageSize: 10 });
+		expect(vi.mocked(prisma.goal.findMany).mock.calls[0]?.[0]).toMatchObject({ skip: 20, take: 10 });
 		expect(vi.mocked(prisma.goal.findMany).mock.calls[0]?.[0]?.where).toEqual({
-			OR: [{ createdAt: { lt: cursor.at } }, { createdAt: cursor.at, id: { lt: ID } }],
 			archivedAt: { not: null },
 			ownerId: TEST_USER_ID,
 			status: 'achieved',

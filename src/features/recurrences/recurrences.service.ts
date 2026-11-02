@@ -3,7 +3,7 @@ import type { RRule } from 'rrule';
 import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
+import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
 import { localDateOf, zonedToUtc } from '../../lib/time.js';
 import { buildRule } from './recurrences.rrule.js';
 import type { CreateRecurrenceInput, UpdateRecurrenceInput } from './recurrences.schemas.js';
@@ -110,10 +110,11 @@ export const getRecurrence = async (prisma: Db, ownerId: string, id: string): Pr
 	return toView(rule);
 };
 
-/** Fetches `limit + 1` rows after `cursor` (newest first); pass them to `toPage`. */
-export const listRecurrences = async (prisma: PrismaClient, ownerId: string, limit: number, cursor?: Cursor): Promise<RecurrenceView[]> => {
-	const rows = await prisma.recurrenceRule.findMany({ include, orderBy: keysetOrder('createdAt'), take: limit + 1, where: { ...scoped(ownerId), ...keysetAfter('createdAt', cursor) } });
-	return rows.map(toView);
+/** One page of recurrence rules (newest first) with the total. */
+export const listRecurrences = async (prisma: PrismaClient, ownerId: string, page: PageParams): Promise<Paged<RecurrenceView>> => {
+	const where = scoped(ownerId);
+	const [rows, total] = await Promise.all([prisma.recurrenceRule.findMany({ include, orderBy: pageOrder('createdAt'), ...pageArgs(page), where }), prisma.recurrenceRule.count({ where })]);
+	return { items: rows.map(toView), total };
 };
 
 /** Creates the rule and its first occurrences (from today, up to the window) in one transaction. */

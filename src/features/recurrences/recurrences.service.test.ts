@@ -69,11 +69,14 @@ describe('getRecurrence / listRecurrences', () => {
 		expect(await rejection(getRecurrence(prisma, OTHER_USER_ID, ID))).toMatchObject({ code: 'not_found', status: 404 });
 	});
 
-	it('lists with keyset pagination scoped by owner', async () => {
+	it('lists one page scoped by owner', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.recurrenceRule.findMany).mockResolvedValue(asRow([rule]));
-		expect(await listRecurrences(prisma, TEST_USER_ID, 20)).toHaveLength(1);
-		expect(prisma.recurrenceRule.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 21, where: { ownerId: TEST_USER_ID } }));
+		vi.mocked(prisma.recurrenceRule.count).mockResolvedValue(1);
+		const page = await listRecurrences(prisma, TEST_USER_ID, { page: 1, pageSize: 20 });
+		expect(page.items).toHaveLength(1);
+		expect(page.total).toBe(1);
+		expect(prisma.recurrenceRule.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 20, where: { ownerId: TEST_USER_ID } }));
 	});
 });
 

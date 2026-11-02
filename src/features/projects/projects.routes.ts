@@ -2,7 +2,7 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import type { AppEnv } from '../../env.js';
 import { ok, okWithMeta } from '../../lib/http.js';
-import { toPage } from '../../lib/pagination.js';
+import { pageMeta } from '../../lib/pagination.js';
 import { validationHook } from '../../lib/validator.js';
 import { requireUser } from '../../middleware/auth.js';
 import { createProjectSchema, listProjectsQuerySchema, projectParamSchema, updateProjectSchema } from './projects.schemas.js';
@@ -12,9 +12,9 @@ import { archiveProject, createProject, getProject, listProjects, unarchiveProje
 export default new Hono<AppEnv>()
 	.use(requireUser())
 	.get('/', zValidator('query', listProjectsQuerySchema, validationHook), async c => {
-		const { archived, cursor, goalId, limit, status } = c.req.valid('query');
-		const { items, nextCursor } = toPage(await listProjects(c.get('prisma'), c.get('claims').sub, { archived, goalId, status }, limit, cursor), limit, project => project.createdAt);
-		return okWithMeta(c, items, { limit, nextCursor }, 200);
+		const { archived, goalId, page, pageSize, status } = c.req.valid('query');
+		const { items, total } = await listProjects(c.get('prisma'), c.get('claims').sub, { archived, goalId, status }, { page, pageSize });
+		return okWithMeta(c, items, pageMeta({ page, pageSize }, total), 200);
 	})
 	.post('/', zValidator('json', createProjectSchema, validationHook), async c => ok(c, await createProject(c.get('prisma'), c.get('claims').sub, c.req.valid('json')), 201))
 	.get('/:id', zValidator('param', projectParamSchema, validationHook), async c => ok(c, await getProject(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id), 200))

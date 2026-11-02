@@ -1,8 +1,8 @@
 import type { InboxItem, InboxStatus, Prisma, PrismaClient } from '@usegonche/database';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
-import type { UserStatus } from './inbox.schemas.js';
+import { type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
+import { INBOX_STATUSES, type InboxRange, RANGE_HOURS, type UserStatus } from './inbox.schemas.js';
 
 /** Anything with the Prisma model API, so the same functions run inside `prisma.$transaction(tx => ...)`. */
 type Db = PrismaClient | Prisma.TransactionClient;
@@ -13,9 +13,31 @@ export const captureItem = (prisma: Db, ownerId: string, content: string): Promi
 export const brainDump = (prisma: Db, ownerId: string, lines: string[]): Promise<InboxItem[]> =>
 	prisma.inboxItem.createManyAndReturn({ data: lines.map(content => ({ content, ownerId, source: 'braindump' as const })) });
 
-/** Fetches `limit + 1` rows after `cursor` (newest first); pass them to `toPage` to get the page and `nextCursor`. */
-export const listItems = (prisma: Db, ownerId: string, status: InboxStatus, limit: number, cursor?: Cursor): Promise<InboxItem[]> =>
-	prisma.inboxItem.findMany({ orderBy: keysetOrder('capturedAt'), take: limit + 1, where: { ...scoped(ownerId, { status }), ...keysetAfter('capturedAt', cursor) } });
+export type InboxCounts = Record<InboxStatus, number>;
+export type InboxPage = { counts: InboxCounts; items: InboxItem[]; total: number };
+
+/** Start of the range as an instant (rolling window back from `now`), or `undefined` for all time. */
+const rangeStart = (range: InboxRange, now: Date): Date | undefined => {
+	const hours = RANGE_HOURS[range];
+	return hours === undefined ? undefined : new Date(now.getTime() - hours * 3_600_000);
+};
+
+/**
+ * One page of the items in `status` (newest first) within the range, plus the number of items per status in that same range
+ * (the counters of the status tabs). `total` is the count of the requested status.
+ */
+export const listItems = async (prisma: Db, ownerId: string, status: InboxStatus, range: InboxRange, page: PageParams, now: Date = new Date()): Promise<InboxPage> => {
+	const start = rangeStart(range, now);
+	const inRange = start ? { capturedAt: { gte: start } } : {};
+	const where = scoped(ownerId, { status, ...inRange });
+	const [items, grouped] = await Promise.all([
+		prisma.inboxItem.findMany({ orderBy: pageOrder('capturedAt'), ...pageArgs(page), where }),
+		prisma.inboxItem.groupBy({ _count: { _all: true }, by: ['status'], where: scoped(ownerId, inRange) }),
+	]);
+	const counts = Object.fromEntries(INBOX_STATUSES.map(name => [name, 0])) as InboxCounts;
+	for (const row of grouped) counts[row.status] = row._count._all;
+	return { counts, items, total: counts[status] };
+};
 
 /** Why a conditional update touched nothing: the item is not the owner's (404) or it is in the wrong state (409). */
 const explainNoMatch = async (prisma: Db, ownerId: string, id: string): Promise<never> => {

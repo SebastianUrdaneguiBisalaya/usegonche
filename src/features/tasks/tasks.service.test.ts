@@ -57,8 +57,12 @@ describe('listTasks', () => {
 	it('lists top-level tasks of the owner by default', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findMany).mockResolvedValue(asRow([base]));
-		expect(await listTasks(prisma, TEST_USER_ID, {}, 20)).toHaveLength(1);
-		expect(prisma.task.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 21, where: { ownerId: TEST_USER_ID, parentId: null } }));
+		vi.mocked(prisma.task.count).mockResolvedValue(1);
+		const page = await listTasks(prisma, TEST_USER_ID, {}, { page: 1, pageSize: 20 });
+		expect(page.items).toHaveLength(1);
+		expect(page.total).toBe(1);
+		expect(prisma.task.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 20, where: { ownerId: TEST_USER_ID, parentId: null } }));
+		expect(prisma.task.count).toHaveBeenCalledWith({ where: { ownerId: TEST_USER_ID, parentId: null } });
 	});
 
 	it('applies every filter', async () => {
@@ -66,7 +70,12 @@ describe('listTasks', () => {
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
 		const dueAfter = new Date('2026-11-01');
 		const dueBefore = new Date('2026-11-30');
-		await listTasks(prisma, TEST_USER_ID, { dueAfter, dueBefore, goalId: REF_ID, parentId: PARENT_ID, priority: 'high', projectId: REF_ID, status: 'done', tagId: TAG_ID }, 10);
+		await listTasks(
+			prisma,
+			TEST_USER_ID,
+			{ dueAfter, dueBefore, goalId: REF_ID, parentId: PARENT_ID, priority: 'high', projectId: REF_ID, status: 'done', tagId: TAG_ID },
+			{ page: 1, pageSize: 10 }
+		);
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({
 			dueDate: { gte: dueAfter, lte: dueBefore },
 			goalId: REF_ID,
@@ -79,12 +88,11 @@ describe('listTasks', () => {
 		});
 	});
 
-	it('continues after a cursor keeping the owner scope', async () => {
+	it('skips the previous pages keeping the owner scope', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
-		const cursor = { at: new Date('2026-11-01T10:00:00.000Z'), id: ID };
-		await listTasks(prisma, TEST_USER_ID, {}, 10, cursor);
-		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toMatchObject({ OR: [{ createdAt: { lt: cursor.at } }, { createdAt: cursor.at, id: { lt: ID } }], ownerId: TEST_USER_ID });
+		await listTasks(prisma, TEST_USER_ID, {}, { page: 3, pageSize: 10 });
+		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]).toMatchObject({ skip: 20, take: 10, where: { ownerId: TEST_USER_ID } });
 	});
 });
 

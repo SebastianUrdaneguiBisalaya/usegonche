@@ -2,7 +2,7 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import type { AppEnv } from '../../env.js';
 import { ok, okWithMeta } from '../../lib/http.js';
-import { toPage } from '../../lib/pagination.js';
+import { pageMeta } from '../../lib/pagination.js';
 import { validationHook } from '../../lib/validator.js';
 import { requireUser } from '../../middleware/auth.js';
 import { createReminderSchema, listRemindersQuerySchema, reminderParamSchema, snoozeReminderSchema, updateReminderSchema } from './reminders.schemas.js';
@@ -12,9 +12,9 @@ import { createReminder, deleteReminder, dismissReminder, getReminder, listRemin
 export default new Hono<AppEnv>()
 	.use(requireUser())
 	.get('/', zValidator('query', listRemindersQuerySchema, validationHook), async c => {
-		const { cursor, limit, ...filters } = c.req.valid('query');
-		const { items, nextCursor } = toPage(await listReminders(c.get('prisma'), c.get('claims').sub, filters, limit, cursor), limit, reminder => reminder.remindAt);
-		return okWithMeta(c, items, { limit, nextCursor }, 200);
+		const { page, pageSize, ...filters } = c.req.valid('query');
+		const { items, total } = await listReminders(c.get('prisma'), c.get('claims').sub, filters, { page, pageSize });
+		return okWithMeta(c, items, pageMeta({ page, pageSize }, total), 200);
 	})
 	.post('/', zValidator('json', createReminderSchema, validationHook), async c => ok(c, await createReminder(c.get('prisma'), c.get('claims').sub, c.req.valid('json')), 201))
 	.get('/:id', zValidator('param', reminderParamSchema, validationHook), async c => ok(c, await getReminder(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id), 200))

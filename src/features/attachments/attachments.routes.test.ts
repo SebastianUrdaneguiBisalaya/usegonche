@@ -107,13 +107,14 @@ describe('GET /attachments', () => {
 	it('lists the attachments of a target with meta', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.attachment.findMany).mockResolvedValue([attachment]);
+		vi.mocked(prisma.attachment.count).mockResolvedValue(1);
 		const res = await app.request(`/attachments?taskId=${TASK_ID}`);
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [json], meta: { limit: 50, nextCursor: null } });
-		expect(prisma.attachment.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51, where: { ownerId: TEST_USER_ID, taskId: TASK_ID } }));
+		expect(await res.json()).toEqual({ data: [json], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(prisma.attachment.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { ownerId: TEST_USER_ID, taskId: TASK_ID } }));
 	});
 
-	it.each(['', `taskId=${TASK_ID}&noteId=${ID}`, 'taskId=nope', `taskId=${TASK_ID}&cursor=garbage`])('answers 422 for ?%s', async query => {
+	it.each(['', `taskId=${TASK_ID}&noteId=${ID}`, 'taskId=nope', `taskId=${TASK_ID}&page=0`])('answers 422 for ?%s', async query => {
 		expect((await setup().app.request(`/attachments?${query}`)).status).toBe(422);
 	});
 });

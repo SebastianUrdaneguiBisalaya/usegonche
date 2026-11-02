@@ -151,13 +151,13 @@ No `db/` folder: schema, migrations and client live in `packages/database`. Auth
 - Route/query params are strings on the wire: use `z.coerce.*` in the schema, pass strings from the client. Encode params with `encodeURIComponent`.
 - Cookies: create the client with `init: { credentials: 'include' }`; for bearer auth, pass `headers: { Authorization: ... }`.
 
-### Pagination (cursor / keyset)
+### Pagination (offset)
 
-Every list endpoint that can grow uses `src/lib/pagination.ts` (never offset, never an unbounded list). Lists are ordered by a timestamp descending with `id` as tie-breaker.
+Every list endpoint that can grow uses `src/lib/pagination.ts` (never an unbounded list). Offset pagination (`?page=<n>&pageSize=<n>`, 1-based) so tables can show page numbers and a total; the web tables keep `page` in the URL (nuqs). Lists are ordered by a timestamp descending with `id` as tie-breaker, so pages do not overlap.
 
-- Query: `z.object({ ...paginationQuery, ...filters })` gives `limit` (default 50, max 100) and an optional opaque `cursor` (invalid cursor -> 422).
-- Service: `findMany({ orderBy: keysetOrder('<timestampField>'), take: limit + 1, where: { ...scoped(ownerId, filters), ...keysetAfter('<timestampField>', cursor) } })`.
-- Route: `const { items, nextCursor } = toPage(rows, limit, row => row.<timestampField>)` then `okWithMeta(c, items, { limit, nextCursor })`. Clients echo `meta.nextCursor` as `?cursor=`; `null` means the last page.
+- Query: `z.object({ ...paginationQuery, ...filters })` gives `page` (default 1) and `pageSize` (default 50, max 100).
+- Service: return `Paged<T>` (`{ items, total }`): `const [items, total] = await Promise.all([findMany({ orderBy: pageOrder('<timestampField>'), ...pageArgs(page), where }), count({ where })])`.
+- Route: `const { items, total } = await listX(prisma, ownerId, filters, { page, pageSize })` then `okWithMeta(c, items, pageMeta({ page, pageSize }, total), 200)`. The meta is `{ page, pageSize, total, pageCount }` (`pageCount` is at least 1). Endpoints may add their own meta keys (e.g. inbox `counts`).
 - Back the ordering with an index `(owner_id, [filters...], <timestampField>)`.
 
 ### Validation (Zod 4)

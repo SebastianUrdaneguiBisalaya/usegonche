@@ -45,4 +45,4 @@ export const revisionParamSchema = z.object({ id: z.uuid(), revisionId: z.uuid()
 
 export type CreateNoteInput = z.infer<typeof createNoteSchema>;
 export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
-export type ListNotesFilters = Omit<z.infer<typeof listNotesQuerySchema>, 'cursor' | 'limit'>;
+export type ListNotesFilters = Omit<z.infer<typeof listNotesQuerySchema>, 'page' | 'pageSize'>;

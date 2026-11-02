@@ -2,7 +2,7 @@ import type { Prisma, PrismaClient, Tag, Template, TemplateKind } from '@usegonc
 import { changedFields, hasChanges, valuesEqual } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
+import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
 import type { CreateTemplateInput, InstantiateTemplateInput, TemplateItemInput, UpdateTemplateInput } from './templates.schemas.js';
 
 type Db = PrismaClient | Prisma.TransactionClient;
@@ -95,9 +95,12 @@ export const getTemplate = async (prisma: Db, ownerId: string, id: string): Prom
 	return toView(row as Row);
 };
 
-/** Fetches `limit + 1` templates (without their items) after `cursor`, newest first; pass them to `toPage`. */
-export const listTemplates = (prisma: PrismaClient, ownerId: string, kind: TemplateKind | undefined, limit: number, cursor?: Cursor): Promise<Template[]> =>
-	prisma.template.findMany({ orderBy: keysetOrder('createdAt'), take: limit + 1, where: { ...scoped(ownerId, kind && { kind }), ...keysetAfter('createdAt', cursor) } });
+/** One page of templates (without their items), newest first, with the total. */
+export const listTemplates = async (prisma: PrismaClient, ownerId: string, kind: TemplateKind | undefined, page: PageParams): Promise<Paged<Template>> => {
+	const where = scoped(ownerId, kind && { kind });
+	const [items, total] = await Promise.all([prisma.template.findMany({ orderBy: pageOrder('createdAt'), ...pageArgs(page), where }), prisma.template.count({ where })]);
+	return { items, total };
+};
 
 export const createTemplate = (prisma: PrismaClient, ownerId: string, input: CreateTemplateInput): Promise<TemplateView> =>
 	prisma.$transaction(async tx => {

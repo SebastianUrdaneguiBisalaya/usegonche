@@ -2,7 +2,7 @@ import type { Prisma, PrismaClient, Review, ReviewDecision } from '@usegonche/da
 import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
+import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
 import { isUniqueViolation } from '../../lib/prisma-errors.js';
 import { addDays, isoWeekday } from '../../lib/time.js';
 import { computePrefill, type Prefill } from './reviews.prefill.js';
@@ -33,13 +33,12 @@ export const getReview = async (prisma: Db, ownerId: string, id: string): Promis
 	return { ...review, prefill: review.status === 'open' ? await computePrefill(prisma, ownerId, toDate(review.periodStart), toDate(review.periodEnd)) : null };
 };
 
-/** Fetches `limit + 1` reviews after `cursor` (most recent period first); pass them to `toPage`. */
-export const listReviews = (prisma: PrismaClient, ownerId: string, filters: ListReviewsFilters, limit: number, cursor?: Cursor): Promise<Review[]> =>
-	prisma.review.findMany({
-		orderBy: keysetOrder('periodStart'),
-		take: limit + 1,
-		where: { ...scoped(ownerId, { ...(filters.kind && { kind: filters.kind }), ...(filters.status && { status: filters.status }) }), ...keysetAfter('periodStart', cursor) },
-	});
+/** One page of reviews (most recent period first) with the total. */
+export const listReviews = async (prisma: PrismaClient, ownerId: string, filters: ListReviewsFilters, page: PageParams): Promise<Paged<Review>> => {
+	const where = scoped(ownerId, { ...(filters.kind && { kind: filters.kind }), ...(filters.status && { status: filters.status }) });
+	const [items, total] = await Promise.all([prisma.review.findMany({ orderBy: pageOrder('periodStart'), ...pageArgs(page), where }), prisma.review.count({ where })]);
+	return { items, total };
+};
 
 /**
  * Opens the review of a period. Idempotent: if it already exists (open or closed) it is returned instead of duplicated.

@@ -24,14 +24,15 @@ describe('listNotes', () => {
 	it('omits the body, scopes by owner and flattens links', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.note.findMany).mockResolvedValue(asRow([row]));
-		expect(await listNotes(prisma, TEST_USER_ID, {}, 20)).toEqual([view]);
-		expect(prisma.note.findMany).toHaveBeenCalledWith(expect.objectContaining({ omit: { body: true }, take: 21, where: { ownerId: TEST_USER_ID } }));
+		vi.mocked(prisma.note.count).mockResolvedValue(1);
+		expect(await listNotes(prisma, TEST_USER_ID, {}, { page: 1, pageSize: 20 })).toEqual({ items: [view], total: 1 });
+		expect(prisma.note.findMany).toHaveBeenCalledWith(expect.objectContaining({ omit: { body: true }, skip: 0, take: 20, where: { ownerId: TEST_USER_ID } }));
 	});
 
 	it('filters by project, tag and task', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.note.findMany).mockResolvedValue([]);
-		await listNotes(prisma, TEST_USER_ID, { projectId: PROJECT_ID, tagId: TAG_ID, taskId: TASK_ID }, 10);
+		await listNotes(prisma, TEST_USER_ID, { projectId: PROJECT_ID, tagId: TAG_ID, taskId: TASK_ID }, { page: 1, pageSize: 10 });
 		expect(vi.mocked(prisma.note.findMany).mock.calls[0]?.[0]?.where).toEqual({
 			ownerId: TEST_USER_ID,
 			projectId: PROJECT_ID,
@@ -40,12 +41,11 @@ describe('listNotes', () => {
 		});
 	});
 
-	it('continues after a cursor keeping the owner scope', async () => {
+	it('skips the previous pages keeping the owner scope', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.note.findMany).mockResolvedValue([]);
-		const cursor = { at: new Date('2026-11-01T10:00:00.000Z'), id: ID };
-		await listNotes(prisma, TEST_USER_ID, {}, 10, cursor);
-		expect(vi.mocked(prisma.note.findMany).mock.calls[0]?.[0]?.where).toMatchObject({ OR: [{ createdAt: { lt: cursor.at } }, { createdAt: cursor.at, id: { lt: ID } }], ownerId: TEST_USER_ID });
+		await listNotes(prisma, TEST_USER_ID, {}, { page: 2, pageSize: 10 });
+		expect(vi.mocked(prisma.note.findMany).mock.calls[0]?.[0]).toMatchObject({ skip: 10, take: 10, where: { ownerId: TEST_USER_ID } });
 	});
 });
 

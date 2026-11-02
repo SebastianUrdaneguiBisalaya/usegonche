@@ -65,32 +65,28 @@ describe('recordTaskEvents', () => {
 describe('listTaskHistory', () => {
 	const event = { id: 'e1', ownerId: TEST_USER_ID, taskId: TASK, type: 'status_changed' } as TaskEvent;
 
-	it('fetches limit + 1 events of an owned task, newest first', async () => {
+	it('fetches a page of events of an owned task, newest first, with the total', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findFirst).mockResolvedValue({ id: TASK } as never);
 		vi.mocked(prisma.taskEvent.findMany).mockResolvedValue([event]);
-		expect(await listTaskHistory(prisma, TEST_USER_ID, TASK, 20)).toEqual([event]);
+		vi.mocked(prisma.taskEvent.count).mockResolvedValue(1);
+		expect(await listTaskHistory(prisma, TEST_USER_ID, TASK, { page: 1, pageSize: 20 })).toEqual({ items: [event], total: 1 });
 		expect(prisma.task.findFirst).toHaveBeenCalledWith({ select: { id: true }, where: { id: TASK, ownerId: TEST_USER_ID } });
-		expect(prisma.taskEvent.findMany).toHaveBeenCalledWith({ orderBy: [{ occurredAt: 'desc' }, { id: 'desc' }], take: 21, where: { ownerId: TEST_USER_ID, taskId: TASK } });
+		expect(prisma.taskEvent.findMany).toHaveBeenCalledWith({ orderBy: [{ occurredAt: 'desc' }, { id: 'desc' }], skip: 0, take: 20, where: { ownerId: TEST_USER_ID, taskId: TASK } });
 	});
 
-	it('continues after a cursor keeping the owner scope', async () => {
+	it('skips the previous pages keeping the owner scope', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findFirst).mockResolvedValue({ id: TASK } as never);
 		vi.mocked(prisma.taskEvent.findMany).mockResolvedValue([]);
-		const cursor = { at: new Date('2026-11-01T10:00:00.000Z'), id: TASK };
-		await listTaskHistory(prisma, TEST_USER_ID, TASK, 10, cursor);
-		expect(vi.mocked(prisma.taskEvent.findMany).mock.calls[0]?.[0]?.where).toMatchObject({
-			OR: [{ occurredAt: { lt: cursor.at } }, { id: { lt: TASK }, occurredAt: cursor.at }],
-			ownerId: TEST_USER_ID,
-			taskId: TASK,
-		});
+		await listTaskHistory(prisma, TEST_USER_ID, TASK, { page: 4, pageSize: 10 });
+		expect(vi.mocked(prisma.taskEvent.findMany).mock.calls[0]?.[0]).toMatchObject({ skip: 30, take: 10, where: { ownerId: TEST_USER_ID, taskId: TASK } });
 	});
 
 	it('throws 404 for a task that is not the owner’s', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findFirst).mockResolvedValue(null);
-		expect(await rejection(listTaskHistory(prisma, OTHER_USER_ID, TASK, 10))).toMatchObject({ code: 'not_found', status: 404 });
+		expect(await rejection(listTaskHistory(prisma, OTHER_USER_ID, TASK, { page: 1, pageSize: 10 }))).toMatchObject({ code: 'not_found', status: 404 });
 		expect(prisma.taskEvent.findMany).not.toHaveBeenCalled();
 	});
 });

@@ -47,13 +47,14 @@ describe('GET /reviews', () => {
 	it('lists reviews with meta and filters', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.review.findMany).mockResolvedValue(asRow([row]));
+		vi.mocked(prisma.review.count).mockResolvedValue(1);
 		const res = await app.request('/reviews?kind=daily&status=open');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [JSON.parse(JSON.stringify(row))], meta: { limit: 50, nextCursor: null } });
-		expect(prisma.review.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51, where: { kind: 'daily', ownerId: TEST_USER_ID, status: 'open' } }));
+		expect(await res.json()).toEqual({ data: [JSON.parse(JSON.stringify(row))], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(prisma.review.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { kind: 'daily', ownerId: TEST_USER_ID, status: 'open' } }));
 	});
 
-	it.each(['kind=monthly', 'status=nope', 'cursor=garbage', 'limit=0'])('answers 422 for ?%s', async query => {
+	it.each(['kind=monthly', 'status=nope', 'page=0', 'pageSize=0'])('answers 422 for ?%s', async query => {
 		expect((await setup().app.request(`/reviews?${query}`)).status).toBe(422);
 	});
 });

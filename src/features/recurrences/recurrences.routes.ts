@@ -2,7 +2,7 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import type { AppEnv } from '../../env.js';
 import { ok, okWithMeta } from '../../lib/http.js';
-import { toPage } from '../../lib/pagination.js';
+import { pageMeta } from '../../lib/pagination.js';
 import { validationHook } from '../../lib/validator.js';
 import { requireUser } from '../../middleware/auth.js';
 import { createRecurrenceSchema, listRecurrencesQuerySchema, recurrenceParamSchema, updateRecurrenceSchema } from './recurrences.schemas.js';
@@ -12,9 +12,9 @@ import { createRecurrence, deleteRecurrence, getRecurrence, getToday, listRecurr
 export default new Hono<AppEnv>()
 	.use(requireUser())
 	.get('/', zValidator('query', listRecurrencesQuerySchema, validationHook), async c => {
-		const { cursor, limit } = c.req.valid('query');
-		const { items, nextCursor } = toPage(await listRecurrences(c.get('prisma'), c.get('claims').sub, limit, cursor), limit, rule => rule.createdAt);
-		return okWithMeta(c, items, { limit, nextCursor }, 200);
+		const { page, pageSize } = c.req.valid('query');
+		const { items, total } = await listRecurrences(c.get('prisma'), c.get('claims').sub, { page, pageSize });
+		return okWithMeta(c, items, pageMeta({ page, pageSize }, total), 200);
 	})
 	.post('/', zValidator('json', createRecurrenceSchema, validationHook), async c => {
 		const prisma = c.get('prisma');

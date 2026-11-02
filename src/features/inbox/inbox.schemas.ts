@@ -28,9 +28,18 @@ export const brainDumpSchema = z.strictObject({
 export const userStatuses = ['pending', 'archived', 'discarded'] as const;
 export const setStatusSchema = z.strictObject({ status: z.enum(userStatuses) });
 
+export const INBOX_STATUSES = ['pending', 'archived', 'discarded', 'converted'] as const;
+
+/** Rolling window over `capturedAt`, counted back from now. */
+export const inboxRanges = ['all', '24h', '7d', '30d'] as const;
+export type InboxRange = (typeof inboxRanges)[number];
+/** Hours covered by each range; `undefined` means no limit. */
+export const RANGE_HOURS: Record<InboxRange, number | undefined> = { '24h': 24, '30d': 720, '7d': 168, all: undefined };
+
 export const listQuerySchema = z.object({
 	...paginationQuery,
-	status: z.enum(['pending', 'converted', 'archived', 'discarded']).default('pending'),
+	range: z.enum(inboxRanges).default('all'),
+	status: z.enum(INBOX_STATUSES).default('pending'),
 });
 
 export const inboxParamSchema = z.object({ id: z.uuid() });

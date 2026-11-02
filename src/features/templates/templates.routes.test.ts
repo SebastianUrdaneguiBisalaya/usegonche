@@ -38,16 +38,17 @@ describe('GET /templates', () => {
 	it('lists the templates of the user with meta and filters by kind', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.template.findMany).mockResolvedValue(asRow([row]));
+		vi.mocked(prisma.template.count).mockResolvedValue(1);
 		const res = await app.request('/templates?kind=task');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toMatchObject({ data: [{ id: ID }], meta: { limit: 50, nextCursor: null } });
+		expect(await res.json()).toMatchObject({ data: [{ id: ID }], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
 		expect(prisma.template.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { kind: 'task', ownerId: TEST_USER_ID } }));
 	});
 
-	it('answers 422 for an invalid kind or cursor', async () => {
+	it('answers 422 for an invalid kind or page', async () => {
 		const { app } = setup();
 		expect((await app.request('/templates?kind=nope')).status).toBe(422);
-		expect((await app.request('/templates?cursor=nope')).status).toBe(422);
+		expect((await app.request('/templates?page=0')).status).toBe(422);
 	});
 });
 

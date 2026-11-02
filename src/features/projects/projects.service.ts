@@ -2,7 +2,7 @@ import type { Prisma, PrismaClient, Project, ProjectStatus, Tag } from '@usegonc
 import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
-import { type Cursor, keysetAfter, keysetOrder } from '../../lib/pagination.js';
+import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
 import { markConverted } from '../inbox/inbox.service.js';
 import type { CreateProjectInput, UpdateProjectInput } from './projects.schemas.js';
 
@@ -29,24 +29,16 @@ const assertTags = async (prisma: Db, ownerId: string, tagIds: string[]): Promis
 	if (count !== tagIds.length) throw invalidReference('tagIds');
 };
 
-/** Fetches `limit + 1` rows after `cursor` (newest first); pass them to `toPage`. Archived projects are hidden unless asked for. */
+/** One page of projects (newest first) with the total. Archived projects are hidden unless asked for. */
 export const listProjects = async (
 	prisma: PrismaClient,
 	ownerId: string,
 	filters: { archived: boolean; goalId?: string; status?: ProjectStatus },
-	limit: number,
-	cursor?: Cursor
-): Promise<ProjectWithTags[]> => {
-	const rows = await prisma.project.findMany({
-		include: withTags,
-		orderBy: keysetOrder('createdAt'),
-		take: limit + 1,
-		where: {
-			...scoped(ownerId, { archivedAt: filters.archived ? { not: null } : null, ...(filters.goalId && { goalId: filters.goalId }), ...(filters.status && { status: filters.status }) }),
-			...keysetAfter('createdAt', cursor),
-		},
-	});
-	return rows.map(flatten);
+	page: PageParams
+): Promise<Paged<ProjectWithTags>> => {
+	const where = scoped(ownerId, { archivedAt: filters.archived ? { not: null } : null, ...(filters.goalId && { goalId: filters.goalId }), ...(filters.status && { status: filters.status }) });
+	const [rows, total] = await Promise.all([prisma.project.findMany({ include: withTags, orderBy: pageOrder('createdAt'), ...pageArgs(page), where }), prisma.project.count({ where })]);
+	return { items: rows.map(flatten), total };
 };
 
 export const getProject = async (prisma: Db, ownerId: string, id: string): Promise<ProjectWithTags> => {

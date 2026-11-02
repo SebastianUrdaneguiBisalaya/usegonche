@@ -22,20 +22,21 @@ describe('GET /tasks/:id/history', () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.task.findFirst).mockResolvedValue({ id: TASK } as never);
 		vi.mocked(prisma.taskEvent.findMany).mockResolvedValue([event]);
+		vi.mocked(prisma.taskEvent.count).mockResolvedValue(1);
 		const res = await app.request(`/tasks/${TASK}/history`);
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [JSON.parse(JSON.stringify(event))], meta: { limit: 50, nextCursor: null } });
-		expect(prisma.taskEvent.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51, where: { ownerId: TEST_USER_ID, taskId: TASK } }));
+		expect(await res.json()).toEqual({ data: [JSON.parse(JSON.stringify(event))], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(prisma.taskEvent.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { ownerId: TEST_USER_ID, taskId: TASK } }));
 	});
 
-	it('returns nextCursor when there are more events', async () => {
+	it('reports the page count and skips the previous pages', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.task.findFirst).mockResolvedValue({ id: TASK } as never);
-		const rows = [1, 2, 3].map(n => ({ ...event, id: `5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7${n}`, occurredAt: new Date(`2026-11-0${n}T10:00:00.000Z`) }));
-		vi.mocked(prisma.taskEvent.findMany).mockResolvedValue([...rows].reverse());
-		const body = (await (await app.request(`/tasks/${TASK}/history?limit=2`)).json()) as { data: unknown[]; meta: { nextCursor: string } };
-		expect(body.data).toHaveLength(2);
-		expect(typeof body.meta.nextCursor).toBe('string');
+		vi.mocked(prisma.taskEvent.findMany).mockResolvedValue([event]);
+		vi.mocked(prisma.taskEvent.count).mockResolvedValue(5);
+		const body = (await (await app.request(`/tasks/${TASK}/history?page=2&pageSize=2`)).json()) as { meta: unknown };
+		expect(body.meta).toEqual({ page: 2, pageCount: 3, pageSize: 2, total: 5 });
+		expect(prisma.taskEvent.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 2, take: 2 }));
 	});
 
 	it('answers 404 for a task that is not the user’s', async () => {
@@ -44,7 +45,7 @@ describe('GET /tasks/:id/history', () => {
 		expect((await app.request(`/tasks/${TASK}/history`)).status).toBe(404);
 	});
 
-	it.each(['limit=0', 'limit=101', 'cursor=garbage'])('answers 422 for ?%s', async query => {
+	it.each(['pageSize=0', 'pageSize=101', 'page=0'])('answers 422 for ?%s', async query => {
 		expect((await setup().app.request(`/tasks/${TASK}/history?${query}`)).status).toBe(422);
 	});
 

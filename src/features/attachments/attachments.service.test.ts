@@ -107,8 +107,9 @@ describe('listAttachments', () => {
 	it('lists the attachments of one target scoped by owner', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.attachment.findMany).mockResolvedValue([attachment]);
-		expect(await listAttachments(prisma, TEST_USER_ID, { noteId: ID }, 20)).toEqual([attachment]);
-		expect(prisma.attachment.findMany).toHaveBeenCalledWith({ orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 21, where: { noteId: ID, ownerId: TEST_USER_ID } });
+		vi.mocked(prisma.attachment.count).mockResolvedValue(1);
+		expect(await listAttachments(prisma, TEST_USER_ID, { noteId: ID }, { page: 1, pageSize: 20 })).toEqual({ items: [attachment], total: 1 });
+		expect(prisma.attachment.findMany).toHaveBeenCalledWith({ orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: 0, take: 20, where: { noteId: ID, ownerId: TEST_USER_ID } });
 	});
 });
 
