@@ -50,7 +50,7 @@ export function useGoogleSignIn() {
 			return;
 		}
 		// Load ahead of the click so the popup opens while the click's user activation is still valid.
-		if (googleClientId) void loadGoogleScript().catch(() => {});
+		if (googleClientId) void loadGoogleScript().catch(() => undefined);
 	}, []);
 
 	const login = (data: GoogleLoginInput) => {
