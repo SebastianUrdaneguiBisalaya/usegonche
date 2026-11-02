@@ -1,5 +1,5 @@
-import { Navigate, useSearchParams } from 'react-router';
-import { RouterLink } from '~/components/router-link';
+import { Navigate, Link as RouterLink, useSearchParams } from 'react-router';
+import { Link } from '~/components/ui/foundations/link/link';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { useTranslate } from '~/hooks/use-translate';
@@ -25,9 +25,9 @@ export default function VerifyEmailPage() {
 					})}
 				</Typography.Span>
 			</Layout.Stack>
-			<RouterLink className='self-center' to='/auth/sign-in'>
+			<Link as={RouterLink} className='self-center' to='/auth/sign-in'>
 				{t('auth.common.backToSignIn')}
-			</RouterLink>
+			</Link>
 		</>
 	);
 }

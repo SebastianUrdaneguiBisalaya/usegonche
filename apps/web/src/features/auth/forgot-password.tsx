@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router';
-import { RouterLink } from '~/components/router-link';
+import { Link as RouterLink, useNavigate } from 'react-router';
 import { Form } from '~/components/ui/forms-inputs/form/form';
 import { Input } from '~/components/ui/forms-inputs/input/input';
+import { Link } from '~/components/ui/foundations/link/link';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { useTranslate } from '~/hooks/use-translate';
@@ -61,9 +61,9 @@ export default function ForgotPasswordPage() {
 					</Layout.Stack>
 				)}
 			</Form>
-			<RouterLink className='self-center' to='/auth/sign-in'>
+			<Link as={RouterLink} className='self-center' to='/auth/sign-in'>
 				{t('auth.common.backToSignIn')}
-			</RouterLink>
+			</Link>
 		</>
 	);
 }

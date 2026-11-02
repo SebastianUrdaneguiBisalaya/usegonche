@@ -1,18 +1,18 @@
 import { Google } from '@ridemountainpig/svgl-react';
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router';
-import { RouterLink } from '~/components/router-link';
+import { Link as RouterLink, useNavigate } from 'react-router';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Form } from '~/components/ui/forms-inputs/form/form';
 import { Input } from '~/components/ui/forms-inputs/input/input';
+import { Link } from '~/components/ui/foundations/link/link';
 import { Separator } from '~/components/ui/foundations/separator/separator';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { useTranslate } from '~/hooks/use-translate';
-import { API_URL } from '~/lib/api';
 import { useSignup } from './api';
 import { authMeta } from './meta';
 import { createSignUpSchema } from './schemas';
+import { useGoogleSignIn } from './use-google-sign-in';
 
 export const meta = authMeta('signUp');
 
@@ -20,6 +20,7 @@ export default function SignUpPage() {
 	const t = useTranslate();
 	const navigate = useNavigate();
 	const signup = useSignup();
+	const google = useGoogleSignIn();
 	const schema = useMemo(() => createSignUpSchema(t), [t]);
 
 	return (
@@ -72,16 +73,20 @@ export default function SignUpPage() {
 					</Layout.Stack>
 				)}
 			</Form>
-			<Separator>{t('auth.common.or')}</Separator>
-			<Button className='w-full py-3' onClick={() => window.location.assign(`${API_URL}/auth/google`)} type='button' variant='secondary'>
-				<Google height={12} width={12} />
-				<Button.Text>{t('auth.signUp.google')}</Button.Text>
-			</Button>
+			{google.enabled && (
+				<>
+					<Separator>{t('auth.common.or')}</Separator>
+					<Button className='w-full py-3' disabled={google.isPending} onClick={google.signIn} type='button' variant='secondary'>
+						<Google height={12} width={12} />
+						<Button.Text>{t('auth.signUp.google')}</Button.Text>
+					</Button>
+				</>
+			)}
 			<Layout.HStack className='justify-between'>
 				<Typography.Span>{t('auth.signUp.haveAccount')}</Typography.Span>
-				<RouterLink className='text-xs' to='/auth/sign-in'>
+				<Link as={RouterLink} className='text-xs' to='/auth/sign-in'>
 					{t('auth.signUp.signInLink')}
-				</RouterLink>
+				</Link>
 			</Layout.HStack>
 		</>
 	);

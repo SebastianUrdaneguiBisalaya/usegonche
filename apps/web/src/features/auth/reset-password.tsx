@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { Navigate, useNavigate, useSearchParams } from 'react-router';
+import { Navigate, Link as RouterLink, useNavigate, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
-import { RouterLink } from '~/components/router-link';
 import { Form } from '~/components/ui/forms-inputs/form/form';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { InputOtp } from '~/components/ui/forms-inputs/input-otp/input-otp';
+import { Link } from '~/components/ui/foundations/link/link';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { useTranslate } from '~/hooks/use-translate';
@@ -94,9 +94,9 @@ export default function ResetPasswordPage() {
 					</Layout.Stack>
 				)}
 			</Form>
-			<RouterLink className='self-center' to='/auth/sign-in'>
+			<Link as={RouterLink} className='self-center' to='/auth/sign-in'>
 				{t('auth.common.backToSignIn')}
-			</RouterLink>
+			</Link>
 		</>
 	);
 }

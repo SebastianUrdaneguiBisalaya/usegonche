@@ -1,20 +1,20 @@
 import { Google } from '@ridemountainpig/svgl-react';
 import { useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
-import { RouterLink } from '~/components/router-link';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Form } from '~/components/ui/forms-inputs/form/form';
 import { Input } from '~/components/ui/forms-inputs/input/input';
+import { Link } from '~/components/ui/foundations/link/link';
 import { Separator } from '~/components/ui/foundations/separator/separator';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { useTranslate } from '~/hooks/use-translate';
-import { API_URL } from '~/lib/api';
 import { ApiError, getApiErrorMessage } from '~/lib/api-error';
 import { useLogin } from './api';
 import { authMeta } from './meta';
 import { createSignInSchema } from './schemas';
+import { useGoogleSignIn } from './use-google-sign-in';
 
 export const meta = authMeta('signIn');
 
@@ -23,6 +23,7 @@ export default function SignInPage() {
 	const navigate = useNavigate();
 	const login = useLogin();
 	const [searchParams] = useSearchParams();
+	const google = useGoogleSignIn();
 	const schema = useMemo(() => createSignInSchema(t), [t]);
 
 	// The API sends the browser back here with `?error=<code>` when Google sign-in or the email link fails.
@@ -87,19 +88,23 @@ export default function SignInPage() {
 					</Layout.Stack>
 				)}
 			</Form>
-			<Separator>{t('auth.common.or')}</Separator>
-			<Button className='w-full py-3' onClick={() => window.location.assign(`${API_URL}/auth/google`)} type='button' variant='secondary'>
-				<Google height={12} width={12} />
-				<Button.Text>{t('auth.signIn.google')}</Button.Text>
-			</Button>
-			<RouterLink className='self-center' to='/auth/forgot-password'>
+			{google.enabled && (
+				<>
+					<Separator>{t('auth.common.or')}</Separator>
+					<Button className='w-full py-3' disabled={google.isPending} onClick={google.signIn} type='button' variant='secondary'>
+						<Google height={12} width={12} />
+						<Button.Text>{t('auth.signIn.google')}</Button.Text>
+					</Button>
+				</>
+			)}
+			<Link as={RouterLink} className='self-center' to='/auth/forgot-password'>
 				<Typography.Span className='text-foreground-secondary'>{t('auth.signIn.forgotPassword')}</Typography.Span>
-			</RouterLink>
+			</Link>
 			<Layout.HStack className='justify-between'>
 				<Typography.Span>{t('auth.signIn.noAccount')}</Typography.Span>
-				<RouterLink className='text-xs' to='/auth/sign-up'>
+				<Link as={RouterLink} className='text-xs' to='/auth/sign-up'>
 					{t('auth.signIn.signUpLink')}
-				</RouterLink>
+				</Link>
 			</Layout.HStack>
 		</>
 	);

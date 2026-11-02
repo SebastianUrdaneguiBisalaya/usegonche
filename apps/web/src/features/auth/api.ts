@@ -7,6 +7,7 @@ import { useSessionStore } from '~/store/session-store';
 export type LoginInput = Body<typeof api.auth.login.$post>;
 export type SignupInput = Body<typeof api.auth.signup.$post>;
 export type ForgotPasswordInput = Body<(typeof api.auth)['forgot-password']['$post']>;
+export type GoogleLoginInput = Body<typeof api.auth.google.$post>;
 export type ResetPasswordInput = Body<(typeof api.auth)['reset-password']['$post']>;
 export type AuthUser = Data<Awaited<ReturnType<typeof api.auth.login.$post>>>['user'];
 
@@ -44,5 +45,14 @@ export function useLogout() {
 	return useMutation({
 		mutationFn: () => unwrap(api.auth.logout.$post()),
 		onSettled: clearUser,
+	});
+}
+
+/** Exchanges a Google authorization code (web popup or desktop bridge) for a session. */
+export function useLoginWithGoogle() {
+	const setUser = useSessionStore(state => state.setUser);
+	return useMutation({
+		mutationFn: (json: GoogleLoginInput) => unwrap(api.auth.google.$post({ json })),
+		onSuccess: ({ user }) => setUser(user),
 	});
 }
