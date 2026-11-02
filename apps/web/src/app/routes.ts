@@ -5,6 +5,7 @@ export default [
 		index('../features/protected/home/home.tsx'),
 		route('inbox', '../features/protected/inbox/inbox.tsx'),
 		route('projects', '../features/protected/projects/projects.tsx'),
+		route('goals', '../features/protected/goals/goals.tsx'),
 	]),
 	layout(
 		'../features/auth/layout.tsx',

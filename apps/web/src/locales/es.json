@@ -416,5 +416,158 @@
       "created": "Más nuevos primero",
       "title": "Título (A–Z)"
     }
+  },
+  "goals": {
+    "title": "Metas",
+    "subtitle": "Define y sigue tus metas.",
+    "new": "Nueva meta",
+    "search": {
+      "placeholder": "Buscar en metas...",
+      "label": "Buscar en metas",
+      "clear": "Borrar búsqueda",
+      "empty": "Ninguna meta coincide con tu búsqueda."
+    },
+    "tabs": {
+      "label": "Estado de la meta",
+      "active": "Activas",
+      "achieved": "Logradas",
+      "archived": "Archivadas"
+    },
+    "status": {
+      "active": "Activa",
+      "achieved": "Lograda",
+      "archived": "Archivada",
+      "change": "Cambiar estado"
+    },
+    "filters": {
+      "due": {
+        "label": "Filtrar por fecha objetivo",
+        "all": "Cualquier fecha objetivo",
+        "overdue": "Vencidas",
+        "soon": "Vencen en 14 días"
+      },
+      "page": {
+        "label": "Página",
+        "value": "Página: {{page}}"
+      }
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "updated": "Actualizadas recientemente",
+      "created": "Más nuevas primero",
+      "targetDate": "Fecha objetivo",
+      "title": "Título (A–Z)"
+    },
+    "columns": {
+      "title": "Título",
+      "description": "Descripción",
+      "targetDate": "Fecha objetivo",
+      "progress": "Progreso",
+      "projects": "Proyectos",
+      "status": "Estado",
+      "updated": "Actualizada"
+    },
+    "cell": {
+      "noDate": "Sin fecha objetivo",
+      "overdue": "Vencida",
+      "progress": "{{done}} de {{total}} tareas hechas",
+      "noTasks": "Aún sin tareas",
+      "projects_one": "{{count}} proyecto",
+      "projects_other": "{{count}} proyectos"
+    },
+    "selection": {
+      "count": "{{count}} seleccionadas",
+      "total_one": "{{count}} meta",
+      "total_other": "{{count}} metas"
+    },
+    "actions": {
+      "open": "Abrir detalle",
+      "setActive": "Marcar activa",
+      "setAchieved": "Marcar lograda",
+      "archive": "Archivar",
+      "restore": "Restaurar",
+      "more": "Más acciones",
+      "rowMenu": "Acciones de la meta",
+      "clearSelection": "Limpiar selección"
+    },
+    "toast": {
+      "created": "Meta creada",
+      "saved": "Cambios guardados",
+      "archived": "Meta archivada",
+      "restored": "Meta restaurada",
+      "statusChanged": "Estado actualizado",
+      "bulk": "{{count}} metas actualizadas",
+      "undo": "Deshacer"
+    },
+    "empty": {
+      "active": {
+        "title": "Sin metas activas",
+        "description": "Define una meta para dar dirección a tus proyectos."
+      },
+      "achieved": {
+        "title": "Nada logrado todavía",
+        "description": "Las metas que alcances aparecen aquí."
+      },
+      "archived": {
+        "title": "Nada archivado",
+        "description": "Archiva las metas que ya no persigues."
+      },
+      "filtered": "Ninguna meta coincide con este filtro."
+    },
+    "error": {
+      "title": "No se pudieron cargar tus metas",
+      "retry": "Reintentar"
+    },
+    "form": {
+      "title": {
+        "label": "Título",
+        "placeholder": "¿Qué quieres lograr?",
+        "required": "Ponle un título a la meta.",
+        "tooLong": "Usa como máximo {{max}} caracteres."
+      },
+      "description": {
+        "label": "Descripción",
+        "placeholder": "Por qué importa, cómo sabrás que está lista... (Markdown)"
+      },
+      "targetDate": {
+        "label": "Fecha objetivo",
+        "placeholder": "Sin fecha objetivo",
+        "picker": {
+          "calendar": "Calendario",
+          "previousMonth": "Mes anterior",
+          "nextMonth": "Mes siguiente",
+          "clear": "Quitar fecha",
+          "apply": "Aplicar",
+          "mo": "Lu",
+          "tu": "Ma",
+          "we": "Mi",
+          "th": "Ju",
+          "fr": "Vi",
+          "sa": "Sá",
+          "su": "Do"
+        }
+      },
+      "status": {
+        "label": "Estado"
+      },
+      "cancel": "Cancelar",
+      "create": "Crear meta",
+      "save": "Guardar cambios"
+    },
+    "modal": {
+      "title": "Nueva meta",
+      "description": "Una meta es un resultado que quieres alcanzar. Los proyectos agrupan el trabajo para llegar."
+    },
+    "drawer": {
+      "close": "Cerrar",
+      "tabsLabel": "Secciones de la meta",
+      "details": "Detalle",
+      "projects": "Proyectos",
+      "created": "Creada {{date}}",
+      "progress": "{{done}} de {{total}} tareas hechas",
+      "projectsEmpty": "Aún no hay proyectos vinculados a esta meta.",
+      "loadError": "No se pudo cargar esta sección.",
+      "retry": "Reintentar"
+    }
   }
 }
