@@ -6,6 +6,7 @@ Every command is run **from the repo root** unless it says otherwise.
 
 ## 0. Rules to keep in mind
 
+- Every endpoint is under **`/v1`** (e.g. `http://localhost:4000/v1/auth/login`), except `GET /health`, which is unversioned.
 - The database is **Supabase Postgres**. There is no local database container.
 - Migrations are **never** run by the API at startup. You run them yourself (section 4).
 - **Never commit `.env`** or any secret.
@@ -33,7 +34,7 @@ Requirements: Node.js 22 or newer, and pnpm (the exact version is pinned in `pac
    | `DATABASE_URL` | Connect > pooled connection (Supavisor, port `6543`). Used at runtime |
    | `DIRECT_URL` | Connect > direct or session pooler (port `5432`). Used **only by migrations** |
    | `AUTH_REDIRECT_URL` | Where the browser lands after Google sign-in or the email link (e.g. `http://localhost:5173`) |
-   | `AUTH_CALLBACK_URL` | Public URL of `GET /auth/callback` (e.g. `http://localhost:4000/auth/callback`) |
+   | `AUTH_CALLBACK_URL` | Public URL of `GET /v1/auth/callback` (e.g. `http://localhost:4000/v1/auth/callback`) |
 
    Optional variables (Google sign-in, storage buckets, rate limits, `INTERNAL_CRON_SECRET`, `API_DOMAIN`) are documented inside `.env.example`.
 
@@ -152,7 +153,7 @@ These are run by you in the Supabase SQL editor. They are re-runnable.
 2. Open the SQL file and replace the two placeholders:
    - `<API_URL>`: public base URL of the API, no trailing slash (e.g. `https://api.example.com`)
    - `<SECRET>`: the same value as `INTERNAL_CRON_SECRET`
-3. Paste it into Supabase > SQL Editor and run it. It enables `pg_cron` and `pg_net` and schedules `process-reminders` every minute (calls `POST /internal/reminders/process`).
+3. Paste it into Supabase > SQL Editor and run it. It enables `pg_cron` and `pg_net` and schedules `process-reminders` every minute (calls `POST /v1/v1/internal/reminders/process`).
 4. To inspect or stop it, use the queries in the comments at the bottom of the file. To rotate the secret, change the env var and re-run the script.
 
 Do not commit the file with the real URL or secret filled in.
@@ -216,7 +217,7 @@ One-time setup on the droplet:
 2. Create an **A record** for your domain pointing to the droplet. Open ports `80`, `443` and `443/udp`.
 3. `cp .env.example .env` and fill it in. In addition to section 1:
    - `API_DOMAIN=api.example.com`
-   - `AUTH_CALLBACK_URL=https://api.example.com/auth/callback`
+   - `AUTH_CALLBACK_URL=https://api.example.com/v1/auth/callback`
    - `AUTH_REDIRECT_URL`: the production URL of your web app
    - `INTERNAL_CRON_SECRET`, and the Google variables if you use Google sign-in
    - `TRUST_PROXY` is forced to `true` by compose (Caddy sets `X-Forwarded-For`)
@@ -282,6 +283,6 @@ Set the env variables in the host (there is no `.env` file in production images)
 | `migrate:*` fails to connect | `DIRECT_URL` missing or wrong (direct or session pooler, port `5432`) |
 | `Cannot find module '@usegonche/database'` or Prisma client errors | Run `pnpm --filter @usegonche/database generate` |
 | Google sign-in or the email link ends on a JSON error | `AUTH_REDIRECT_URL` / `AUTH_CALLBACK_URL` missing or wrong |
-| `401` on `/internal/reminders/process` | `INTERNAL_CRON_SECRET` is unset, or differs from the one in the SQL |
+| `401` on `/v1/internal/reminders/process` | `INTERNAL_CRON_SECRET` is unset, or differs from the one in the SQL |
 | Web app types are stale after changing routes | `pnpm --filter @usegonche/api-client build` |
 | Too many requests (`429`) while testing | Raise `RATE_LIMIT_*_PER_MINUTE` in `.env` |
