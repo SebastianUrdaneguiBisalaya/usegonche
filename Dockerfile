@@ -7,6 +7,7 @@ FROM node:22-slim AS build
 # pnpm version comes from `packageManager` in package.json.
 RUN corepack enable
 WORKDIR /app
+# Includes pnpm-workspace.yaml (workspace globs + `allowBuilds`, without which pnpm skips the Prisma/esbuild build scripts), the lockfile and the package.json of every workspace.
 COPY . .
 # Only the API and the packages it depends on (`usegonche...`); the `postinstall` of @usegonche/database generates the Prisma clients.
 RUN pnpm install --frozen-lockfile --filter "usegonche..."
