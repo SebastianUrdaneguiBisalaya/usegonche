@@ -10,6 +10,7 @@ import { Image } from '~/components/ui/media-files/image/image';
 import { Sidebar } from '~/components/ui/navigation/sidebar/sidebar';
 import { UserProfile } from '~/components/ui/navigation/user-profile/user-profile';
 import { SettingsDialog } from '~/components/ui/overlays-feedback/settings-dialog/settings-dialog';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useSession } from '~/features/auth/api';
 import { useTranslate } from '~/hooks/use-translate';
 import { isActive, primaryNav, secondaryNav } from './navigation';
@@ -20,6 +21,8 @@ interface AppSidebarProps {
 	onMobileOpenChange: (open: boolean) => void;
 	onOpenCommand: () => void;
 }
+
+const avatarInitialsClassName = 'flex items-center justify-center bg-muted text-xs font-semibold text-muted-foreground';
 
 /** Two initials of the name: first letters of the first two words, or the first two letters of a single word (an email prefix too). */
 export function initialsOf(name: string): string {
@@ -136,9 +139,16 @@ export function AppSidebar({ mobileOpen, onMobileOpenChange, onOpenCommand }: Ap
 						<UserProfile.Trigger
 							avatar={
 								<Avatar size='sm'>
-									{avatarUrl && <Avatar.Img alt={name} src={avatarUrl} />}
-									<Avatar.Skeleton />
-									<Avatar.Fallback className='bg-muted text-xs font-semibold text-muted-foreground'>{initials}</Avatar.Fallback>
+									{avatarUrl ? (
+										<>
+											<Avatar.Img alt={name} src={avatarUrl} />
+											<Avatar.Skeleton />
+											<Avatar.Fallback className={avatarInitialsClassName}>{initials}</Avatar.Fallback>
+										</>
+									) : (
+										// `Avatar.Fallback` only appears after an image error, and without an image there is nothing to fail: draw the initials directly.
+										<span className={cn('absolute inset-0', avatarInitialsClassName)}>{initials}</span>
+									)}
 								</Avatar>
 							}
 							collapsed={collapsed}
