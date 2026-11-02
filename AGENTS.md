@@ -209,6 +209,18 @@ The API does not translate. `message` is a default English fallback; clients loc
 - Lint/format: a single `biome.json` at the root. Do not add per-app Biome configs or Biome dependencies.
 - Every package exposes `lint`, `format` and `typecheck` scripts. Run lint and typecheck before declaring any task done.
 
+## apps/web (React Router)
+
+SSR is on (`ssr: true`) and the Electron app (`apps/desktop`) loads the deployed/dev web URL, so server `loader`s work there too. If the web is ever bundled as static files inside Electron, SSR must be turned off and every `loader` becomes a `clientLoader`.
+
+### Data loading
+
+- **Route modules load their data with `loader`** (server, initial render and client navigations through an automatic fetch) and read it with `useLoaderData<typeof loader>()`. `clientLoader` (+ `HydrateFallback`) is for data that only the browser can fetch. Loaders return plain serializable values; they may also return unawaited promises, read with `<Suspense>` + `<Await>`, to stream slow, non-critical data behind a skeleton instead of blocking the page.
+- **A parent loader does NOT protect its children.** React Router runs matched loaders in parallel and a child can be requested on its own (fetchers, navigations that skip revalidating the parent). So the layout's session check (`features/protected/layout.tsx`) is only for redirecting and first paint: **every protected loader and action must authenticate the request itself** (forward the cookie to the API, `createClient(API_BASE, { headers: { cookie } })`) and never assume the layout already did. The API stays the authority: `requireAuth` plus owner-scoped queries.
+- **The session cookie only reaches the web server** when the browser sends it there too (same host in dev, a shared `COOKIE_DOMAIN` in production). Without it a loader answers `null` and the client-side check takes over, behind a skeleton (`features/protected/shared/layout-skeleton.tsx`). Do not treat a missing cookie as "signed out" in a loader; only a 401 from the API is.
+- **react-query stays the client cache** (mutations, refetching, the shared `['session']` entry). A loader that resolves data the UI also reads through `useQuery` seeds that same cache (`queryClient.setQueryData(key, loaderData)` during render) so there is a single source of truth and no duplicate request. Do not add a second store (zustand) for server data.
+- **`QueryClient` is per request on the server** and a singleton in the browser (`providers/query-client.tsx`). Never create it at module level for the server: a shared cache would leak one user's data to the next.
+
 ## apps/www (Next.js)
 
 <!-- BEGIN:nextjs-agent-rules -->
