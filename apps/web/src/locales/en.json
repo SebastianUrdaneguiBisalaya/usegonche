@@ -1262,6 +1262,26 @@
         "count": "{{count}} linked"
       }
     },
+    "reminder": {
+      "title": "Reminder",
+      "description": "Get reminded about this note.",
+      "none": "Set a reminder",
+      "pending": "Reminds you {{when}}",
+      "change": "Change the reminder",
+      "remove": "Remove the reminder",
+      "toast": {
+        "set": "Reminder set",
+        "updated": "Reminder updated",
+        "removed": "Reminder removed"
+      },
+      "error": "Could not save the reminder.",
+      "loadError": "Could not load the reminder.",
+      "retry": "Retry",
+      "picker": {
+        "hour": "Hour",
+        "minute": "Minute"
+      }
+    },
     "files": {
       "title": "Attachments ({{count}})",
       "loading": "Loading attachments",
