@@ -155,7 +155,100 @@
       "summary": "{{done}} de {{total}} tareas"
     },
     "settings": {
-      "title": "Configuración"
+      "title": "Configuración",
+      "group": "Configuración",
+      "close": "Cerrar",
+      "search": "Buscar en configuración",
+      "noResults": "Sin resultados",
+      "general": {
+        "nav": "General",
+        "title": "General",
+        "theme": {
+          "label": "Tema",
+          "description": "Elige cómo se ve useGonche en este dispositivo.",
+          "system": "Sistema",
+          "light": "Claro",
+          "dark": "Oscuro"
+        },
+        "language": {
+          "label": "Idioma",
+          "description": "El idioma de la interfaz.",
+          "options": {
+            "system": "Sistema",
+            "en": "English",
+            "es": "Español"
+          }
+        },
+        "country": {
+          "label": "País",
+          "description": "Zona horaria: {{timezone}}",
+          "hint": "Define tu zona horaria para planes y recordatorios."
+        }
+      },
+      "account": {
+        "nav": "Cuenta",
+        "title": "Cuenta",
+        "save": "Guardar cambios",
+        "cancel": "Cancelar",
+        "saved": "Cuenta actualizada",
+        "tooLong": "Máximo {{max}} caracteres",
+        "invalidUrl": "Ingresa una URL válida, como https://ejemplo.com",
+        "email": {
+          "label": "Correo",
+          "hint": "Tu correo no se puede cambiar."
+        },
+        "displayName": {
+          "label": "Nombre",
+          "placeholder": "¿Cómo te llamamos?"
+        },
+        "phoneNumber": {
+          "label": "Teléfono",
+          "placeholder": "+51 999 999 999"
+        },
+        "websiteUrl": {
+          "label": "Sitio web"
+        },
+        "jobTitle": {
+          "label": "Cargo",
+          "placeholder": "Diseñadora de producto"
+        },
+        "company": {
+          "label": "Empresa",
+          "placeholder": "Acme"
+        },
+        "industry": {
+          "label": "Industria",
+          "placeholder": "Software"
+        },
+        "bio": {
+          "label": "Biografía",
+          "placeholder": "Unas palabras sobre ti"
+        },
+        "avatar": {
+          "edit": "Cambiar foto",
+          "title": "Foto de perfil",
+          "description": "Sube una imagen cuadrada que se vea bien en un círculo pequeño.",
+          "hint": "PNG, JPG o WEBP, hasta 5 MB.",
+          "dragOrClick": "Arrastra una foto o haz clic para subir",
+          "dropHere": "Suéltala aquí",
+          "invalidType": "La foto debe ser una imagen PNG, JPG o WEBP.",
+          "maxSize": "máx. {{limit}}",
+          "tooLarge": "La foto no puede superar {{limit}}.",
+          "uploaded": "Subida",
+          "uploading": "Subiendo foto",
+          "saved": "Foto actualizada"
+        }
+      },
+      "shortcuts": {
+        "nav": "Atajos",
+        "description": "Estos son los atajos de teclado disponibles en useGonche. No se pueden cambiar.",
+        "empty": "No hay atajos disponibles.",
+        "groups": {
+          "general": "General",
+          "navigation": "Navegación",
+          "other": "Otros"
+        }
+      }
     }
   },
   "inbox": {

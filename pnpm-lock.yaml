@@ -297,6 +297,9 @@ importers:
       clsx:
         specifier: 2.1.1
         version: 2.1.1
+      countries-and-timezones:
+        specifier: 3.11.0
+        version: 3.11.0
       country-flag-icons:
         specifier: 1.6.20
         version: 1.6.20
@@ -3550,6 +3553,10 @@ packages:
 
   core-util-is@1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
+
+  countries-and-timezones@3.11.0:
+    resolution: {integrity: sha512-amqnHZJyuaFol6Z9gmyDb/D5cS6OSZUMfT6Ovj2HMmEBykHfwfA6dih59rulQ2kWynW7XeCAOzJr60hWL64Anw==}
+    engines: {node: '>=8.x', npm: '>=5.x'}
 
   country-flag-icons@1.6.20:
     resolution: {integrity: sha512-py8JiEKzjhYw6HPJ0L7SxLgCYim36UPRTZX43/kqGueUCZLSvnrqAiwW8HtQibur7mdkFQUkjOgdK+o/9FBtaw==}
@@ -9739,6 +9746,8 @@ snapshots:
       browserslist: 4.29.5
 
   core-util-is@1.0.3: {}
+
+  countries-and-timezones@3.11.0: {}
 
   country-flag-icons@1.6.20: {}
 

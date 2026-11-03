@@ -1,6 +1,7 @@
 import type { PrismaClient, Profile, UserSettings } from '@usegonche/database';
+import type { Storage, UploadUrl } from '@usegonche/storage';
 import { changedFields, hasChanges } from '../../lib/diff.js';
-import type { UpdateProfileInput, UpdateSettingsInput } from './profile.schemas.js';
+import type { AvatarUploadInput, UpdateProfileInput, UpdateSettingsInput } from './profile.schemas.js';
 
 /** Identity taken from the verified JWT claims (never from the request body). */
 export type Identity = { email?: string; id: string };
@@ -30,4 +31,16 @@ export const updateSettings = async (prisma: PrismaClient, user: Identity, input
 	const current = await getSettings(prisma, user);
 	const changed = changedFields(current, input);
 	return hasChanges(changed) ? prisma.userSettings.update({ data: changed, where: { ownerId: user.id } }) : current;
+};
+
+const AVATAR_EXTENSIONS = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' } as const;
+
+/**
+ * Signed URL for the client to upload the avatar straight to the public bucket, plus the permanent public URL the file will have.
+ * Nothing is saved yet: the client sends `publicUrl` as `avatarUrl` in `PATCH /profile` once the upload succeeds.
+ * Every avatar lives under the owner's folder with a fresh name, so a new picture never serves a stale cached one.
+ */
+export const createAvatarUploadUrl = async (storage: Storage, ownerId: string, input: AvatarUploadInput): Promise<UploadUrl & { publicUrl: string }> => {
+	const upload = await storage.uploadUrl('public', `${ownerId}/avatar/${crypto.randomUUID()}.${AVATAR_EXTENSIONS[input.mimeType]}`);
+	return { ...upload, publicUrl: await storage.readUrl('public', upload.path) };
 };

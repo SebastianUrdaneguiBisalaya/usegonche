@@ -1,7 +1,7 @@
 import type { Profile, UserSettings } from '@usegonche/database';
 import { describe, expect, it, vi } from 'vitest';
-import { createMockPrisma, OTHER_USER_ID, TEST_USER_ID } from '../../test/helpers.js';
-import { DEFAULT_SETTINGS, getProfile, getSettings, updateProfile, updateSettings } from './profile.service.js';
+import { createMockPrisma, createMockStorage, OTHER_USER_ID, TEST_USER_ID } from '../../test/helpers.js';
+import { createAvatarUploadUrl, DEFAULT_SETTINGS, getProfile, getSettings, updateProfile, updateSettings } from './profile.service.js';
 
 const user = { email: 'me@example.com', id: TEST_USER_ID };
 const profile = { email: user.email, id: TEST_USER_ID } as Profile;
@@ -73,5 +73,33 @@ describe('updateSettings', () => {
 		expect(await updateSettings(prisma, user, { theme: 'system' })).toBe(settings);
 		expect(prisma.userSettings.upsert).toHaveBeenCalledWith(expect.objectContaining({ update: {}, where: { ownerId: TEST_USER_ID } }));
 		expect(prisma.userSettings.update).not.toHaveBeenCalled();
+	});
+});
+
+describe('createAvatarUploadUrl', () => {
+	it.each([
+		['image/png', 'png'],
+		['image/jpeg', 'jpg'],
+		['image/webp', 'webp'],
+	] as const)('uploads %s to the public bucket under the owner folder and returns the public url', async (mimeType, extension) => {
+		const storage = createMockStorage();
+		vi.mocked(storage.uploadUrl).mockResolvedValue({ path: 'the/path', token: 't', uploadUrl: 'u', visibility: 'public' });
+		vi.mocked(storage.readUrl).mockResolvedValue('https://cdn/the/path');
+
+		const result = await createAvatarUploadUrl(storage, TEST_USER_ID, { mimeType, sizeBytes: 10 });
+
+		expect(storage.uploadUrl).toHaveBeenCalledWith('public', expect.stringMatching(new RegExp(`^${TEST_USER_ID}/avatar/[0-9a-f-]{36}\\.${extension}$`)));
+		expect(storage.readUrl).toHaveBeenCalledWith('public', 'the/path');
+		expect(result).toEqual({ path: 'the/path', publicUrl: 'https://cdn/the/path', token: 't', uploadUrl: 'u', visibility: 'public' });
+	});
+
+	it('uses a fresh path every time', async () => {
+		const storage = createMockStorage();
+		vi.mocked(storage.uploadUrl).mockResolvedValue({ path: 'p', token: 't', uploadUrl: 'u', visibility: 'public' });
+		vi.mocked(storage.readUrl).mockResolvedValue('x');
+		await createAvatarUploadUrl(storage, TEST_USER_ID, { mimeType: 'image/png', sizeBytes: 1 });
+		await createAvatarUploadUrl(storage, TEST_USER_ID, { mimeType: 'image/png', sizeBytes: 1 });
+		const [first, second] = vi.mocked(storage.uploadUrl).mock.calls;
+		expect(first?.[1]).not.toBe(second?.[1]);
 	});
 });

@@ -155,7 +155,100 @@
       "summary": "{{done}} of {{total}} tasks"
     },
     "settings": {
-      "title": "Settings"
+      "title": "Settings",
+      "group": "Settings",
+      "close": "Close",
+      "search": "Search settings",
+      "noResults": "No results",
+      "general": {
+        "nav": "General",
+        "title": "General",
+        "theme": {
+          "label": "Theme",
+          "description": "Choose how useGonche looks on this device.",
+          "system": "System",
+          "light": "Light",
+          "dark": "Dark"
+        },
+        "language": {
+          "label": "Language",
+          "description": "The language of the interface.",
+          "options": {
+            "system": "System",
+            "en": "English",
+            "es": "Español"
+          }
+        },
+        "country": {
+          "label": "Country",
+          "description": "Time zone: {{timezone}}",
+          "hint": "Sets your time zone for plans and reminders."
+        }
+      },
+      "account": {
+        "nav": "Account",
+        "title": "Account",
+        "save": "Save changes",
+        "cancel": "Cancel",
+        "saved": "Account updated",
+        "tooLong": "At most {{max}} characters",
+        "invalidUrl": "Enter a valid URL, like https://example.com",
+        "email": {
+          "label": "Email",
+          "hint": "Your email can't be changed."
+        },
+        "displayName": {
+          "label": "Name",
+          "placeholder": "How should we call you?"
+        },
+        "phoneNumber": {
+          "label": "Phone",
+          "placeholder": "+51 999 999 999"
+        },
+        "websiteUrl": {
+          "label": "Website"
+        },
+        "jobTitle": {
+          "label": "Job title",
+          "placeholder": "Product designer"
+        },
+        "company": {
+          "label": "Company",
+          "placeholder": "Acme"
+        },
+        "industry": {
+          "label": "Industry",
+          "placeholder": "Software"
+        },
+        "bio": {
+          "label": "Bio",
+          "placeholder": "A few words about you"
+        },
+        "avatar": {
+          "edit": "Change photo",
+          "title": "Profile photo",
+          "description": "Upload a square image that shows well as a small circle.",
+          "hint": "PNG, JPG or WEBP, up to 5 MB.",
+          "dragOrClick": "Drag a photo or click to upload",
+          "dropHere": "Drop here",
+          "invalidType": "The photo must be a PNG, JPG or WEBP image.",
+          "maxSize": "max. {{limit}}",
+          "tooLarge": "The photo can't exceed {{limit}}.",
+          "uploaded": "Uploaded",
+          "uploading": "Uploading photo",
+          "saved": "Photo updated"
+        }
+      },
+      "shortcuts": {
+        "nav": "Shortcuts",
+        "description": "These are the keyboard shortcuts available in useGonche. They can't be changed.",
+        "empty": "No shortcuts available.",
+        "groups": {
+          "general": "General",
+          "navigation": "Navigation",
+          "other": "Other"
+        }
+      }
     }
   },
   "inbox": {

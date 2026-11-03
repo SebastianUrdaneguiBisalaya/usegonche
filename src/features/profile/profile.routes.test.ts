@@ -1,6 +1,6 @@
 import type { Profile, UserSettings } from '@usegonche/database';
 import { describe, expect, it, vi } from 'vitest';
-import { createMockPrisma, createTestApp, jsonRequest, TEST_USER_ID } from '../../test/helpers.js';
+import { createMockPrisma, createMockStorage, createTestApp, jsonRequest, TEST_USER_ID } from '../../test/helpers.js';
 import routes from './profile.routes.js';
 
 const profile = { displayName: 'Ana', email: 'me@example.com', id: TEST_USER_ID } as Profile;
@@ -51,6 +51,13 @@ describe('PATCH /profile', () => {
 		const res = await app.request('/profile', jsonRequest('PATCH', { displayName: 'Ana' }));
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({ data: profile });
+		expect(prisma.profile.update).not.toHaveBeenCalled();
+	});
+
+	it('never changes the email: it is not part of the schema', async () => {
+		const { app, prisma } = setup();
+		const res = await app.request('/profile', jsonRequest('PATCH', { displayName: 'x', email: 'other@example.com' }));
+		expect(res.status).toBe(422);
 		expect(prisma.profile.update).not.toHaveBeenCalled();
 	});
 
@@ -118,5 +125,36 @@ describe('PATCH /profile/settings', () => {
 		expect(res.status).toBe(422);
 		expect(await res.json()).toMatchObject({ error: { code: 'validation_error' } });
 		expect(prisma.userSettings.upsert).not.toHaveBeenCalled();
+	});
+});
+
+describe('POST /profile/avatar/upload-url', () => {
+	it('answers 401 when unauthenticated', async () => {
+		const { app } = setup({ claims: null });
+		expect((await app.request('/profile/avatar/upload-url', jsonRequest('POST', { mimeType: 'image/png', sizeBytes: 10 }))).status).toBe(401);
+	});
+
+	it.each([
+		[{ mimeType: 'application/pdf', sizeBytes: 10 }],
+		[{ mimeType: 'image/png', sizeBytes: 0 }],
+		[{ mimeType: 'image/png', sizeBytes: 6 * 1024 * 1024 }],
+		[{ mimeType: 'image/png', sizeBytes: 10, ownerId: 'someone-else' }],
+	])('rejects an invalid body %j', async body => {
+		const { app } = setup();
+		const res = await app.request('/profile/avatar/upload-url', jsonRequest('POST', body));
+		expect(res.status).toBe(422);
+		expect(await res.json()).toMatchObject({ error: { code: 'validation_error' } });
+	});
+
+	it('answers a signed upload url for the authenticated user', async () => {
+		const prisma = createMockPrisma();
+		const storage = createMockStorage();
+		vi.mocked(storage.uploadUrl).mockResolvedValue({ path: 'p.png', token: 't', uploadUrl: 'u', visibility: 'public' });
+		vi.mocked(storage.readUrl).mockResolvedValue('https://cdn/p.png');
+		const app = createTestApp(routes, { path: '/profile', prisma, storage });
+		const res = await app.request('/profile/avatar/upload-url', jsonRequest('POST', { mimeType: 'image/png', sizeBytes: 10 }));
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ data: { path: 'p.png', publicUrl: 'https://cdn/p.png', token: 't', uploadUrl: 'u', visibility: 'public' } });
+		expect(storage.uploadUrl).toHaveBeenCalledWith('public', expect.stringMatching(new RegExp(`^${TEST_USER_ID}/avatar/[0-9a-f-]{36}\\.png$`)));
 	});
 });

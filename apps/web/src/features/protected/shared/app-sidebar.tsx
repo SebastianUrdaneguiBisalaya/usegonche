@@ -13,6 +13,8 @@ import { SettingsDialog } from '~/components/ui/overlays-feedback/settings-dialo
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useSession } from '~/features/auth/api';
 import { useTranslate } from '~/hooks/use-translate';
+import { SettingsContent } from '../settings/settings-content';
+import { initialsOf } from './initials';
 import { isActive, primaryNav, secondaryNav } from './navigation';
 import { shortcutKeys } from './shortcut-keys';
 
@@ -23,13 +25,6 @@ interface AppSidebarProps {
 }
 
 const avatarInitialsClassName = 'flex items-center justify-center bg-muted text-xs font-semibold text-muted-foreground';
-
-/** Two initials of the name: first letters of the first two words, or the first two letters of a single word (an email prefix too). */
-export function initialsOf(name: string): string {
-	const words = name.split(/[\s._-]+/).filter(Boolean);
-	const letters = words.length > 1 ? `${words[0]?.[0] ?? ''}${words[1]?.[0] ?? ''}` : (words[0] ?? '').slice(0, 2);
-	return letters.toUpperCase();
-}
 
 function DailyProgress({ done, total }: { done: number; total: number }) {
 	const t = useTranslate();
@@ -163,10 +158,13 @@ export function AppSidebar({ mobileOpen, onMobileOpenChange, onOpenCommand }: Ap
 				</Sidebar.Footer>
 			</Sidebar>
 
-			<SettingsDialog.Root onOpenChange={setSettingsOpen} open={settingsOpen}>
-				<SettingsDialog.Content title={t('protected.settings.title')}>
-					<SettingsDialog.Main />
-				</SettingsDialog.Content>
+			<SettingsDialog.Root
+				defaultValue='general'
+				lang={{ close: t('protected.settings.close'), noResults: t('protected.settings.noResults'), searchPlaceholder: t('protected.settings.search'), title: t('protected.settings.title') }}
+				onOpenChange={setSettingsOpen}
+				open={settingsOpen}
+			>
+				<SettingsContent />
 			</SettingsDialog.Root>
 		</>
 	);
