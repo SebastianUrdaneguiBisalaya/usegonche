@@ -29,7 +29,7 @@ Principles: suggestions are explainable (reason codes, not opaque scores); repla
 
 ### MVP scope
 
-In the MVP: the Flow Cycle (inbox, projects, goals, tasks with dependencies/blockers/subtasks, notes, attachments, tags, availability, calendar events, daily plan, time blocks, functional history, daily/weekly review, "what next" suggestions).
+In the MVP: the Flow Cycle (inbox, projects, goals, tasks with dependencies/blockers/subtasks, notes, attachments, tags, availability, calendar events, daily plan, time blocks, functional history, daily/weekly review).
 
 Rich text (TipTap on the frontend) is converted to **Markdown on the client** and stored as a plain **`text` column** (never a `Json`/`jsonb` column). The API only bounds its size (`markdownSchema`, `src/lib/markdown.ts`); it does not parse it. Being plain text, it is searchable directly by full-text search (no separate plain-text column). Files live in Supabase Storage. Backend first; frontend later.
 
@@ -119,7 +119,7 @@ src/
 ├── app.ts              # Builds the app: global middleware + routes + onError. Runtime-agnostic
 ├── env.ts              # Bindings / Variables types (AppEnv) shared by every feature
 ├── routes.ts           # Aggregator: chains `.route()` per feature; exports `AppType`
-├── features/           # attachments, auth, goals, health, history, inbox, me, notes, planning, profile, projects, reminders, reviews, search, suggestions, tags, tasks
+├── features/           # attachments, auth, goals, health, history, inbox, me, notes, planning, profile, projects, reminders, reviews, search, tags, tasks
 │   └── <feature>/      # e.g. profiles, posts
 │       ├── <feature>.routes.ts    # Hono sub-app: validators + thin handlers
 │       ├── <feature>.schemas.ts   # Zod schemas (+ inferred types)

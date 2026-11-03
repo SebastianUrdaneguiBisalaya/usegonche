@@ -22,7 +22,6 @@ import { listStyles } from '../shared/styles';
 import { useTagOptions } from '../shared/tags';
 import { BOARD_PAGE_SIZE, type BulkChanges, type Task, useBulkUpdate, useDeleteTask, useGoalOptions, useTasks, useTasksSearch, useUpdateTask } from './api';
 import { NewTaskModal } from './components/new-task-modal';
-import { NextTask } from './components/next-task';
 import { TaskBoard } from './components/task-board';
 import { TaskDrawer } from './components/task-drawer';
 import { DueFilter, GoalFilter, ProjectFilter, TagFilter, TaskChips } from './components/task-filters';
@@ -170,7 +169,6 @@ export default function TasksRoute() {
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
 				{!recurring && <TaskQuickAdd projects={projectList} />}
-				{!recurring && <NextTask onOpen={setOpenedId} />}
 				{!recurring && (
 					<div className={`${listStyles.card} flex flex-col gap-3 overflow-x-auto p-3`}>
 						<TaskChips

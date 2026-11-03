@@ -978,22 +978,6 @@
       "projectNotFound": "No project \"{{name}}\"",
       "estimate": "~{{minutes}} min"
     },
-    "next": {
-      "title": "Next best task",
-      "open": "Open",
-      "reason": {
-        "due_soon": "Due soon",
-        "due_today": "Due today",
-        "fits_available_slot": "Fits your free time",
-        "in_progress": "Already in progress",
-        "linked_to_goal": "Linked to an active goal",
-        "overdue": "Overdue",
-        "planned_today": "Planned for today",
-        "priority_high": "High priority",
-        "priority_urgent": "Urgent",
-        "unblocked": "Unblocks other tasks"
-      }
-    },
     "modal": {
       "title": "New task",
       "description": "Capture what needs to be done. You can refine it later."
