@@ -10,7 +10,6 @@
 **/dist
 **/build
 **/.react-router
-**/.expo
 **/release
 coverage
 *.log
