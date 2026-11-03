@@ -765,5 +765,350 @@
       "hex": "Valor hexadecimal",
       "eyedropper": "Tomar color de la pantalla"
     }
+  },
+  "tasks": {
+    "title": "Tareas",
+    "subtitle": "Planifica, organiza y haz que las cosas pasen.",
+    "new": "Nueva tarea",
+    "search": {
+      "placeholder": "Buscar en tareas...",
+      "label": "Buscar en tareas",
+      "clear": "Borrar búsqueda",
+      "empty": "Ninguna tarea coincide con tu búsqueda.",
+      "loading": "Buscando..."
+    },
+    "views": {
+      "label": "Vista",
+      "board": "Tablero",
+      "list": "Lista"
+    },
+    "status": {
+      "todo": "Por hacer",
+      "in_progress": "En curso",
+      "done": "Hecha",
+      "cancelled": "Cancelada",
+      "change": "Cambiar estado"
+    },
+    "priority": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta",
+      "urgent": "Urgente",
+      "change": "Cambiar prioridad"
+    },
+    "columns": {
+      "title": "Tarea",
+      "project": "Proyecto",
+      "due": "Fecha límite",
+      "priority": "Prioridad",
+      "status": "Estado",
+      "tags": "Etiquetas"
+    },
+    "properties": {
+      "start": "Fecha de inicio",
+      "noStart": "Sin fecha de inicio",
+      "estimate": "Estimación",
+      "minutes": "Minutos",
+      "goal": "Meta"
+    },
+    "due": {
+      "change": "Cambiar fecha límite",
+      "none": "Sin fecha"
+    },
+    "blocked": {
+      "tag": "Bloqueada",
+      "byBlockers": "{{count}} bloqueo(s) abierto(s)",
+      "byDependencies": "Espera a otra tarea"
+    },
+    "chips": {
+      "label": "Filtros rápidos",
+      "overdue": "Vencidas",
+      "blocked": "Bloqueadas"
+    },
+    "filters": {
+      "project": {
+        "label": "Filtrar por proyecto",
+        "all": "Todos los proyectos",
+        "none": "Sin proyecto"
+      },
+      "goal": {
+        "label": "Filtrar por meta",
+        "all": "Todas las metas"
+      },
+      "tag": {
+        "label": "Filtrar por etiqueta",
+        "all": "Todas las etiquetas"
+      },
+      "due": {
+        "label": "Filtrar por fecha",
+        "any": "Cualquier fecha",
+        "today": "Vencen hoy",
+        "week": "Próximos 7 días",
+        "overdue": "Vencidas",
+        "none": "Sin fecha"
+      },
+      "page": {
+        "label": "Página",
+        "value": "Página: {{page}}"
+      }
+    },
+    "sort": {
+      "label": "Ordenar tareas",
+      "created": "Más recientes",
+      "due": "Vencen antes",
+      "priority": "Más urgentes",
+      "title": "Título (A-Z)",
+      "updated": "Actualizadas"
+    },
+    "groupBy": {
+      "label": "Agrupar tareas",
+      "none": "Sin agrupar",
+      "project": "Por proyecto",
+      "goal": "Por meta",
+      "due": "Por fecha límite",
+      "priority": "Por prioridad"
+    },
+    "group": {
+      "noProject": "Sin proyecto",
+      "noGoal": "Sin meta",
+      "due": {
+        "overdue": "Vencidas",
+        "today": "Hoy",
+        "week": "Próximos 7 días",
+        "later": "Más adelante",
+        "none": "Sin fecha"
+      }
+    },
+    "picker": {
+      "apply": "Aplicar",
+      "calendar": "Calendario",
+      "clear": "Borrar",
+      "nextMonth": "Mes siguiente",
+      "previousMonth": "Mes anterior",
+      "mo": "Lu",
+      "tu": "Ma",
+      "we": "Mi",
+      "th": "Ju",
+      "fr": "Vi",
+      "sa": "Sá",
+      "su": "Do"
+    },
+    "actions": {
+      "rowMenu": "Acciones de la tarea",
+      "open": "Abrir detalle",
+      "delete": "Eliminar",
+      "setPriority": "Prioridad: {{priority}}",
+      "clearSelection": "Quitar selección"
+    },
+    "selection": {
+      "count": "{{count}} seleccionadas",
+      "total_one": "{{count}} tarea",
+      "total_other": "{{count}} tareas"
+    },
+    "bulk": {
+      "status": "Estado",
+      "priority": "Prioridad",
+      "project": "Proyecto",
+      "noProject": "Sin proyecto",
+      "moveDates": "Mover fechas",
+      "shift": {
+        "dayBack": "1 día antes",
+        "dayForward": "1 día después",
+        "weekForward": "1 semana después",
+        "clear": "Quitar fecha límite"
+      }
+    },
+    "card": {
+      "subtasks": "{{done}} de {{total}} subtareas hechas"
+    },
+    "board": {
+      "instructions": "Pulsa espacio para coger la tarjeta, las flechas para moverla y espacio para soltarla.",
+      "card": "Tarea arrastrable",
+      "empty": "Sin tareas.",
+      "add": "Añadir tarea a {{status}}",
+      "addTask": "Añadir tarea..."
+    },
+    "list": {
+      "collapse": "Ocultar subtareas",
+      "expand": "Mostrar subtareas"
+    },
+    "empty": {
+      "title": "No hay tareas aquí",
+      "description": "Añade una arriba o convierte un elemento del Inbox en tarea.",
+      "filtered": "Ninguna tarea coincide con estos filtros."
+    },
+    "error": {
+      "title": "No se pudieron cargar tus tareas",
+      "retry": "Reintentar"
+    },
+    "toast": {
+      "created": "Tarea creada",
+      "completed": "Tarea completada",
+      "statusChanged": "Estado actualizado",
+      "undo": "Deshacer",
+      "bulk": "{{count}} tareas actualizadas",
+      "deleted": "Tarea eliminada"
+    },
+    "quickAdd": {
+      "label": "Añadir una tarea",
+      "placeholder": "Añade una tarea... (p. ej. \"Revisar contrato #proyecto !alta mañana\")",
+      "submit": "Añadir tarea",
+      "needsTitle": "Escribe de qué trata la tarea.",
+      "understood": "Entendido:",
+      "projectNotFound": "No hay proyecto \"{{name}}\"",
+      "estimate": "~{{minutes}} min"
+    },
+    "next": {
+      "title": "Siguiente mejor tarea",
+      "open": "Abrir",
+      "reason": {
+        "due_soon": "Vence pronto",
+        "due_today": "Vence hoy",
+        "fits_available_slot": "Cabe en tu tiempo libre",
+        "in_progress": "Ya está en curso",
+        "linked_to_goal": "Ligada a una meta activa",
+        "overdue": "Vencida",
+        "planned_today": "Planificada para hoy",
+        "priority_high": "Prioridad alta",
+        "priority_urgent": "Urgente",
+        "unblocked": "Desbloquea otras tareas"
+      }
+    },
+    "modal": {
+      "title": "Nueva tarea",
+      "description": "Captura lo que hay que hacer. Podrás afinarla después."
+    },
+    "form": {
+      "title": {
+        "label": "Título",
+        "placeholder": "¿Qué hay que hacer?",
+        "required": "Ponle un título a la tarea.",
+        "tooLong": "Usa como máximo {{max}} caracteres."
+      },
+      "description": {
+        "label": "Descripción",
+        "placeholder": "Añade detalles (opcional)"
+      },
+      "priority": {
+        "label": "Prioridad"
+      },
+      "dueDate": {
+        "label": "Fecha límite",
+        "placeholder": "Sin fecha"
+      },
+      "project": {
+        "label": "Proyecto",
+        "none": "Sin proyecto"
+      },
+      "goal": {
+        "label": "Meta",
+        "none": "Sin meta"
+      },
+      "tags": {
+        "label": "Etiquetas",
+        "placeholder": "Añade etiquetas",
+        "create": "Crear \"{{name}}\"",
+        "empty": "Aún no hay etiquetas."
+      },
+      "cancel": "Cancelar",
+      "create": "Crear tarea"
+    },
+    "editor": {
+      "bold": "Negrita",
+      "bulletList": "Lista con viñetas",
+      "checklist": "Lista de comprobación",
+      "heading1": "Título 1",
+      "heading2": "Título 2",
+      "heading3": "Título 3",
+      "highlight": "Resaltar",
+      "italic": "Cursiva",
+      "link": "Enlace",
+      "linkPrompt": "URL",
+      "numberedList": "Lista numerada",
+      "quote": "Cita",
+      "save": "Guardar",
+      "strikethrough": "Tachado",
+      "underline": "Subrayado",
+      "placeholder": "Describe la tarea... (Markdown)",
+      "status": {
+        "error": "No se pudo guardar",
+        "saved": "Guardado",
+        "saving": "Guardando...",
+        "unsaved": "Cambios sin guardar"
+      }
+    },
+    "subtasks": {
+      "title": "Subtareas ({{done}} / {{total}})",
+      "toggle": "Marcar \"{{title}}\" como hecha",
+      "add": "Añadir una subtarea"
+    },
+    "dependencies": {
+      "title": "Dependencias",
+      "added": "Dependencia añadida",
+      "cycle": "Eso crearía un ciclo de dependencias.",
+      "confirm": "\"{{title}}\" esperará a \"{{candidate}}\".",
+      "cyclePreview": "Esto crearía un ciclo y no se puede añadir:",
+      "confirmAction": "Añadir dependencia",
+      "search": "Busca una tarea a la que esperar...",
+      "noResults": "No se encontraron tareas.",
+      "waitsFor_one": "Espera a {{count}} tarea",
+      "waitsFor_other": "Espera a {{count}} tareas",
+      "blocks_one": "Bloquea a {{count}} tarea",
+      "blocks_other": "Bloquea a {{count}} tareas",
+      "remove": "Dejar de esperar a \"{{title}}\""
+    },
+    "blockers": {
+      "title_one": "Bloqueos ({{count}} abierto)",
+      "title_other": "Bloqueos ({{count}} abiertos)",
+      "none": "Nada bloquea esta tarea.",
+      "openFor": "Abierto {{time}}",
+      "recurring": "Recurrente ×{{count}}",
+      "resolve": "Resolver",
+      "resolved_one": "{{count}} bloqueo resuelto",
+      "resolved_other": "{{count}} bloqueos resueltos",
+      "add": "Añadir un bloqueo (el motivo)"
+    },
+    "drawer": {
+      "close": "Cerrar",
+      "tabsLabel": "Secciones de la tarea",
+      "history": "Historial",
+      "notes": "Notas",
+      "files": "Adjuntos",
+      "time": "Tiempo",
+      "notesEmpty": "Esta tarea aún no tiene notas.",
+      "filesEmpty": "Esta tarea aún no tiene adjuntos.",
+      "loadError": "No se pudo cargar esta sección.",
+      "retry": "Reintentar",
+      "estimate": "Estimada: {{minutes}} min",
+      "noEstimate": "Sin estimación todavía.",
+      "blocksEmpty": "No hay bloques de tiempo planificados para esta tarea.",
+      "blockStatus": {
+        "planned": "Planificado",
+        "done": "Hecho",
+        "missed": "Perdido",
+        "interrupted": "Interrumpido",
+        "rescheduled": "Reprogramado"
+      },
+      "created": "Creada el {{date}}",
+      "completeShortcut": "Completar tarea",
+      "reopen": "Reabrir",
+      "complete": "Completar",
+      "cancel": "Cancelar tarea"
+    },
+    "history": {
+      "none": "ninguna",
+      "status": "Estado: {{from}} → {{to}}",
+      "priority": "Prioridad: {{from}} → {{to}}",
+      "due": "Fecha límite: {{from}} → {{to}}",
+      "project": "Proyecto: {{from}} → {{to}}",
+      "rescheduled": "Reprogramada: {{from}} → {{to}}",
+      "created": "Tarea creada"
+    },
+    "delete": {
+      "cancel": "Conservarla",
+      "confirm": "Eliminar tarea",
+      "title": "¿Eliminar esta tarea?",
+      "description": "\"{{title}}\" y sus subtareas, bloqueos y archivos se eliminarán. No se puede deshacer."
+    }
   }
 }

@@ -765,5 +765,350 @@
       "hex": "Hex color value",
       "eyedropper": "Pick color from screen"
     }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "subtitle": "Plan, organize and get things done.",
+    "new": "New task",
+    "search": {
+      "placeholder": "Search in tasks...",
+      "label": "Search in tasks",
+      "clear": "Clear search",
+      "empty": "No task matches your search.",
+      "loading": "Searching..."
+    },
+    "views": {
+      "label": "View",
+      "board": "Board",
+      "list": "List"
+    },
+    "status": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "done": "Done",
+      "cancelled": "Cancelled",
+      "change": "Change status"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent",
+      "change": "Change priority"
+    },
+    "columns": {
+      "title": "Task",
+      "project": "Project",
+      "due": "Due date",
+      "priority": "Priority",
+      "status": "Status",
+      "tags": "Tags"
+    },
+    "properties": {
+      "start": "Start date",
+      "noStart": "No start date",
+      "estimate": "Estimate",
+      "minutes": "Minutes",
+      "goal": "Goal"
+    },
+    "due": {
+      "change": "Change due date",
+      "none": "No date"
+    },
+    "blocked": {
+      "tag": "Blocked",
+      "byBlockers": "{{count}} open blocker(s)",
+      "byDependencies": "Waiting for another task"
+    },
+    "chips": {
+      "label": "Quick filters",
+      "overdue": "Overdue",
+      "blocked": "Blocked"
+    },
+    "filters": {
+      "project": {
+        "label": "Filter by project",
+        "all": "All projects",
+        "none": "No project"
+      },
+      "goal": {
+        "label": "Filter by goal",
+        "all": "All goals"
+      },
+      "tag": {
+        "label": "Filter by tag",
+        "all": "All tags"
+      },
+      "due": {
+        "label": "Filter by date",
+        "any": "Any date",
+        "today": "Due today",
+        "week": "Next 7 days",
+        "overdue": "Overdue",
+        "none": "No date"
+      },
+      "page": {
+        "label": "Page",
+        "value": "Page: {{page}}"
+      }
+    },
+    "sort": {
+      "label": "Sort tasks",
+      "created": "Newest first",
+      "due": "Due soonest",
+      "priority": "Most urgent",
+      "title": "Title (A-Z)",
+      "updated": "Recently updated"
+    },
+    "groupBy": {
+      "label": "Group tasks",
+      "none": "No grouping",
+      "project": "By project",
+      "goal": "By goal",
+      "due": "By due date",
+      "priority": "By priority"
+    },
+    "group": {
+      "noProject": "No project",
+      "noGoal": "No goal",
+      "due": {
+        "overdue": "Overdue",
+        "today": "Today",
+        "week": "Next 7 days",
+        "later": "Later",
+        "none": "No date"
+      }
+    },
+    "picker": {
+      "apply": "Apply",
+      "calendar": "Calendar",
+      "clear": "Clear",
+      "nextMonth": "Next month",
+      "previousMonth": "Previous month",
+      "mo": "Mo",
+      "tu": "Tu",
+      "we": "We",
+      "th": "Th",
+      "fr": "Fr",
+      "sa": "Sa",
+      "su": "Su"
+    },
+    "actions": {
+      "rowMenu": "Task actions",
+      "open": "Open details",
+      "delete": "Delete",
+      "setPriority": "Set priority: {{priority}}",
+      "clearSelection": "Clear selection"
+    },
+    "selection": {
+      "count": "{{count}} selected",
+      "total_one": "{{count}} task",
+      "total_other": "{{count}} tasks"
+    },
+    "bulk": {
+      "status": "Status",
+      "priority": "Priority",
+      "project": "Project",
+      "noProject": "No project",
+      "moveDates": "Move dates",
+      "shift": {
+        "dayBack": "1 day earlier",
+        "dayForward": "1 day later",
+        "weekForward": "1 week later",
+        "clear": "Clear due date"
+      }
+    },
+    "card": {
+      "subtasks": "{{done}} of {{total}} subtasks done"
+    },
+    "board": {
+      "instructions": "Press space to pick up the card, the arrow keys to move it and space to drop it.",
+      "card": "Draggable task",
+      "empty": "No tasks.",
+      "add": "Add task to {{status}}",
+      "addTask": "Add task..."
+    },
+    "list": {
+      "collapse": "Hide subtasks",
+      "expand": "Show subtasks"
+    },
+    "empty": {
+      "title": "No tasks here",
+      "description": "Add one above, or convert an inbox item into a task.",
+      "filtered": "No tasks match these filters."
+    },
+    "error": {
+      "title": "Could not load your tasks",
+      "retry": "Retry"
+    },
+    "toast": {
+      "created": "Task created",
+      "completed": "Task completed",
+      "statusChanged": "Status updated",
+      "undo": "Undo",
+      "bulk": "{{count}} tasks updated",
+      "deleted": "Task deleted"
+    },
+    "quickAdd": {
+      "label": "Add a task",
+      "placeholder": "Add a task... (e.g. \"Review contract #project !high tomorrow\")",
+      "submit": "Add task",
+      "needsTitle": "Write what the task is about.",
+      "understood": "Understood:",
+      "projectNotFound": "No project \"{{name}}\"",
+      "estimate": "~{{minutes}} min"
+    },
+    "next": {
+      "title": "Next best task",
+      "open": "Open",
+      "reason": {
+        "due_soon": "Due soon",
+        "due_today": "Due today",
+        "fits_available_slot": "Fits your free time",
+        "in_progress": "Already in progress",
+        "linked_to_goal": "Linked to an active goal",
+        "overdue": "Overdue",
+        "planned_today": "Planned for today",
+        "priority_high": "High priority",
+        "priority_urgent": "Urgent",
+        "unblocked": "Unblocks other tasks"
+      }
+    },
+    "modal": {
+      "title": "New task",
+      "description": "Capture what needs to be done. You can refine it later."
+    },
+    "form": {
+      "title": {
+        "label": "Title",
+        "placeholder": "What needs to be done?",
+        "required": "Give the task a title.",
+        "tooLong": "Use at most {{max}} characters."
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Add details (optional)"
+      },
+      "priority": {
+        "label": "Priority"
+      },
+      "dueDate": {
+        "label": "Due date",
+        "placeholder": "No date"
+      },
+      "project": {
+        "label": "Project",
+        "none": "No project"
+      },
+      "goal": {
+        "label": "Goal",
+        "none": "No goal"
+      },
+      "tags": {
+        "label": "Tags",
+        "placeholder": "Add tags",
+        "create": "Create \"{{name}}\"",
+        "empty": "No tags yet."
+      },
+      "cancel": "Cancel",
+      "create": "Create task"
+    },
+    "editor": {
+      "bold": "Bold",
+      "bulletList": "Bulleted list",
+      "checklist": "Checklist",
+      "heading1": "Heading 1",
+      "heading2": "Heading 2",
+      "heading3": "Heading 3",
+      "highlight": "Highlight",
+      "italic": "Italic",
+      "link": "Link",
+      "linkPrompt": "URL",
+      "numberedList": "Numbered list",
+      "quote": "Quote",
+      "save": "Save",
+      "strikethrough": "Strikethrough",
+      "underline": "Underline",
+      "placeholder": "Describe the task... (Markdown)",
+      "status": {
+        "error": "Couldn't save",
+        "saved": "Saved",
+        "saving": "Saving...",
+        "unsaved": "Unsaved changes"
+      }
+    },
+    "subtasks": {
+      "title": "Subtasks ({{done}} / {{total}})",
+      "toggle": "Mark \"{{title}}\" as done",
+      "add": "Add a subtask"
+    },
+    "dependencies": {
+      "title": "Dependencies",
+      "added": "Dependency added",
+      "cycle": "That would create a dependency cycle.",
+      "confirm": "\"{{title}}\" will wait for \"{{candidate}}\".",
+      "cyclePreview": "This would create a cycle and cannot be added:",
+      "confirmAction": "Add dependency",
+      "search": "Search a task to wait for...",
+      "noResults": "No tasks found.",
+      "waitsFor_one": "Waits for {{count}} task",
+      "waitsFor_other": "Waits for {{count}} tasks",
+      "blocks_one": "Blocks {{count}} task",
+      "blocks_other": "Blocks {{count}} tasks",
+      "remove": "Stop waiting for \"{{title}}\""
+    },
+    "blockers": {
+      "title_one": "Blockers ({{count}} open)",
+      "title_other": "Blockers ({{count}} open)",
+      "none": "Nothing is blocking this task.",
+      "openFor": "Open {{time}}",
+      "recurring": "Recurring ×{{count}}",
+      "resolve": "Resolve",
+      "resolved_one": "{{count}} resolved blocker",
+      "resolved_other": "{{count}} resolved blockers",
+      "add": "Add a blocker (the reason)"
+    },
+    "drawer": {
+      "close": "Close",
+      "tabsLabel": "Task sections",
+      "history": "History",
+      "notes": "Notes",
+      "files": "Files",
+      "time": "Time",
+      "notesEmpty": "This task has no notes yet.",
+      "filesEmpty": "This task has no files yet.",
+      "loadError": "Could not load this section.",
+      "retry": "Retry",
+      "estimate": "Estimated: {{minutes}} min",
+      "noEstimate": "No estimate yet.",
+      "blocksEmpty": "No time blocks planned for this task.",
+      "blockStatus": {
+        "planned": "Planned",
+        "done": "Done",
+        "missed": "Missed",
+        "interrupted": "Interrupted",
+        "rescheduled": "Rescheduled"
+      },
+      "created": "Created {{date}}",
+      "completeShortcut": "Complete task",
+      "reopen": "Reopen",
+      "complete": "Complete",
+      "cancel": "Cancel task"
+    },
+    "history": {
+      "none": "none",
+      "status": "Status: {{from}} → {{to}}",
+      "priority": "Priority: {{from}} → {{to}}",
+      "due": "Due date: {{from}} → {{to}}",
+      "project": "Project: {{from}} → {{to}}",
+      "rescheduled": "Rescheduled: {{from}} → {{to}}",
+      "created": "Task created"
+    },
+    "delete": {
+      "cancel": "Keep it",
+      "confirm": "Delete task",
+      "title": "Delete this task?",
+      "description": "\"{{title}}\" and its subtasks, blockers and files will be deleted. This cannot be undone."
+    }
   }
 }
