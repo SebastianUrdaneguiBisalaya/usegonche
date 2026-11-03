@@ -103,7 +103,7 @@ Prisma only manages the `public` schema. Supabase owns `auth` and `storage`; nev
 Hand-written migrations (Prisma cannot express them) are still in `migrations/` and are applied by the normal migrate commands:
 
 - `..._link_profiles_to_auth_users`: foreign key from `profiles.id` to `auth.users.id` plus the `on_auth_user_created` trigger.
-- `..._add_full_text_search`: generated `tsvector` columns and GIN indexes.
+- `..._add_full_text_search`: generated `tsvector` columns and GIN indexes (removed again by `..._remove_full_text_search`).
 
 ## 4. Migrations
 

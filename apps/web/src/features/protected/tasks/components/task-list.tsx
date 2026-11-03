@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import { ChevronRight, ListChecks, MoreHorizontal, SearchX, Trash2 } from 'lucide-react';
+import { ChevronRight, ListChecks, MoreHorizontal, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import type { DataTableFeatures } from '~/components/ui/data-display/data-table/data-table';
@@ -29,7 +29,6 @@ export interface TaskRow {
 }
 
 interface TaskListProps {
-	emptyKind: 'search' | 'tasks';
 	error: boolean;
 	expanded: ReadonlySet<string>;
 	filtered: boolean;
@@ -82,7 +81,6 @@ function buildRows(props: Pick<TaskListProps, 'expanded' | 'goalTitles' | 'group
 /** The list: tasks (optionally grouped) with foldable subtasks, inline status, priority and date, and bulk actions on the selection. */
 export function TaskList(props: TaskListProps) {
 	const {
-		emptyKind,
 		error,
 		expanded,
 		filtered,
@@ -291,13 +289,13 @@ export function TaskList(props: TaskListProps) {
 			columns={columns}
 			empty={
 				<ListEmpty
-					description={emptyKind === 'search' ? t('tasks.search.empty') : filtered ? t('tasks.empty.filtered') : t('tasks.empty.description')}
+					description={filtered ? t('tasks.empty.filtered') : t('tasks.empty.description')}
 					error={error}
 					errorTitle={t('tasks.error.title')}
-					icon={emptyKind === 'search' ? SearchX : ListChecks}
+					icon={ListChecks}
 					onRetry={onRetry}
 					retryLabel={t('tasks.error.retry')}
-					title={emptyKind === 'search' || filtered ? undefined : t('tasks.empty.title')}
+					title={filtered ? undefined : t('tasks.empty.title')}
 				/>
 			}
 			footer={

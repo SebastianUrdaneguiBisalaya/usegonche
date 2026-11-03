@@ -11,7 +11,7 @@ const PREVIEW = 3;
 /** The latest pending inbox items and how many are waiting; processing happens in the Inbox page. */
 export function InboxCard() {
 	const t = useTranslate();
-	const inbox = useInbox({ page: 1, range: 'all', status: 'pending' }, true);
+	const inbox = useInbox({ page: 1, range: 'all', status: 'pending' });
 	const items = (inbox.data?.data ?? []).slice(0, PREVIEW);
 	const pending = inbox.data?.meta.counts.pending ?? 0;
 

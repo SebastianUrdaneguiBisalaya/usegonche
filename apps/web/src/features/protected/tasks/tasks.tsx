@@ -13,14 +13,13 @@ import { useTranslate } from '~/hooks/use-translate';
 import { api } from '~/lib/api';
 import { getApiErrorMessage, unwrap } from '~/lib/api-error';
 import { RecurringView } from '../recurrences/components/recurring-view';
-import { ListSearch } from '../shared/list-search';
 import { OptionSelect } from '../shared/option-select';
 import { PageSelect } from '../shared/page-select';
 import { PAGE_SIZE } from '../shared/paged';
 import { useProjectOptions } from '../shared/projects';
 import { listStyles } from '../shared/styles';
 import { useTagOptions } from '../shared/tags';
-import { BOARD_PAGE_SIZE, type BulkChanges, type Task, useBulkUpdate, useDeleteTask, useGoalOptions, useTasks, useTasksSearch, useUpdateTask } from './api';
+import { BOARD_PAGE_SIZE, type BulkChanges, type Task, useBulkUpdate, useDeleteTask, useGoalOptions, useTasks, useUpdateTask } from './api';
 import { NewTaskModal } from './components/new-task-modal';
 import { TaskBoard } from './components/task-board';
 import { TaskDrawer } from './components/task-drawer';
@@ -35,16 +34,14 @@ export default function TasksRoute() {
 	const t = useTranslate();
 	const [params, setParams] = useQueryStates(taskParsers, { clearOnDefault: true });
 	const page = Math.max(1, params.page);
-	const searching = params.q.length > 0;
 	const view = params.view;
 	const queryParams = useMemo(
 		() => ({ blocked: params.blocked, due: params.due, goal: params.goal, page, project: params.project, sort: params.sort, status: params.status, tag: params.tag }),
 		[page, params.blocked, params.due, params.goal, params.project, params.sort, params.status, params.tag]
 	);
 
-	const list = useTasks(view, queryParams, !searching && view !== 'recurring');
-	const search = useTasksSearch(params.q, page);
-	const active = searching ? search : list;
+	const list = useTasks(view, queryParams, view !== 'recurring');
+	const active = list;
 	const counts = list.data?.meta.counts;
 	const tasks = list.data?.data ?? [];
 	const projects = useProjectOptions();
@@ -65,7 +62,7 @@ export default function TasksRoute() {
 	// Selection (list only): it belongs to one page of one view.
 	const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(emptyIds);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset whenever the view changes.
-	useEffect(() => setSelectedIds(emptyIds), [page, view, params.status, params.goal, params.project, params.tag, params.due, params.blocked, params.q]);
+	useEffect(() => setSelectedIds(emptyIds), [page, view, params.status, params.goal, params.project, params.tag, params.due, params.blocked]);
 
 	// Subtasks of the expanded parents (each its own query, so a change refreshes them with the rest).
 	const [expanded, setExpanded] = useState<ReadonlySet<string>>(emptyIds);
@@ -152,15 +149,6 @@ export default function TasksRoute() {
 					<Page.Description>{t('tasks.subtitle')}</Page.Description>
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
-					{!recurring && (
-						<ListSearch
-							clearLabel={t('tasks.search.clear')}
-							label={t('tasks.search.label')}
-							onChange={q => void setParams({ page: 1, q })}
-							placeholder={t('tasks.search.placeholder')}
-							value={params.q}
-						/>
-					)}
 					<Button className={listStyles.pillTrigger} onClick={() => (recurring ? setCreatingRule(true) : setCreating('todo'))} variant='secondary'>
 						<Button.Icon icon={Plus} />
 						<Button.Text>{t(recurring ? 'recurrences.new' : 'tasks.new')}</Button.Text>
@@ -175,9 +163,9 @@ export default function TasksRoute() {
 							blocked={params.blocked}
 							counts={counts}
 							due={params.due}
-							onBlockedChange={blocked => void setParams({ blocked, page: 1, q: '' })}
-							onDueChange={due => void setParams({ due, page: 1, q: '' })}
-							onStatusChange={status => void setParams({ page: 1, q: '', status })}
+							onBlockedChange={blocked => void setParams({ blocked, page: 1 })}
+							onDueChange={due => void setParams({ due, page: 1 })}
+							onStatusChange={status => void setParams({ page: 1, status })}
 							status={params.status}
 						/>
 					</div>
@@ -196,7 +184,7 @@ export default function TasksRoute() {
 					<div className='flex flex-wrap items-center gap-3'>
 						{!recurring && <OptionSelect icon={ArrowDownUp} label={t('tasks.sort.label')} onChange={sort => void setParams({ page: 1, sort })} options={sortOptions} value={params.sort} />}
 						{view === 'list' && <OptionSelect icon={Layers} label={t('tasks.groupBy.label')} onChange={group => void setParams({ group })} options={groupOptions} value={params.group} />}
-						{view === 'list' && !searching && (
+						{view === 'list' && (
 							<PageSelect
 								label={t('tasks.filters.page.label')}
 								onChange={next => void setParams({ page: next })}
@@ -225,8 +213,6 @@ export default function TasksRoute() {
 				</div>
 				{recurring ? (
 					<RecurringView creating={creatingRule} onCreatingChange={setCreatingRule} />
-				) : searching ? (
-					<SearchResults hits={search.data?.data} isError={search.isError} isLoading={search.isPending} onOpen={setOpenedId} onRetry={() => void search.refetch()} />
 				) : view === 'board' ? (
 					<TaskBoard
 						error={list.isError}
@@ -241,7 +227,6 @@ export default function TasksRoute() {
 					/>
 				) : (
 					<TaskList
-						emptyKind='tasks'
 						error={list.isError}
 						expanded={expanded}
 						filtered={filtered}
@@ -296,44 +281,5 @@ export default function TasksRoute() {
 				</ConfirmDialog.Content>
 			</ConfirmDialog.Root>
 		</Page.Root>
-	);
-}
-
-interface SearchResultsProps {
-	hits: { id: string; title: string }[] | undefined;
-	isError: boolean;
-	isLoading: boolean;
-	onOpen: (id: string) => void;
-	onRetry: () => void;
-}
-
-/** What `GET /search?types=task` found: titles only (the detail opens in the drawer). */
-function SearchResults({ hits, isError, isLoading, onOpen, onRetry }: SearchResultsProps) {
-	const t = useTranslate();
-	return (
-		<div className={`${listStyles.card} min-h-64 flex-1 overflow-y-auto p-3`}>
-			{isLoading ? (
-				<Typography.Span className='block py-10 text-center text-sm text-muted-foreground'>{t('tasks.search.loading')}</Typography.Span>
-			) : isError ? (
-				<div className='flex flex-col items-center gap-2 py-10'>
-					<Typography.Span className='text-sm text-muted-foreground'>{t('tasks.error.title')}</Typography.Span>
-					<Button onClick={onRetry} variant='secondary'>
-						<Button.Text>{t('tasks.error.retry')}</Button.Text>
-					</Button>
-				</div>
-			) : !hits || hits.length === 0 ? (
-				<Typography.Span className='block py-10 text-center text-sm text-muted-foreground'>{t('tasks.search.empty')}</Typography.Span>
-			) : (
-				<ul className='flex flex-col'>
-					{hits.map(hit => (
-						<li key={hit.id}>
-							<button className='w-full cursor-pointer truncate rounded-xl px-4 py-3 text-left text-sm hover:bg-foreground/[0.06]' onClick={() => onOpen(hit.id)} type='button'>
-								{hit.title}
-							</button>
-						</li>
-					))}
-				</ul>
-			)}
-		</div>
 	);
 }

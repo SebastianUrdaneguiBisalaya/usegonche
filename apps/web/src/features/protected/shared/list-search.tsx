@@ -15,7 +15,7 @@ interface ListSearchProps {
 	value: string;
 }
 
-/** Search box of a list page (`GET /search?types=...`). Typing is debounced into the URL; `/` focuses it. */
+/** Search box of a list page. Typing is debounced into the URL; `/` focuses it. */
 export function ListSearch({ clearLabel, label, onChange, placeholder, value }: ListSearchProps) {
 	const ref = useRef<HTMLInputElement>(null);
 	const [text, setText] = useState(value);

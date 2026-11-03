@@ -9,14 +9,13 @@ import { Button } from '~/components/ui/actions-controls/button/button';
 import { Page } from '~/components/ui/layout/page/page';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
-import { ListSearch } from '../shared/list-search';
 import { OptionSelect } from '../shared/option-select';
 import { PageSelect } from '../shared/page-select';
 import { PAGE_SIZE } from '../shared/paged';
 import { type StatusTab, StatusTabs } from '../shared/status-tabs';
 import { listStyles } from '../shared/styles';
 import { useTagOptions } from '../shared/tags';
-import { type BulkAction, type Project, type ProjectsPage, projectsKey, projectsQuery, useBulkAction, useGoals, useProjects, useProjectsSearch, useSetArchived, useUpdateProject } from './api';
+import { type BulkAction, type Project, type ProjectsPage, projectsKey, projectsQuery, useBulkAction, useGoals, useProjects, useSetArchived, useUpdateProject } from './api';
 import { GoalFilter, TagFilter } from './components/filters';
 import { NewProjectModal } from './components/new-project-modal';
 import { ProjectDrawer } from './components/project-drawer';
@@ -31,13 +30,11 @@ interface LoaderData {
 
 /**
  * Loads the first page on the server from the URL's params (the request cookie is forwarded: a parent loader does not protect this one).
- * A search (`?q=`) is fetched by the client, and without the cookie the client-side query takes over behind skeleton rows.
  */
 export async function loader({ request }: LoaderFunctionArgs): Promise<LoaderData | null> {
 	const cookie = request.headers.get('cookie');
 	if (!cookie) return null;
 	const params = loadProjectsParams(request);
-	if (params.q) return null;
 	const res = await createClient(API_BASE, { headers: { cookie } })
 		.projects.$get({ query: projectsQuery(params) })
 		.catch(() => undefined);
@@ -56,7 +53,6 @@ export default function ProjectsRoute() {
 	const loaderData = useLoaderData<typeof loader>();
 	const [params, setParams] = useQueryStates(projectParsers, { clearOnDefault: true });
 	const page = Math.max(1, params.page);
-	const searching = params.q.length > 0;
 
 	// Seeds the cache with what the loader resolved, so the first render already has the page (no extra request, no skeleton).
 	if (loaderData) {
@@ -70,9 +66,8 @@ export default function ProjectsRoute() {
 		if (queryClient.getQueryData(key) === undefined) queryClient.setQueryData(key, loaderData.data);
 	}
 
-	const list = useProjects({ goal: params.goal, page, sort: params.sort, status: params.status, tag: params.tag }, !searching);
-	const search = useProjectsSearch({ page, q: params.q });
-	const active = searching ? search : list;
+	const list = useProjects({ goal: params.goal, page, sort: params.sort, status: params.status, tag: params.tag });
+	const active = list;
 	const counts = list.data?.meta.counts;
 	const goals = useGoals();
 	const tags = useTagOptions();
@@ -82,16 +77,15 @@ export default function ProjectsRoute() {
 	const tagOptions = useMemo(() => (tags.data ?? []).map(tag => ({ id: tag.id, name: tag.name })), [tags.data]);
 
 	const rows = useMemo<ProjectRow[]>(() => {
-		if (searching) return (search.data?.data ?? []).map(hit => ({ id: hit.id, title: hit.title, updatedAt: hit.updatedAt }));
 		return (list.data?.data ?? []).map(project => ({ id: project.id, project, title: project.title, updatedAt: project.updatedAt }));
-	}, [list.data, search.data, searching]);
+	}, [list.data]);
 
 	const meta = active.data?.meta;
 	const pageCount = meta?.pageCount ?? 1;
 	const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(emptyIds);
 	// A selection belongs to one page of one view.
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset whenever the view changes.
-	useEffect(() => setSelectedIds(emptyIds), [page, params.status, params.goal, params.tag, params.q]);
+	useEffect(() => setSelectedIds(emptyIds), [page, params.status, params.goal, params.tag]);
 
 	const [creating, setCreating] = useState(false);
 	const [opened, setOpened] = useState<Project | undefined>(undefined);
@@ -175,13 +169,6 @@ export default function ProjectsRoute() {
 					<Page.Description>{t('projects.subtitle')}</Page.Description>
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
-					<ListSearch
-						clearLabel={t('projects.search.clear')}
-						label={t('projects.search.label')}
-						onChange={q => void setParams({ page: 1, q })}
-						placeholder={t('projects.search.placeholder')}
-						value={params.q}
-					/>
 					<Button className={listStyles.pillTrigger} onClick={() => setCreating(true)} variant='secondary'>
 						<Button.Icon icon={Plus} />
 						<Button.Text>{t('projects.new')}</Button.Text>
@@ -190,7 +177,7 @@ export default function ProjectsRoute() {
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
 				<div className={`${listStyles.card} overflow-x-auto p-3`}>
-					<StatusTabs ariaLabel={t('projects.tabs.label')} counts={counts} onChange={status => void setParams({ page: 1, q: '', status })} tabs={tabs} value={params.status} />
+					<StatusTabs ariaLabel={t('projects.tabs.label')} counts={counts} onChange={status => void setParams({ page: 1, status })} tabs={tabs} value={params.status} />
 				</div>
 				<div className={`${listStyles.card} flex flex-wrap items-center justify-between gap-3 p-3`}>
 					<div className='flex flex-wrap items-center gap-3'>
@@ -209,7 +196,7 @@ export default function ProjectsRoute() {
 					</div>
 				</div>
 				<ProjectsTable
-					emptyKind={searching ? 'search' : params.status}
+					emptyKind={params.status}
 					error={active.isError}
 					filtered={params.goal !== '' || params.tag !== ''}
 					goalTitles={goalTitles}
@@ -225,7 +212,7 @@ export default function ProjectsRoute() {
 					pageCount={pageCount}
 					pageSize={PAGE_SIZE}
 					rows={rows}
-					selectable={!searching}
+					selectable
 					selectedIds={selectedIds}
 					total={meta?.total ?? 0}
 				/>

@@ -23,7 +23,7 @@ interface LinkedTasksProps {
 	value: string[];
 }
 
-/** Picks the tasks a note links to: type to search tasks by title (`GET /search?types=task`), pick several. */
+/** Picks the tasks a note links to: type to find tasks by title, pick several. */
 export function LinkedTasks({ onChange, value }: LinkedTasksProps) {
 	const t = useTranslate();
 	const { loading, options, setQuery } = useTaskOptions(value);

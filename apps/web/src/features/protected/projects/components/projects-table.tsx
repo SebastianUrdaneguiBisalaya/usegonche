@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import { Archive, FolderKanban, MoreHorizontal, RotateCcw, SearchX } from 'lucide-react';
+import { Archive, FolderKanban, MoreHorizontal, RotateCcw } from 'lucide-react';
 import { useMemo } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import type { DataTableFeatures } from '~/components/ui/data-display/data-table/data-table';
@@ -21,7 +21,7 @@ import type { BulkAction, Project } from '../api';
 import { displayStatus, projectIcon, statusDot } from '../display';
 import { type ProjectStatus, type ProjectTab, projectStatuses } from '../search-params';
 
-/** A row of the table: a project, or a search hit (read-only: it only knows its title and date). */
+/** A row of the table. */
 export interface ProjectRow {
 	id: string;
 	project?: Project;
@@ -30,8 +30,8 @@ export interface ProjectRow {
 }
 
 interface ProjectsTableProps {
-	/** Which empty state to show: the tab being listed, or `search`. */
-	emptyKind: ProjectTab | 'search';
+	/** Which empty state to show: the tab being listed. */
+	emptyKind: ProjectTab;
 	/** Fills the table with a retry action when the request failed. */
 	error: boolean;
 	/** The goal filter or the tag filter is on, so an empty list may be the filter's doing. */
@@ -226,13 +226,13 @@ export function ProjectsTable({
 			columns={columns}
 			empty={
 				<ListEmpty
-					description={emptyKind === 'search' ? t('projects.search.empty') : filtered ? t('projects.empty.filtered') : t(`projects.empty.${emptyKind}.description`)}
+					description={filtered ? t('projects.empty.filtered') : t(`projects.empty.${emptyKind}.description`)}
 					error={error}
 					errorTitle={t('projects.error.title')}
-					icon={emptyKind === 'search' ? SearchX : FolderKanban}
+					icon={FolderKanban}
 					onRetry={onRetry}
 					retryLabel={t('projects.error.retry')}
-					title={emptyKind === 'search' ? undefined : t(`projects.empty.${emptyKind}.title`)}
+					title={t(`projects.empty.${emptyKind}.title`)}
 				/>
 			}
 			footer={

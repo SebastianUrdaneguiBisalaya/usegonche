@@ -7,10 +7,9 @@ import { toast } from 'sonner';
 import { Page } from '~/components/ui/layout/page/page';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
-import { ListSearch } from '../shared/list-search';
 import { PAGE_SIZE } from '../shared/paged';
 import { StatusTabs } from '../shared/status-tabs';
-import { type ConvertTarget, type InboxPage, inboxKey, inboxQuery, type SettableStatus, useBulkSetStatus, useConvert, useInbox, useInboxSearch, useSetStatus } from './api';
+import { type ConvertTarget, type InboxPage, inboxKey, inboxQuery, type SettableStatus, useBulkSetStatus, useConvert, useInbox, useSetStatus } from './api';
 import { BrainDump } from './components/brain-dump';
 import { type InboxRow, InboxTable } from './components/inbox-table';
 import { QuickCapture } from './components/quick-capture';
@@ -25,13 +24,11 @@ interface LoaderData {
 
 /**
  * Loads the first page on the server from the URL's params (the request cookie is forwarded: a parent loader does not protect this one).
- * A search (`?q=`) is fetched by the client, and without the cookie the client-side query takes over behind skeleton rows.
  */
 export async function loader({ request }: LoaderFunctionArgs): Promise<LoaderData | null> {
 	const cookie = request.headers.get('cookie');
 	if (!cookie) return null;
 	const params = loadInboxParams(request);
-	if (params.q) return null;
 	const res = await createClient(API_BASE, { headers: { cookie } })
 		.inbox.$get({ query: inboxQuery(params) })
 		.catch(() => undefined);
@@ -50,7 +47,6 @@ export default function InboxPage() {
 	const loaderData = useLoaderData<typeof loader>();
 	const [params, setParams] = useQueryStates(inboxParsers, { clearOnDefault: true });
 	const page = Math.max(1, params.page);
-	const searching = params.q.length > 0;
 
 	// Seeds the cache with what the loader resolved, so the first render already has the page (no extra request, no skeleton).
 	if (loaderData) {
@@ -58,21 +54,19 @@ export default function InboxPage() {
 		if (queryClient.getQueryData(key) === undefined) queryClient.setQueryData(key, loaderData.data);
 	}
 
-	const list = useInbox({ page, range: params.range, status: params.status }, !searching);
-	const search = useInboxSearch({ page, q: params.q });
-	const active = searching ? search : list;
+	const list = useInbox({ page, range: params.range, status: params.status });
+	const active = list;
 	const counts = list.data?.meta.counts;
 
 	const rows = useMemo<InboxRow[]>(() => {
-		if (searching) return (search.data?.data ?? []).map(hit => ({ at: hit.updatedAt, content: hit.title, id: hit.id }));
 		return (list.data?.data ?? []).map(item => ({ at: item.capturedAt, content: item.content, id: item.id, source: item.source, status: item.status }));
-	}, [list.data, search.data, searching]);
+	}, [list.data]);
 
 	const meta = active.data?.meta;
 	const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(emptyIds);
 	// A selection belongs to one page of one view.
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset whenever the view changes.
-	useEffect(() => setSelectedIds(emptyIds), [page, params.status, params.range, params.q]);
+	useEffect(() => setSelectedIds(emptyIds), [page, params.status, params.range]);
 
 	const setStatus = useSetStatus();
 	const bulk = useBulkSetStatus();
@@ -110,9 +104,7 @@ export default function InboxPage() {
 
 	const pageIds = rows.map(row => row.id);
 	const selectedOnPage = pageIds.filter(id => selectedIds.has(id)).length;
-	const selectable = !searching && params.status !== 'converted';
-
-	const emptyKind = searching ? 'search' : params.status;
+	const selectable = params.status !== 'converted';
 
 	return (
 		<Page.Root className='min-h-0 flex-1' size='full'>
@@ -122,13 +114,6 @@ export default function InboxPage() {
 					<Page.Description>{t('inbox.subtitle')}</Page.Description>
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
-					<ListSearch
-						clearLabel={t('inbox.search.clear')}
-						label={t('inbox.search.label')}
-						onChange={q => void setParams({ page: 1, q })}
-						placeholder={t('inbox.search.placeholder')}
-						value={params.q}
-					/>
 					<RangeSelect onChange={range => void setParams({ page: 1, range })} value={params.range} />
 				</Page.Actions>
 			</Page.Header>
@@ -137,7 +122,7 @@ export default function InboxPage() {
 				<BrainDump />
 				<div className='flex min-h-0 flex-1 flex-col gap-4'>
 					<div className='flex flex-wrap items-center justify-between gap-3'>
-						<StatusTabs ariaLabel={t('inbox.tabs.label')} counts={counts} onChange={status => void setParams({ page: 1, q: '', status })} tabs={statusTabs} value={params.status} />
+						<StatusTabs ariaLabel={t('inbox.tabs.label')} counts={counts} onChange={status => void setParams({ page: 1, status })} tabs={statusTabs} value={params.status} />
 						{selectable && (
 							<SelectionBar
 								allSelected={pageIds.length > 0 && selectedOnPage === pageIds.length}
@@ -165,7 +150,7 @@ export default function InboxPage() {
 						)}
 					</div>
 					<InboxTable
-						emptyKind={emptyKind}
+						emptyKind={params.status}
 						error={active.isError}
 						isLoading={active.isPending || (active.isPlaceholderData && active.isFetching && rows.length === 0)}
 						onConvert={onConvert}

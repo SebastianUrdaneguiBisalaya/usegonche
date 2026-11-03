@@ -36,7 +36,6 @@ export const taskParsers = {
 	group: parseAsStringLiteral(taskGroups).withDefault('none'),
 	page: parseAsInteger.withDefault(1),
 	project: parseAsString.withDefault(''),
-	q: parseAsString.withDefault(''),
 	sort: parseAsStringLiteral(taskSorts).withDefault('created'),
 	status: parseAsArrayOf(parseAsStringLiteral(taskStatuses)).withDefault(defaultStatuses),
 	tag: parseAsString.withDefault(''),

@@ -93,6 +93,14 @@ describe('GET /tasks', () => {
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ ownerId: TEST_USER_ID, parentId: null, recurrenceId: OTHER, status: { in: ['todo'] } });
 	});
 
+	it('filters by a case-insensitive title match, scoped to the owner', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+		expect((await app.request('/tasks?title=%20Roadmap%20')).status).toBe(200);
+		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ ownerId: TEST_USER_ID, parentId: null, title: { contains: 'Roadmap', mode: 'insensitive' } });
+	});
+
 	it('accepts noProject and noDueDate', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
@@ -111,6 +119,7 @@ describe('GET /tasks', () => {
 		'priority=nope',
 		'projectId=nope',
 		'recurrenceId=nope',
+		'title=',
 		'dueBefore=tomorrow',
 		'page=0',
 		'pageSize=0',

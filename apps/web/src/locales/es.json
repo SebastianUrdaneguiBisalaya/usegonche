@@ -148,7 +148,6 @@
       "placeholder": "Buscar o ir a...",
       "empty": "Sin resultados",
       "navigate": "Navegar",
-      "notes": "Notas",
       "toggle": "Abrir paleta de comandos",
       "close": "Cerrar"
     },
@@ -273,13 +272,6 @@
   "inbox": {
     "title": "Bandeja",
     "subtitle": "Captura lo que sea, organiza después.",
-    "search": {
-      "placeholder": "Buscar en la bandeja...",
-      "label": "Buscar en la bandeja",
-      "clear": "Limpiar búsqueda",
-      "results": "Resultados para “{{q}}”",
-      "empty": "Nada coincide con tu búsqueda."
-    },
     "range": {
       "label": "Rango de tiempo",
       "all": "Todo el tiempo",
@@ -373,12 +365,6 @@
     "title": "Proyectos",
     "subtitle": "Planifica, organiza y sigue tus proyectos.",
     "new": "Nuevo proyecto",
-    "search": {
-      "placeholder": "Buscar en proyectos...",
-      "label": "Buscar en proyectos",
-      "clear": "Borrar búsqueda",
-      "empty": "Ningún proyecto coincide con tu búsqueda."
-    },
     "tabs": {
       "label": "Estado del proyecto",
       "active": "Activos",
@@ -535,12 +521,6 @@
     "title": "Metas",
     "subtitle": "Define y sigue tus metas.",
     "new": "Nueva meta",
-    "search": {
-      "placeholder": "Buscar en metas...",
-      "label": "Buscar en metas",
-      "clear": "Borrar búsqueda",
-      "empty": "Ninguna meta coincide con tu búsqueda."
-    },
     "tabs": {
       "label": "Estado de la meta",
       "active": "Activas",
@@ -789,13 +769,6 @@
     "title": "Tareas",
     "subtitle": "Planifica, organiza y haz que las cosas pasen.",
     "new": "Nueva tarea",
-    "search": {
-      "placeholder": "Buscar en tareas...",
-      "label": "Buscar en tareas",
-      "clear": "Borrar búsqueda",
-      "empty": "Ninguna tarea coincide con tu búsqueda.",
-      "loading": "Buscando..."
-    },
     "views": {
       "label": "Vista",
       "board": "Tablero",
@@ -1119,13 +1092,6 @@
     "title": "Notas",
     "subtitle": "Captura ideas, escribe y guarda tus pensamientos.",
     "new": "Nueva nota",
-    "search": {
-      "placeholder": "Buscar en notas...",
-      "label": "Buscar en notas",
-      "clear": "Borrar búsqueda",
-      "empty": "Ninguna nota coincide con tu búsqueda.",
-      "loading": "Buscando..."
-    },
     "views": {
       "label": "Vista",
       "list": "Lista",

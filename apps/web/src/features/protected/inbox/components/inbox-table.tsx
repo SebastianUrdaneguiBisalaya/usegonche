@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import { Archive, Inbox, RefreshCw, RotateCcw, SearchX, Trash2 } from 'lucide-react';
+import { Archive, Inbox, RefreshCw, RotateCcw, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { DataTable, type DataTableFeatures } from '~/components/ui/data-display/data-table/data-table';
@@ -15,7 +15,7 @@ import { listStyles } from '../../shared/styles';
 import type { ConvertTarget, SettableStatus } from '../api';
 import type { InboxStatus } from '../search-params';
 
-/** A row of the table: an inbox item, or a search hit (read-only: it has no source, status or actions). */
+/** A row of the table. */
 export interface InboxRow {
 	at: string;
 	content: string;
@@ -25,8 +25,8 @@ export interface InboxRow {
 }
 
 interface InboxTableProps {
-	/** Which empty state to show: the status being listed, or `search` / `range`. */
-	emptyKind: InboxStatus | 'search';
+	/** Which empty state to show: the status being listed. */
+	emptyKind: InboxStatus;
 	/** Fills the table with a retry action when the request failed. */
 	error: boolean;
 	isLoading: boolean;
@@ -174,15 +174,9 @@ export function InboxTable({
 		</Layout.Stack>
 	) : (
 		<Layout.Stack align='center' className='px-4 py-16 text-center' gap='sm'>
-			<Icon aria-hidden className='text-muted-foreground' icon={emptyKind === 'search' ? SearchX : Inbox} size='xl' />
-			{emptyKind === 'search' ? (
-				<Typography.Span className='text-sm text-muted-foreground'>{t('inbox.search.empty')}</Typography.Span>
-			) : (
-				<>
-					<Typography.Span className='text-sm font-medium'>{t(`inbox.empty.${emptyKind}.title`)}</Typography.Span>
-					<Typography.Span className='text-xs text-muted-foreground'>{rangeActive ? t('inbox.empty.range') : t(`inbox.empty.${emptyKind}.description`)}</Typography.Span>
-				</>
-			)}
+			<Icon aria-hidden className='text-muted-foreground' icon={Inbox} size='xl' />
+			<Typography.Span className='text-sm font-medium'>{t(`inbox.empty.${emptyKind}.title`)}</Typography.Span>
+			<Typography.Span className='text-xs text-muted-foreground'>{rangeActive ? t('inbox.empty.range') : t(`inbox.empty.${emptyKind}.description`)}</Typography.Span>
 		</Layout.Stack>
 	);
 

@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import { Archive, CircleAlert, FolderKanban, MoreHorizontal, RotateCcw, SearchX, Target } from 'lucide-react';
+import { Archive, CircleAlert, FolderKanban, MoreHorizontal, RotateCcw, Target } from 'lucide-react';
 import { useMemo } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import type { DataTableFeatures } from '~/components/ui/data-display/data-table/data-table';
@@ -20,7 +20,7 @@ import type { BulkAction, Goal } from '../api';
 import { displayStatus, goalIcon, isOverdue, statusLook, todayDateOnly } from '../display';
 import { type GoalStatus, type GoalTab, goalStatuses } from '../search-params';
 
-/** A row of the table: a goal, or a search hit (read-only: it only knows its title and date). */
+/** A row of the table. */
 export interface GoalRow {
 	goal?: Goal;
 	id: string;
@@ -29,8 +29,8 @@ export interface GoalRow {
 }
 
 interface GoalsTableProps {
-	/** Which empty state to show: the tab being listed, or `search`. */
-	emptyKind: GoalTab | 'search';
+	/** Which empty state to show: the tab being listed. */
+	emptyKind: GoalTab;
 	/** Fills the table with a retry action when the request failed. */
 	error: boolean;
 	/** The due filter is on, so an empty list may be the filter's doing. */
@@ -242,13 +242,13 @@ export function GoalsTable({
 			columns={columns}
 			empty={
 				<ListEmpty
-					description={emptyKind === 'search' ? t('goals.search.empty') : filtered ? t('goals.empty.filtered') : t(`goals.empty.${emptyKind}.description`)}
+					description={filtered ? t('goals.empty.filtered') : t(`goals.empty.${emptyKind}.description`)}
 					error={error}
 					errorTitle={t('goals.error.title')}
-					icon={emptyKind === 'search' ? SearchX : Target}
+					icon={Target}
 					onRetry={onRetry}
 					retryLabel={t('goals.error.retry')}
-					title={emptyKind === 'search' ? undefined : t(`goals.empty.${emptyKind}.title`)}
+					title={t(`goals.empty.${emptyKind}.title`)}
 				/>
 			}
 			footer={

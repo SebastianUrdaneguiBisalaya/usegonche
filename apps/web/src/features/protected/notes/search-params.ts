@@ -9,7 +9,6 @@ export const noteParsers = {
 	note: parseAsString.withDefault(''),
 	page: parseAsInteger.withDefault(1),
 	project: parseAsString.withDefault(''),
-	q: parseAsString.withDefault(''),
 	tag: parseAsString.withDefault(''),
 	task: parseAsString.withDefault(''),
 	view: parseAsStringLiteral(noteViews).withDefault('list'),

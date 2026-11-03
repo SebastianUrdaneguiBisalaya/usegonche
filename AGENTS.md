@@ -40,7 +40,6 @@ Rich text (TipTap on the frontend) is converted to **Markdown on the client** an
 - **Third-party integrations**: GitHub (repos, issues, PRs, reviews, releases), Google Calendar, Google Drive, Notion, Gmail, Slack, Google Meet/Zoom. Needs: ExternalAccount, ExternalResource, task-resource link, sync cursors, webhooks, dedupe/conflict handling.
 - **AI** and **agents** (always as proposals the user accepts), **automations** and custom **workflows**, **planning rules**.
 - **Productivity metrics** beyond the review snapshots.
-- **Full-text search**: implemented in `src/features/search` (#37): `GET /search?q=&types=` over tasks, notes, projects, goals and inbox items (Postgres `websearch_to_tsquery`, config `simple`, generated `search_vector` columns + GIN; Markdown text is indexed as is). Not tested against a real database in CI (raw SQL is unit-tested for shape only).
 - **Note revision history** (versioning).
 - **Enterprise-style audit log** (only the functional history exists).
 - **Multi-user and collaboration**: workspaces, organizations, memberships, invitations, roles/permissions, comments.

@@ -1,15 +1,22 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useDebouncedValue } from '~/hooks/use-debounced-value';
 import { api } from '~/lib/api';
 import { unwrap } from '~/lib/api-error';
 
-/** Tasks found by title, to pick one (the task a task waits for, the task a note links to). */
+const PICK_SHOWN = 8;
+
+/** Tasks whose title contains `q` (`GET /tasks?title=`, one request per pause in typing), to pick one: the task a task waits for, the task a note links to. */
 export function useTaskSearch(q: string) {
-	return useQuery({
-		enabled: q.trim().length > 0,
+	const text = q.trim();
+	const needle = useDebouncedValue(text, 250);
+	const tasks = useQuery({
+		enabled: needle !== '',
 		placeholderData: keepPreviousData,
-		queryFn: () => unwrap(api.search.$get({ query: { pageSize: '8', q: q.trim(), types: 'task' } })),
-		queryKey: ['tasks', 'pick', q.trim()],
+		queryFn: () => unwrap(api.tasks.$get({ query: { order: 'desc', page: '1', pageSize: String(PICK_SHOWN), sort: 'updatedAt', title: needle } })),
+		queryKey: ['tasks', 'pick', needle],
 	});
+	const typing = needle !== text;
+	return { data: text === '' ? [] : (tasks.data ?? []), isFetching: typing || (needle !== '' && tasks.isFetching), isPending: typing || (needle !== '' && tasks.isPending) };
 }
 
 /** Tasks by id, so a screen can show the titles of the ones it only knows by id. */
