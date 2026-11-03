@@ -1684,6 +1684,58 @@
       "accept": "Accept",
       "reject": "Dismiss",
       "accepted": "Block rescheduled."
+    },
+    "events": {
+      "title": "Events",
+      "new": "New event",
+      "empty": "No events on this day."
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "subtitle": "Plan your time. Make it count.",
+    "new": "New event",
+    "allDay": "All day",
+    "grid": "Calendar",
+    "next": "Next",
+    "previous": "Previous",
+    "today": "Today",
+    "toolbar": "Calendar navigation",
+    "view": {
+      "label": "View",
+      "day": "Day",
+      "week": "Week"
+    },
+    "kind": {
+      "event": "Event",
+      "out_of_office": "Out of office"
+    },
+    "event": {
+      "newTitle": "New event",
+      "editTitle": "Edit event",
+      "description": "Events block time on your day: they reduce the capacity Today plans against.",
+      "titleLabel": "Title",
+      "titlePlaceholder": "What is it?",
+      "kind": "Type",
+      "allDay": "All day",
+      "startDate": "Start date",
+      "startTime": "Start",
+      "endDate": "End date",
+      "endTime": "End",
+      "endBeforeStart": "The end must be after the start.",
+      "create": "Create",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "delete": {
+      "title": "Delete event?",
+      "description": "\"{{title}}\" will be removed from your calendar. This cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "toast": {
+      "deleted": "Event deleted"
     }
   }
 }

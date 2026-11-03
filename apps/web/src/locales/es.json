@@ -1684,6 +1684,58 @@
       "accept": "Aceptar",
       "reject": "Descartar",
       "accepted": "Bloque reprogramado."
+    },
+    "events": {
+      "title": "Eventos",
+      "new": "Nuevo evento",
+      "empty": "No hay eventos este día."
+    }
+  },
+  "calendar": {
+    "title": "Calendario",
+    "subtitle": "Planifica tu tiempo. Haz que cuente.",
+    "new": "Nuevo evento",
+    "allDay": "Todo el día",
+    "grid": "Calendario",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "today": "Hoy",
+    "toolbar": "Navegación del calendario",
+    "view": {
+      "label": "Vista",
+      "day": "Día",
+      "week": "Semana"
+    },
+    "kind": {
+      "event": "Evento",
+      "out_of_office": "Fuera de la oficina"
+    },
+    "event": {
+      "newTitle": "Nuevo evento",
+      "editTitle": "Editar evento",
+      "description": "Los eventos reservan tiempo de tu día: reducen la capacidad con la que Hoy planifica.",
+      "titleLabel": "Título",
+      "titlePlaceholder": "¿Qué es?",
+      "kind": "Tipo",
+      "allDay": "Todo el día",
+      "startDate": "Fecha de inicio",
+      "startTime": "Inicio",
+      "endDate": "Fecha de fin",
+      "endTime": "Fin",
+      "endBeforeStart": "El fin debe ser posterior al inicio.",
+      "create": "Crear",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar"
+    },
+    "delete": {
+      "title": "¿Eliminar evento?",
+      "description": "\"{{title}}\" se quitará de tu calendario. No se puede deshacer.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar"
+    },
+    "toast": {
+      "deleted": "Evento eliminado"
     }
   }
 }

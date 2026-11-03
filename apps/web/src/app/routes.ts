@@ -3,6 +3,7 @@ import { index, layout, prefix, type RouteConfig, route } from '@react-router/de
 export default [
 	layout('../features/protected/layout.tsx', [
 		index('../features/protected/today/today.tsx'),
+		route('calendar', '../features/protected/calendar/calendar.tsx'),
 		route('inbox', '../features/protected/inbox/inbox.tsx'),
 		route('projects', '../features/protected/projects/projects.tsx'),
 		route('goals', '../features/protected/goals/goals.tsx'),
