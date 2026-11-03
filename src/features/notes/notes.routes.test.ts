@@ -38,11 +38,11 @@ describe.each([
 describe('GET /notes', () => {
 	it('lists notes of the user with meta', async () => {
 		const { app, prisma } = setup();
-		vi.mocked(prisma.note.findMany).mockResolvedValue(asRow([row]));
+		vi.mocked(prisma.note.findMany).mockResolvedValue(asRow([{ ...row, body: '# Plan' }]));
 		vi.mocked(prisma.note.count).mockResolvedValue(1);
 		const res = await app.request('/notes');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [expected], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(await res.json()).toEqual({ data: [{ ...expected, excerpt: 'Plan' }], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
 		expect(prisma.note.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { ownerId: TEST_USER_ID } }));
 	});
 

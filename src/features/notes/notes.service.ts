@@ -13,8 +13,23 @@ type Db = PrismaClient | Prisma.TransactionClient;
 
 type Links = { tags: Tag[]; taskIds: string[] };
 export type NoteView = Note & Links;
-/** Lists omit the body (it can be large); fetch the note to read it. */
-export type NoteSummary = Omit<Note, 'body'> & Links;
+/** Lists omit the body (it can be large) and carry an `excerpt` of it instead; fetch the note to read it. */
+export type NoteSummary = Omit<Note, 'body'> & Links & { excerpt: string };
+
+export const EXCERPT_MAX = 200;
+
+/** The start of a Markdown body as plain text on one line (formatting marks dropped), cut at `EXCERPT_MAX` characters. */
+export const excerptOf = (body: string | null): string => {
+	const text = (body ?? '')
+		.replace(/```[\s\S]*?```/g, ' ')
+		.replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+		.replace(/^\s{0,3}(?:#{1,6}|>|[-*+]|\d+\.|- \[[ xX]\])\s+/gm, '')
+		.replace(/[*_~`]+/g, '')
+		.replace(/\s+/g, ' ')
+		.trim();
+	return text.length > EXCERPT_MAX ? `${text.slice(0, EXCERPT_MAX).trimEnd()}…` : text;
+};
 
 const include = {
 	tags: { include: { tag: true }, orderBy: { tag: { name: 'asc' as const } } },
@@ -38,12 +53,12 @@ const assertTasks = async (prisma: Db, ownerId: string, taskIds: string[]): Prom
 	if (taskIds.length > 0 && (await prisma.task.count({ where: scoped(ownerId, { id: { in: taskIds } }) })) !== taskIds.length) throw invalidReference('taskIds');
 };
 
-/** One page of notes (newest first) with the total. */
+/** One page of notes (last edited first) with the total. */
 export const listNotes = async (prisma: PrismaClient, ownerId: string, filters: ListNotesFilters, page: PageParams): Promise<Paged<NoteSummary>> => {
 	const { projectId, tagId, taskId } = filters;
 	const where = scoped(ownerId, { ...(projectId && { projectId }), ...(tagId && { tags: { some: { tagId } } }), ...(taskId && { tasks: { some: { taskId } } }) });
-	const [rows, total] = await Promise.all([prisma.note.findMany({ include, omit: { body: true }, orderBy: pageOrder('createdAt'), ...pageArgs(page), where }), prisma.note.count({ where })]);
-	return { items: rows.map(({ tags, tasks, ...note }) => ({ ...note, ...links({ tags, tasks }) })), total };
+	const [rows, total] = await Promise.all([prisma.note.findMany({ include, orderBy: pageOrder('updatedAt'), ...pageArgs(page), where }), prisma.note.count({ where })]);
+	return { items: rows.map(({ body, tags, tasks, ...note }) => ({ ...note, excerpt: excerptOf(body), ...links({ tags, tasks }) })), total };
 };
 
 export const getNote = async (prisma: Db, ownerId: string, id: string): Promise<NoteView> => {

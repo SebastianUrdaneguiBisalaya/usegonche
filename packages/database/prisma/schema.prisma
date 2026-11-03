@@ -394,7 +394,7 @@ model Note {
   revisions       NoteRevision[]
   reminders       Reminder[]
 
-  @@index([ownerId, createdAt])
+  @@index([ownerId, updatedAt])
   @@index([projectId])
   @@index([searchVector], type: Gin)
   @@map("notes")
