@@ -23,6 +23,7 @@ describe.each([
 	['GET', '/planning/availability', undefined],
 	['PUT', '/planning/availability', put({ windows: [] })],
 	['GET', `/planning/events?from=${DATE}&to=${DATE}`, undefined],
+	['GET', `/planning/events/${ID}`, undefined],
 	['POST', '/planning/events', jsonRequest('POST', { endsAt: '2026-11-02T11:00:00Z', startsAt: '2026-11-02T10:00:00Z', title: 'x' })],
 	['PATCH', `/planning/events/${ID}`, jsonRequest('PATCH', { title: 'x' })],
 	['DELETE', `/planning/events/${ID}`, del],
@@ -95,6 +96,22 @@ describe('events', () => {
 		const res = await app.request(`/planning/events?from=${DATE}&to=2026-11-03`);
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({ data: [JSON.parse(JSON.stringify(event))] });
+	});
+
+	it('gets one event by id, scoped to the owner', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.calendarEvent.findFirst).mockResolvedValue(asRow(event));
+		const res = await app.request(`/planning/events/${ID}`);
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ data: JSON.parse(JSON.stringify(event)) });
+		expect(prisma.calendarEvent.findFirst).toHaveBeenCalledWith({ where: { id: ID, ownerId: TEST_USER_ID } });
+	});
+
+	it('answers 404 for a missing event and 422 for a bad id', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.calendarEvent.findFirst).mockResolvedValue(null);
+		expect((await app.request(`/planning/events/${ID}`)).status).toBe(404);
+		expect((await app.request('/planning/events/not-a-uuid')).status).toBe(422);
 	});
 
 	it.each(['', `from=${DATE}`, `from=${DATE}&to=2026-11-01`, `from=${DATE}&to=2027-03-01`, 'from=nope&to=2026-11-03', 'from=2026-02-30&to=2026-03-01'])('answers 422 for ?%s', async query => {

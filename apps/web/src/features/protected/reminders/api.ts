@@ -1,7 +1,6 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '~/lib/api';
 import { unwrap } from '~/lib/api-error';
-import { toDateOnly } from '../shared/dates';
 import { type OkBody, unwrapPage } from '../shared/paged';
 import { useTasksByIds } from '../shared/task-lookup';
 
@@ -83,28 +82,19 @@ export interface TargetInfo {
 	title: string;
 }
 
-/**
- * Titles (and a little context) of what the reminders point at, by target id. Events have no "get one" endpoint, so they come from the event list
- * of the window that starts at the earliest event reminder.
- */
+/** Titles (and a little context) of what the reminders point at, by target id. */
 export function useTargets(reminders: readonly Reminder[]): ReadonlyMap<string, TargetInfo> {
 	const taskIds = [...new Set(reminders.flatMap(reminder => (reminder.taskId ? [reminder.taskId] : [])))];
 	const noteIds = [...new Set(reminders.flatMap(reminder => (reminder.noteId ? [reminder.noteId] : [])))];
-	const eventTimes = reminders.filter(reminder => reminder.calendarEventId).map(reminder => new Date(reminder.remindAt).getTime());
+	const eventIds = [...new Set(reminders.flatMap(reminder => (reminder.calendarEventId ? [reminder.calendarEventId] : [])))];
 
 	const tasks = useTasksByIds(taskIds);
 	const notes = useQueries({ queries: noteIds.map(id => ({ queryFn: () => unwrap(api.notes[':id'].$get({ param: { id } })), queryKey: ['notes', 'one', id] })) });
-	const start = eventTimes.length > 0 ? new Date(Math.min(...eventTimes)) : null;
-	const end = start ? new Date(start.getFullYear(), start.getMonth(), start.getDate() + 61) : null;
-	const events = useQuery({
-		enabled: start !== null && end !== null,
-		queryFn: () => unwrap(api.planning.events.$get({ query: { from: toDateOnly(start as Date), to: toDateOnly(end as Date) } })),
-		queryKey: ['planning', 'events', 'reminders', start ? toDateOnly(start) : ''],
-	});
+	const events = useQueries({ queries: eventIds.map(id => ({ queryFn: () => unwrap(api.planning.events[':id'].$get({ param: { id } })), queryKey: ['planning', 'event', id] })) });
 
 	const map = new Map<string, TargetInfo>();
 	for (const task of tasks.data ?? []) map.set(task.id, { description: task.description ?? null, priority: task.priority, title: task.title });
 	for (const note of notes) if (note.data) map.set(note.data.id, { description: note.data.body ?? null, title: note.data.title });
-	for (const event of events.data ?? []) map.set(event.id, { description: null, title: event.title });
+	for (const event of events) if (event.data) map.set(event.data.id, { description: null, title: event.data.title });
 	return map;
 }

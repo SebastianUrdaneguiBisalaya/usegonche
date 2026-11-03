@@ -64,6 +64,12 @@ describe('createEvent', () => {
 });
 
 describe('getEvent', () => {
+	it('returns the event of the owner', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.calendarEvent.findFirst).mockResolvedValue(timed);
+		expect(await getEvent(prisma, TEST_USER_ID, ID)).toBe(timed);
+	});
+
 	it('throws 404 for another owner', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.calendarEvent.findFirst).mockResolvedValue(null);
