@@ -1,15 +1,16 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Download, Paperclip, Plus, Trash2 } from 'lucide-react';
+import { ArrowRight, Download, Ellipsis, Paperclip, Plus, Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Collapsible } from '~/components/ui/data-display/collapsible/collapsible';
 import { UploadDropzone } from '~/components/ui/forms-inputs/upload-dropzone/upload-dropzone';
-import { FileIcon } from '~/components/ui/foundations/file-icon/file-icon';
+import { FileIcon, resolveFileFormat } from '~/components/ui/foundations/file-icon/file-icon';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
+import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
 import { formatFileSize } from '~/components/ui/utils/files/fileTypes';
 import { useTranslate } from '~/hooks/use-translate';
@@ -19,7 +20,8 @@ import { type NoteAttachment, noteFileUrl, refreshNoteFiles, uploadNoteFile, use
 const MAX_FILES = 10;
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 100 * 1024 * 1024;
-const COLLAPSED_COUNT = 3;
+const COLLAPSED_COUNT = 2;
+const GRID = 'grid gap-3 sm:grid-cols-2';
 
 interface AttachmentsCardProps {
 	noteId: string;
@@ -77,11 +79,26 @@ export function AttachmentsCard({ noteId }: AttachmentsCardProps) {
 	return (
 		<div className='flex flex-col gap-3 rounded-2xl border border-border bg-foreground/[0.03] p-4'>
 			<Layout.HStack align='center' justify='between'>
-				<Typography.Span className='text-sm font-medium'>{t('notes.files.title', { count: items.length })}</Typography.Span>
-				<Button disabled={isFull} onClick={openUpload} title={isFull ? t('notes.files.full') : undefined} type='button' variant='secondary'>
-					<Button.Icon icon={Plus} />
-					<Button.Text>{t('notes.files.add')}</Button.Text>
-				</Button>
+				<span className='flex items-center gap-2 text-sm font-medium'>
+					<Icon aria-hidden className='text-muted-foreground' icon={Paperclip} size='lg' />
+					{t('notes.files.title', { count: items.length })}
+				</span>
+				<div className='flex items-center gap-2'>
+					{items.length > COLLAPSED_COUNT && (
+						<button
+							className='flex cursor-pointer items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground'
+							onClick={() => setExpanded(value => !value)}
+							type='button'
+						>
+							{expanded ? t('notes.files.viewLess') : t('notes.files.viewAll')}
+							<Icon aria-hidden icon={ArrowRight} size='sm' />
+						</button>
+					)}
+					<Button disabled={isFull} onClick={openUpload} title={isFull ? t('notes.files.full') : undefined} type='button' variant='secondary'>
+						<Button.Icon icon={Plus} />
+						<Button.Text>{t('notes.files.add')}</Button.Text>
+					</Button>
+				</div>
 			</Layout.HStack>
 
 			{files.isLoading ? (
@@ -104,24 +121,19 @@ export function AttachmentsCard({ noteId }: AttachmentsCardProps) {
 				</Layout.Stack>
 			) : (
 				<Collapsible.Root onOpenChange={setExpanded} open={expanded}>
-					<ul className='flex flex-col gap-2'>
+					<ul className={GRID}>
 						{visible.map(attachment => (
-							<AttachmentRow attachment={attachment} key={attachment.id} onDownload={handleDownload} onRemove={handleRemove} />
+							<AttachmentTile attachment={attachment} key={attachment.id} onDownload={handleDownload} onRemove={handleRemove} />
 						))}
 					</ul>
 					{items.length > COLLAPSED_COUNT && (
-						<>
-							<Collapsible.Content>
-								<ul className='flex flex-col gap-2'>
-									{items.slice(COLLAPSED_COUNT).map(attachment => (
-										<AttachmentRow attachment={attachment} key={attachment.id} onDownload={handleDownload} onRemove={handleRemove} />
-									))}
-								</ul>
-							</Collapsible.Content>
-							<Collapsible.Trigger chevron={false} className='text-xs text-muted-foreground'>
-								{expanded ? t('notes.files.viewLess') : t('notes.files.viewAll')}
-							</Collapsible.Trigger>
-						</>
+						<Collapsible.Content>
+							<ul className={GRID}>
+								{items.slice(COLLAPSED_COUNT).map(attachment => (
+									<AttachmentTile attachment={attachment} key={attachment.id} onDownload={handleDownload} onRemove={handleRemove} />
+								))}
+							</ul>
+						</Collapsible.Content>
 					)}
 				</Collapsible.Root>
 			)}
@@ -174,27 +186,45 @@ export function AttachmentsCard({ noteId }: AttachmentsCardProps) {
 	);
 }
 
-interface AttachmentRowProps {
+interface AttachmentTileProps {
 	attachment: NoteAttachment;
 	onDownload: (attachment: NoteAttachment) => void;
 	onRemove: (attachment: NoteAttachment) => void;
 }
 
-function AttachmentRow({ attachment, onDownload, onRemove }: AttachmentRowProps) {
+function AttachmentTile({ attachment, onDownload, onRemove }: AttachmentTileProps) {
 	const t = useTranslate();
+	const format = resolveFileFormat({ mimeType: attachment.mimeType, source: attachment.name });
 	return (
-		<li className='flex items-center gap-3 rounded-lg border border-border p-2'>
+		<li className='flex items-center gap-3 rounded-xl border border-border bg-foreground/[0.03] p-3'>
 			<FileIcon.Root aria-hidden file={attachment.name} mimeType={attachment.mimeType} size='sm' />
 			<div className='flex min-w-0 flex-1 flex-col gap-0.5'>
 				<p className='truncate text-sm font-medium'>{attachment.name}</p>
-				<p className='text-xs text-muted-foreground'>{formatFileSize(attachment.sizeBytes)}</p>
+				<p className='text-xs text-muted-foreground'>
+					{formatFileSize(attachment.sizeBytes)}
+					{format ? ` · ${format.label}` : ''}
+				</p>
 			</div>
 			<Button aria-label={t('notes.files.download', { name: attachment.name })} onClick={() => onDownload(attachment)} size='icon' type='button' variant='ghost'>
 				<Button.Icon icon={Download} />
 			</Button>
-			<Button aria-label={t('notes.files.remove', { name: attachment.name })} onClick={() => onRemove(attachment)} size='icon' type='button' variant='ghost'>
-				<Button.Icon icon={Trash2} />
-			</Button>
+			<Dropdown>
+				<Dropdown.Trigger>
+					<Button aria-label={t('notes.files.more', { name: attachment.name })} size='icon' type='button' variant='ghost'>
+						<Button.Icon icon={Ellipsis} />
+					</Button>
+				</Dropdown.Trigger>
+				<Dropdown.Content align='end'>
+					<Dropdown.Item onSelect={() => onDownload(attachment)}>
+						<Icon aria-hidden icon={Download} size='sm' />
+						{t('notes.files.download', { name: attachment.name })}
+					</Dropdown.Item>
+					<Dropdown.Item onSelect={() => onRemove(attachment)} variant='destructive'>
+						<Icon aria-hidden icon={Trash2} size='sm' />
+						{t('notes.files.remove', { name: attachment.name })}
+					</Dropdown.Item>
+				</Dropdown.Content>
+			</Dropdown>
 		</li>
 	);
 }
