@@ -147,6 +147,7 @@
       "placeholder": "Search or jump to...",
       "empty": "No results",
       "navigate": "Navigate",
+      "notes": "Notes",
       "toggle": "Open command palette",
       "close": "Close"
     },
