@@ -178,6 +178,13 @@ describe('findDueReminders / claimReminder', () => {
 });
 
 describe('processDueReminders', () => {
+	it('just marks due reminders as sent when no delivery hook is given (internal reminders)', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.reminder.findMany).mockResolvedValue(asRow([row()]));
+		vi.mocked(prisma.reminder.updateMany).mockResolvedValue({ count: 1 });
+		expect(await processDueReminders(prisma, undefined, NOW)).toEqual({ claimed: 1, failed: 0 });
+	});
+
 	it('delivers each claimed reminder once', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.reminder.findMany).mockResolvedValue(asRow([row(), row({ id: 'r2' })]));

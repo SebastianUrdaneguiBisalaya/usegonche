@@ -3,7 +3,6 @@ import { env } from 'hono/adapter';
 import { timingSafeEqual } from 'hono/utils/buffer';
 import type { AppEnv } from '../../env.js';
 import { fail, ok } from '../../lib/http.js';
-import { deliverReminder } from './reminders.delivery.js';
 import { processDueReminders } from './reminders.service.js';
 
 export const SECRET_HEADER = 'x-internal-secret';
@@ -17,5 +16,5 @@ export default new Hono<AppEnv>().post('/process', async c => {
 	const secret = env(c).INTERNAL_CRON_SECRET;
 	const given = c.req.header(SECRET_HEADER);
 	if (!secret || !given || !(await timingSafeEqual(given, secret))) return fail(c, 'unauthorized', 401);
-	return ok(c, await processDueReminders(c.get('prisma'), deliverReminder), 200);
+	return ok(c, await processDueReminders(c.get('prisma')), 200);
 });

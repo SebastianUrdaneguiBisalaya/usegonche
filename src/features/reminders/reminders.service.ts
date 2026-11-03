@@ -88,8 +88,11 @@ const release = async (prisma: PrismaClient, id: string, now: Date): Promise<voi
 	await prisma.reminder.updateMany({ data: { sentAt: null, status: 'pending' }, where: { id, sentAt: now, status: 'sent' } });
 };
 
-/** Claims every due reminder and hands each claimed one to `deliver`. */
-export const processDueReminders = async (prisma: PrismaClient, deliver: (reminder: Reminder) => Promise<void>, now: Date = new Date()): Promise<ProcessResult> => {
+/**
+ * Claims every due reminder (`pending -> sent`, so the app shows it as fired) and hands each claimed one to the optional `deliver` hook.
+ * Reminders are internal (seen in the web app), so by default nothing else happens.
+ */
+export const processDueReminders = async (prisma: PrismaClient, deliver: (reminder: Reminder) => Promise<void> = async () => undefined, now: Date = new Date()): Promise<ProcessResult> => {
 	const result: ProcessResult = { claimed: 0, failed: 0 };
 	for (const reminder of await findDueReminders(prisma, now)) {
 		if (!(await claimReminder(prisma, reminder.id, now))) continue;
