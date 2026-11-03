@@ -8,13 +8,13 @@ import { Form } from '~/components/ui/forms-inputs/form/form';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Drawer } from '~/components/ui/overlays-feedback/drawer/drawer';
-import { useLanguage } from '~/hooks/use-language';
 import { useRetained } from '~/hooks/use-retained';
 import { useTranslate } from '~/hooks/use-translate';
 import { diffPayload } from '~/utils/diff-payload';
 import { apiDateOnly } from '../../shared/dates';
 import { DrawerSection } from '../../shared/drawer-section';
 import { StatusBadge } from '../../shared/status-pill';
+import { useDateTime } from '../../shared/use-datetime';
 import { type Goal, useGoalProjects, useSetGoalArchived, useUpdateGoal } from '../api';
 import { displayStatus, goalIcon, statusLook } from '../display';
 import { createGoalFormSchema, type GoalFormValues } from '../schemas';
@@ -36,14 +36,13 @@ const toFormValues = (goal: Goal): GoalFormValues => ({
 
 function Body({ goal, onChange, onClose }: Omit<GoalDrawerProps, 'goal'> & { goal: Goal }) {
 	const t = useTranslate();
-	const { locale } = useLanguage();
 	const update = useUpdateGoal();
 	const setArchived = useSetGoalArchived();
 	const schema = useMemo(() => createGoalFormSchema(t), [t]);
 	const projects = useGoalProjects(goal.id, true);
 	const { done, total } = goal.taskCounts;
 	const status = displayStatus(goal);
-	const dateFormat = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }), [locale]);
+	const { formatDate } = useDateTime();
 
 	const toggleArchived = () =>
 		setArchived.mutate(
@@ -65,7 +64,7 @@ function Body({ goal, onChange, onClose }: Omit<GoalDrawerProps, 'goal'> & { goa
 					</span>
 					<Layout.Stack className='min-w-0' gap='xs'>
 						<Drawer.Title className='truncate'>{goal.title}</Drawer.Title>
-						<Drawer.Description>{t('goals.drawer.created', { date: dateFormat.format(new Date(goal.createdAt)) })}</Drawer.Description>
+						<Drawer.Description>{t('goals.drawer.created', { date: formatDate(goal.createdAt) })}</Drawer.Description>
 					</Layout.Stack>
 				</Layout.HStack>
 				<Drawer.Close>

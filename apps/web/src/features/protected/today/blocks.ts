@@ -1,16 +1,17 @@
+import { toApi } from '~/lib/datetime';
+
 export const MINUTES_PER_DAY = 1440;
 export const SNAP_MINUTES = 15;
 export const DURATIONS = [15, 30, 45, 60, 90, 120, 180, 240] as const;
 
-/** The instant `minute` minutes after local midnight of a `YYYY-MM-DD` day. */
-export function atMinute(dateOnly: string, minute: number): Date {
-	const [year, month, day] = dateOnly.split('-').map(Number);
-	return new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1, 0, minute);
+/** The instant `minute` minutes after midnight of a `YYYY-MM-DD` day in the user's time zone (undefined: the browser's). */
+export function atMinute(dateOnly: string, minute: number, timeZone: string | undefined): Date {
+	return new Date(toApi(dateOnly, minute, timeZone));
 }
 
-/** Minutes after local midnight of `dateOnly`, clamped to the day. */
-export function minuteOf(dateOnly: string, iso: string): number {
-	const minutes = (new Date(iso).getTime() - atMinute(dateOnly, 0).getTime()) / 60_000;
+/** Minutes after midnight of `dateOnly` in the user's time zone, clamped to the day. */
+export function minuteOf(dateOnly: string, iso: string, timeZone: string | undefined): number {
+	const minutes = (new Date(iso).getTime() - atMinute(dateOnly, 0, timeZone).getTime()) / 60_000;
 	return Math.min(Math.max(Math.round(minutes), 0), MINUTES_PER_DAY);
 }
 

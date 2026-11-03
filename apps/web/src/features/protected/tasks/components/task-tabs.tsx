@@ -11,6 +11,7 @@ import { NewNoteModal } from '../../notes/components/new-note-modal';
 import { DrawerSection } from '../../shared/drawer-section';
 import { useProjectOptions } from '../../shared/projects';
 import { formatRelative } from '../../shared/relative-time';
+import { useDateTime } from '../../shared/use-datetime';
 import { type Task, useTaskBlocks, useTaskFiles, useTaskHistory, useTaskNotes } from '../api';
 
 const formatSize = (bytes: number): string => (bytes < 1024 ? `${bytes} B` : bytes < 1_048_576 ? `${(bytes / 1024).toFixed(0)} KB` : `${(bytes / 1_048_576).toFixed(1)} MB`);
@@ -23,7 +24,7 @@ function History({ task }: { task: Task }) {
 	const history = useTaskHistory(task.id, true);
 	const projects = useProjectOptions();
 	const projectTitle = useMemo(() => new Map((projects.data ?? []).map(project => [project.id, project.title])), [projects.data]);
-	const dateTime = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }), [locale]);
+	const { formatDateTime } = useDateTime();
 
 	if (history.isPending) {
 		return (
@@ -61,8 +62,8 @@ function History({ task }: { task: Task }) {
 					icon = FolderKanban;
 				} else {
 					title = t('tasks.history.rescheduled', {
-						from: event.fromStart ? dateTime.format(new Date(event.fromStart)) : none,
-						to: event.toStart ? dateTime.format(new Date(event.toStart)) : none,
+						from: event.fromStart ? formatDateTime(event.fromStart) : none,
+						to: event.toStart ? formatDateTime(event.toStart) : none,
 					});
 					icon = ArrowRightLeft;
 				}
@@ -81,7 +82,7 @@ export function TaskTabs({ task }: { task: Task }) {
 	const [newNote, setNewNote] = useState(false);
 	const files = useTaskFiles(task.id, true);
 	const blocks = useTaskBlocks(task.id, true);
-	const dateTime = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }), [locale]);
+	const { formatDateTime } = useDateTime();
 	const retry = t('tasks.drawer.retry');
 	const loadError = t('tasks.drawer.loadError');
 
@@ -150,7 +151,7 @@ export function TaskTabs({ task }: { task: Task }) {
 					onRetry={() => void blocks.refetch()}
 					render={block => (
 						<>
-							<span className='min-w-0 truncate'>{`${dateTime.format(new Date(block.plannedStart))} – ${dateTime.format(new Date(block.plannedEnd))}`}</span>
+							<span className='min-w-0 truncate'>{`${formatDateTime(block.plannedStart)} – ${formatDateTime(block.plannedEnd)}`}</span>
 							<span className='shrink-0 text-xs text-muted-foreground'>{t(`tasks.drawer.blockStatus.${block.status}`)}</span>
 						</>
 					)}
