@@ -1334,5 +1334,41 @@
       "previewEmpty": "Esta versión no tiene texto.",
       "restoreHint": "La versión actual se guarda como una nueva revisión."
     }
+  },
+  "today": {
+    "title": "Hoy",
+    "subtitle": "Enfócate en lo que te hace avanzar.",
+    "backToToday": "Volver a hoy",
+    "strip": {
+      "previous": "Días anteriores",
+      "next": "Días siguientes"
+    },
+    "plan": {
+      "title": "Plan del día",
+      "titleToday": "Plan de hoy",
+      "count": "{{done}} de {{total}} tareas",
+      "progress": "Progreso del día",
+      "add": "Añadir tarea…",
+      "addEmpty": "Ninguna tarea coincide.",
+      "remove": "Quitar “{{title}}” del plan"
+    },
+    "empty": {
+      "title": "Nada planificado",
+      "description": "Añade las tareas en las que quieres trabajar este día."
+    },
+    "error": {
+      "title": "No se pudo cargar el plan.",
+      "retry": "Reintentar"
+    },
+    "blocked": {
+      "title": "Bloqueadas",
+      "count_one": "{{count}} tarea",
+      "count_other": "{{count}} tareas"
+    },
+    "inbox": {
+      "title": "Bandeja",
+      "viewAll": "Ver todo",
+      "empty": "Tu bandeja está vacía."
+    }
   }
 }
