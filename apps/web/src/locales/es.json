@@ -1432,6 +1432,19 @@
       "noHours": "Define tu horario en Ajustes > Disponibilidad para ver tu capacidad.",
       "unestimated_one": "{{count}} tarea abierta sin estimación cuenta como 0.",
       "unestimated_other": "{{count}} tareas abiertas sin estimación cuentan como 0."
+    },
+    "replan": {
+      "title": "Replanificar",
+      "subtitle": "Bloques perdidos o interrumpidos. Nada cambia hasta que aceptes.",
+      "reason": {
+        "missed": "Perdido",
+        "interrupted": "Interrumpido"
+      },
+      "suggestion": "Faltan {{duration}} · propuesta: {{time}}",
+      "noSlot": "Faltan {{duration}} · sin hueco libre en los próximos 7 días",
+      "accept": "Aceptar",
+      "reject": "Descartar",
+      "accepted": "Bloque reprogramado."
     }
   }
 }

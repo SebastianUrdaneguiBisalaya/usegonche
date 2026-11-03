@@ -83,3 +83,14 @@ export function useDeleteBlock() {
 	const refresh = useRefreshBlocks();
 	return useMutation({ mutationFn: (id: string) => unwrap(api.planning.blocks[':id'].$delete({ param: { id } })), onSuccess: refresh });
 }
+
+type ReplanResponse = Awaited<ReturnType<(typeof api.planning)['replan-proposals']['$get']>>;
+export type ReplanProposal = Extract<Awaited<ReturnType<ReplanResponse['json']>>, { data: unknown }>['data'][number];
+
+/** `GET /planning/replan-proposals`: for each missed or interrupted block of the day, the first free slot that fits what is left. Proposals only, nothing is applied. */
+export function useReplanProposals(date: string) {
+	return useQuery({
+		queryFn: () => unwrap(api.planning['replan-proposals'].$get({ query: { date, days: '7' } })),
+		queryKey: ['planning', 'replan', date],
+	});
+}
