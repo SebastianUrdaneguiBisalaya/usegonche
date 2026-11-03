@@ -259,6 +259,51 @@ describe('listTasks', () => {
 		});
 	});
 
+	it("counts overdue against the user's day in their stored time zone, not the UTC day (regression #138)", async () => {
+		vi.useFakeTimers();
+		// 02:30 UTC on the 10th is still the evening of the 9th in Lima (UTC-5).
+		vi.setSystemTime(new Date('2026-11-10T02:30:00Z'));
+		try {
+			const prisma = createMockPrisma();
+			vi.mocked(prisma.userSettings.findUnique).mockResolvedValue({ timezone: 'America/Lima' } as never);
+			vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+			vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+			await listTasks(prisma, TEST_USER_ID, {}, { page: 1, pageSize: 10 });
+			expect(prisma.userSettings.findUnique).toHaveBeenCalledWith({ select: { timezone: true }, where: { ownerId: TEST_USER_ID } });
+			const overdue = vi
+				.mocked(prisma.task.count)
+				.mock.calls.map(([args]) => args?.where)
+				.find(where => JSON.stringify(where).includes('"lt"'));
+			expect(overdue).toEqual({
+				AND: [
+					{ ownerId: TEST_USER_ID, parentId: null },
+					{ dueDate: { lt: new Date('2026-11-09') }, status: { in: ['todo', 'in_progress'] } },
+				],
+			});
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it('falls back to UTC when the user never set a time zone', async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date('2026-11-10T02:30:00Z'));
+		try {
+			const prisma = createMockPrisma();
+			vi.mocked(prisma.userSettings.findUnique).mockResolvedValue(null);
+			vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+			vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+			await listTasks(prisma, TEST_USER_ID, {}, { page: 1, pageSize: 10 });
+			const overdue = vi
+				.mocked(prisma.task.count)
+				.mock.calls.map(([args]) => args?.where)
+				.find(where => JSON.stringify(where).includes('"lt"'));
+			expect(overdue).toMatchObject({ AND: [expect.anything(), { dueDate: { lt: new Date('2026-11-10') } }] });
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
 	it('filters blocked and not blocked tasks', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);

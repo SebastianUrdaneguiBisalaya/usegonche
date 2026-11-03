@@ -11,6 +11,7 @@ import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
 import { useTranslate } from '~/hooks/use-translate';
 import { ListEmpty } from '../../shared/list-table';
 import { listStyles } from '../../shared/styles';
+import { useDateTime } from '../../shared/use-datetime';
 import type { Task } from '../api';
 import { daysUntil, isOpen, statusColor, statusDot, statusIcon, taskIcon } from '../display';
 import { type TaskPriority, type TaskStatus, taskPriorities, taskStatuses } from '../search-params';
@@ -38,8 +39,9 @@ const cardSurface = 'rounded-2xl border-border bg-foreground/[0.04] p-3.5 shadow
 function TaskCard({ onOpen, onSetPriority, task }: { onOpen: (task: Task) => void; onSetPriority: (task: Task, priority: TaskPriority) => void; task: Task }) {
 	const t = useTranslate();
 	const formatDay = useFormatDay();
+	const { today } = useDateTime();
 	const due = taskDay(task.dueDate);
-	const overdue = due !== '' && isOpen(task.status) && daysUntil(due) < 0;
+	const overdue = due !== '' && isOpen(task.status) && daysUntil(due, today()) < 0;
 	const { done, total } = task.progress;
 	const finished = task.status === 'done';
 

@@ -7,6 +7,7 @@ import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagi
 import { attachmentPaths, removeFiles } from '../attachments/attachments.service.js';
 import { diffTaskChanges, recordTaskEvents } from '../history/history.service.js';
 import { markConverted } from '../inbox/inbox.service.js';
+import { getTimeZone } from '../planning/planning.shared.js';
 import { createNextOccurrence } from '../recurrences/recurrences.service.js';
 import { CLOSED, dueBucketWhere, OPEN, planGroups, sliceGroups, type TaskGroupPage, taskToday, WEEK_DAYS, weekEnd } from './tasks.groups.js';
 import type { BulkUpdateTasksInput, CreateTaskInput, ListTasksFilters, TaskSort, UpdateTaskInput } from './tasks.schemas.js';
@@ -89,9 +90,9 @@ const assertParent = async (prisma: Db, ownerId: string, parentId: string, taskI
 const DAY_MS = 86_400_000;
 
 /** The working set: what needs attention (open and overdue, due soon or undated) and what was just closed. Day boundaries come from `taskToday`. */
-const focusWhere = (now: Date): Prisma.TaskWhereInput => ({
+const focusWhere = (now: Date, timeZone: string): Prisma.TaskWhereInput => ({
 	OR: [
-		{ OR: [{ dueDate: null }, { dueDate: { lte: weekEnd(taskToday(now)) } }], status: { in: OPEN } },
+		{ OR: [{ dueDate: null }, { dueDate: { lte: weekEnd(taskToday(now, timeZone)) } }], status: { in: OPEN } },
 		{ status: { in: CLOSED }, updatedAt: { gte: new Date(now.getTime() - WEEK_DAYS * DAY_MS) } },
 	],
 });
@@ -101,7 +102,7 @@ const NULLABLE_SORT: TaskSort[] = ['dueDate', 'startDate'];
 
 /**
  * One page of tasks (newest first by default) with the total and the counters. Without `parentId` only top-level tasks are listed.
- * Counters follow every filter except the status, so each status chip shows how many tasks it would hold. `overdue` uses the UTC date.
+ * Counters follow every filter except the status, so each status chip shows how many tasks it would hold. `overdue`, the due groups and the working set use the user's day (their stored time zone).
  */
 export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: ListTasksFilters, page: PageParams): Promise<TaskPage> => {
 	const {
@@ -123,6 +124,9 @@ export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: 
 		tagId,
 		title,
 	} = filters;
+	// "Today" is the user's day, in their stored time zone: the counters, the groups and the working set all read it.
+	const now = new Date();
+	const timeZone = await getTimeZone(prisma, ownerId);
 	const shared = scoped(ownerId, {
 		parentId: parentId ?? null,
 		...(dueAfter || dueBefore ? { dueDate: { ...(dueAfter && { gte: dueAfter }), ...(dueBefore && { lte: dueBefore }) } } : noDueDate ? { dueDate: null } : {}),
@@ -133,12 +137,11 @@ export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: 
 		...(projectId ? { projectId } : noProject ? { projectId: null } : {}),
 		...(tagId && { tags: { some: { tagId } } }),
 		...(blocked === undefined ? {} : blocked ? blockedWhere : { NOT: blockedWhere }),
-		...(focus && { AND: [focusWhere(new Date())] }),
+		...(focus && { AND: [focusWhere(now, timeZone)] }),
 	});
 	const where = { ...shared, ...(status && { status: { in: status } }) };
 	const orderBy = [NULLABLE_SORT.includes(sort) ? { [sort]: { nulls: 'last', sort: order } } : { [sort]: order }, { id: order }] as Prisma.TaskOrderByWithRelationInput[];
-	const now = new Date();
-	const today = taskToday(now);
+	const today = taskToday(now, timeZone);
 	// The counters (and the blocked / overdue chips) follow every filter but the status, grouped or not.
 	const loadChips = () =>
 		Promise.all([

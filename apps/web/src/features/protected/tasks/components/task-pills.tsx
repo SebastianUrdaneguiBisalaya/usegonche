@@ -6,6 +6,7 @@ import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { apiDateOnly, fromDateOnly, toDateOnly } from '../../shared/dates';
 import { StatusMenu } from '../../shared/status-pill';
+import { useDateTime } from '../../shared/use-datetime';
 import { daysUntil, isOpen, priorityClass, priorityDot, statusColor, statusDot, statusIcon } from '../display';
 import { type TaskPriority, type TaskStatus, taskPriorities, taskStatuses } from '../search-params';
 
@@ -108,7 +109,8 @@ export function DueDate({ ariaLabel, className, emptyLabel, onChange, status, va
 	const t = useTranslate();
 	const { locale } = useLanguage();
 	const lang = usePickerLang();
-	const overdue = value !== '' && isOpen(status) && daysUntil(value) < 0;
+	const { today } = useDateTime();
+	const overdue = value !== '' && isOpen(status) && daysUntil(value, today()) < 0;
 
 	return (
 		<DatePicker.Root lang={lang} locale={locale} onChange={date => onChange(date ? toDateOnly(date) : null)} value={fromDateOnly(value)}>

@@ -1,8 +1,8 @@
 import { keepPreviousData, type QueryClient, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type Body } from '~/lib/api';
 import { unwrap } from '~/lib/api-error';
-import { toDateOnly } from '../shared/dates';
 import { type OkBody, PAGE_SIZE, unwrapPage } from '../shared/paged';
+import { useDateTime } from '../shared/use-datetime';
 import { NO_PROJECT, type TaskSort, type TasksParams, type TaskView } from './search-params';
 
 /** Events per page of a task's history. */
@@ -33,19 +33,17 @@ const SORT_QUERY: Record<TaskSort, { order: 'asc' | 'desc'; sort: 'createdAt' | 
 	updated: { order: 'desc', sort: 'updatedAt' },
 };
 
-const shiftDay = (days: number): string => {
-	const now = new Date();
-	return toDateOnly(new Date(now.getFullYear(), now.getMonth(), now.getDate() + days));
-};
+/** Today and the days around it, as `YYYY-MM-DD` in the user's stored time zone (the same day the API counts `overdue` against). */
+type Today = (days?: number) => string;
 
-export const tasksKey = (view: TaskView, params: TasksParams) => ['tasks', 'list', view, params, shiftDay(0)] as const;
+export const tasksKey = (view: TaskView, params: TasksParams, today: string) => ['tasks', 'list', view, params, today] as const;
 
 /** The filters of `GET /tasks` (values are strings on the wire). The due filter becomes a date range, as the API knows no "overdue". */
-const filterQuery = ({ blocked, due, focus, goal, project, sort, status, tag }: Omit<TasksParams, 'group' | 'page'>) => ({
+const filterQuery = ({ blocked, due, focus, goal, project, sort, status, tag }: Omit<TasksParams, 'group' | 'page'>, today: Today) => ({
 	// An overdue task is an open one: the status chips cannot bring the finished ones back into that filter.
-	...(due === 'overdue' ? { dueBefore: shiftDay(-1), status: status.filter(value => value === 'todo' || value === 'in_progress') } : { status }),
-	...(due === 'today' && { dueAfter: shiftDay(0), dueBefore: shiftDay(0) }),
-	...(due === 'week' && { dueAfter: shiftDay(0), dueBefore: shiftDay(6) }),
+	...(due === 'overdue' ? { dueBefore: today(-1), status: status.filter(value => value === 'todo' || value === 'in_progress') } : { status }),
+	...(due === 'today' && { dueAfter: today(), dueBefore: today() }),
+	...(due === 'week' && { dueAfter: today(), dueBefore: today(6) }),
 	...(due === 'none' && { noDueDate: 'true' as const }),
 	...(blocked && { blocked: 'true' as const }),
 	...(focus && { focus: 'true' as const }),
@@ -56,15 +54,16 @@ const filterQuery = ({ blocked, due, focus, goal, project, sort, status, tag }: 
 });
 
 /** Query of one page of the list. The grouping is done by the API over the whole filtered set, so a group is never cut short by the page. */
-export const tasksQuery = (params: TasksParams) => ({ ...filterQuery(params), groupBy: params.group, page: String(params.page), pageSize: String(PAGE_SIZE) });
+export const tasksQuery = (params: TasksParams, today: Today) => ({ ...filterQuery(params, today), groupBy: params.group, page: String(params.page), pageSize: String(PAGE_SIZE) });
 
 /** One page of the list view, with the counters of the status chips. */
 export function useTasks(params: TasksParams, enabled = true) {
+	const { today } = useDateTime();
 	return useQuery({
 		enabled,
 		placeholderData: keepPreviousData,
-		queryFn: () => unwrapPage(api.tasks.$get({ query: tasksQuery(params) })),
-		queryKey: tasksKey('list', params),
+		queryFn: () => unwrapPage(api.tasks.$get({ query: tasksQuery(params, today) })),
+		queryKey: tasksKey('list', params, today()),
 	});
 }
 
@@ -76,14 +75,15 @@ export type BoardPage = TasksPage & { hidden: number };
  * A due filter picked by the user replaces the working set.
  */
 export function useBoardTasks(params: TasksParams, enabled = true) {
+	const { today } = useDateTime();
 	return useQuery({
 		enabled,
 		placeholderData: keepPreviousData,
 		queryFn: async (): Promise<BoardPage> => {
-			const page = await unwrapPage(api.tasks.$get({ query: { ...filterQuery({ ...params, focus: params.due === 'any' }), page: '1', pageSize: String(BOARD_PAGE_SIZE) } }));
+			const page = await unwrapPage(api.tasks.$get({ query: { ...filterQuery({ ...params, focus: params.due === 'any' }, today), page: '1', pageSize: String(BOARD_PAGE_SIZE) } }));
 			return { ...page, hidden: Math.max(page.meta.total - page.data.length, 0) };
 		},
-		queryKey: tasksKey('board', params),
+		queryKey: tasksKey('board', params, today()),
 	});
 }
 

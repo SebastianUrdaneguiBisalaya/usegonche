@@ -1,6 +1,7 @@
 import type { Prisma, PrismaClient, TaskPriority, TaskStatus } from '@usegonche/database';
 import { scoped } from '../../lib/owner.js';
 import type { PageParams } from '../../lib/pagination.js';
+import { localDateOf } from '../../lib/time.js';
 
 /** What the list can group by. `none` is the plain list. */
 export const taskGroupings = ['none', 'project', 'goal', 'due', 'priority'] as const;
@@ -15,10 +16,11 @@ const DAY_MS = 86_400_000;
 export const WEEK_DAYS = 7;
 
 /**
- * Today's date as the tasks see it. The ONE place the day boundary is decided: the due buckets, the `overdue` counter and the working set all read it,
- * so they never disagree. It is the UTC date until the user's stored time zone replaces it here.
+ * Today's date as the tasks see it: the calendar day it is at `now` in the user's stored time zone (`UserSettings.timezone`), as the UTC midnight of that
+ * date, which is how a `dueDate` column compares. The ONE place the day boundary is decided: the due buckets, the `overdue` counter and the working set
+ * all read it, so they never disagree with each other or with the user's clock.
  */
-export const taskToday = (now: Date): Date => new Date(now.toISOString().slice(0, 10));
+export const taskToday = (now: Date, timeZone: string): Date => new Date(localDateOf(now, timeZone));
 
 /** Last due date (inclusive) of the "this week" bucket. */
 export const weekEnd = (today: Date): Date => new Date(today.getTime() + (WEEK_DAYS - 1) * DAY_MS);
