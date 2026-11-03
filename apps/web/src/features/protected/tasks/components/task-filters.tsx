@@ -1,46 +1,12 @@
 import { CalendarDays, FolderKanban, OctagonAlert, Tag, Target, TimerOff } from 'lucide-react';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Icon } from '~/components/ui/foundations/icon/icon';
-import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { useTranslate } from '~/hooks/use-translate';
+import { FilterChip } from '../../shared/filter-chip';
+import { IdSelect } from '../../shared/id-select';
 import { listStyles } from '../../shared/styles';
 import { statusColor, statusIcon } from '../display';
 import { NO_PROJECT, type TaskDue, type TaskStatus, taskDues, taskStatuses } from '../search-params';
-
-const ALL = '__all';
-
-interface ChipProps {
-	active: boolean;
-	count: number | undefined;
-	icon: React.ReactNode;
-	label: string;
-	onClick: () => void;
-	tone?: 'danger';
-}
-
-/** A toggle chip with its counter (a pulsing placeholder until the counts arrive). */
-function Chip({ active, count, icon, label, onClick, tone }: ChipProps) {
-	return (
-		<button
-			aria-pressed={active}
-			className={`flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-				active ? 'border-border-strong bg-foreground/[0.06]' : 'border-border hover:bg-foreground/[0.04]'
-			} ${tone === 'danger' && active ? 'text-destructive' : ''}`}
-			onClick={onClick}
-			type='button'
-		>
-			{icon}
-			{label}
-			{count === undefined ? (
-				<Skeleton className='gap-0'>
-					<Skeleton.Item className='h-4 w-6 rounded-full' />
-				</Skeleton>
-			) : (
-				<span className={`rounded-full px-2 py-0.5 text-xs tabular-nums ${tone === 'danger' && count > 0 ? 'bg-destructive/10 text-destructive' : 'bg-muted'}`}>{count}</span>
-			)}
-		</button>
-	);
-}
 
 interface TaskChipsProps {
 	blocked: boolean;
@@ -65,7 +31,7 @@ export function TaskChips({ blocked, counts, due, onBlockedChange, onDueChange, 
 	return (
 		<div aria-label={t('tasks.chips.label')} className='flex flex-wrap items-center gap-2' role='group'>
 			{taskStatuses.map(value => (
-				<Chip
+				<FilterChip
 					active={status.includes(value)}
 					count={counts?.[value]}
 					icon={<Icon aria-hidden className={statusColor[value]} icon={statusIcon[value]} size='sm' />}
@@ -75,7 +41,7 @@ export function TaskChips({ blocked, counts, due, onBlockedChange, onDueChange, 
 				/>
 			))}
 			<span aria-hidden className='mx-1 hidden h-6 w-px bg-border sm:block' />
-			<Chip
+			<FilterChip
 				active={due === 'overdue'}
 				count={counts?.overdue}
 				icon={<Icon aria-hidden className='text-destructive' icon={TimerOff} size='sm' />}
@@ -83,7 +49,7 @@ export function TaskChips({ blocked, counts, due, onBlockedChange, onDueChange, 
 				onClick={() => onDueChange(due === 'overdue' ? 'any' : 'overdue')}
 				tone='danger'
 			/>
-			<Chip
+			<FilterChip
 				active={blocked}
 				count={counts?.blocked}
 				icon={<Icon aria-hidden className='text-destructive' icon={OctagonAlert} size='sm' />}
@@ -92,41 +58,6 @@ export function TaskChips({ blocked, counts, due, onBlockedChange, onDueChange, 
 				tone='danger'
 			/>
 		</div>
-	);
-}
-
-interface IdSelectProps {
-	allLabel: string;
-	/** Extra option after "all" (e.g. "No project"), as `[value, label]`. */
-	extra?: readonly [string, string];
-	icon: typeof Target;
-	label: string;
-	onChange: (id: string) => void;
-	options: readonly { id: string; name: string }[];
-	value: string;
-}
-
-function IdSelect({ allLabel, extra, icon, label, onChange, options, value }: IdSelectProps) {
-	return (
-		<Select.Root onChange={next => onChange(next === ALL ? '' : next)} value={value || ALL}>
-			<Select.Trigger aria-label={label} className={`${listStyles.pillTrigger} min-w-40`}>
-				<span className='flex min-w-0 items-center gap-2'>
-					<Icon aria-hidden className='text-muted-foreground' icon={icon} size='sm' />
-					<Select.Value />
-				</span>
-			</Select.Trigger>
-			<Select.Content>
-				<Select.ItemList>
-					<Select.Item value={ALL}>{allLabel}</Select.Item>
-					{extra && <Select.Item value={extra[0]}>{extra[1]}</Select.Item>}
-					{options.map(option => (
-						<Select.Item key={option.id} value={option.id}>
-							{option.name}
-						</Select.Item>
-					))}
-				</Select.ItemList>
-			</Select.Content>
-		</Select.Root>
 	);
 }
 
