@@ -1369,6 +1369,43 @@
       "title": "Inbox",
       "viewAll": "View all",
       "empty": "Your inbox is empty."
+    },
+    "agenda": {
+      "title": "Day agenda",
+      "new": "New block",
+      "empty": "No time blocks yet. Click a time slot to plan one.",
+      "planAt": "Plan a block at {{time}}",
+      "untitled": "Untitled block",
+      "conflict": "This block has a scheduling conflict"
+    },
+    "block": {
+      "newTitle": "New time block",
+      "editTitle": "Time block",
+      "description": "Reserve time for a task. It never changes the task itself.",
+      "task": "Task",
+      "taskPlaceholder": "Search your open tasks…",
+      "titleLabel": "Title (optional with a task)",
+      "titlePlaceholder": "What will you work on?",
+      "start": "Start",
+      "duration": "Duration",
+      "minutes": "{{count}} min",
+      "create": "Create",
+      "save": "Save",
+      "cancel": "Cancel",
+      "markDone": "Done",
+      "markMissed": "Missed",
+      "delete": "Delete",
+      "status": {
+        "done": "This block was completed.",
+        "missed": "This block was missed.",
+        "interrupted": "This block was interrupted.",
+        "rescheduled": "This block was moved."
+      },
+      "warning": {
+        "outside_availability": "Outside your working hours.",
+        "overlaps_block": "Overlaps another block.",
+        "overlaps_event": "Overlaps a calendar event."
+      }
     }
   }
 }

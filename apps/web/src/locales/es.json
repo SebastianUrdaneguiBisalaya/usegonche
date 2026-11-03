@@ -1369,6 +1369,43 @@
       "title": "Bandeja",
       "viewAll": "Ver todo",
       "empty": "Tu bandeja está vacía."
+    },
+    "agenda": {
+      "title": "Agenda del día",
+      "new": "Nuevo bloque",
+      "empty": "Aún no hay bloques. Haz clic en una hora para planificar uno.",
+      "planAt": "Planificar un bloque a las {{time}}",
+      "untitled": "Bloque sin título",
+      "conflict": "Este bloque tiene un conflicto de horario"
+    },
+    "block": {
+      "newTitle": "Nuevo bloque de tiempo",
+      "editTitle": "Bloque de tiempo",
+      "description": "Reserva tiempo para una tarea. No cambia la tarea.",
+      "task": "Tarea",
+      "taskPlaceholder": "Busca entre tus tareas abiertas…",
+      "titleLabel": "Título (opcional con una tarea)",
+      "titlePlaceholder": "¿En qué vas a trabajar?",
+      "start": "Inicio",
+      "duration": "Duración",
+      "minutes": "{{count}} min",
+      "create": "Crear",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "markDone": "Hecho",
+      "markMissed": "Perdido",
+      "delete": "Eliminar",
+      "status": {
+        "done": "Este bloque se completó.",
+        "missed": "Este bloque se perdió.",
+        "interrupted": "Este bloque se interrumpió.",
+        "rescheduled": "Este bloque se movió."
+      },
+      "warning": {
+        "outside_availability": "Fuera de tu horario de trabajo.",
+        "overlaps_block": "Se solapa con otro bloque.",
+        "overlaps_event": "Se solapa con un evento del calendario."
+      }
     }
   }
 }
