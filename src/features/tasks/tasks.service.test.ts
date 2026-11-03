@@ -119,6 +119,22 @@ describe('listTasks', () => {
 		expect(vi.mocked(prisma.task.groupBy).mock.calls[0]?.[0]?.where).not.toHaveProperty('status');
 	});
 
+	it('lists the tasks with no project or no due date', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+		await listTasks(prisma, TEST_USER_ID, { noDueDate: true, noProject: true }, { page: 1, pageSize: 10 });
+		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ dueDate: null, ownerId: TEST_USER_ID, parentId: null, projectId: null });
+	});
+
+	it('an explicit project or due range wins over noProject / noDueDate', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+		await listTasks(prisma, TEST_USER_ID, { dueBefore: new Date('2026-11-30'), noDueDate: true, noProject: true, projectId: REF_ID }, { page: 1, pageSize: 10 });
+		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ dueDate: { lte: new Date('2026-11-30') }, ownerId: TEST_USER_ID, parentId: null, projectId: REF_ID });
+	});
+
 	it('filters blocked and not blocked tasks', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);

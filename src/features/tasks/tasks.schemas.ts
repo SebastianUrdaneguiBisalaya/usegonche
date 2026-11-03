@@ -72,6 +72,16 @@ export const listTasksQuerySchema = z.object({
 	dueBefore: date.optional(),
 	goalId: z.uuid().optional(),
 	order: z.enum(['asc', 'desc']).default('desc'),
+	/** `true` keeps only tasks with no due date. Ignored when `dueAfter`/`dueBefore` are given. */
+	noDueDate: z
+		.enum(['true'])
+		.transform(() => true)
+		.optional(),
+	/** `true` keeps only tasks with no project. Ignored when `projectId` is given. */
+	noProject: z
+		.enum(['true'])
+		.transform(() => true)
+		.optional(),
 	/** Subtasks of this task. Without it only top-level tasks are listed. */
 	parentId: z.uuid().optional(),
 	priority: z.enum(taskPriorities).optional(),

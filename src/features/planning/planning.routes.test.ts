@@ -255,6 +255,9 @@ describe('blocks', () => {
 		expect((await app.request(`/planning/blocks?from=${DATE}&to=${DATE}&status=missed`)).status).toBe(200);
 		expect((await app.request(`/planning/blocks?from=${DATE}&to=${DATE}&status=nope`)).status).toBe(422);
 		expect((await app.request(`/planning/blocks?from=${DATE}`)).status).toBe(422);
+		expect((await app.request('/planning/blocks')).status).toBe(422);
+		expect((await app.request(`/planning/blocks?taskId=${TASK}&from=${DATE}`)).status).toBe(422);
+		expect((await app.request(`/planning/blocks?taskId=${TASK}`)).status).toBe(200);
 	});
 
 	it('closes a block, answers 409 when it is not planned and 404 when missing', async () => {

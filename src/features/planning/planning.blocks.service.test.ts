@@ -118,11 +118,17 @@ describe('createBlock', () => {
 describe('listBlocks / getBlock', () => {
 	it('lists blocks of the local days, optionally by status, scoped by owner', async () => {
 		const prisma = setup({ blocks: [block()] });
-		expect(await listBlocks(prisma, TEST_USER_ID, '2026-11-02', '2026-11-03', 'missed')).toHaveLength(1);
+		expect(await listBlocks(prisma, TEST_USER_ID, { from: '2026-11-02', status: 'missed', to: '2026-11-03' })).toHaveLength(1);
 		expect(prisma.timeBlock.findMany).toHaveBeenCalledWith({
 			orderBy: [{ plannedStart: 'asc' }, { id: 'asc' }],
 			where: { ownerId: TEST_USER_ID, plannedEnd: { gt: new Date('2026-11-02T00:00:00Z') }, plannedStart: { lt: new Date('2026-11-04T00:00:00Z') }, status: 'missed' },
 		});
+	});
+
+	it('lists the blocks of one task, with no range', async () => {
+		const prisma = setup({ blocks: [block()] });
+		await listBlocks(prisma, TEST_USER_ID, { taskId: TASK });
+		expect(prisma.timeBlock.findMany).toHaveBeenCalledWith({ orderBy: [{ plannedStart: 'asc' }, { id: 'asc' }], take: 200, where: { ownerId: TEST_USER_ID, taskId: TASK } });
 	});
 
 	it('throws 404 for another owner', async () => {
