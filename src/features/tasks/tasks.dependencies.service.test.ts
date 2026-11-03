@@ -5,7 +5,7 @@ import { addDependency, removeDependency } from './tasks.dependencies.service.js
 const A = '5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7e';
 const B = '9b7e4a10-3c52-4d8f-a1e6-0f2d3c4b5a69';
 const C = 'c4d5e6f7-1a2b-4c3d-8e9f-a0b1c2d3e4f5';
-const view = { blockers: [], dependencies: [], id: A, ownerId: TEST_USER_ID, status: 'todo', subtasks: [], tags: [] };
+const view = { blockers: [], dependencies: [], dependents: [], id: A, ownerId: TEST_USER_ID, status: 'todo', subtasks: [], tags: [] };
 
 // biome-ignore lint/suspicious/noExplicitAny: the mock rows are partial on purpose
 const asRow = (value: unknown): any => value;

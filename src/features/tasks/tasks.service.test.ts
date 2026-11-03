@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createMockPrisma, createMockStorage, OTHER_USER_ID, TEST_USER_ID } from '../../test/helpers.js';
-import { createTask, deleteTask, getTask, listTasks, updateTask } from './tasks.service.js';
+import { bulkUpdateTasks, createTask, deleteTask, getTask, listTasks, updateTask } from './tasks.service.js';
 
 const ID = '5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7e';
 const PARENT_ID = '9b7e4a10-3c52-4d8f-a1e6-0f2d3c4b5a69';
@@ -8,7 +8,7 @@ const TAG_ID = 'c4d5e6f7-1a2b-4c3d-8e9f-a0b1c2d3e4f5';
 const INBOX_ID = 'e1f2a3b4-5c6d-4e7f-8a9b-0c1d2e3f4a5b';
 const REF_ID = '1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
 const tag = { id: TAG_ID, name: 'work' };
-const base = { blockers: [], dependencies: [], id: ID, ownerId: TEST_USER_ID, status: 'todo', subtasks: [], tags: [], title: 'Write' };
+const base = { blockers: [], dependencies: [], dependents: [], id: ID, ownerId: TEST_USER_ID, status: 'todo', subtasks: [], tags: [], title: 'Write' };
 
 // biome-ignore lint/suspicious/noExplicitAny: the mock rows are partial on purpose
 const asRow = (value: unknown): any => value;
@@ -38,6 +38,12 @@ describe('getTask (derived fields)', () => {
 		expect(await getTask(prisma, TEST_USER_ID, ID)).toMatchObject({ blocked: true, openBlockers: 1 });
 	});
 
+	it('lists the tasks that wait for it', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.task.findFirst).mockResolvedValue(asRow({ ...base, dependents: [{ taskId: REF_ID }, { taskId: PARENT_ID }] }));
+		expect(await getTask(prisma, TEST_USER_ID, ID)).toMatchObject({ blocksIds: [REF_ID, PARENT_ID] });
+	});
+
 	it('derives progress from subtasks ignoring cancelled ones and flattens tags', async () => {
 		const prisma = createMockPrisma();
 		const subtasks = [{ status: 'done' }, { status: 'todo' }, { status: 'cancelled' }];
@@ -58,9 +64,11 @@ describe('listTasks', () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findMany).mockResolvedValue(asRow([base]));
 		vi.mocked(prisma.task.count).mockResolvedValue(1);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
 		const page = await listTasks(prisma, TEST_USER_ID, {}, { page: 1, pageSize: 20 });
 		expect(page.items).toHaveLength(1);
 		expect(page.total).toBe(1);
+		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.orderBy).toEqual([{ createdAt: 'desc' }, { id: 'desc' }]);
 		expect(prisma.task.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 20, where: { ownerId: TEST_USER_ID, parentId: null } }));
 		expect(prisma.task.count).toHaveBeenCalledWith({ where: { ownerId: TEST_USER_ID, parentId: null } });
 	});
@@ -68,12 +76,13 @@ describe('listTasks', () => {
 	it('applies every filter', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
 		const dueAfter = new Date('2026-11-01');
 		const dueBefore = new Date('2026-11-30');
 		await listTasks(
 			prisma,
 			TEST_USER_ID,
-			{ dueAfter, dueBefore, goalId: REF_ID, parentId: PARENT_ID, priority: 'high', projectId: REF_ID, status: 'done', tagId: TAG_ID },
+			{ dueAfter, dueBefore, goalId: REF_ID, parentId: PARENT_ID, priority: 'high', projectId: REF_ID, status: ['done', 'in_progress'], tagId: TAG_ID },
 			{ page: 1, pageSize: 10 }
 		);
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({
@@ -83,7 +92,7 @@ describe('listTasks', () => {
 			parentId: PARENT_ID,
 			priority: 'high',
 			projectId: REF_ID,
-			status: 'done',
+			status: { in: ['done', 'in_progress'] },
 			tags: { some: { tagId: TAG_ID } },
 		});
 	});
@@ -91,8 +100,92 @@ describe('listTasks', () => {
 	it('skips the previous pages keeping the owner scope', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
 		await listTasks(prisma, TEST_USER_ID, {}, { page: 3, pageSize: 10 });
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]).toMatchObject({ skip: 20, take: 10, where: { ownerId: TEST_USER_ID } });
+	});
+
+	it('counts per status (ignoring the status filter) plus blocked and overdue', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.count).mockResolvedValueOnce(0).mockResolvedValueOnce(4).mockResolvedValueOnce(2);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([
+			{ _count: { _all: 5 }, status: 'todo' },
+			{ _count: { _all: 3 }, status: 'done' },
+		] as never);
+		const page = await listTasks(prisma, TEST_USER_ID, { status: ['done'] }, { page: 1, pageSize: 10 });
+		expect(page.counts).toEqual({ blocked: 4, cancelled: 0, done: 3, in_progress: 0, overdue: 2, todo: 5 });
+		expect(vi.mocked(prisma.task.groupBy).mock.calls[0]?.[0]).toMatchObject({ by: ['status'], where: { ownerId: TEST_USER_ID, parentId: null } });
+		expect(vi.mocked(prisma.task.groupBy).mock.calls[0]?.[0]?.where).not.toHaveProperty('status');
+	});
+
+	it('filters blocked and not blocked tasks', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+		await listTasks(prisma, TEST_USER_ID, { blocked: true }, { page: 1, pageSize: 10 });
+		await listTasks(prisma, TEST_USER_ID, { blocked: false }, { page: 1, pageSize: 10 });
+		const [yes, no] = vi.mocked(prisma.task.findMany).mock.calls.map(call => call[0]?.where);
+		expect(yes).toHaveProperty('OR');
+		expect(no).toHaveProperty('NOT');
+	});
+
+	it('sorts with the id as tie-breaker and puts empty dates last', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+		await listTasks(prisma, TEST_USER_ID, { order: 'asc', sort: 'dueDate' }, { page: 1, pageSize: 10 });
+		await listTasks(prisma, TEST_USER_ID, { order: 'asc', sort: 'priority' }, { page: 1, pageSize: 10 });
+		const [byDue, byPriority] = vi.mocked(prisma.task.findMany).mock.calls.map(call => call[0]?.orderBy);
+		expect(byDue).toEqual([{ dueDate: { nulls: 'last', sort: 'asc' } }, { id: 'asc' }]);
+		expect(byPriority).toEqual([{ priority: 'asc' }, { id: 'asc' }]);
+	});
+});
+
+describe('bulkUpdateTasks', () => {
+	const A = ID;
+	const B = PARENT_ID;
+	const setupBulk = (tasks: { dueDate: Date | null; id: string; startDate: Date | null }[]) => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.task.findMany).mockResolvedValue(asRow(tasks));
+		vi.mocked(prisma.task.findFirst).mockImplementation(((args: { where: { id: string } }) =>
+			Promise.resolve(asRow({ ...base, id: args.where.id, dueDate: null, startDate: null, tags: [] }))) as never);
+		vi.mocked(prisma.task.updateMany).mockResolvedValue({ count: 1 });
+		return prisma;
+	};
+
+	it('applies the change to every task, scoped by owner, in the order of ids', async () => {
+		const prisma = setupBulk([
+			{ dueDate: null, id: A, startDate: null },
+			{ dueDate: null, id: B, startDate: null },
+		]);
+		const result = await bulkUpdateTasks(prisma, TEST_USER_ID, { changes: { priority: 'high' }, ids: [B, A] });
+		expect(result.map(task => task.id)).toEqual([B, A]);
+		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ id: { in: [B, A] }, ownerId: TEST_USER_ID });
+		expect(vi.mocked(prisma.task.updateMany).mock.calls.map(call => call[0]?.where)).toEqual([
+			{ id: B, ownerId: TEST_USER_ID },
+			{ id: A, ownerId: TEST_USER_ID },
+		]);
+	});
+
+	it('answers 404 and writes nothing when an id is not the owner’s', async () => {
+		const prisma = setupBulk([{ dueDate: null, id: A, startDate: null }]);
+		expect(await rejection(bulkUpdateTasks(prisma, OTHER_USER_ID, { changes: { status: 'done' }, ids: [A, B] }))).toMatchObject({ code: 'not_found', status: 404 });
+		expect(prisma.task.updateMany).not.toHaveBeenCalled();
+	});
+
+	it('moves the dates each task has with shiftDays', async () => {
+		const prisma = setupBulk([
+			{ dueDate: new Date('2026-11-10'), id: A, startDate: new Date('2026-11-05') },
+			{ dueDate: null, id: B, startDate: null },
+		]);
+		vi.mocked(prisma.task.findFirst).mockImplementation(((args: { where: { id: string } }) =>
+			Promise.resolve(
+				asRow({ ...base, id: args.where.id, dueDate: args.where.id === A ? new Date('2026-11-10') : null, startDate: args.where.id === A ? new Date('2026-11-05') : null, tags: [] })
+			)) as never);
+		await bulkUpdateTasks(prisma, TEST_USER_ID, { changes: { shiftDays: 3 }, ids: [A, B] });
+		expect(prisma.task.updateMany).toHaveBeenCalledTimes(1);
+		expect(vi.mocked(prisma.task.updateMany).mock.calls[0]?.[0]?.data).toMatchObject({ dueDate: new Date('2026-11-13'), startDate: new Date('2026-11-08') });
 	});
 });
 

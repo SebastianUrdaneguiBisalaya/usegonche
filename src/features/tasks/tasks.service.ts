@@ -8,12 +8,14 @@ import { attachmentPaths, removeFiles } from '../attachments/attachments.service
 import { diffTaskChanges, recordTaskEvents } from '../history/history.service.js';
 import { markConverted } from '../inbox/inbox.service.js';
 import { createNextOccurrence } from '../recurrences/recurrences.service.js';
-import type { CreateTaskInput, ListTasksFilters, UpdateTaskInput } from './tasks.schemas.js';
+import type { BulkUpdateTasksInput, CreateTaskInput, ListTasksFilters, TaskSort, UpdateTaskInput } from './tasks.schemas.js';
 
 export type Db = PrismaClient | Prisma.TransactionClient;
 
 /** A task plus what is derived from its relations. Blocking and progress are never stored. */
 export type TaskView = Task & {
+	/** Tasks that wait for this one (the reverse of `dependsOnIds`). */
+	blocksIds: string[];
 	/** Informational: an open manual blocker, or a dependency that is not done/cancelled yet. Never prevents any action. */
 	blocked: boolean;
 	dependsOnIds: string[];
@@ -23,9 +25,14 @@ export type TaskView = Task & {
 	tags: Tag[];
 };
 
+/** Open tasks per status plus `blocked` and `overdue` (open tasks only). Follows every filter but the status. */
+export type TaskListCounts = Record<TaskStatus | 'blocked' | 'overdue', number>;
+export type TaskPage = { counts: TaskListCounts; items: TaskView[]; total: number };
+
 const include = {
 	blockers: { select: { id: true }, where: { resolvedAt: null } },
 	dependencies: { select: { dependsOn: { select: { id: true, status: true } } } },
+	dependents: { select: { taskId: true } },
 	subtasks: { select: { status: true } },
 	tags: { include: { tag: true }, orderBy: { tag: { name: 'asc' as const } } },
 };
@@ -33,17 +40,19 @@ const include = {
 type Row = Task & {
 	blockers: { id: string }[];
 	dependencies: { dependsOn: { id: string; status: TaskStatus } }[];
+	dependents: { taskId: string }[];
 	subtasks: { status: TaskStatus }[];
 	tags: { tag: Tag }[];
 };
 
 const FINISHED: TaskStatus[] = ['done', 'cancelled'];
 
-const toView = ({ blockers, dependencies, subtasks, tags, ...task }: Row): TaskView => {
+const toView = ({ blockers, dependencies, dependents, subtasks, tags, ...task }: Row): TaskView => {
 	const counted = subtasks.filter(subtask => subtask.status !== 'cancelled');
 	return {
 		...task,
 		blocked: blockers.length > 0 || dependencies.some(dependency => !FINISHED.includes(dependency.dependsOn.status)),
+		blocksIds: dependents.map(dependent => dependent.taskId),
 		dependsOnIds: dependencies.map(dependency => dependency.dependsOn.id),
 		openBlockers: blockers.length,
 		progress: { done: counted.filter(subtask => subtask.status === 'done').length, total: counted.length },
@@ -75,20 +84,39 @@ const assertParent = async (prisma: Db, ownerId: string, parentId: string, taskI
 	if (taskId && (await prisma.task.count({ where: scoped(ownerId, { parentId: taskId }) })) > 0) throw invalidReference('parentId', 'has_subtasks');
 };
 
-/** One page of tasks (newest first) with the total. Without `parentId` only top-level tasks are listed. */
-export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: ListTasksFilters, page: PageParams): Promise<Paged<TaskView>> => {
-	const { dueAfter, dueBefore, goalId, parentId, priority, projectId, status, tagId } = filters;
-	const where = scoped(ownerId, {
+const OPEN: TaskStatus[] = ['todo', 'in_progress'];
+/** Same rule as `TaskView.blocked`: an open manual blocker or a dependency that is not finished. */
+const blockedWhere: Prisma.TaskWhereInput = { OR: [{ blockers: { some: { resolvedAt: null } } }, { dependencies: { some: { dependsOn: { status: { in: OPEN } } } } }] };
+const NULLABLE_SORT: TaskSort[] = ['dueDate', 'startDate'];
+
+/**
+ * One page of tasks (newest first by default) with the total and the counters. Without `parentId` only top-level tasks are listed.
+ * Counters follow every filter except the status, so each status chip shows how many tasks it would hold. `overdue` uses the UTC date.
+ */
+export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: ListTasksFilters, page: PageParams): Promise<TaskPage> => {
+	const { blocked, dueAfter, dueBefore, goalId, order = 'desc', parentId, priority, projectId, sort = 'createdAt', status, tagId } = filters;
+	const shared = scoped(ownerId, {
 		parentId: parentId ?? null,
 		...(dueAfter || dueBefore ? { dueDate: { ...(dueAfter && { gte: dueAfter }), ...(dueBefore && { lte: dueBefore }) } } : {}),
 		...(goalId && { goalId }),
 		...(priority && { priority }),
 		...(projectId && { projectId }),
-		...(status && { status }),
 		...(tagId && { tags: { some: { tagId } } }),
+		...(blocked === undefined ? {} : blocked ? blockedWhere : { NOT: blockedWhere }),
 	});
-	const [rows, total] = await Promise.all([prisma.task.findMany({ include, orderBy: pageOrder('createdAt'), ...pageArgs(page), where }), prisma.task.count({ where })]);
-	return { items: rows.map(toView), total };
+	const where = { ...shared, ...(status && { status: { in: status } }) };
+	const orderBy = [NULLABLE_SORT.includes(sort) ? { [sort]: { nulls: 'last', sort: order } } : { [sort]: order }, { id: order }] as Prisma.TaskOrderByWithRelationInput[];
+	const today = new Date(new Date().toISOString().slice(0, 10));
+	const [rows, total, grouped, blockedCount, overdue] = await Promise.all([
+		prisma.task.findMany({ include, orderBy, ...pageArgs(page), where }),
+		prisma.task.count({ where }),
+		prisma.task.groupBy({ _count: { _all: true }, by: ['status'], where: shared }),
+		prisma.task.count({ where: { AND: [shared, blockedWhere], status: { in: OPEN } } }),
+		prisma.task.count({ where: { ...shared, dueDate: { lt: today }, status: { in: OPEN } } }),
+	]);
+	const counts: TaskListCounts = { blocked: blockedCount, cancelled: 0, done: 0, in_progress: 0, overdue, todo: 0 };
+	for (const group of grouped) counts[group.status] = group._count._all;
+	return { counts, items: rows.map(toView), total };
 };
 
 export const getTask = async (prisma: Db, ownerId: string, id: string): Promise<TaskView> => {
@@ -133,36 +161,65 @@ export const createTask = (prisma: PrismaClient, ownerId: string, input: CreateT
  * history in the same transaction. Only what really changed is written (tags are compared as a set): an update that changes nothing
  * answers with the current task, with no write, no `updatedAt` bump and no history event.
  */
-export const updateTask = (prisma: PrismaClient, ownerId: string, id: string, { tagIds, ...fields }: UpdateTaskInput): Promise<TaskView> =>
-	prisma.$transaction(async tx => {
-		const current = await tx.task.findFirst({ include: { tags: { select: { tagId: true } } }, where: scoped(ownerId, { id }) });
-		if (!current) throw new AppError('not_found', 404);
+export const updateTask = (prisma: PrismaClient, ownerId: string, id: string, input: UpdateTaskInput): Promise<TaskView> => prisma.$transaction(tx => applyUpdate(tx, ownerId, id, input));
 
-		const { tagIds: newTagIds, ...changes } = changedFields({ ...current, tagIds: current.tags.map(link => link.tagId) }, { ...fields, tagIds }, { unordered: ['tagIds'] });
-		if (!hasChanges(changes) && !newTagIds) return getTask(tx, ownerId, id);
+const applyUpdate = async (tx: Db, ownerId: string, id: string, { tagIds, ...fields }: UpdateTaskInput): Promise<TaskView> => {
+	const current = await tx.task.findFirst({ include: { tags: { select: { tagId: true } } }, where: scoped(ownerId, { id }) });
+	if (!current) throw new AppError('not_found', 404);
 
-		const startDate = changes.startDate === undefined ? current.startDate : changes.startDate;
-		const dueDate = changes.dueDate === undefined ? current.dueDate : changes.dueDate;
-		if (startDate && dueDate && dueDate < startDate) throw invalidReference('dueDate', 'due_before_start');
+	const { tagIds: newTagIds, ...changes } = changedFields({ ...current, tagIds: current.tags.map(link => link.tagId) }, { ...fields, tagIds }, { unordered: ['tagIds'] });
+	if (!hasChanges(changes) && !newTagIds) return getTask(tx, ownerId, id);
 
-		if (changes.projectId) await assertProject(tx, ownerId, changes.projectId);
-		if (changes.goalId) await assertGoal(tx, ownerId, changes.goalId);
-		if (changes.parentId) await assertParent(tx, ownerId, changes.parentId, id);
-		if (newTagIds) await assertTags(tx, ownerId, newTagIds);
+	const startDate = changes.startDate === undefined ? current.startDate : changes.startDate;
+	const dueDate = changes.dueDate === undefined ? current.dueDate : changes.dueDate;
+	if (startDate && dueDate && dueDate < startDate) throw invalidReference('dueDate', 'due_before_start');
 
-		if (hasChanges(changes)) {
-			const completedAt = changes.status === undefined ? undefined : changes.status === 'done' ? new Date() : null;
-			await tx.task.updateMany({ data: { ...changes, completedAt }, where: scoped(ownerId, { id }) });
-			await recordTaskEvents(tx, ownerId, id, diffTaskChanges(current, changes));
-			if (current.recurrenceId && current.occurrenceDate && changes.status && FINISHED.includes(changes.status))
-				await createNextOccurrence(tx, ownerId, current.recurrenceId, current.occurrenceDate);
-		}
-		if (newTagIds) {
-			await tx.taskTag.deleteMany({ where: { taskId: id } });
-			await tx.taskTag.createMany({ data: newTagIds.map(tagId => ({ tagId, taskId: id })) });
-		}
-		return getTask(tx, ownerId, id);
-	});
+	if (changes.projectId) await assertProject(tx, ownerId, changes.projectId);
+	if (changes.goalId) await assertGoal(tx, ownerId, changes.goalId);
+	if (changes.parentId) await assertParent(tx, ownerId, changes.parentId, id);
+	if (newTagIds) await assertTags(tx, ownerId, newTagIds);
+
+	if (hasChanges(changes)) {
+		const completedAt = changes.status === undefined ? undefined : changes.status === 'done' ? new Date() : null;
+		await tx.task.updateMany({ data: { ...changes, completedAt }, where: scoped(ownerId, { id }) });
+		await recordTaskEvents(tx, ownerId, id, diffTaskChanges(current, changes));
+		if (current.recurrenceId && current.occurrenceDate && changes.status && FINISHED.includes(changes.status))
+			await createNextOccurrence(tx, ownerId, current.recurrenceId, current.occurrenceDate);
+	}
+	if (newTagIds) {
+		await tx.taskTag.deleteMany({ where: { taskId: id } });
+		await tx.taskTag.createMany({ data: newTagIds.map(tagId => ({ tagId, taskId: id })) });
+	}
+	return getTask(tx, ownerId, id);
+};
+
+const DAY_MS = 86_400_000;
+const shifted = (date: Date | null, days: number): Date | undefined => (date ? new Date(date.getTime() + days * DAY_MS) : undefined);
+
+/**
+ * Applies the same change to several tasks in one transaction, each one through the normal update rules (completion, history, recurrence,
+ * date order). Every id must be the owner's (404 otherwise, nothing is written). `shiftDays` moves the start and due dates each task has.
+ * Answers with the updated tasks in the order of `ids`.
+ */
+export const bulkUpdateTasks = (prisma: PrismaClient, ownerId: string, { changes, ids }: BulkUpdateTasksInput): Promise<TaskView[]> => {
+	const { shiftDays, ...fields } = changes;
+	return prisma.$transaction(
+		async tx => {
+			const current = await tx.task.findMany({ select: { dueDate: true, id: true, startDate: true }, where: scoped(ownerId, { id: { in: ids } }) });
+			if (current.length !== ids.length) throw new AppError('not_found', 404);
+			const byId = new Map(current.map(task => [task.id, task]));
+			const result: TaskView[] = [];
+			for (const id of ids) {
+				const task = byId.get(id);
+				const dates = shiftDays === undefined || !task ? {} : { dueDate: shifted(task.dueDate, shiftDays), startDate: shifted(task.startDate, shiftDays) };
+				const update = { ...fields, ...(dates.dueDate && { dueDate: dates.dueDate }), ...(dates.startDate && { startDate: dates.startDate }) };
+				result.push(hasChanges(update) ? await applyUpdate(tx, ownerId, id, update) : await getTask(tx, ownerId, id));
+			}
+			return result;
+		},
+		{ timeout: 20_000 }
+	);
+};
 
 /** Deletes the task; its subtasks, dependencies, blockers, tag/note links and attachment rows cascade, and the attachment files (its and its subtasks') are removed from Storage. */
 export const deleteTask = async (prisma: PrismaClient, storage: Storage, ownerId: string, id: string): Promise<void> => {
