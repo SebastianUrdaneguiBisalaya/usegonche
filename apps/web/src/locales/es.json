@@ -249,6 +249,23 @@
           "navigation": "Navegación",
           "other": "Otros"
         }
+      },
+      "availability": {
+        "nav": "Disponibilidad",
+        "title": "Disponibilidad",
+        "description": "Tu horario de trabajo semanal. Hoy lo usa para calcular cuánto tiempo tienes de verdad.",
+        "dayOff": "Día libre",
+        "add": "Añadir franja",
+        "remove": "Quitar franja",
+        "start": "{{day}}: inicio",
+        "end": "{{day}}: fin",
+        "total": "Total semanal: {{total}}",
+        "save": "Guardar",
+        "saved": "Disponibilidad guardada.",
+        "error": "No se pudo cargar la disponibilidad.",
+        "retry": "Reintentar",
+        "error_end_before_start": "El fin debe ser posterior al inicio.",
+        "error_overlapping": "Esta franja se solapa con otra del mismo día."
       }
     }
   },
@@ -1406,6 +1423,15 @@
         "overlaps_block": "Se solapa con otro bloque.",
         "overlaps_event": "Se solapa con un evento del calendario."
       }
+    },
+    "capacity": {
+      "title": "Capacidad",
+      "summary": "{{planned}} planificadas de {{available}} disponibles",
+      "remaining": "Quedan {{time}}",
+      "over": "Sobrecargado por {{time}}",
+      "noHours": "Define tu horario en Ajustes > Disponibilidad para ver tu capacidad.",
+      "unestimated_one": "{{count}} tarea abierta sin estimación cuenta como 0.",
+      "unestimated_other": "{{count}} tareas abiertas sin estimación cuentan como 0."
     }
   }
 }

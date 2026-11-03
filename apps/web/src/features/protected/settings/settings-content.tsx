@@ -1,7 +1,8 @@
-import { Keyboard, SlidersHorizontal, UserRound } from 'lucide-react';
+import { CalendarClock, Keyboard, SlidersHorizontal, UserRound } from 'lucide-react';
 import { SettingsDialog } from '~/components/ui/overlays-feedback/settings-dialog/settings-dialog';
 import { useTranslate } from '~/hooks/use-translate';
 import { AccountPanel } from './account-panel';
+import { AvailabilityPanel } from './availability-panel';
 import { GeneralPanel } from './general-panel';
 import { ShortcutsPanel } from './shortcuts-panel';
 
@@ -21,6 +22,9 @@ export function SettingsContent() {
 						<SettingsDialog.Item icon={UserRound} keywords={['profile', 'email', 'avatar', 'perfil', 'cuenta']} value='account'>
 							{t('protected.settings.account.nav')}
 						</SettingsDialog.Item>
+						<SettingsDialog.Item icon={CalendarClock} keywords={['availability', 'working hours', 'schedule', 'disponibilidad', 'horario', 'trabajo']} value='availability'>
+							{t('protected.settings.availability.nav')}
+						</SettingsDialog.Item>
 						<SettingsDialog.Item icon={Keyboard} keywords={['hotkeys', 'keyboard', 'atajos', 'teclado']} value='shortcuts'>
 							{t('protected.settings.shortcuts.nav')}
 						</SettingsDialog.Item>
@@ -33,6 +37,9 @@ export function SettingsContent() {
 				</SettingsDialog.Panel>
 				<SettingsDialog.Panel value='account'>
 					<AccountPanel />
+				</SettingsDialog.Panel>
+				<SettingsDialog.Panel value='availability'>
+					<AvailabilityPanel />
 				</SettingsDialog.Panel>
 				<SettingsDialog.Panel value='shortcuts'>
 					<ShortcutsPanel />
