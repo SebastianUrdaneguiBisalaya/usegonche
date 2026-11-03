@@ -112,7 +112,16 @@ export const updateBlockSchema = z
 	.refine(value => !(value.actualStart && value.actualEnd) || value.actualEnd > value.actualStart, { message: 'end_before_start', path: ['actualEnd'] })
 	.refine(value => value.status !== 'interrupted' || Boolean(value.actualStart && value.actualEnd), { message: 'actual_required', path: ['actualStart'] });
 
-export const listBlocksQuerySchema = z.object({ ...rangeQuery, status: z.enum(['planned', 'done', 'missed', 'interrupted', 'rescheduled']).optional() }).refine(validRange, validRangeIssue);
+/** `from` and `to` come together; they are required unless `taskId` is given (then no range lists every block of that task). */
+export const listBlocksQuerySchema = z
+	.object({
+		from: calendarDate.optional(),
+		status: z.enum(['planned', 'done', 'missed', 'interrupted', 'rescheduled']).optional(),
+		taskId: z.uuid().optional(),
+		to: calendarDate.optional(),
+	})
+	.refine(value => (value.from === undefined) === (value.to === undefined) && (value.taskId !== undefined || value.from !== undefined), { message: 'range_required', path: ['from'] })
+	.refine(value => value.from === undefined || value.to === undefined || validRange({ from: value.from, to: value.to }), validRangeIssue);
 
 export const replanQuerySchema = z.object({
 	date: calendarDate,

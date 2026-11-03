@@ -35,6 +35,8 @@ export interface TableSelection<TData> {
   readonly onSelectedIdsChange: (ids: Set<string>) => void;
   /** Derives a stable string ID from a row's data (e.g. `(row) => row.id`) — required since selection must survive re-sorting/re-fetching, which a table-internal row index can't. */
   readonly getRowId: (row: TData) => string;
+  /** Rows for which this returns `false` (group headers, placeholders) show no checkbox and are skipped by "select all". @default every row is selectable */
+  readonly isSelectable?: (row: TData) => boolean;
 }
 
 export interface DataTableProps<TData extends Record<string, any>> {
@@ -57,6 +59,8 @@ export interface DataTableProps<TData extends Record<string, any>> {
   readonly hideHeader?: boolean;
   /** Extra classes on every body row (e.g. to change its hover tint or border). */
   readonly rowClassName?: string;
+  /** Extra classes for one row, on top of `rowClassName` (e.g. to style a group header). */
+  readonly getRowClassName?: (row: TData) => string | undefined;
   /** Extra classes on the sticky header row (e.g. to swap its opaque background for a translucent one). */
   readonly headerClassName?: string;
   /** Extra classes on every body cell (e.g. to change its padding). */
@@ -138,6 +142,7 @@ export function DataTable<TData extends Record<string, any>>({
   selection,
   hideHeader = false,
   rowClassName,
+  getRowClassName,
   cellClassName,
   containerClassName,
   headerClassName,
@@ -154,8 +159,11 @@ export function DataTable<TData extends Record<string, any>>({
   const isEmpty = !isLoading && rows.length === 0;
   const colCount = columns.length + (selection ? 1 : 0);
 
+  const isSelectable = (row: TData) => selection?.isSelectable?.(row) ?? true;
   const pageRowIds = selection
-    ? rows.map((row) => selection.getRowId(row.original))
+    ? rows
+        .filter((row) => isSelectable(row.original))
+        .map((row) => selection.getRowId(row.original))
     : [];
   const selectedOnPageCount = selection
     ? pageRowIds.filter((id) => selection.selectedIds.has(id)).length
@@ -280,11 +288,15 @@ export function DataTable<TData extends Record<string, any>>({
                       "border-b border-border last:border-0 hover:bg-muted transition-colors duration-150",
                       onRowClick && "cursor-pointer",
                       rowClassName,
+                      getRowClassName?.(row.original),
                     )}
                     key={row.id}
                     onClick={() => onRowClick?.(row.original)}
                   >
-                    {selection && rowId !== undefined && (
+                    {selection && rowId !== undefined && !isSelectable(row.original) && (
+                      <td className={cn("px-4 py-3", cellClassName)} />
+                    )}
+                    {selection && rowId !== undefined && isSelectable(row.original) && (
                       <td
                         className={cn("px-4 py-3", cellClassName)}
                         onClick={(event) => event.stopPropagation()}

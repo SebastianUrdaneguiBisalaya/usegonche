@@ -5,8 +5,8 @@ import routes from './tasks.routes.js';
 const ID = '5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7e';
 const OTHER = '9b7e4a10-3c52-4d8f-a1e6-0f2d3c4b5a69';
 const BLOCKER = 'c4d5e6f7-1a2b-4c3d-8e9f-a0b1c2d3e4f5';
-const row = { blockers: [], createdAt: new Date('2026-11-01T10:00:00.000Z'), dependencies: [], id: ID, ownerId: TEST_USER_ID, status: 'todo', subtasks: [], tags: [], title: 'Write' };
-const view = { ...JSON.parse(JSON.stringify(row)), blocked: false, dependsOnIds: [], openBlockers: 0, progress: { done: 0, total: 0 }, tags: [] };
+const row = { blockers: [], createdAt: new Date('2026-11-01T10:00:00.000Z'), dependencies: [], dependents: [], id: ID, ownerId: TEST_USER_ID, status: 'todo', subtasks: [], tags: [], title: 'Write' };
+const view = { ...JSON.parse(JSON.stringify(row)), blocked: false, blocksIds: [], dependsOnIds: [], openBlockers: 0, progress: { done: 0, total: 0 }, tags: [] };
 
 // biome-ignore lint/suspicious/noExplicitAny: the mock rows are partial on purpose
 const asRow = (value: unknown): any => value;
@@ -19,8 +19,9 @@ const setup = (claims?: { sub: string } | null) => {
 };
 
 const expectedView = () => {
-	const { blockers, dependencies, subtasks, ...rest } = view;
+	const { blockers, dependencies, dependents, subtasks, ...rest } = view;
 	void blockers;
+	void dependents;
 	void dependencies;
 	void subtasks;
 	return rest;
@@ -29,6 +30,7 @@ const expectedView = () => {
 describe.each([
 	['GET', '/tasks', undefined],
 	['POST', '/tasks', jsonRequest('POST', { title: 'x' })],
+	['PATCH', '/tasks/bulk', jsonRequest('PATCH', { changes: { priority: 'high' }, ids: [ID] })],
 	['GET', `/tasks/${ID}`, undefined],
 	['PATCH', `/tasks/${ID}`, jsonRequest('PATCH', { title: 'x' })],
 	['DELETE', `/tasks/${ID}`, del],
@@ -50,27 +52,87 @@ describe('GET /tasks', () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.task.findMany).mockResolvedValue(asRow([row]));
 		vi.mocked(prisma.task.count).mockResolvedValue(1);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([{ _count: { _all: 1 }, status: 'todo' }] as never);
 		const res = await app.request('/tasks');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [expectedView()], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(await res.json()).toEqual({
+			data: [expectedView()],
+			meta: { counts: { blocked: 1, cancelled: 0, done: 0, in_progress: 0, overdue: 1, todo: 1 }, page: 1, pageCount: 1, pageSize: 50, total: 1 },
+		});
 		expect(prisma.task.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { ownerId: TEST_USER_ID, parentId: null } }));
 	});
 
 	it('passes the filters to the service', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
-		await app.request(`/tasks?status=done&priority=high&projectId=${OTHER}&dueBefore=2026-12-01&pageSize=5`);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+		await app.request(`/tasks?status=done&status=todo&priority=high&projectId=${OTHER}&dueBefore=2026-12-01&pageSize=5`);
 		expect(prisma.task.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				skip: 0,
 				take: 5,
-				where: { dueDate: { lte: new Date('2026-12-01') }, ownerId: TEST_USER_ID, parentId: null, priority: 'high', projectId: OTHER, status: 'done' },
+				where: { dueDate: { lte: new Date('2026-12-01') }, ownerId: TEST_USER_ID, parentId: null, priority: 'high', projectId: OTHER, status: { in: ['done', 'todo'] } },
 			})
 		);
 	});
 
-	it.each(['status=nope', 'priority=nope', 'projectId=nope', 'dueBefore=tomorrow', 'page=0', 'pageSize=0'])('answers 422 for ?%s', async query => {
-		expect((await setup().app.request(`/tasks?${query}`)).status).toBe(422);
+	it('accepts one status, sort, order and blocked', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+		const res = await app.request('/tasks?status=done&sort=title&order=asc&blocked=false');
+		expect(res.status).toBe(200);
+		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]).toMatchObject({ orderBy: [{ title: 'asc' }, { id: 'asc' }], where: { status: { in: ['done'] } } });
+	});
+
+	it('accepts noProject and noDueDate', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+		expect((await app.request('/tasks?noProject=true&noDueDate=true')).status).toBe(200);
+		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ dueDate: null, ownerId: TEST_USER_ID, parentId: null, projectId: null });
+	});
+
+	it.each(['noProject=false', 'noDueDate=1', 'status=nope', 'sort=nope', 'order=up', 'blocked=maybe', 'priority=nope', 'projectId=nope', 'dueBefore=tomorrow', 'page=0', 'pageSize=0'])(
+		'answers 422 for ?%s',
+		async query => {
+			expect((await setup().app.request(`/tasks?${query}`)).status).toBe(422);
+		}
+	);
+});
+
+describe('PATCH /tasks/bulk', () => {
+	it('updates the selected tasks for the claims user (200)', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findMany).mockResolvedValue(asRow([{ dueDate: null, id: ID, startDate: null }]));
+		vi.mocked(prisma.task.findFirst).mockResolvedValue(asRow(row));
+		vi.mocked(prisma.task.updateMany).mockResolvedValue({ count: 1 });
+		const res = await app.request('/tasks/bulk', jsonRequest('PATCH', { changes: { priority: 'high' }, ids: [ID, ID] }));
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ data: [expectedView()] });
+		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ id: { in: [ID] }, ownerId: TEST_USER_ID });
+	});
+
+	it('answers 404 when a task is not the user’s', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		const res = await app.request('/tasks/bulk', jsonRequest('PATCH', { changes: { status: 'done' }, ids: [ID] }));
+		expect(res.status).toBe(404);
+		expect(await res.json()).toMatchObject({ error: { code: 'not_found' } });
+	});
+
+	it.each([
+		['no ids', { changes: { priority: 'high' }, ids: [] }],
+		['too many ids', { changes: { priority: 'high' }, ids: Array.from({ length: 51 }, (_, i) => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`) }],
+		['no changes', { changes: {}, ids: [ID] }],
+		['an unknown change', { changes: { title: 'x' }, ids: [ID] }],
+		['shift mixed with a date', { changes: { dueDate: '2026-12-01', shiftDays: 2 }, ids: [ID] }],
+		['a zero shift', { changes: { shiftDays: 0 }, ids: [ID] }],
+		['due before start', { changes: { dueDate: '2026-11-01', startDate: '2026-12-01' }, ids: [ID] }],
+	])('answers 422 for %s', async (_name, body) => {
+		const res = await setup().app.request('/tasks/bulk', jsonRequest('PATCH', body));
+		expect(res.status).toBe(422);
+		expect(await res.json()).toMatchObject({ error: { code: 'validation_error' } });
 	});
 });
 

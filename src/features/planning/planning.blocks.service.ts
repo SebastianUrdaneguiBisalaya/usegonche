@@ -48,12 +48,21 @@ export const createBlock = async (prisma: PrismaClient, ownerId: string, input: 
 	return { ...block, warnings: await detectWarnings(prisma, ownerId, block.plannedStart, block.plannedEnd, block.id) };
 };
 
-/** Blocks planned within the local dates `from`..`to` (inclusive), by planned start. */
-export const listBlocks = async (prisma: PrismaClient, ownerId: string, from: string, to: string, status?: TimeBlockStatus): Promise<TimeBlock[]> => {
-	const timeZone = await getTimeZone(prisma, ownerId);
+export type ListBlocksFilters = { from?: string; status?: TimeBlockStatus; taskId?: string; to?: string };
+
+const MAX_BLOCKS_WITHOUT_RANGE = 200;
+
+/** Blocks planned within the local dates `from`..`to` (inclusive), by planned start; optionally of one task and status. Without a range (only allowed with `taskId`) the task's first 200 blocks. */
+export const listBlocks = async (prisma: PrismaClient, ownerId: string, { from, status, taskId, to }: ListBlocksFilters): Promise<TimeBlock[]> => {
+	const timeZone = from && to ? await getTimeZone(prisma, ownerId) : undefined;
 	return prisma.timeBlock.findMany({
 		orderBy: [{ plannedStart: 'asc' }, { id: 'asc' }],
-		where: scoped(ownerId, { plannedEnd: { gt: dayRange(from, timeZone).start }, plannedStart: { lt: dayRange(to, timeZone).end }, ...(status && { status }) }),
+		...(from && to ? {} : { take: MAX_BLOCKS_WITHOUT_RANGE }),
+		where: scoped(ownerId, {
+			...(timeZone && from && to ? { plannedEnd: { gt: dayRange(from, timeZone).start }, plannedStart: { lt: dayRange(to, timeZone).end } } : {}),
+			...(status && { status }),
+			...(taskId && { taskId }),
+		}),
 	});
 };
 

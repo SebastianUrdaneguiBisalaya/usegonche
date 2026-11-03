@@ -47,8 +47,7 @@ export default new Hono<AppEnv>()
 		ok(c, await setDayItems(c.get('prisma'), c.get('claims').sub, c.req.valid('param').date, c.req.valid('json').taskIds), 200)
 	)
 	.get('/blocks', zValidator('query', listBlocksQuerySchema, validationHook), async c => {
-		const { from, status, to } = c.req.valid('query');
-		return ok(c, await listBlocks(c.get('prisma'), c.get('claims').sub, from, to, status), 200);
+		return ok(c, await listBlocks(c.get('prisma'), c.get('claims').sub, c.req.valid('query')), 200);
 	})
 	.post('/blocks', zValidator('json', createBlockSchema, validationHook), async c => ok(c, await createBlock(c.get('prisma'), c.get('claims').sub, c.req.valid('json')), 201))
 	.patch('/blocks/:id', zValidator('param', idParamSchema, validationHook), zValidator('json', updateBlockSchema, validationHook), async c =>

@@ -7,6 +7,7 @@ import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
+import { Markdown } from "@tiptap/markdown";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Extension } from "@tiptap/react";
@@ -149,6 +150,8 @@ export function baseExtensions({
     Placeholder.configure({
       placeholder,
     }),
+    // Adds `editor.getMarkdown()` and `contentType: "markdown"` — the API stores descriptions as Markdown text.
+    Markdown,
     createBlockIdExtension([
       ...DEFAULT_BLOCK_TYPES,
       ...blockTypes,

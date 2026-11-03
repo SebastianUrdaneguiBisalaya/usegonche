@@ -879,12 +879,18 @@ export interface KanbanColumnProps {
   title: string;
   /** One-line explanation under the heading, for columns whose name isn't self-evident. */
   description?: string;
+  /** Decoration before the title, e.g. a colored status dot. */
+  icon?: ReactNode;
+  /** Control at the end of the header, after the counter, e.g. an "add card" button. */
+  action?: ReactNode;
   /** Work-in-progress limit. The counter turns into `3/2` and goes warning-colored when exceeded. */
   limit?: number;
   /** Replaces the default card body, keeping the board's drag and keyboard behaviour. */
   renderItem?: (item: KanbanItem) => ReactNode;
   /** Footer slot under the card list, e.g. an "add card" button. */
   children?: ReactNode;
+  /** Classes for every card shell in this column (e.g. to restyle the surface). */
+  cardClassName?: string;
   className?: string;
 }
 
@@ -893,9 +899,12 @@ function Column({
   id,
   title,
   description,
+  icon,
+  action,
   limit,
   renderItem,
   children,
+  cardClassName,
   className,
 }: KanbanColumnProps) {
   const {
@@ -936,12 +945,13 @@ function Column({
         )}
         data-kanban-column={id}
       >
-        <header className="flex items-baseline justify-between gap-2">
+        <header className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 flex-col gap-1">
             <h3
-              className="truncate text-sm font-medium leading-none"
+              className="flex min-w-0 items-center gap-2 truncate text-sm font-medium leading-none"
               id={headingId}
             >
+              {icon}
               {title}
             </h3>
             {description && (
@@ -958,6 +968,7 @@ function Column({
           >
             {limit === undefined ? items.length : `${items.length}/${limit}`}
           </span>
+          {action}
         </header>
 
         {/* The drop-zone listeners sit on the list itself; the cards inside carry the
@@ -1004,6 +1015,7 @@ function Column({
             <Fragment key={item.id}>
               {indicatorIndex === index && <DropIndicator />}
               <Card
+                className={cardClassName}
                 item={item}
                 renderItem={renderItem}
               />

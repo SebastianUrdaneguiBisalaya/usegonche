@@ -6,6 +6,7 @@ export default [
 		route('inbox', '../features/protected/inbox/inbox.tsx'),
 		route('projects', '../features/protected/projects/projects.tsx'),
 		route('goals', '../features/protected/goals/goals.tsx'),
+		route('tasks', '../features/protected/tasks/tasks.tsx'),
 		route('tags', '../features/protected/tags/tags.tsx'),
 	]),
 	layout(

@@ -7,18 +7,30 @@ import { validationHook } from '../../lib/validator.js';
 import { requireUser } from '../../middleware/auth.js';
 import { createBlocker, listBlockers, resolveBlocker } from './tasks.blockers.service.js';
 import { addDependency, removeDependency } from './tasks.dependencies.service.js';
-import { addDependencySchema, blockerParamSchema, createBlockerSchema, createTaskSchema, dependencyParamSchema, listTasksQuerySchema, taskParamSchema, updateTaskSchema } from './tasks.schemas.js';
-import { createTask, deleteTask, getTask, listTasks, updateTask } from './tasks.service.js';
+import {
+	addDependencySchema,
+	blockerParamSchema,
+	bulkUpdateTasksSchema,
+	createBlockerSchema,
+	createTaskSchema,
+	dependencyParamSchema,
+	listTasksQuerySchema,
+	taskParamSchema,
+	updateTaskSchema,
+} from './tasks.schemas.js';
+import { bulkUpdateTasks, createTask, deleteTask, getTask, listTasks, updateTask } from './tasks.service.js';
 
 // The owner always comes from the verified claims, never from the body.
 export default new Hono<AppEnv>()
 	.use(requireUser())
 	.get('/', zValidator('query', listTasksQuerySchema, validationHook), async c => {
 		const { page, pageSize, ...filters } = c.req.valid('query');
-		const { items, total } = await listTasks(c.get('prisma'), c.get('claims').sub, filters, { page, pageSize });
-		return okWithMeta(c, items, pageMeta({ page, pageSize }, total), 200);
+		const { counts, items, total } = await listTasks(c.get('prisma'), c.get('claims').sub, filters, { page, pageSize });
+		return okWithMeta(c, items, { ...pageMeta({ page, pageSize }, total), counts }, 200);
 	})
 	.post('/', zValidator('json', createTaskSchema, validationHook), async c => ok(c, await createTask(c.get('prisma'), c.get('claims').sub, c.req.valid('json')), 201))
+	// Registered before `/:id` so "bulk" is never read as an id.
+	.patch('/bulk', zValidator('json', bulkUpdateTasksSchema, validationHook), async c => ok(c, await bulkUpdateTasks(c.get('prisma'), c.get('claims').sub, c.req.valid('json')), 200))
 	.get('/:id', zValidator('param', taskParamSchema, validationHook), async c => ok(c, await getTask(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id), 200))
 	.patch('/:id', zValidator('param', taskParamSchema, validationHook), zValidator('json', updateTaskSchema, validationHook), async c =>
 		ok(c, await updateTask(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id, c.req.valid('json')), 200)
