@@ -85,6 +85,14 @@ describe('GET /tasks', () => {
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]).toMatchObject({ orderBy: [{ title: 'asc' }, { id: 'asc' }], where: { status: { in: ['done'] } } });
 	});
 
+	it('filters the occurrences of one recurrence rule, scoped to the owner', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+		expect((await app.request(`/tasks?recurrenceId=${OTHER}&status=todo`)).status).toBe(200);
+		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ ownerId: TEST_USER_ID, parentId: null, recurrenceId: OTHER, status: { in: ['todo'] } });
+	});
+
 	it('accepts noProject and noDueDate', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
@@ -93,7 +101,7 @@ describe('GET /tasks', () => {
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ dueDate: null, ownerId: TEST_USER_ID, parentId: null, projectId: null });
 	});
 
-	it.each(['noProject=false', 'noDueDate=1', 'status=nope', 'sort=nope', 'order=up', 'blocked=maybe', 'priority=nope', 'projectId=nope', 'dueBefore=tomorrow', 'page=0', 'pageSize=0'])(
+	it.each(['noProject=false', 'noDueDate=1', 'status=nope', 'sort=nope', 'order=up', 'blocked=maybe', 'priority=nope', 'projectId=nope', 'recurrenceId=nope', 'dueBefore=tomorrow', 'page=0', 'pageSize=0'])(
 		'answers 422 for ?%s',
 		async query => {
 			expect((await setup().app.request(`/tasks?${query}`)).status).toBe(422);

@@ -6,8 +6,8 @@ export type TaskStatus = (typeof taskStatuses)[number];
 export const taskPriorities = ['low', 'medium', 'high', 'urgent'] as const;
 export type TaskPriority = (typeof taskPriorities)[number];
 
-/** The Board shows a column per status; the List is a paginated table. */
-export const taskViews = ['board', 'list'] as const;
+/** The Board shows a column per status; the List is a paginated table; Recurring lists the recurrence rules. */
+export const taskViews = ['board', 'list', 'recurring'] as const;
 export type TaskView = (typeof taskViews)[number];
 
 /** Orders of the list: newest first, soonest due first, most urgent first, by title, or last changed. */

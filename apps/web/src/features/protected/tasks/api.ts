@@ -49,8 +49,8 @@ export const tasksQuery = (view: TaskView, { blocked, due, goal, page, project, 
 	...(project === NO_PROJECT ? { noProject: 'true' as const } : project ? { projectId: project } : {}),
 	...(tag && { tagId: tag }),
 	...SORT_QUERY[sort],
-	page: view === 'board' ? '1' : String(page),
-	pageSize: String(view === 'board' ? BOARD_PAGE_SIZE : PAGE_SIZE),
+	page: view !== 'list' ? '1' : String(page),
+	pageSize: String(view !== 'list' ? BOARD_PAGE_SIZE : PAGE_SIZE),
 });
 
 export function useTasks(view: TaskView, params: TasksParams, enabled: boolean) {

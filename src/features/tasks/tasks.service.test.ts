@@ -82,7 +82,7 @@ describe('listTasks', () => {
 		await listTasks(
 			prisma,
 			TEST_USER_ID,
-			{ dueAfter, dueBefore, goalId: REF_ID, parentId: PARENT_ID, priority: 'high', projectId: REF_ID, status: ['done', 'in_progress'], tagId: TAG_ID },
+			{ dueAfter, dueBefore, goalId: REF_ID, parentId: PARENT_ID, priority: 'high', projectId: REF_ID, recurrenceId: REF_ID, status: ['done', 'in_progress'], tagId: TAG_ID },
 			{ page: 1, pageSize: 10 }
 		);
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({
@@ -92,6 +92,7 @@ describe('listTasks', () => {
 			parentId: PARENT_ID,
 			priority: 'high',
 			projectId: REF_ID,
+			recurrenceId: REF_ID,
 			status: { in: ['done', 'in_progress'] },
 			tags: { some: { tagId: TAG_ID } },
 		});

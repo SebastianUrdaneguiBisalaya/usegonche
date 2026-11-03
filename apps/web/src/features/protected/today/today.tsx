@@ -9,6 +9,7 @@ import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { QuickCapture } from '../inbox/components/quick-capture';
+import { useMaterializeRecurrences } from '../recurrences/api';
 import { fromDateOnly, toDateOnly } from '../shared/dates';
 import { listStyles } from '../shared/styles';
 import { useUpdateTask } from '../tasks/api';
@@ -36,6 +37,8 @@ export default function TodayRoute() {
 	const isToday = date === toDateOnly(today);
 	const startDate = useMemo(() => new Date(today.getFullYear(), today.getMonth(), today.getDate() - 3), [today]);
 
+	// Opening Today fills in the occurrences of the recurrence rules (once a day, idempotent).
+	useMaterializeRecurrences(toDateOnly(today));
 	const day = useDay(date);
 	const setItems = useSetDayItems(date);
 	const update = useUpdateTask();

@@ -1,10 +1,11 @@
-import { CalendarClock, CalendarDays, CircleDot, Clock, FlagTriangleRight, FolderKanban, type LucideIcon, Tag, Target } from 'lucide-react';
+import { CalendarClock, CalendarDays, CircleDot, Clock, FlagTriangleRight, FolderKanban, type LucideIcon, Repeat, Tag, Target } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Combobox } from '~/components/ui/forms-inputs/combobox/combobox';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { useTranslate } from '~/hooks/use-translate';
+import { RepeatProperty } from '../../recurrences/components/repeat-property';
 import { useProjectOptions } from '../../shared/projects';
 import { listStyles } from '../../shared/styles';
 import { useCreateTag, useTagOptions } from '../../shared/tags';
@@ -112,6 +113,9 @@ export function TaskProperties({ onChange, task }: TaskPropertiesProps) {
 						</Select.ItemList>
 					</Select.Content>
 				</Select.Root>
+			</Row>
+			<Row icon={Repeat} label={t('recurrences.drawer.label')}>
+				<RepeatProperty task={task} />
 			</Row>
 			<Row icon={Tag} label={t('tasks.columns.tags')}>
 				<Combobox

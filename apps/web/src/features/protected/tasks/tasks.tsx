@@ -1,6 +1,6 @@
 import { useQueries } from '@tanstack/react-query';
 import { useHotkeys } from '@usehotkeys/react';
-import { ArrowDownUp, KanbanSquare, Layers, List, Plus, Trash2 } from 'lucide-react';
+import { ArrowDownUp, KanbanSquare, Layers, List, Plus, Repeat, Trash2 } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -12,6 +12,7 @@ import { ConfirmDialog } from '~/components/ui/overlays-feedback/confirm-dialog/
 import { useTranslate } from '~/hooks/use-translate';
 import { api } from '~/lib/api';
 import { getApiErrorMessage, unwrap } from '~/lib/api-error';
+import { RecurringView } from '../recurrences/components/recurring-view';
 import { ListSearch } from '../shared/list-search';
 import { OptionSelect } from '../shared/option-select';
 import { PageSelect } from '../shared/page-select';
@@ -42,7 +43,7 @@ export default function TasksRoute() {
 		[page, params.blocked, params.due, params.goal, params.project, params.sort, params.status, params.tag]
 	);
 
-	const list = useTasks(view, queryParams, !searching);
+	const list = useTasks(view, queryParams, !searching && view !== 'recurring');
 	const search = useTasksSearch(params.q, page);
 	const active = searching ? search : list;
 	const counts = list.data?.meta.counts;
@@ -88,6 +89,8 @@ export default function TasksRoute() {
 	);
 
 	const [creating, setCreating] = useState<'in_progress' | 'todo' | undefined>(undefined);
+	const [creatingRule, setCreatingRule] = useState(false);
+	const recurring = view === 'recurring';
 	const [openedId, setOpenedId] = useState<string | undefined>(undefined);
 	const [deleting, setDeleting] = useState<Task | undefined>(undefined);
 	const opened = useMemo(() => tasks.find(task => task.id === openedId), [openedId, tasks]);
@@ -150,42 +153,50 @@ export default function TasksRoute() {
 					<Page.Description>{t('tasks.subtitle')}</Page.Description>
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
-					<ListSearch
-						clearLabel={t('tasks.search.clear')}
-						label={t('tasks.search.label')}
-						onChange={q => void setParams({ page: 1, q })}
-						placeholder={t('tasks.search.placeholder')}
-						value={params.q}
-					/>
-					<Button className={listStyles.pillTrigger} onClick={() => setCreating('todo')} variant='secondary'>
+					{!recurring && (
+						<ListSearch
+							clearLabel={t('tasks.search.clear')}
+							label={t('tasks.search.label')}
+							onChange={q => void setParams({ page: 1, q })}
+							placeholder={t('tasks.search.placeholder')}
+							value={params.q}
+						/>
+					)}
+					<Button className={listStyles.pillTrigger} onClick={() => (recurring ? setCreatingRule(true) : setCreating('todo'))} variant='secondary'>
 						<Button.Icon icon={Plus} />
-						<Button.Text>{t('tasks.new')}</Button.Text>
+						<Button.Text>{t(recurring ? 'recurrences.new' : 'tasks.new')}</Button.Text>
 					</Button>
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
-				<TaskQuickAdd projects={projectList} />
-				<NextTask onOpen={setOpenedId} />
-				<div className={`${listStyles.card} flex flex-col gap-3 overflow-x-auto p-3`}>
-					<TaskChips
-						blocked={params.blocked}
-						counts={counts}
-						due={params.due}
-						onBlockedChange={blocked => void setParams({ blocked, page: 1, q: '' })}
-						onDueChange={due => void setParams({ due, page: 1, q: '' })}
-						onStatusChange={status => void setParams({ page: 1, q: '', status })}
-						status={params.status}
-					/>
-				</div>
-				<div className={`${listStyles.card} flex flex-wrap items-center justify-between gap-3 p-3`}>
-					<div className='flex flex-wrap items-center gap-3'>
-						<ProjectFilter onChange={project => void setParams({ page: 1, project })} options={projectOptions} value={params.project} />
-						<GoalFilter onChange={goal => void setParams({ goal, page: 1 })} options={goalOptions} value={params.goal} />
-						<TagFilter onChange={tag => void setParams({ page: 1, tag })} options={tagOptions} value={params.tag} />
-						<DueFilter onChange={due => void setParams({ due, page: 1 })} value={params.due} />
+				{!recurring && <TaskQuickAdd projects={projectList} />}
+				{!recurring && <NextTask onOpen={setOpenedId} />}
+				{!recurring && (
+					<div className={`${listStyles.card} flex flex-col gap-3 overflow-x-auto p-3`}>
+						<TaskChips
+							blocked={params.blocked}
+							counts={counts}
+							due={params.due}
+							onBlockedChange={blocked => void setParams({ blocked, page: 1, q: '' })}
+							onDueChange={due => void setParams({ due, page: 1, q: '' })}
+							onStatusChange={status => void setParams({ page: 1, q: '', status })}
+							status={params.status}
+						/>
 					</div>
+				)}
+				<div className={`${listStyles.card} flex flex-wrap items-center justify-between gap-3 p-3`}>
+					{!recurring ? (
+						<div className='flex flex-wrap items-center gap-3'>
+							<ProjectFilter onChange={project => void setParams({ page: 1, project })} options={projectOptions} value={params.project} />
+							<GoalFilter onChange={goal => void setParams({ goal, page: 1 })} options={goalOptions} value={params.goal} />
+							<TagFilter onChange={tag => void setParams({ page: 1, tag })} options={tagOptions} value={params.tag} />
+							<DueFilter onChange={due => void setParams({ due, page: 1 })} value={params.due} />
+						</div>
+					) : (
+						<span />
+					)}
 					<div className='flex flex-wrap items-center gap-3'>
-						<OptionSelect icon={ArrowDownUp} label={t('tasks.sort.label')} onChange={sort => void setParams({ page: 1, sort })} options={sortOptions} value={params.sort} />
+						{!recurring && <OptionSelect icon={ArrowDownUp} label={t('tasks.sort.label')} onChange={sort => void setParams({ page: 1, sort })} options={sortOptions} value={params.sort} />}
 						{view === 'list' && <OptionSelect icon={Layers} label={t('tasks.groupBy.label')} onChange={group => void setParams({ group })} options={groupOptions} value={params.group} />}
 						{view === 'list' && !searching && (
 							<PageSelect
@@ -196,7 +207,7 @@ export default function TasksRoute() {
 								valueLabel={t('tasks.filters.page.value', { page: meta?.page ?? page })}
 							/>
 						)}
-						<Tabs onValueChange={next => void setParams({ view: next as 'board' | 'list', page: 1 })} value={view} defaultValue={view}>
+						<Tabs onValueChange={next => void setParams({ view: next as 'board' | 'list' | 'recurring', page: 1 })} value={view} defaultValue={view}>
 							<Tabs.List aria-label={t('tasks.views.label')} className='gap-1'>
 								<Tabs.Trigger value='board'>
 									<Tabs.TriggerIcon icon={KanbanSquare} />
@@ -206,11 +217,17 @@ export default function TasksRoute() {
 									<Tabs.TriggerIcon icon={List} />
 									<Tabs.TriggerTitle>{t('tasks.views.list')}</Tabs.TriggerTitle>
 								</Tabs.Trigger>
+								<Tabs.Trigger value='recurring'>
+									<Tabs.TriggerIcon icon={Repeat} />
+									<Tabs.TriggerTitle>{t('tasks.views.recurring')}</Tabs.TriggerTitle>
+								</Tabs.Trigger>
 							</Tabs.List>
 						</Tabs>
 					</div>
 				</div>
-				{searching ? (
+				{recurring ? (
+					<RecurringView creating={creatingRule} onCreatingChange={setCreatingRule} />
+				) : searching ? (
 					<SearchResults hits={search.data?.data} isError={search.isError} isLoading={search.isPending} onOpen={setOpenedId} onRetry={() => void search.refetch()} />
 				) : view === 'board' ? (
 					<TaskBoard
