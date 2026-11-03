@@ -4,7 +4,9 @@ import { toast } from 'sonner';
 import { Pill } from '~/components/ui/data-display/pill/pill';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
+import { fromDateOnly } from '../../shared/dates';
 import { QuickAdd } from '../../shared/quick-add';
+import { useDateTime } from '../../shared/use-datetime';
 import { useCreateTask, useDeleteTask } from '../api';
 import { priorityClass } from '../display';
 import { type ParsedTask, parseQuickTask } from '../quick-parse';
@@ -32,15 +34,19 @@ export function matchProject(projects: readonly { id: string; title: string }[],
 export function TaskQuickAdd({ projects }: TaskQuickAddProps) {
 	const t = useTranslate();
 	const formatDay = useFormatDay();
+	// Relative dates ("today", "tomorrow", weekdays) count from the user's day in their stored time zone, not the browser's clock.
+	const { today } = useDateTime();
+	const todayValue = today();
+	const todayDate = useMemo(() => fromDateOnly(todayValue) ?? new Date(), [todayValue]);
 	const create = useCreateTask();
 	const remove = useDeleteTask();
 	const [text, setText] = useState('');
-	const parsed = useMemo<ParsedTask>(() => parseQuickTask(text), [text]);
+	const parsed = useMemo<ParsedTask>(() => parseQuickTask(text, todayDate), [text, todayDate]);
 	const project = matchProject(projects, parsed.projectName);
 	const understood = Boolean(parsed.projectName || parsed.priority || parsed.dueDate || parsed.estimatedMinutes);
 
 	const submit = async (line: string) => {
-		const task = parseQuickTask(line);
+		const task = parseQuickTask(line, fromDateOnly(today()) ?? todayDate);
 		if (!task.title) {
 			toast.error(t('tasks.quickAdd.needsTitle'));
 			throw new Error('empty_title');

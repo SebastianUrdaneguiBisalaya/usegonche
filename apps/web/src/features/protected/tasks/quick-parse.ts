@@ -59,8 +59,11 @@ const validDay = (year: number, month: number, day: number): Date | undefined =>
  * Light natural-language reading of a task line, on the client and without AI: `#project`, `!priority`, `~estimate` and a date
  * (`today`/`hoy`, `tomorrow`/`mañana`, a weekday, `in 3 days`, `2026-12-31`, `24/12`). Every marker is removed from the title. A
  * date word is only taken as a date at the end of the line, so "Call mañana's client" is not misread.
+ *
+ * `today` is the user's calendar day (a local `Date` at that day, from `fromDateOnly(useDateTime().today())`), in their stored time zone. It is required on
+ * purpose: defaulting to the browser's clock would resolve "today"/"tomorrow" to another day than the rest of the app around midnight.
  */
-export function parseQuickTask(input: string, today: Date = new Date()): ParsedTask {
+export function parseQuickTask(input: string, today: Date): ParsedTask {
 	let text = ` ${input} `;
 	const result: ParsedTask = { title: '' };
 
