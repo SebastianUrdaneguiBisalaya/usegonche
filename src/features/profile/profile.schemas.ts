@@ -48,5 +48,15 @@ export const updateSettingsSchema = z
 	.partial()
 	.refine(hasChanges);
 
+export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+export const AVATAR_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as const;
+
+/** Asks for a signed URL to upload the avatar straight to Storage (public bucket). */
+export const avatarUploadSchema = z.strictObject({
+	mimeType: z.enum(AVATAR_MIME_TYPES),
+	sizeBytes: z.number().int().min(1).max(AVATAR_MAX_BYTES),
+});
+
+export type AvatarUploadInput = z.infer<typeof avatarUploadSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type UpdateSettingsInput = z.infer<typeof updateSettingsSchema>;
