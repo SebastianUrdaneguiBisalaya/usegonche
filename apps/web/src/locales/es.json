@@ -621,11 +621,11 @@
       "total_other": "{{count}} etiquetas"
     },
     "actions": {
-      "rename": "Renombrar",
       "delete": "Eliminar",
       "deleteSelected": "Eliminar selección",
       "more": "Más acciones",
-      "clearSelection": "Limpiar selección"
+      "clearSelection": "Limpiar selección",
+      "edit": "Editar"
     },
     "toast": {
       "created": "Etiqueta creada",
@@ -641,17 +641,6 @@
       "title": "No se pudieron cargar tus etiquetas",
       "retry": "Reintentar"
     },
-    "rename": {
-      "title": "Renombrar etiqueta",
-      "description": "El nuevo nombre se ve en todos los sitios donde se usa la etiqueta.",
-      "label": "Nombre",
-      "placeholder": "Nombre de la etiqueta",
-      "required": "Ponle un nombre a la etiqueta.",
-      "tooLong": "Usa como máximo {{max}} caracteres.",
-      "exists": "Ya tienes una etiqueta con este nombre.",
-      "save": "Guardar nombre",
-      "cancel": "Cancelar"
-    },
     "delete": {
       "title_one": "¿Eliminar esta etiqueta?",
       "title_other": "¿Eliminar {{count}} etiquetas?",
@@ -660,6 +649,26 @@
       "used_other": "Se quitará de {{count}} elementos; los elementos se quedan. No se puede deshacer.",
       "cancel": "Cancelar",
       "confirm": "Eliminar"
+    },
+    "edit": {
+      "title": "Editar etiqueta",
+      "description": "Cambia el nombre o el color de la etiqueta. Se actualiza en todos los sitios donde se usa.",
+      "label": "Nombre",
+      "placeholder": "Nombre de la etiqueta",
+      "required": "Ponle un nombre a la etiqueta.",
+      "tooLong": "Usa como máximo {{max}} caracteres.",
+      "exists": "Ya tienes una etiqueta con este nombre.",
+      "save": "Guardar nombre",
+      "cancel": "Cancelar"
+    },
+    "color": {
+      "label": "Color",
+      "set": "Elegir color",
+      "remove": "Quitar color",
+      "choose": "Elige un color",
+      "picker": "Selector de color",
+      "hex": "Valor hexadecimal",
+      "eyedropper": "Tomar color de la pantalla"
     }
   }
 }

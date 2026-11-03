@@ -18,7 +18,8 @@ import { listStyles } from '../shared/styles';
 import { useCreateTag } from '../shared/tags';
 import { type Tag, type TagsPage, tagsKey, tagsQuery, useTagList } from './api';
 import { DeleteTagsDialog } from './components/delete-tags-dialog';
-import { RenameTagModal } from './components/rename-tag-modal';
+import { EditTagModal } from './components/edit-tag-modal';
+import { TagColorField } from './components/tag-color-field';
 import { TagsTable } from './components/tags-table';
 import { NAME_MAX } from './schemas';
 import { loadTagsParams, type TagSort, tagParsers, tagSorts } from './search-params';
@@ -71,7 +72,8 @@ export default function TagsRoute() {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset whenever the view changes.
 	useEffect(() => setSelectedIds(emptyIds), [page, params.sort, params.q]);
 
-	const [renaming, setRenaming] = useState<Tag | undefined>(undefined);
+	const [newColor, setNewColor] = useState('');
+	const [editing, setEditing] = useState<Tag | undefined>(undefined);
 	const [deleting, setDeleting] = useState<Tag[] | undefined>(undefined);
 	const addField = useRef<HTMLInputElement>(null);
 	const create = useCreateTag();
@@ -100,12 +102,14 @@ export default function TagsRoute() {
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
 				<QuickAdd
+					extra={<TagColorField onChange={setNewColor} value={newColor} />}
 					icon={TagIcon}
 					inputRef={addField}
 					label={t('tags.add.label')}
 					maxLength={NAME_MAX}
 					onSubmit={async name => {
-						await create.mutateAsync(name);
+						await create.mutateAsync({ ...(newColor && { color: newColor }), name });
+						setNewColor('');
 						toast.success(t('tags.toast.created'));
 					}}
 					pending={create.isPending}
@@ -128,7 +132,7 @@ export default function TagsRoute() {
 					isLoading={list.isPending || (list.isPlaceholderData && list.isFetching && rows.length === 0)}
 					onDelete={setDeleting}
 					onPageChange={next => void setParams({ page: next })}
-					onRename={setRenaming}
+					onEdit={setEditing}
 					onRetry={() => void list.refetch()}
 					onSelectedIdsChange={setSelectedIds}
 					page={meta?.page ?? page}
@@ -140,7 +144,7 @@ export default function TagsRoute() {
 					total={meta?.total ?? 0}
 				/>
 			</Page.Body>
-			<RenameTagModal onClose={() => setRenaming(undefined)} tag={renaming} />
+			<EditTagModal onClose={() => setEditing(undefined)} tag={editing} />
 			<DeleteTagsDialog onClose={() => setDeleting(undefined)} onDeleted={() => setSelectedIds(emptyIds)} tags={deleting} />
 		</Page.Root>
 	);

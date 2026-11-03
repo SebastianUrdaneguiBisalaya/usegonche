@@ -11,7 +11,7 @@ import { useTranslate } from '~/hooks/use-translate';
 import { BulkBar } from '../../shared/bulk-bar';
 import { ListEmpty, ListTable } from '../../shared/list-table';
 import { listStyles } from '../../shared/styles';
-import { tagDot } from '../../shared/tags';
+import { TagDot } from '../../shared/tag-chip';
 import type { Tag } from '../api';
 
 interface TagsTableProps {
@@ -19,8 +19,8 @@ interface TagsTableProps {
 	error: boolean;
 	isLoading: boolean;
 	onDelete: (tags: Tag[]) => void;
+	onEdit: (tag: Tag) => void;
 	onPageChange: (page: number) => void;
-	onRename: (tag: Tag) => void;
 	onRetry: () => void;
 	onSelectedIdsChange: (ids: Set<string>) => void;
 	page: number;
@@ -35,8 +35,8 @@ interface TagsTableProps {
 
 const chip = 'inline-flex items-center gap-2 rounded-full bg-foreground/[0.06] px-3 py-1.5 text-sm tabular-nums';
 
-/** The tags list: colored name, where it is used (tasks, projects, notes), dates and the rename / delete actions, paginated and filling the available height. */
-export function TagsTable({ error, isLoading, onDelete, onPageChange, onRename, onRetry, onSelectedIdsChange, page, pageCount, pageSize, rows, searching, selectedIds, total }: TagsTableProps) {
+/** The tags list: colored name, where it is used (tasks, projects, notes), dates and the edit / delete actions, paginated and filling the available height. */
+export function TagsTable({ error, isLoading, onDelete, onPageChange, onEdit, onRetry, onSelectedIdsChange, page, pageCount, pageSize, rows, searching, selectedIds, total }: TagsTableProps) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
 	const dateFormat = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }), [locale]);
@@ -46,7 +46,7 @@ export function TagsTable({ error, isLoading, onDelete, onPageChange, onRename, 
 			{
 				cell: ({ row }) => (
 					<span className='flex min-w-0 items-center gap-3'>
-						<span aria-hidden className={`size-3 shrink-0 rounded-full ${tagDot(row.original.name)}`} />
+						<TagDot color={row.original.color} />
 						<Typography.Span className='truncate text-sm font-medium' title={row.original.name}>
 							{row.original.name}
 						</Typography.Span>
@@ -112,14 +112,7 @@ export function TagsTable({ error, isLoading, onDelete, onPageChange, onRename, 
 			{
 				cell: ({ row }) => (
 					<div className='flex justify-end gap-1'>
-						<Button
-							aria-label={t('tags.actions.rename')}
-							className={listStyles.iconButton}
-							onClick={() => onRename(row.original)}
-							size='icon'
-							title={t('tags.actions.rename')}
-							variant='ghost'
-						>
+						<Button aria-label={t('tags.actions.edit')} className={listStyles.iconButton} onClick={() => onEdit(row.original)} size='icon' title={t('tags.actions.edit')} variant='ghost'>
 							<Button.Icon icon={Pencil} />
 						</Button>
 						<Button
@@ -139,7 +132,7 @@ export function TagsTable({ error, isLoading, onDelete, onPageChange, onRename, 
 				size: 110,
 			},
 		],
-		[dateFormat, onDelete, onRename, t]
+		[dateFormat, onDelete, onEdit, t]
 	);
 
 	const selected = rows.filter(tag => selectedIds.has(tag.id));
