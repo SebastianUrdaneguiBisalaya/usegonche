@@ -7,7 +7,7 @@ import { requireUser } from '../../middleware/auth.js';
 import { getAvailability, setAvailability } from './planning.availability.service.js';
 import { createBlock, deleteBlock, listBlocks, moveBlock, updateBlock } from './planning.blocks.service.js';
 import { getDay, setDayItems } from './planning.days.service.js';
-import { createEvent, deleteEvent, listEvents, updateEvent } from './planning.events.service.js';
+import { createEvent, deleteEvent, getEvent, listEvents, updateEvent } from './planning.events.service.js';
 import { proposeReplan } from './planning.replan.service.js';
 import {
 	createBlockSchema,
@@ -33,6 +33,7 @@ export default new Hono<AppEnv>()
 		const { from, to } = c.req.valid('query');
 		return ok(c, await listEvents(c.get('prisma'), c.get('claims').sub, from, to), 200);
 	})
+	.get('/events/:id', zValidator('param', idParamSchema, validationHook), async c => ok(c, await getEvent(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id), 200))
 	.post('/events', zValidator('json', createEventSchema, validationHook), async c => ok(c, await createEvent(c.get('prisma'), c.get('claims').sub, c.req.valid('json')), 201))
 	.patch('/events/:id', zValidator('param', idParamSchema, validationHook), zValidator('json', updateEventSchema, validationHook), async c =>
 		ok(c, await updateEvent(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id, c.req.valid('json')), 200)
