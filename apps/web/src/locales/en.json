@@ -1699,6 +1699,19 @@
       "title": "Events",
       "new": "New event",
       "empty": "No events on this day."
+    },
+    "focus": {
+      "title": "Quick focus",
+      "duration": "Session length",
+      "task": "Focus on a task (optional)...",
+      "start": "Start",
+      "pause": "Pause",
+      "resume": "Resume",
+      "stop": "Stop",
+      "session": "Focus session",
+      "saved": "Focus session saved.",
+      "savedStopped": "Session stopped and saved.",
+      "tooShort": "Under a minute: nothing was saved."
     }
   },
   "calendar": {

@@ -1699,6 +1699,19 @@
       "title": "Eventos",
       "new": "Nuevo evento",
       "empty": "No hay eventos este día."
+    },
+    "focus": {
+      "title": "Enfoque rápido",
+      "duration": "Duración de la sesión",
+      "task": "Enfócate en una tarea (opcional)...",
+      "start": "Empezar",
+      "pause": "Pausar",
+      "resume": "Reanudar",
+      "stop": "Detener",
+      "session": "Sesión de enfoque",
+      "saved": "Sesión de enfoque guardada.",
+      "savedStopped": "Sesión detenida y guardada.",
+      "tooShort": "Menos de un minuto: no se guardó nada."
     }
   },
   "calendar": {

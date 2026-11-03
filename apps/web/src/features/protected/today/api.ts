@@ -59,6 +59,37 @@ export function useCreateBlock() {
 	});
 }
 
+/** What a focus session records: the block it planned and what really happened. */
+export interface FocusRecord {
+	actualEnd: string;
+	actualStart: string;
+	plannedEnd: string;
+	plannedStart: string;
+	status: 'done' | 'interrupted';
+	taskId?: string;
+	title?: string;
+}
+
+/**
+ * Records a finished (`done`) or stopped (`interrupted`) focus session as a real time block: `POST /planning/blocks`, then `PATCH` with the actual times and
+ * the status. If the second call fails the block just created is removed, so a failed save never leaves a half-recorded session behind.
+ */
+export function useRecordFocus() {
+	const refresh = useRefreshBlocks();
+	return useMutation({
+		mutationFn: async ({ actualEnd, actualStart, status, ...planned }: FocusRecord) => {
+			const block = await unwrap(api.planning.blocks.$post({ json: planned }));
+			try {
+				return await unwrap(api.planning.blocks[':id'].$patch({ json: { actualEnd, actualStart, status }, param: { id: block.id } }));
+			} catch (error) {
+				await unwrap(api.planning.blocks[':id'].$delete({ param: { id: block.id } })).catch(() => undefined);
+				throw error;
+			}
+		},
+		onSuccess: refresh,
+	});
+}
+
 /** `POST /planning/blocks/:id/move`: never edits the block, it plans a new one and keeps the old one as history. */
 export function useMoveBlock() {
 	const refresh = useRefreshBlocks();
