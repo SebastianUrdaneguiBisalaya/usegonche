@@ -1548,6 +1548,49 @@
       "deleted": "Recurrence deleted."
     }
   },
+  "onboarding": {
+    "progress": "Onboarding progress",
+    "back": "Back",
+    "continue": "Continue",
+    "steps": {
+      "appearance": "Appearance",
+      "region": "Region",
+      "finish": "Finish"
+    },
+    "appearance": {
+      "title": "What theme do you prefer?",
+      "subtitle": "Choose how you'd like gonche to look.",
+      "dark": {
+        "label": "Dark",
+        "description": "A focused dark experience."
+      },
+      "light": {
+        "label": "Light",
+        "description": "A clean, minimal look."
+      },
+      "system": {
+        "label": "System",
+        "description": "Follows your OS preference."
+      }
+    },
+    "region": {
+      "title": "Where are you based?",
+      "subtitle": "Language, country and time zone set how dates and times show up.",
+      "language": "Language",
+      "country": "Country",
+      "timezone": "Time zone",
+      "timezoneHint": "Detected from your device. It follows the country you pick."
+    },
+    "finish": {
+      "title": "You're all set",
+      "subtitle": "You can change any of this later in Settings.",
+      "theme": "Theme",
+      "language": "Language",
+      "country": "Country",
+      "timezone": "Time zone",
+      "start": "Get started"
+    }
+  },
   "today": {
     "title": "Today",
     "subtitle": "Focus on what moves you forward.",

@@ -7,6 +7,7 @@ import { Icon } from '~/components/ui/foundations/icon/icon';
 import { type Session, sessionKey, useSession } from '~/features/auth/api';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
+import { useUserSettings } from './settings/api';
 import { useSyncPreferences } from './settings/use-preferences';
 import { AppSidebar } from './shared/app-sidebar';
 import { CommandPalette } from './shared/command-palette';
@@ -43,9 +44,12 @@ export default function ProtectedLayout() {
 	const [mobileOpen, setMobileOpen] = useState(false);
 	const [commandOpen, setCommandOpen] = useState(false);
 	useSyncPreferences();
+	const settings = useUserSettings();
 
-	if (isPending) return <LayoutSkeleton />;
+	if (isPending || (session && settings.isPending)) return <LayoutSkeleton />;
 	if (!session) return <Navigate replace to='/auth/sign-in' />;
+	// Mandatory onboarding: until it is completed, every signed-in page sends the user back to it.
+	if (settings.data && !settings.data.onboardingCompletedAt) return <Navigate replace to='/onboarding' />;
 
 	return (
 		<div className='flex h-screen w-full bg-background text-foreground'>

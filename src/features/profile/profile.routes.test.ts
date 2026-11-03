@@ -96,6 +96,29 @@ describe('GET /profile/settings', () => {
 	});
 });
 
+describe('PATCH /profile/settings (onboarding)', () => {
+	it('completes it when everything is set (200)', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.userSettings.upsert).mockResolvedValue({ ...settings, country: 'PE' } as UserSettings);
+		vi.mocked(prisma.userSettings.update).mockResolvedValue({ ...settings, country: 'PE', onboardingCompletedAt: new Date() } as UserSettings);
+		const res = await app.request('/profile/settings', jsonRequest('PATCH', { onboardingCompleted: true }));
+		expect(res.status).toBe(200);
+		expect(prisma.userSettings.update).toHaveBeenCalledWith({ data: { onboardingCompletedAt: expect.any(Date) }, where: { ownerId: TEST_USER_ID } });
+	});
+
+	it('answers 422 with details while the country is missing', async () => {
+		const { app } = setup();
+		const res = await app.request('/profile/settings', jsonRequest('PATCH', { onboardingCompleted: true }));
+		expect(res.status).toBe(422);
+		expect(await res.json()).toMatchObject({ error: { code: 'validation_error', details: [{ code: 'onboarding_incomplete', field: 'country' }] } });
+	});
+
+	it('rejects `false` and unknown values', async () => {
+		const { app } = setup();
+		expect((await app.request('/profile/settings', jsonRequest('PATCH', { onboardingCompleted: false }))).status).toBe(422);
+	});
+});
+
 describe('PATCH /profile/settings', () => {
 	it('updates the settings', async () => {
 		const { app, prisma } = setup();

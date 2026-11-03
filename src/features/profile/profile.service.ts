@@ -1,6 +1,7 @@
 import type { PrismaClient, Profile, UserSettings } from '@usegonche/database';
 import type { Storage, UploadUrl } from '@usegonche/storage';
 import { changedFields, hasChanges } from '../../lib/diff.js';
+import { AppError } from '../../lib/errors.js';
 import { createOwnerUploadUrl } from '../../lib/upload-url.js';
 import type { AvatarUploadInput, UpdateProfileInput, UpdateSettingsInput } from './profile.schemas.js';
 
@@ -28,9 +29,16 @@ export const getSettings = (prisma: PrismaClient, user: Identity): Promise<UserS
 	});
 
 /** Writes only what changed; an update that changes nothing answers with the current settings and writes nothing. */
-export const updateSettings = async (prisma: PrismaClient, user: Identity, input: UpdateSettingsInput): Promise<UserSettings> => {
+export const updateSettings = async (prisma: PrismaClient, user: Identity, { onboardingCompleted, ...input }: UpdateSettingsInput): Promise<UserSettings> => {
 	const current = await getSettings(prisma, user);
-	const changed = changedFields(current, input);
+	const changed: Partial<UserSettings> = changedFields(current, input);
+	if (onboardingCompleted && !current.onboardingCompletedAt) {
+		// Mandatory onboarding: everything it collects must be there once it is completed.
+		const merged = { ...current, ...changed };
+		const missing = (['theme', 'language', 'country', 'timezone'] as const).find(field => !merged[field]);
+		if (missing) throw new AppError('validation_error', 422, [{ code: 'onboarding_incomplete', field: missing }]);
+		changed.onboardingCompletedAt = new Date();
+	}
 	return hasChanges(changed) ? prisma.userSettings.update({ data: changed, where: { ownerId: user.id } }) : current;
 };
 

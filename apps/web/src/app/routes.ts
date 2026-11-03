@@ -12,6 +12,7 @@ export default [
 		route('reminders', '../features/protected/reminders/reminders.tsx'),
 		route('tags', '../features/protected/tags/tags.tsx'),
 	]),
+	route('onboarding', '../features/onboarding/onboarding.tsx'),
 	layout(
 		'../features/auth/layout.tsx',
 		prefix('auth', [

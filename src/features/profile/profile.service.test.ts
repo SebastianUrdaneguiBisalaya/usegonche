@@ -76,6 +76,37 @@ describe('updateSettings', () => {
 	});
 });
 
+describe('updateSettings (onboarding)', () => {
+	const ready = { ...settings, country: 'PE' } as UserSettings;
+
+	it('completes the onboarding once theme, language, country and time zone are set', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.userSettings.upsert).mockResolvedValue(settings);
+		vi.mocked(prisma.userSettings.update).mockResolvedValue({ ...ready, onboardingCompletedAt: new Date() });
+		await updateSettings(prisma, user, { country: 'PE', onboardingCompleted: true });
+		expect(prisma.userSettings.update).toHaveBeenCalledWith({ data: { country: 'PE', onboardingCompletedAt: expect.any(Date) }, where: { ownerId: TEST_USER_ID } });
+	});
+
+	it('answers 422 `onboarding_incomplete` for the first missing field and writes nothing', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.userSettings.upsert).mockResolvedValue(settings);
+		await expect(updateSettings(prisma, user, { onboardingCompleted: true })).rejects.toMatchObject({
+			code: 'validation_error',
+			details: [{ code: 'onboarding_incomplete', field: 'country' }],
+			status: 422,
+		});
+		expect(prisma.userSettings.update).not.toHaveBeenCalled();
+	});
+
+	it('is idempotent: an already completed onboarding keeps its date', async () => {
+		const prisma = createMockPrisma();
+		const done = { ...ready, onboardingCompletedAt: new Date('2026-11-01T00:00:00Z') } as UserSettings;
+		vi.mocked(prisma.userSettings.upsert).mockResolvedValue(done);
+		expect(await updateSettings(prisma, user, { onboardingCompleted: true })).toBe(done);
+		expect(prisma.userSettings.update).not.toHaveBeenCalled();
+	});
+});
+
 describe('createAvatarUploadUrl', () => {
 	it.each([
 		['image/png', 'png'],
