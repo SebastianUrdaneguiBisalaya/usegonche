@@ -319,6 +319,10 @@ Read-only dashboards, all computed on read in the user's time zone, for a date r
 - Bulk selection bars for tasks and inbox items.
 - The UI is localized from stable API error codes; the API itself returns English fallback messages.
 
+## Development commands
+
+All commands are available as `make` targets (`make help` lists them): `api-*`, `web-*`, `desktop-*`, `www-*`, `db-*`, plus `lint`, `format`, `typecheck`, `test` and `check`. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the contribution workflow and [`MANUAL.md`](MANUAL.md) for backend setup and deploy.
+
 ## API conventions
 
 - All endpoints live under `/v1` (except `GET /health`).
