@@ -43,3 +43,16 @@ export const listTaskHistory = async (prisma: PrismaClient, ownerId: string, tas
 	const [items, total] = await Promise.all([prisma.taskEvent.findMany({ orderBy: pageOrder('occurredAt'), ...pageArgs(page), where }), prisma.taskEvent.count({ where })]);
 	return { items, total };
 };
+
+/** An event of the global feed: the task event plus the title of its task, so the feed reads without a second request. */
+export type ActivityEvent = TaskEvent & { taskTitle: string };
+
+/** One page of the activity across all the owner's tasks (newest first) with the total. Events go with their task, so the title is always there. */
+export const listActivity = async (prisma: PrismaClient, ownerId: string, page: PageParams): Promise<Paged<ActivityEvent>> => {
+	const where = scoped(ownerId);
+	const [rows, total] = await Promise.all([
+		prisma.taskEvent.findMany({ include: { task: { select: { title: true } } }, orderBy: pageOrder('occurredAt'), ...pageArgs(page), where }),
+		prisma.taskEvent.count({ where }),
+	]);
+	return { items: rows.map(({ task, ...event }) => ({ ...event, taskTitle: task.title })), total };
+};

@@ -3,6 +3,7 @@ import type { AppEnv } from './env.js';
 import attachments from './features/attachments/attachments.routes.js';
 import auth from './features/auth/auth.routes.js';
 import goals from './features/goals/goals.routes.js';
+import activity from './features/history/history.activity.routes.js';
 import history from './features/history/history.routes.js';
 import inbox from './features/inbox/inbox.routes.js';
 import me from './features/me/me.routes.js';
@@ -34,7 +35,8 @@ const routes = new Hono<AppEnv>()
 	.route('/reviews', reviews)
 	.route('/tags', tags)
 	.route('/tasks', tasks)
-	.route('/tasks', history);
+	.route('/tasks', history)
+	.route('/history', activity);
 
 export type AppType = typeof routes;
 export default routes;
