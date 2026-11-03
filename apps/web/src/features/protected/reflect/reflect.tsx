@@ -12,6 +12,7 @@ import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { fromDateOnly, toDateOnly } from '../shared/dates';
 import { listStyles } from '../shared/styles';
+import { useDateTime } from '../shared/use-datetime';
 import { usePickerLang } from '../tasks/components/task-pills';
 import { type Review, type ReviewKind, useCloseReview, useReview, useUpdateReview } from './api';
 import { ActionsCard } from './components/actions-card';
@@ -100,9 +101,10 @@ export default function ReflectRoute() {
 	const t = useTranslate();
 	const { locale } = useLanguage();
 	const pickerLang = usePickerLang();
+	const { today } = useDateTime();
 	const [kind, setKind] = useQueryState('kind', parseAsStringLiteral(kinds).withDefault('daily'));
 	const [param, setParam] = useQueryState('date', parseAsString.withDefault(''));
-	const date = param || toDateOnly(new Date());
+	const date = param || today();
 	const review = useReview(kind as ReviewKind, date);
 
 	return (

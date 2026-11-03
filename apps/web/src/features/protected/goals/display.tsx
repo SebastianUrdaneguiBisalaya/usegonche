@@ -36,9 +36,6 @@ const GOAL_ICONS: readonly LucideIcon[] = [Target, Flag, Trophy, Rocket, Compass
 /** Goals have no icon of their own: it is picked from the id, so it stays the same everywhere. */
 export const goalIcon = (id: string): LucideIcon => pickBy(GOAL_ICONS, id, Target);
 
-/** Today as `YYYY-MM-DD` in the user's calendar. */
-export const todayDateOnly = (now: Date = new Date()): string => `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
 /** An active goal whose target date has passed. `targetDate` is the API's date column; the comparison is between calendar days. */
-export const isOverdue = (goal: { archivedAt: string | null; status: string; targetDate: string | null }, today: string = todayDateOnly()): boolean =>
+export const isOverdue = (goal: { archivedAt: string | null; status: string; targetDate: string | null }, today: string): boolean =>
 	goal.status === 'active' && !goal.archivedAt && goal.targetDate !== null && goal.targetDate.slice(0, 10) < today;

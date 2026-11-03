@@ -16,8 +16,9 @@ import { ListEmpty, ListTable } from '../../shared/list-table';
 import { formatRelative } from '../../shared/relative-time';
 import { StatusMenu } from '../../shared/status-pill';
 import { listStyles } from '../../shared/styles';
+import { useDateTime } from '../../shared/use-datetime';
 import type { BulkAction, Goal } from '../api';
-import { displayStatus, goalIcon, isOverdue, statusLook, todayDateOnly } from '../display';
+import { displayStatus, goalIcon, isOverdue, statusLook } from '../display';
 import { type GoalStatus, type GoalTab, goalStatuses } from '../search-params';
 
 /** A row of the table. */
@@ -79,6 +80,7 @@ export function GoalsTable({
 }: GoalsTableProps) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
+	const today = useDateTime().today();
 	const dateFormat = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }), [locale]);
 
 	const columns = useMemo<ColumnDef<DataTableFeatures, GoalRow>[]>(
@@ -120,7 +122,7 @@ export function GoalsTable({
 					const goal = row.original.goal;
 					if (!goal?.targetDate) return goal ? <Typography.Span className='text-sm text-muted-foreground'>—</Typography.Span> : null;
 					const label = dateFormat.format(new Date(goal.targetDate));
-					if (!isOverdue(goal, todayDateOnly())) return <Typography.Span className='whitespace-nowrap text-sm'>{label}</Typography.Span>;
+					if (!isOverdue(goal, today)) return <Typography.Span className='whitespace-nowrap text-sm'>{label}</Typography.Span>;
 					return (
 						<span className='flex items-center gap-2 whitespace-nowrap text-sm font-medium text-destructive' title={t('goals.cell.overdue')}>
 							<Icon aria-hidden icon={CircleAlert} size='sm' />
@@ -230,7 +232,7 @@ export function GoalsTable({
 				size: 64,
 			},
 		],
-		[dateFormat, locale, onOpen, onSetArchived, onSetStatus, t]
+		[dateFormat, locale, onOpen, onSetArchived, onSetStatus, t, today]
 	);
 
 	const archivedTab = emptyKind === 'archived';
