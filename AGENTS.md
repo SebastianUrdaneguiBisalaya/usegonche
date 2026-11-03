@@ -39,7 +39,6 @@ Rich text (TipTap on the frontend) is converted to **Markdown on the client** an
 - **Reminders**: entity, API and due processing implemented in `src/features/reminders` (#35). A reminder targets exactly one task, event or note and is independent of due dates. `pg_cron` calls `POST /v1/internal/reminders/process` (secret header `x-internal-secret` = `INTERNAL_CRON_SECRET`; script in `packages/database/prisma/manual/reminders-pg-cron.sql`, applied by the user). Reminders are **internal only**: the user sees them in the web app (Reminders page); there is no email or push delivery. The job just marks due reminders as `sent`.
 - **Third-party integrations**: GitHub (repos, issues, PRs, reviews, releases), Google Calendar, Google Drive, Notion, Gmail, Slack, Google Meet/Zoom. Needs: ExternalAccount, ExternalResource, task-resource link, sync cursors, webhooks, dedupe/conflict handling.
 - **AI** and **agents** (always as proposals the user accepts), **automations** and custom **workflows**, **planning rules**.
-- **Templates**.
 - **Productivity metrics** beyond the review snapshots.
 - **Full-text search**: implemented in `src/features/search` (#37): `GET /search?q=&types=` over tasks, notes, projects, goals and inbox items (Postgres `websearch_to_tsquery`, config `simple`, generated `search_vector` columns + GIN; Markdown text is indexed as is). Not tested against a real database in CI (raw SQL is unit-tested for shape only).
 - **Note revision history** (versioning).

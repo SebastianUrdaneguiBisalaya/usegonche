@@ -101,12 +101,22 @@ describe('GET /tasks', () => {
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ dueDate: null, ownerId: TEST_USER_ID, parentId: null, projectId: null });
 	});
 
-	it.each(['noProject=false', 'noDueDate=1', 'status=nope', 'sort=nope', 'order=up', 'blocked=maybe', 'priority=nope', 'projectId=nope', 'recurrenceId=nope', 'dueBefore=tomorrow', 'page=0', 'pageSize=0'])(
-		'answers 422 for ?%s',
-		async query => {
-			expect((await setup().app.request(`/tasks?${query}`)).status).toBe(422);
-		}
-	);
+	it.each([
+		'noProject=false',
+		'noDueDate=1',
+		'status=nope',
+		'sort=nope',
+		'order=up',
+		'blocked=maybe',
+		'priority=nope',
+		'projectId=nope',
+		'recurrenceId=nope',
+		'dueBefore=tomorrow',
+		'page=0',
+		'pageSize=0',
+	])('answers 422 for ?%s', async query => {
+		expect((await setup().app.request(`/tasks?${query}`)).status).toBe(422);
+	});
 });
 
 describe('PATCH /tasks/bulk', () => {

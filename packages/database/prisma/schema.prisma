@@ -58,8 +58,6 @@ model Profile {
   reviewDecisions     ReviewDecision[]
   recurrenceRules     RecurrenceRule[]
   noteRevisions       NoteRevision[]
-  templates           Template[]
-  templateItems       TemplateItem[]
   reminders           Reminder[]
 
   @@map("profiles")
@@ -100,8 +98,6 @@ model Tag {
   tasks           TaskTag[]
   notes           NoteTag[]
   recurrenceRules RecurrenceRuleTag[]
-  templates       TemplateTag[]
-  templateItems   TemplateItemTag[]
 
   @@unique([ownerId, name])
   @@map("tags")
@@ -761,85 +757,6 @@ model NoteRevision {
 
   @@index([ownerId, noteId, createdAt])
   @@map("note_revisions")
-}
-
-enum TemplateKind {
-  task
-  project
-
-  @@map("template_kind")
-}
-
-/// Reusable structure that is copied into real data on demand (nothing links back to it afterwards).
-/// `task`: exactly one top-level item (the task) whose children are its subtasks.
-/// `project`: `title`/`description`/tags describe the project and the top-level items are its tasks (children = subtasks).
-/// Items are at most two levels deep, like tasks. CHECKs in the migration: a project template has a title, a task template has no
-/// project fields, and offsets are 0..3650 days.
-model Template {
-  id          String       @id @default(uuid(4)) @db.Uuid
-  ownerId     String       @map("owner_id") @db.Uuid
-  kind        TemplateKind
-  name        String       @db.VarChar(100)
-  title       String?      @db.VarChar(200)
-  description String?      @db.Text
-  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  owner Profile        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  tags  TemplateTag[]
-  items TemplateItem[]
-
-  @@index([ownerId, kind, createdAt])
-  @@map("templates")
-}
-
-/// Tags of the project a `project` template creates.
-model TemplateTag {
-  templateId String @map("template_id") @db.Uuid
-  tagId      String @map("tag_id") @db.Uuid
-
-  template Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  tag      Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([templateId, tagId])
-  @@index([tagId])
-  @@map("template_tags")
-}
-
-/// A task (top-level) or subtask (`parentId`) of a template. `dueOffsetDays` is days after the start date given when instantiating.
-model TemplateItem {
-  id               String       @id @default(uuid(4)) @db.Uuid
-  ownerId          String       @map("owner_id") @db.Uuid
-  templateId       String       @map("template_id") @db.Uuid
-  parentId         String?      @map("parent_id") @db.Uuid
-  position         Int
-  title            String       @db.VarChar(200)
-  description      String?      @db.Text
-  priority         TaskPriority @default(medium)
-  estimatedMinutes Int?         @map("estimated_minutes")
-  dueOffsetDays    Int?         @map("due_offset_days")
-
-  owner    Profile           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  template Template          @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  parent   TemplateItem?     @relation("TemplateSubitems", fields: [parentId], references: [id], onDelete: Cascade)
-  subtasks TemplateItem[]    @relation("TemplateSubitems")
-  tags     TemplateItemTag[]
-
-  @@index([templateId, position])
-  @@index([parentId])
-  @@map("template_items")
-}
-
-model TemplateItemTag {
-  itemId String @map("item_id") @db.Uuid
-  tagId  String @map("tag_id") @db.Uuid
-
-  item TemplateItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  tag  Tag          @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([itemId, tagId])
-  @@index([tagId])
-  @@map("template_item_tags")
 }
 
 enum ReminderStatus {
