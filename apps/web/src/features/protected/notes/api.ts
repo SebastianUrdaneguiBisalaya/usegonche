@@ -153,3 +153,37 @@ export function useDeleteNoteFile(noteId: string) {
 export const noteFileUrl = (id: string) => unwrap(api.attachments[':id'].url.$get({ param: { id } }));
 
 export const refreshNoteFiles = (queryClient: QueryClient, noteId: string) => queryClient.invalidateQueries({ queryKey: ['notes', 'files', noteId] });
+
+type RemindersResponse = Awaited<ReturnType<typeof api.reminders.$get>>;
+export type NoteReminder = OkBody<RemindersResponse>['data'][number];
+
+const reminderKey = (noteId: string) => ['notes', 'reminder', noteId] as const;
+
+/** The next pending reminder of a note (a reminder that was sent or dismissed no longer counts). */
+export function useNoteReminder(noteId: string, enabled = true) {
+	return useQuery({
+		enabled,
+		queryFn: async () => (await unwrap(api.reminders.$get({ query: { noteId, pageSize: '1', status: 'pending' } })))[0] ?? null,
+		queryKey: reminderKey(noteId),
+	});
+}
+
+/** Creates the reminder, or reschedules the pending one when `id` is given. */
+export function useSetNoteReminder(noteId: string) {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: ({ id, remindAt }: { id?: string; remindAt: Date }) =>
+			id
+				? unwrap(api.reminders[':id'].$patch({ json: { remindAt: remindAt.toISOString() }, param: { id } }))
+				: unwrap(api.reminders.$post({ json: { noteId, remindAt: remindAt.toISOString() } })),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: reminderKey(noteId) }),
+	});
+}
+
+export function useRemoveNoteReminder(noteId: string) {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (id: string) => unwrap(api.reminders[':id'].$delete({ param: { id } })),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: reminderKey(noteId) }),
+	});
+}

@@ -922,7 +922,7 @@ function TimeRow() {
   if (mode === "single") {
     const bounds = timeBoundsForDay(draftSingle, minDate, maxDate);
     return (
-      <div className="mt-3 sm:mt-0 sm:self-center sm:border-l sm:border-border sm:pl-3">
+      <div className="self-center border-l border-border pl-3">
         <TimeField
           hourCycle={hourCycle}
           lang={lang}
@@ -1064,7 +1064,7 @@ function Content({ className }: DatePickerContentProps) {
       <div
         className={cn(
           "flex flex-col",
-          withTime && mode === "single" && "sm:flex-row",
+          withTime && mode === "single" && "flex-row",
         )}
       >
         <div className="flex flex-col sm:flex-row">
