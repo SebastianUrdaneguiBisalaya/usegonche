@@ -43,12 +43,12 @@ export const taskIcon = (id: string): LucideIcon => pickBy(TASK_ICONS, id, FileT
 
 const DAY_MS = 86_400_000;
 
-/** Whole days from today (local) to a `YYYY-MM-DD` date: negative when it is past. */
-export const daysUntil = (dateOnly: string, today: Date = new Date()): number => {
+/** Whole days from `today` to a due date, both `YYYY-MM-DD` (calendar days: `today` comes from the user's stored time zone): negative when it is past. */
+export const daysUntil = (dateOnly: string, today: string): number => {
 	const [year, month, day] = dateOnly.split('-').map(Number);
-	if (!year || !month || !day) return 0;
-	const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-	return Math.round((new Date(year, month - 1, day).getTime() - start) / DAY_MS);
+	const [todayYear, todayMonth, todayDay] = today.split('-').map(Number);
+	if (!year || !month || !day || !todayYear || !todayMonth || !todayDay) return 0;
+	return Math.round((Date.UTC(year, month - 1, day) - Date.UTC(todayYear, todayMonth - 1, todayDay)) / DAY_MS);
 };
 
 export const isOpen = (status: TaskStatus): boolean => status === 'todo' || status === 'in_progress';

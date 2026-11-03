@@ -4,9 +4,20 @@ import { dueBucketWhere, sliceGroups, taskToday, weekEnd } from './tasks.groups.
 const group = (key: string, count: number) => ({ count, key, where: {} });
 
 describe('task day boundaries', () => {
-	it('takes today from the UTC date, whatever the time of day', () => {
-		expect(taskToday(new Date('2026-11-10T00:00:00Z'))).toEqual(new Date('2026-11-10'));
-		expect(taskToday(new Date('2026-11-10T23:59:59Z'))).toEqual(new Date('2026-11-10'));
+	it('takes today from the calendar day it is in the given time zone, whatever the time of day', () => {
+		expect(taskToday(new Date('2026-11-10T00:00:00Z'), 'UTC')).toEqual(new Date('2026-11-10'));
+		expect(taskToday(new Date('2026-11-10T23:59:59Z'), 'UTC')).toEqual(new Date('2026-11-10'));
+	});
+
+	// Regression (#138): around midnight UTC a user west of UTC is still on the previous day, and one east of it is already on the next.
+	it('is still yesterday for a user west of UTC just after midnight UTC', () => {
+		expect(taskToday(new Date('2026-11-10T02:30:00Z'), 'America/Lima')).toEqual(new Date('2026-11-09'));
+		expect(taskToday(new Date('2026-11-10T04:59:59Z'), 'America/Lima')).toEqual(new Date('2026-11-09'));
+		expect(taskToday(new Date('2026-11-10T05:00:00Z'), 'America/Lima')).toEqual(new Date('2026-11-10'));
+	});
+
+	it('is already tomorrow for a user east of UTC before midnight UTC', () => {
+		expect(taskToday(new Date('2026-11-10T20:00:00Z'), 'Pacific/Auckland')).toEqual(new Date('2026-11-11'));
 	});
 
 	it('closes "this week" six days after today (seven days, today included)', () => {
