@@ -88,6 +88,7 @@ const TITLE_MAX = 200;
 
 /** The inbox item becomes a task, project or note in one transaction (`originInboxItemId`); a long text keeps its full content in the description/body. */
 export function useConvert() {
+	const queryClient = useQueryClient();
 	const refresh = useRefreshInbox();
 	return useMutation({
 		mutationFn: async ({ item, target }: { item: Pick<InboxItem, 'content' | 'id'>; target: ConvertTarget }): Promise<void> => {
@@ -98,6 +99,9 @@ export function useConvert() {
 			else if (target === 'project') await unwrap(api.projects.$post({ json: { description: rest, originInboxItemId, title } as Body<typeof api.projects.$post> }));
 			else await unwrap(api.notes.$post({ json: { body: rest, originInboxItemId, title } as Body<typeof api.notes.$post> }));
 		},
-		onSuccess: refresh,
+		onSuccess: async (_, { target }) => {
+			if (target === 'note') await Promise.all([['notes'], ['tasks', 'notes'], ['project-notes']].map(queryKey => queryClient.invalidateQueries({ queryKey })));
+			await refresh();
+		},
 	});
 }

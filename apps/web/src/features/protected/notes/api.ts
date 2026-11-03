@@ -53,7 +53,12 @@ export function useNote(id: string | undefined) {
 }
 
 /** Everything that shows notes refetches after a change (lists, the open note, the notes listed in a task or a project). */
-const refresh = (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: ['notes'] }), queryClient.invalidateQueries({ queryKey: ['tasks', 'notes'] })]);
+const refresh = (queryClient: QueryClient) =>
+	Promise.all([
+		queryClient.invalidateQueries({ queryKey: ['notes'] }),
+		queryClient.invalidateQueries({ queryKey: ['tasks', 'notes'] }),
+		queryClient.invalidateQueries({ queryKey: ['project-notes'] }),
+	]);
 
 export function useCreateNote() {
 	const queryClient = useQueryClient();

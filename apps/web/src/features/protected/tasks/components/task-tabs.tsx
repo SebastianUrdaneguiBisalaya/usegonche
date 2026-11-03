@@ -1,11 +1,13 @@
 import { ArrowRightLeft, CalendarClock, CircleDot, Flag, FolderKanban, Plus } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { Button } from '~/components/ui/actions-controls/button/button';
 import { Tabs } from '~/components/ui/data-display/tabs/tabs';
 import { Timeline, type TimelineTone } from '~/components/ui/data-display/timeline/timeline';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
+import { NewNoteModal } from '../../notes/components/new-note-modal';
 import { DrawerSection } from '../../shared/drawer-section';
 import { useProjectOptions } from '../../shared/projects';
 import { formatRelative } from '../../shared/relative-time';
@@ -76,6 +78,7 @@ export function TaskTabs({ task }: { task: Task }) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
 	const notes = useTaskNotes(task.id, true);
+	const [newNote, setNewNote] = useState(false);
 	const files = useTaskFiles(task.id, true);
 	const blocks = useTaskBlocks(task.id, true);
 	const dateTime = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }), [locale]);
@@ -95,6 +98,12 @@ export function TaskTabs({ task }: { task: Task }) {
 				<History task={task} />
 			</Tabs.Content>
 			<Tabs.Content className='w-full pt-5' value='notes'>
+				<div className='mb-3 flex justify-end'>
+					<Button onClick={() => setNewNote(true)} type='button' variant='secondary'>
+						<Button.Icon icon={Plus} />
+						<Button.Text>{t('notes.new')}</Button.Text>
+					</Button>
+				</div>
 				<DrawerSection
 					empty={t('tasks.drawer.notesEmpty')}
 					error={notes.isError}
@@ -148,6 +157,7 @@ export function TaskTabs({ task }: { task: Task }) {
 					retryLabel={retry}
 				/>
 			</Tabs.Content>
+			<NewNoteModal links={{ taskIds: [task.id] }} onOpenChange={setNewNote} open={newNote} />
 		</Tabs>
 	);
 }
