@@ -19,6 +19,7 @@ import { AgendaCard } from './components/agenda-card';
 import { BlockedCard } from './components/blocked-card';
 import { CapacityCard } from './components/capacity-card';
 import { EventsCard } from './components/events-card';
+import { FocusCard } from './components/focus-card';
 import { InboxCard } from './components/inbox-card';
 import { PlanCard } from './components/plan-card';
 import { ReplanCard } from './components/replan-card';
