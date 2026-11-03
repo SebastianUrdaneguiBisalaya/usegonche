@@ -1353,6 +1353,77 @@
       "restoreHint": "La versión actual se guarda como una nueva revisión."
     }
   },
+  "reflect": {
+    "title": "Reflexión",
+    "subtitle": "Revisa tu progreso. Toma decisiones. Define lo siguiente.",
+    "date": "Elige una fecha",
+    "loadError": "No se pudo cargar la revisión.",
+    "retry": "Reintentar",
+    "kind": {
+      "daily": "Diaria",
+      "weekly": "Semanal"
+    },
+    "period": {
+      "title": "Este periodo",
+      "planned": "Planificadas",
+      "completed": "Completadas",
+      "pending": "Pendientes",
+      "rate": "Tasa de cumplimiento"
+    },
+    "reflection": {
+      "title": "Tu reflexión",
+      "subtitle": "¿Qué salió bien? ¿Qué podría mejorar? ¿Cuál es tu foco para el próximo periodo?",
+      "placeholder": "Escribe tus ideas aquí...",
+      "status": {
+        "saved": "Guardado",
+        "saving": "Guardando...",
+        "unsaved": "Cambios sin guardar",
+        "error": "No se pudo guardar"
+      }
+    },
+    "decisions": {
+      "title": "Decisiones",
+      "subtitle": "Revisa tus tareas pendientes y decide qué hacer.",
+      "selected": "Seleccionadas: {{count}}",
+      "keepAll": "Mantener todas",
+      "apply": "Aplicar decisiones ({{count}})",
+      "applied": "Decisiones aplicadas.",
+      "empty": "Nada pendiente: todas las tareas planificadas están hechas.",
+      "noneTaken": "No se tomaron decisiones en esta revisión.",
+      "select": "Seleccionar {{title}}",
+      "date": "Fecha",
+      "action": {
+        "carry_over": "Trasladar",
+        "reschedule": "Reprogramar",
+        "drop": "Descartar",
+        "keep": "Mantener"
+      }
+    },
+    "focus": {
+      "title": "Próximo foco",
+      "subtitle": "¿En qué quieres enfocarte el próximo periodo?",
+      "placeholder": "Lanzar la v2.0 y mejorar la experiencia de bienvenida...",
+      "save": "Guardar foco",
+      "saved": "Foco guardado."
+    },
+    "summary": {
+      "title": "Resumen de la revisión",
+      "onTrack": "En camino",
+      "overdue": "Vencidas",
+      "recurring": "Bloqueos recurrentes",
+      "noBlockers": "Sin bloqueos recurrentes.",
+      "details": "Ver detalles"
+    },
+    "actions": {
+      "title": "Acciones",
+      "close": "Cerrar revisión",
+      "or": "o",
+      "draft": "Guardar borrador",
+      "draftSaved": "Borrador guardado.",
+      "closeDone": "Revisión cerrada.",
+      "closed": "Esta revisión está cerrada."
+    }
+  },
   "today": {
     "title": "Hoy",
     "subtitle": "Enfócate en lo que te hace avanzar.",
