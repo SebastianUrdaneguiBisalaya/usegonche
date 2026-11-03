@@ -9,8 +9,9 @@ import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { listStyles } from '../../shared/styles';
+import { useDateTime } from '../../shared/use-datetime';
 import { type DayBlock, useCloseBlock, useCreateBlock, useDeleteBlock, useMoveBlock, useOpenTasks } from '../api';
-import { atMinute, DURATIONS, fromTimeValue, MINUTES_PER_DAY, minuteOf, toTimeValue } from '../blocks';
+import { DURATIONS, fromTimeValue, MINUTES_PER_DAY, minuteOf, toTimeValue } from '../blocks';
 
 export type BlockModalState = { date: string; kind: 'create'; startMinute: number } | { block: DayBlock; date: string; kind: 'edit'; title: string };
 
@@ -32,11 +33,12 @@ export function BlockModal({ onClose, state }: BlockModalProps) {
 
 function BlockForm({ onClose, state }: { onClose: () => void; state: BlockModalState }) {
 	const t = useTranslate();
+	const { timeZone, toApi } = useDateTime();
 	const editing = state.kind === 'edit';
 	const block = editing ? state.block : undefined;
 	const planned = !editing || block?.status === 'planned';
 
-	const initialStart = block ? minuteOf(state.date, block.plannedStart) : state.kind === 'create' ? state.startMinute : 0;
+	const initialStart = block ? minuteOf(state.date, block.plannedStart, timeZone) : state.kind === 'create' ? state.startMinute : 0;
 	const initialDuration = block ? Math.max(Math.round((new Date(block.plannedEnd).getTime() - new Date(block.plannedStart).getTime()) / 60_000), 15) : 60;
 	const [time, setTime] = useState(toTimeValue(initialStart));
 	const [duration, setDuration] = useState(initialDuration);
@@ -56,7 +58,7 @@ function BlockForm({ onClose, state }: { onClose: () => void; state: BlockModalS
 	const options = (open.data ?? []).filter(task => task.title.toLowerCase().includes(needle)).slice(0, 8);
 	const start = fromTimeValue(time);
 	const valid = start !== null && start + duration <= MINUTES_PER_DAY && (editing || taskId !== null || title.trim() !== '');
-	const range = () => ({ plannedEnd: atMinute(state.date, (start ?? 0) + duration).toISOString(), plannedStart: atMinute(state.date, start ?? 0).toISOString() });
+	const range = () => ({ plannedEnd: toApi(state.date, (start ?? 0) + duration), plannedStart: toApi(state.date, start ?? 0) });
 
 	const submit = () => {
 		if (!valid) return;

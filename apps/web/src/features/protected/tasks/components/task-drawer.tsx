@@ -10,12 +10,12 @@ import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { ConfirmDialog } from '~/components/ui/overlays-feedback/confirm-dialog/confirm-dialog';
 import { Drawer } from '~/components/ui/overlays-feedback/drawer/drawer';
-import { useLanguage } from '~/hooks/use-language';
 import { useRetained } from '~/hooks/use-retained';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { TargetReminder } from '../../reminders/components/target-reminder';
 import { shortcutKeys } from '../../shared/shortcut-keys';
+import { useDateTime } from '../../shared/use-datetime';
 import { type Task, type UpdateTaskBody, useDeleteTask, useTask, useUpdateTask } from '../api';
 import { statusIcon, taskIcon } from '../display';
 import type { TaskStatus } from '../search-params';
@@ -83,14 +83,13 @@ function Title({ onCommit, task }: { onCommit: (title: string) => void; task: Ta
 
 function Body({ onClose, onOpenTask, onSetStatus, task }: Omit<TaskDrawerProps, 'initial' | 'taskId'> & { task: Task }) {
 	const t = useTranslate();
-	const { locale } = useLanguage();
 	const update = useUpdateTask();
 	const remove = useDeleteTask();
 	const [confirmingDelete, setConfirmingDelete] = useState(false);
 	// The editor owns the text while it is open: it only starts from what was saved (a refetch must not overwrite what is being typed).
 	const [initialDescription] = useState(task.description ?? '');
 	const finished = task.status === 'done';
-	const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: 'medium' });
+	const { formatDate } = useDateTime();
 
 	const change = (changes: UpdateTaskBody) => {
 		if (changes.status) return onSetStatus(task, changes.status);
@@ -113,7 +112,7 @@ function Body({ onClose, onOpenTask, onSetStatus, task }: Omit<TaskDrawerProps, 
 						</Layout.HStack>
 						<Title onCommit={title => change({ title })} task={task} />
 						<Drawer.Title className='sr-only'>{task.title}</Drawer.Title>
-						<Drawer.Description>{t('tasks.drawer.created', { date: dateFormat.format(new Date(task.createdAt)) })}</Drawer.Description>
+						<Drawer.Description>{t('tasks.drawer.created', { date: formatDate(task.createdAt) })}</Drawer.Description>
 					</Layout.Stack>
 				</Layout.HStack>
 				<Drawer.Close>

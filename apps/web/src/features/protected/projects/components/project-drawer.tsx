@@ -16,6 +16,7 @@ import { NewNoteModal } from '../../notes/components/new-note-modal';
 import { DrawerSection } from '../../shared/drawer-section';
 import { formatRelative } from '../../shared/relative-time';
 import { StatusBadge } from '../../shared/status-pill';
+import { useDateTime } from '../../shared/use-datetime';
 import { type Project, useProjectFiles, useProjectNotes, useProjectTasks, useSetArchived, useUpdateProject } from '../api';
 import { displayStatus, projectIcon, statusDot } from '../display';
 import { createProjectFormSchema, type ProjectFormValues } from '../schemas';
@@ -53,7 +54,7 @@ function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'
 	const files = useProjectFiles(project.id, true);
 	const { done, total } = project.taskCounts;
 	const status = displayStatus(project);
-	const dateFormat = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }), [locale]);
+	const { formatDate } = useDateTime();
 
 	const toggleArchived = () =>
 		setArchived.mutate(
@@ -75,7 +76,7 @@ function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'
 					</span>
 					<Layout.Stack className='min-w-0' gap='xs'>
 						<Drawer.Title className='truncate'>{project.title}</Drawer.Title>
-						<Drawer.Description>{t('projects.drawer.created', { date: dateFormat.format(new Date(project.createdAt)) })}</Drawer.Description>
+						<Drawer.Description>{t('projects.drawer.created', { date: formatDate(project.createdAt) })}</Drawer.Description>
 					</Layout.Stack>
 				</Layout.HStack>
 				<Drawer.Close>

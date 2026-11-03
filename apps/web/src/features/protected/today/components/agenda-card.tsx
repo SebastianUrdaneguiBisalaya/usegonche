@@ -6,8 +6,10 @@ import { Typography } from '~/components/ui/foundations/typography/typography';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
+import { minuteInZone } from '~/lib/datetime';
 import { listStyles } from '../../shared/styles';
 import { useTasksByIds } from '../../shared/task-lookup';
+import { useDateTime } from '../../shared/use-datetime';
 import { type DayBlock, useMoveBlock } from '../api';
 import { atMinute, MINUTES_PER_DAY, minuteOf, SNAP_MINUTES, snap } from '../blocks';
 import { BlockModal, type BlockModalState } from './block-modal';
@@ -35,6 +37,7 @@ interface AgendaCardProps {
 export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
+	const { timeZone, toApi } = useDateTime();
 	const move = useMoveBlock();
 	const [modal, setModal] = useState<BlockModalState | undefined>(undefined);
 	const [drag, setDrag] = useState<{ id: string; minute: number } | undefined>(undefined);
@@ -46,14 +49,14 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 	const taskTitles = useMemo(() => new Map((tasks.data ?? []).map(task => [task.id, task.title])), [tasks.data]);
 	const titleOf = (block: DayBlock) => block.title ?? (block.taskId ? taskTitles.get(block.taskId) : undefined) ?? t('today.agenda.untitled');
 
-	const hourLabel = useMemo(() => new Intl.DateTimeFormat(locale, { hour: 'numeric' }), [locale]);
-	const timeLabel = useMemo(() => new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }), [locale]);
+	const hourLabel = useMemo(() => new Intl.DateTimeFormat(locale, { hour: 'numeric', timeZone }), [locale, timeZone]);
+	const timeLabel = useMemo(() => new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit', timeZone }), [locale, timeZone]);
 	const [now, setNow] = useState(() => new Date());
 	useEffect(() => {
 		const id = window.setInterval(() => setNow(new Date()), 60_000);
 		return () => window.clearInterval(id);
 	}, []);
-	const nowMinute = now.getHours() * 60 + now.getMinutes();
+	const nowMinute = minuteInZone(now, timeZone);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: scroll to the morning once per day.
 	useEffect(() => {
@@ -78,10 +81,7 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 			if (!moved) return setModal({ block, date, kind: 'edit', title: titleOf(block) });
 			if (minute === startMinute) return;
 			const length = endMinute - startMinute;
-			move.mutate(
-				{ id: block.id, plannedEnd: atMinute(date, minute + length).toISOString(), plannedStart: atMinute(date, minute).toISOString() },
-				{ onError: error => toast.error(getApiErrorMessage(error)) }
-			);
+			move.mutate({ id: block.id, plannedEnd: toApi(date, minute + length), plannedStart: toApi(date, minute) }, { onError: error => toast.error(getApiErrorMessage(error)) });
 		};
 		window.addEventListener('pointermove', onMove);
 		window.addEventListener('pointerup', onUp);
@@ -100,14 +100,14 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 				<div className='relative ml-14' style={{ height: px(MINUTES_PER_DAY) }}>
 					{HOURS.map(hour => (
 						<button
-							aria-label={t('today.agenda.planAt', { time: hourLabel.format(atMinute(date, hour * 60)) })}
+							aria-label={t('today.agenda.planAt', { time: hourLabel.format(atMinute(date, hour * 60, timeZone)) })}
 							className='absolute inset-x-0 cursor-pointer border-t border-border/60 hover:bg-foreground/[0.03]'
 							key={hour}
 							onClick={() => setModal({ date, kind: 'create', startMinute: hour * 60 })}
 							style={{ height: HOUR_PX, top: px(hour * 60) }}
 							type='button'
 						>
-							<span className='absolute -left-14 -top-2 w-12 text-right text-xs text-muted-foreground'>{hourLabel.format(atMinute(date, hour * 60))}</span>
+							<span className='absolute -left-14 -top-2 w-12 text-right text-xs text-muted-foreground'>{hourLabel.format(atMinute(date, hour * 60, timeZone))}</span>
 						</button>
 					))}
 					{isToday && (
@@ -116,10 +116,10 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 						</div>
 					)}
 					{visible.map(block => {
-						const startMinute = minuteOf(date, block.plannedStart);
-						const endMinute = Math.max(minuteOf(date, block.plannedEnd), startMinute + SNAP_MINUTES);
+						const startMinute = minuteOf(date, block.plannedStart, timeZone);
+						const endMinute = Math.max(minuteOf(date, block.plannedEnd, timeZone), startMinute + SNAP_MINUTES);
 						const top = drag?.id === block.id ? drag.minute : startMinute;
-						const shownStart = atMinute(date, top);
+						const shownStart = atMinute(date, top, timeZone);
 						return (
 							<button
 								className={`absolute inset-x-1 z-20 flex flex-col gap-0.5 overflow-hidden rounded-xl border px-3 py-1.5 text-left ${tone[block.status] ?? tone.planned} ${block.status === 'planned' ? 'cursor-grab touch-none active:cursor-grabbing' : 'cursor-pointer'} ${drag?.id === block.id ? 'shadow-lg' : ''}`}
@@ -135,7 +135,7 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 								</span>
 								{endMinute - startMinute >= 30 && (
 									<span className='truncate text-xs text-muted-foreground tabular-nums'>
-										{timeLabel.format(shownStart)} – {timeLabel.format(atMinute(date, top + (endMinute - startMinute)))}
+										{timeLabel.format(shownStart)} – {timeLabel.format(atMinute(date, top + (endMinute - startMinute), timeZone))}
 									</span>
 								)}
 							</button>

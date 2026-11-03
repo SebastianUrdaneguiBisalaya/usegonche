@@ -9,6 +9,7 @@ import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { listStyles } from '../../shared/styles';
 import { useTasksByIds } from '../../shared/task-lookup';
+import { useDateTime } from '../../shared/use-datetime';
 import { useMoveBlock, useReplanProposals } from '../api';
 import { formatMinutes } from '../format';
 
@@ -19,6 +20,7 @@ import { formatMinutes } from '../format';
 export function ReplanCard({ date }: { date: string }) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
+	const { timeZone } = useDateTime();
 	const proposals = useReplanProposals(date);
 	const move = useMoveBlock();
 	const [rejected, setRejected] = useState<ReadonlySet<string>>(new Set());
@@ -26,7 +28,7 @@ export function ReplanCard({ date }: { date: string }) {
 	const pending = useMemo(() => (proposals.data ?? []).filter(proposal => !rejected.has(proposal.blockId)), [proposals.data, rejected]);
 	const tasks = useTasksByIds([...new Set(pending.flatMap(proposal => (proposal.taskId ? [proposal.taskId] : [])))]);
 	const titles = useMemo(() => new Map((tasks.data ?? []).map(task => [task.id, task.title])), [tasks.data]);
-	const slot = useMemo(() => new Intl.DateTimeFormat(locale, { day: 'numeric', hour: 'numeric', minute: '2-digit', month: 'short', weekday: 'short' }), [locale]);
+	const slot = useMemo(() => new Intl.DateTimeFormat(locale, { day: 'numeric', hour: 'numeric', minute: '2-digit', month: 'short', timeZone, weekday: 'short' }), [locale, timeZone]);
 
 	// A failed or empty proposal list is not worth a banner: the page works without it.
 	if (proposals.isError || pending.length === 0) return null;
