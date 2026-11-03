@@ -19,7 +19,6 @@
 			"!**/dist",
 			"!**/build",
 			"!**/.next",
-			"!**/.expo",
 			"!**/.react-router",
 			"!**/release",
 			"!**/pnpm-lock.yaml",
@@ -204,16 +203,6 @@
 			"linter": {
 				"domains": {
 					"next": "recommended"
-				}
-			}
-		},
-		{
-			"includes": ["apps/mobile/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"noCommonJs": "off"
-					}
 				}
 			}
 		}
