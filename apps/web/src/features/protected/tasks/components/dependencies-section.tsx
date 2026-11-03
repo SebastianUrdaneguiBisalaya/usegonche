@@ -7,7 +7,8 @@ import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { useTranslate } from '~/hooks/use-translate';
 import { ApiError, getApiErrorMessage } from '~/lib/api-error';
-import { type Task, useAddDependency, useCyclePreview, useRemoveDependency, useTaskSearch, useTasksByIds } from '../api';
+import { type Task, useAddDependency, useCyclePreview, useRemoveDependency } from '../api';
+import { useTaskSearch, useTasksByIds } from '../../shared/task-lookup';
 import { statusColor, statusIcon } from '../display';
 
 function TaskLink({ onOpen, task }: { onOpen: (id: string) => void; task: Task }) {

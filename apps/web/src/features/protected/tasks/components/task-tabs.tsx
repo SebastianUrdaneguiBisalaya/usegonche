@@ -7,8 +7,9 @@ import { Typography } from '~/components/ui/foundations/typography/typography';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { DrawerSection } from '../../shared/drawer-section';
+import { useProjectOptions } from '../../shared/projects';
 import { formatRelative } from '../../shared/relative-time';
-import { type Task, useProjectOptions, useTaskBlocks, useTaskFiles, useTaskHistory, useTaskNotes } from '../api';
+import { type Task, useTaskBlocks, useTaskFiles, useTaskHistory, useTaskNotes } from '../api';
 
 const formatSize = (bytes: number): string => (bytes < 1024 ? `${bytes} B` : bytes < 1_048_576 ? `${(bytes / 1024).toFixed(0)} KB` : `${(bytes / 1_048_576).toFixed(1)} MB`);
 

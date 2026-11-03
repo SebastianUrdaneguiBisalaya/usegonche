@@ -1110,5 +1110,197 @@
       "title": "Delete this task?",
       "description": "\"{{title}}\" and its subtasks, blockers and files will be deleted. This cannot be undone."
     }
+  },
+  "notes": {
+    "title": "Notes",
+    "subtitle": "Capture ideas, write and keep your thoughts.",
+    "new": "New note",
+    "search": {
+      "placeholder": "Search in notes...",
+      "label": "Search in notes",
+      "clear": "Clear search",
+      "empty": "No note matches your search.",
+      "loading": "Searching..."
+    },
+    "views": {
+      "label": "View",
+      "list": "List",
+      "grid": "Grid"
+    },
+    "filters": {
+      "all": "All",
+      "project": {
+        "label": "Filter by project",
+        "all": "Project"
+      },
+      "tag": {
+        "label": "Filter by tag",
+        "all": "Tag"
+      },
+      "task": {
+        "label": "Filter by linked task",
+        "all": "Task"
+      }
+    },
+    "card": {
+      "noExcerpt": "No content yet",
+      "more": "More actions for {{title}}",
+      "project": "Project"
+    },
+    "actions": {
+      "open": "Open",
+      "copyLink": "Copy link",
+      "delete": "Delete"
+    },
+    "empty": {
+      "title": "No notes here",
+      "description": "Create a note, or convert an inbox item into one.",
+      "filtered": "No notes match these filters."
+    },
+    "error": {
+      "title": "Could not load your notes",
+      "retry": "Retry"
+    },
+    "modal": {
+      "title": "New note",
+      "description": "Give it a title; you write the rest in the editor."
+    },
+    "form": {
+      "title": {
+        "label": "Title",
+        "placeholder": "Note title",
+        "required": "Give the note a title.",
+        "tooLong": "Use at most {{max}} characters."
+      },
+      "cancel": "Cancel",
+      "create": "Create note"
+    },
+    "toast": {
+      "created": "Note created",
+      "saved": "Note saved",
+      "deleted": "Note deleted",
+      "linkCopied": "Link copied",
+      "markdownCopied": "Markdown copied",
+      "restored": "Version restored",
+      "fileRemoved": "File removed",
+      "filesAdded": "Files added"
+    },
+    "delete": {
+      "cancel": "Keep it",
+      "confirm": "Delete note",
+      "title": "Delete this note?",
+      "description": "\"{{title}}\" and its attachments will be deleted. This cannot be undone."
+    },
+    "discard": {
+      "title": "Discard your changes?",
+      "description": "This note has changes you have not saved.",
+      "cancel": "Keep editing",
+      "confirm": "Discard changes"
+    },
+    "editor": {
+      "back": "Back",
+      "close": "Close",
+      "save": "Save",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Untitled note",
+      "placeholder": "Write your note... (Markdown)",
+      "copyLink": "Copy link",
+      "copyMarkdown": "Copy Markdown",
+      "delete": "Delete note",
+      "loadError": "Could not load this note.",
+      "retry": "Retry",
+      "panel": "Note editor",
+      "status": {
+        "idle": "",
+        "saved": "Saved",
+        "saving": "Saving...",
+        "unsaved": "Unsaved changes",
+        "error": "Couldn't save"
+      },
+      "bold": "Bold",
+      "italic": "Italic",
+      "link": "Link",
+      "linkPrompt": "URL",
+      "bulletList": "Bulleted list",
+      "numberedList": "Numbered list",
+      "checklist": "Checklist",
+      "quote": "Quote",
+      "divider": "Divider",
+      "code": "Code",
+      "more": "More",
+      "heading1": "Heading 1",
+      "heading2": "Heading 2",
+      "heading3": "Heading 3",
+      "highlight": "Highlight",
+      "strikethrough": "Strikethrough",
+      "underline": "Underline",
+      "undo": "Undo",
+      "redo": "Redo",
+      "placeholderEmpty": "Select a note to read or edit it.",
+      "placeholderEmptyHint": "Or create a new one with the button above.",
+      "saveShortcut": "Save note"
+    },
+    "meta": {
+      "project": {
+        "label": "Project",
+        "none": "No project"
+      },
+      "tags": {
+        "label": "Tags",
+        "placeholder": "Add tag",
+        "create": "Create \"{{name}}\"",
+        "empty": "No tags yet."
+      },
+      "tasks": {
+        "label": "Linked tasks",
+        "add": "Link task",
+        "search": "Search tasks...",
+        "empty": "No task matches.",
+        "none": "No linked tasks",
+        "remove": "Unlink {{title}}",
+        "count": "{{count}} linked"
+      }
+    },
+    "files": {
+      "title": "Attachments ({{count}})",
+      "loading": "Loading attachments",
+      "empty": "No files attached yet.",
+      "add": "Add files",
+      "viewAll": "View all",
+      "viewLess": "Show less",
+      "download": "Download {{name}}",
+      "remove": "Remove {{name}}",
+      "more": "More actions for {{name}}",
+      "uploadTitle": "Add files",
+      "uploadDescription": "They are uploaded straight to storage and attached to this note.",
+      "limits": "Up to {{max}} files, {{size}} in total ({{used}} used).",
+      "full": "This note already has the maximum number of files.",
+      "totalExceeded": "Adding this file would exceed {{size}} in total.",
+      "done": "Done",
+      "loadError": "Could not load the attachments.",
+      "retry": "Retry",
+      "removeError": "Could not remove the file.",
+      "downloadError": "Could not open the file."
+    },
+    "history": {
+      "title": "Revision history",
+      "description": "View and restore previous versions.",
+      "view": "View history",
+      "drawerTitle": "Revision history",
+      "drawerDescription": "Each time you change the title or the text, the previous version is kept here.",
+      "empty": "No previous versions yet.",
+      "emptyHint": "They appear when you change the title or the text.",
+      "loadError": "Could not load the history.",
+      "retry": "Retry",
+      "versionOf": "Version of {{date}}",
+      "untitled": "Untitled",
+      "preview": "Preview",
+      "back": "All versions",
+      "restore": "Restore this version",
+      "restoring": "Restoring...",
+      "close": "Close",
+      "previewEmpty": "This version has no text.",
+      "restoreHint": "The current version is saved as a new revision."
+    }
   }
 }

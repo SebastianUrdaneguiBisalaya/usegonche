@@ -5,9 +5,10 @@ import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { useTranslate } from '~/hooks/use-translate';
+import { useProjectOptions } from '../../shared/projects';
 import { listStyles } from '../../shared/styles';
 import { useCreateTag, useTagOptions } from '../../shared/tags';
-import { type Task, type UpdateTaskBody, useGoalOptions, useProjectOptions } from '../api';
+import { type Task, type UpdateTaskBody, useGoalOptions } from '../api';
 import { DueDate, PriorityMenu, TaskStatusMenu, taskDay } from './task-pills';
 
 const NONE = '__none';

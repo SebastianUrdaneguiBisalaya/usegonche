@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createMockPrisma, createMockStorage, OTHER_USER_ID, TEST_USER_ID } from '../../test/helpers.js';
-import { createNote, deleteNote, getNote, listNotes, restoreRevision, updateNote } from './notes.service.js';
+import { createNote, deleteNote, excerptOf, getNote, listNotes, restoreRevision, updateNote } from './notes.service.js';
 
 const ID = '5d1f0c2e-7a34-4b9e-8c61-2f3a4b5c6d7e';
 const PROJECT_ID = '9b7e4a10-3c52-4d8f-a1e6-0f2d3c4b5a69';
@@ -20,13 +20,31 @@ const rejection = (promise: Promise<unknown>) =>
 	);
 const input = { tagIds: [], taskIds: [], title: 'Meeting' };
 
+describe('excerptOf', () => {
+	it('is empty without a body', () => {
+		expect(excerptOf(null)).toBe('');
+	});
+
+	it('drops the Markdown marks and joins the lines', () => {
+		expect(excerptOf('## Key ideas\n\n- **Keep** it [simple](https://x.dev)\n- ![img](a.png) done\n\n```ts\nconst a = 1;\n```')).toBe('Key ideas Keep it simple done');
+	});
+
+	it('cuts long bodies with an ellipsis', () => {
+		const excerpt = excerptOf('word '.repeat(100));
+		expect(excerpt.length).toBeLessThanOrEqual(201);
+		expect(excerpt.endsWith('…')).toBe(true);
+	});
+});
+
 describe('listNotes', () => {
-	it('omits the body, scopes by owner and flattens links', async () => {
+	it('returns an excerpt instead of the body, ordered by last update, scoped by owner and flattening links', async () => {
 		const prisma = createMockPrisma();
-		vi.mocked(prisma.note.findMany).mockResolvedValue(asRow([row]));
+		vi.mocked(prisma.note.findMany).mockResolvedValue(asRow([{ ...row, body: '# Hello **world**' }]));
 		vi.mocked(prisma.note.count).mockResolvedValue(1);
-		expect(await listNotes(prisma, TEST_USER_ID, {}, { page: 1, pageSize: 20 })).toEqual({ items: [view], total: 1 });
-		expect(prisma.note.findMany).toHaveBeenCalledWith(expect.objectContaining({ omit: { body: true }, skip: 0, take: 20, where: { ownerId: TEST_USER_ID } }));
+		expect(await listNotes(prisma, TEST_USER_ID, {}, { page: 1, pageSize: 20 })).toEqual({ items: [{ ...view, excerpt: 'Hello world' }], total: 1 });
+		const args = vi.mocked(prisma.note.findMany).mock.calls[0]?.[0];
+		expect(args).toEqual(expect.objectContaining({ orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }], skip: 0, take: 20, where: { ownerId: TEST_USER_ID } }));
+		expect(args).not.toHaveProperty('omit');
 	});
 
 	it('filters by project, tag and task', async () => {

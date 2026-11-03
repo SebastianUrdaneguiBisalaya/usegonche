@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { sessionKey } from '~/features/auth/api';
 import { api, type Body } from '~/lib/api';
 import { type Data, getApiErrorMessage, unwrap } from '~/lib/api-error';
+import { putToStorage } from '../shared/storage-upload';
 
 /** Request bodies and rows come from the API through the RPC client: nothing is redeclared here. */
 export type UserSettings = Data<Awaited<ReturnType<typeof api.profile.settings.$get>>>;
@@ -31,23 +32,6 @@ export function useUpdateProfile() {
 	return useMutation({
 		mutationFn: (json: UpdateProfileBody) => unwrap(api.profile.$patch({ json })),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: sessionKey }),
-	});
-}
-
-/** PUTs the file straight to Supabase Storage (files never go through the API), the way supabase-js does for a signed upload URL. */
-function putToStorage(url: string, file: File, onProgress: (percent: number) => void): Promise<void> {
-	return new Promise((resolve, reject) => {
-		const fail = () => reject(new Error(getApiErrorMessage(null)));
-		const body = new FormData();
-		body.append('cacheControl', '3600');
-		body.append('', file);
-
-		const request = new XMLHttpRequest();
-		request.open('PUT', url);
-		request.upload.onprogress = event => event.lengthComputable && onProgress(Math.round((event.loaded / event.total) * 100));
-		request.onload = () => (request.status >= 200 && request.status < 300 ? resolve() : fail());
-		request.onerror = fail;
-		request.send(body);
 	});
 }
 

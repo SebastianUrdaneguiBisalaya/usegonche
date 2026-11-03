@@ -85,11 +85,6 @@ export function useTask(id: string | undefined) {
 	return useQuery({ enabled: id !== undefined, queryFn: () => unwrap(api.tasks[':id'].$get({ param: { id: id ?? '' } })), queryKey: ['tasks', 'one', id] });
 }
 
-/** The projects a task can belong to (the API caps a page at 100, plenty for a personal list). */
-export function useProjectOptions() {
-	return useQuery({ queryFn: () => unwrap(api.projects.$get({ query: { archived: 'false', pageSize: '100' } })), queryKey: ['projects', 'options'], staleTime: 60_000 });
-}
-
 export function useGoalOptions() {
 	return useQuery({ queryFn: () => unwrap(api.goals.$get({ query: { pageSize: '100' } })), queryKey: ['goals', 'options'], staleTime: 60_000 });
 }
@@ -171,26 +166,6 @@ export function useRemoveDependency() {
 	return useMutation({
 		mutationFn: ({ dependsOnId, id }: { dependsOnId: string; id: string }) => unwrap(api.tasks[':id'].dependencies[':dependsOnId'].$delete({ param: { dependsOnId, id } })),
 		onSuccess: refresh,
-	});
-}
-
-/** Tasks found by title, to pick the one a task waits for. */
-export function useTaskSearch(q: string) {
-	return useQuery({
-		enabled: q.trim().length > 0,
-		placeholderData: keepPreviousData,
-		queryFn: () => unwrap(api.search.$get({ query: { pageSize: '8', q: q.trim(), types: 'task' } })),
-		queryKey: ['tasks', 'pick', q.trim()],
-	});
-}
-
-/** Tasks by id (the ones a task waits for or blocks), so the drawer can show their titles. */
-export function useTasksByIds(ids: readonly string[]) {
-	const key = [...ids].sort().join(',');
-	return useQuery({
-		enabled: ids.length > 0,
-		queryFn: async () => Promise.all(ids.map(id => unwrap(api.tasks[':id'].$get({ param: { id } })))),
-		queryKey: ['tasks', 'by-ids', key],
 	});
 }
 
