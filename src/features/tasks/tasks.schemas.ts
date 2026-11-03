@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { hasChanges } from '../../lib/diff.js';
 import { markdownSchema } from '../../lib/markdown.js';
 import { paginationQuery } from '../../lib/pagination.js';
+import { taskGroupings } from './tasks.groups.js';
 
 export const BULK_MAX = 50;
 const title = z.string().trim().min(1).max(200);
@@ -79,6 +80,11 @@ export const listTasksQuerySchema = z.object({
 		.transform(() => true)
 		.optional(),
 	goalId: z.uuid().optional(),
+	/**
+	 * Groups the whole filtered set (not just the page): the page holds the groups laid end to end, each ordered by `sort`, and the answer lists them in `meta.groups`
+	 * with their full size. `none` is a plain list.
+	 */
+	groupBy: z.enum(taskGroupings).default('none'),
 	order: z.enum(['asc', 'desc']).default('desc'),
 	/** `true` keeps only tasks with no due date. Ignored when `dueAfter`/`dueBefore` are given. */
 	noDueDate: z

@@ -36,8 +36,19 @@ export default function TasksRoute() {
 	const page = Math.max(1, params.page);
 	const view = params.view;
 	const queryParams = useMemo(
-		() => ({ blocked: params.blocked, due: params.due, focus: params.focus, goal: params.goal, page, project: params.project, sort: params.sort, status: params.status, tag: params.tag }),
-		[page, params.blocked, params.due, params.focus, params.goal, params.project, params.sort, params.status, params.tag]
+		() => ({
+			blocked: params.blocked,
+			due: params.due,
+			focus: params.focus,
+			goal: params.goal,
+			group: params.group,
+			page,
+			project: params.project,
+			sort: params.sort,
+			status: params.status,
+			tag: params.tag,
+		}),
+		[page, params.blocked, params.due, params.focus, params.goal, params.group, params.project, params.sort, params.status, params.tag]
 	);
 
 	const listPage = useTasks(queryParams, view === 'list');
@@ -66,7 +77,7 @@ export default function TasksRoute() {
 	// Selection (list only): it belongs to one page of one view.
 	const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(emptyIds);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset whenever the view changes.
-	useEffect(() => setSelectedIds(emptyIds), [page, view, params.status, params.goal, params.project, params.tag, params.due, params.focus, params.blocked]);
+	useEffect(() => setSelectedIds(emptyIds), [page, view, params.status, params.goal, params.project, params.tag, params.due, params.focus, params.blocked, params.group]);
 
 	// Subtasks of the expanded parents (each its own query, so a change refreshes them with the rest).
 	const [expanded, setExpanded] = useState<ReadonlySet<string>>(emptyIds);
@@ -241,6 +252,7 @@ export default function TasksRoute() {
 						filtered={filtered}
 						goalTitles={goalTitles}
 						group={params.group}
+						groups={listPage.data?.meta.groups ?? null}
 						isLoading={rowsLoading}
 						onBulkApply={onBulkApply}
 						onDelete={setDeleting}

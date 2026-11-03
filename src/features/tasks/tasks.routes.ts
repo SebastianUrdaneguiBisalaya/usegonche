@@ -25,8 +25,8 @@ export default new Hono<AppEnv>()
 	.use(requireUser())
 	.get('/', zValidator('query', listTasksQuerySchema, validationHook), async c => {
 		const { page, pageSize, ...filters } = c.req.valid('query');
-		const { counts, items, total } = await listTasks(c.get('prisma'), c.get('claims').sub, filters, { page, pageSize });
-		return okWithMeta(c, items, { ...pageMeta({ page, pageSize }, total), counts }, 200);
+		const { counts, groups, items, total } = await listTasks(c.get('prisma'), c.get('claims').sub, filters, { page, pageSize });
+		return okWithMeta(c, items, { ...pageMeta({ page, pageSize }, total), counts, groups }, 200);
 	})
 	.post('/', zValidator('json', createTaskSchema, validationHook), async c => ok(c, await createTask(c.get('prisma'), c.get('claims').sub, c.req.valid('json')), 201))
 	// Registered before `/:id` so "bulk" is never read as an id.

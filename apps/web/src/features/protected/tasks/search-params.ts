@@ -56,6 +56,8 @@ export interface TasksParams {
 	focus: boolean;
 	/** Goal id, or empty for every goal. */
 	goal: string;
+	/** What the list groups its rows by (the board ignores it). */
+	group: TaskGroup;
 	page: number;
 	/** Project id, `NO_PROJECT`, or empty for every project. */
 	project: string;

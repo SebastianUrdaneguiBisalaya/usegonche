@@ -57,7 +57,7 @@ describe('GET /tasks', () => {
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
 			data: [expectedView()],
-			meta: { counts: { blocked: 1, cancelled: 0, done: 0, in_progress: 0, overdue: 1, todo: 1 }, page: 1, pageCount: 1, pageSize: 50, total: 1 },
+			meta: { counts: { blocked: 1, cancelled: 0, done: 0, in_progress: 0, overdue: 1, todo: 1 }, groups: null, page: 1, pageCount: 1, pageSize: 50, total: 1 },
 		});
 		expect(prisma.task.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { ownerId: TEST_USER_ID, parentId: null } }));
 	});
@@ -109,6 +109,17 @@ describe('GET /tasks', () => {
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ dueDate: null, ownerId: TEST_USER_ID, parentId: null, projectId: null });
 	});
 
+	it('groups the whole filtered set and answers the groups of the page in meta', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findMany).mockResolvedValue(asRow([row]));
+		vi.mocked(prisma.task.groupBy).mockImplementation((async (args: { by: string[] }) => (args.by[0] === 'priority' ? [{ _count: { _all: 4 }, priority: 'high' }] : [])) as never);
+		const res = await app.request('/tasks?groupBy=priority');
+		expect(res.status).toBe(200);
+		const body = (await res.json()) as { meta: { groups: { count: number; key: string; taskIds: string[] }[]; total: number } };
+		expect(body.meta.groups).toEqual([{ count: 4, key: 'high', taskIds: [row.id] }]);
+		expect(body.meta.total).toBe(4);
+	});
+
 	it('accepts the working-set filter', async () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
@@ -121,6 +132,7 @@ describe('GET /tasks', () => {
 		'noProject=false',
 		'noDueDate=1',
 		'focus=1',
+		'groupBy=nope',
 		'focus=false',
 		'status=nope',
 		'sort=nope',

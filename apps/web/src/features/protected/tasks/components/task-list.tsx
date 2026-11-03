@@ -12,9 +12,8 @@ import { useTranslate } from '~/hooks/use-translate';
 import { ListEmpty, ListTable } from '../../shared/list-table';
 import { listStyles } from '../../shared/styles';
 import { TagChip } from '../../shared/tag-chip';
-import type { BulkChanges, Task } from '../api';
+import type { BulkChanges, Task, TasksPage } from '../api';
 import { statusColor, statusIcon, taskIcon } from '../display';
-import { groupTasks } from '../grouping';
 import type { TaskGroup, TaskPriority, TaskStatus } from '../search-params';
 import { TaskBulkBar } from './task-bulk-bar';
 import { BlockedTag, DueDate, PriorityMenu, TaskStatusMenu, taskDay } from './task-pills';
@@ -34,6 +33,8 @@ interface TaskListProps {
 	filtered: boolean;
 	goalTitles: ReadonlyMap<string, string>;
 	group: TaskGroup;
+	/** The groups of this page as the API computed them over the whole filtered set (`null` when the list is not grouped). */
+	groups: TasksPage['meta']['groups'];
 	isLoading: boolean;
 	onBulkApply: (changes: BulkChanges) => void;
 	onDelete: (task: Task) => void;
@@ -60,19 +61,27 @@ interface TaskListProps {
 
 const stop = (event: { stopPropagation: () => void }) => event.stopPropagation();
 
-/** The rows of the page: grouped (when asked) tasks, each followed by its subtasks when expanded. */
-function buildRows(props: Pick<TaskListProps, 'expanded' | 'goalTitles' | 'group' | 'projectTitles' | 'subtasks' | 'tasks'>, groupLabel: (key: string) => string): TaskRow[] {
-	const { expanded, goalTitles, group, projectTitles, subtasks, tasks } = props;
+/** The rows of the page: the API's groups (each with its full size) with their tasks, each task followed by its subtasks when expanded. */
+function buildRows(props: Pick<TaskListProps, 'expanded' | 'groups' | 'subtasks' | 'tasks'>, groupLabel: (key: string) => string): TaskRow[] {
+	const { expanded, groups, subtasks, tasks } = props;
 	const rows: TaskRow[] = [];
-	const titles = group === 'goal' ? goalTitles : projectTitles;
-	for (const bucket of groupTasks(tasks, group, titles)) {
-		if (group !== 'none') rows.push({ count: bucket.tasks.length, id: `group:${bucket.key}`, kind: 'group', label: groupLabel(bucket.key) });
-		for (const task of bucket.tasks) {
-			rows.push({ id: task.id, kind: 'task', task });
-			if (!expanded.has(task.id)) continue;
-			const children = subtasks.get(task.id);
-			if (!children) rows.push({ id: `loading:${task.id}`, kind: 'loading' });
-			else for (const child of children) rows.push({ id: child.id, kind: 'subtask', task: child });
+	const byId = new Map(tasks.map(task => [task.id, task]));
+	const push = (task: Task) => {
+		rows.push({ id: task.id, kind: 'task', task });
+		if (!expanded.has(task.id)) return;
+		const children = subtasks.get(task.id);
+		if (!children) rows.push({ id: `loading:${task.id}`, kind: 'loading' });
+		else for (const child of children) rows.push({ id: child.id, kind: 'subtask', task: child });
+	};
+	if (!groups) {
+		for (const task of tasks) push(task);
+		return rows;
+	}
+	for (const group of groups) {
+		rows.push({ count: group.count, id: `group:${group.key}`, kind: 'group', label: groupLabel(group.key) });
+		for (const id of group.taskIds) {
+			const task = byId.get(id);
+			if (task) push(task);
 		}
 	}
 	return rows;
@@ -85,6 +94,7 @@ export function TaskList(props: TaskListProps) {
 		expanded,
 		filtered,
 		group,
+		groups,
 		isLoading,
 		onBulkApply,
 		onDelete,
@@ -115,8 +125,8 @@ export function TaskList(props: TaskListProps) {
 			if (group === 'priority') return t(`tasks.priority.${key as TaskPriority}`);
 			return t(`tasks.group.due.${key as 'overdue' | 'today' | 'week' | 'later' | 'none'}`);
 		};
-		return buildRows({ expanded, goalTitles, group, projectTitles, subtasks, tasks }, groupLabel);
-	}, [expanded, goalTitles, group, projectTitles, subtasks, tasks, t]);
+		return buildRows({ expanded, groups, subtasks, tasks }, groupLabel);
+	}, [expanded, goalTitles, group, groups, projectTitles, subtasks, tasks, t]);
 
 	const columns = useMemo<ColumnDef<DataTableFeatures, TaskRow>[]>(
 		() => [

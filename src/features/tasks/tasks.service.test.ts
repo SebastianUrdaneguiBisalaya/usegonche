@@ -170,6 +170,95 @@ describe('listTasks', () => {
 		expect(where).toHaveProperty('OR');
 	});
 
+	describe('grouped', () => {
+		const where = { ownerId: TEST_USER_ID, parentId: null };
+		const rowOf = (id: string) => asRow({ ...base, id });
+
+		it('lays the groups of the whole filtered set end to end and slices the page over them', async () => {
+			const prisma = createMockPrisma();
+			vi.mocked(prisma.task.groupBy).mockImplementation((async (args: { by: string[] }) =>
+				args.by[0] === 'priority'
+					? [
+							{ _count: { _all: 3 }, priority: 'low' },
+							{ _count: { _all: 2 }, priority: 'urgent' },
+						]
+					: []) as never);
+			vi.mocked(prisma.task.findMany).mockImplementation((async (args: { skip: number; take: number }) =>
+				Array.from({ length: args.take }, (_, index) => rowOf(`t${args.skip + index}`))) as never);
+
+			const first = await listTasks(prisma, TEST_USER_ID, { groupBy: 'priority' }, { page: 1, pageSize: 3 });
+			expect(first.total).toBe(5);
+			// Urgent first, then low: the page holds the two urgent tasks and the first low one.
+			expect(first.groups).toEqual([
+				{ count: 2, key: 'urgent', taskIds: ['t0', 't1'] },
+				{ count: 3, key: 'low', taskIds: ['t0'] },
+			]);
+			expect(vi.mocked(prisma.task.findMany).mock.calls.map(([args]) => [args?.skip, args?.take, args?.where])).toEqual([
+				[0, 2, { AND: [where, { priority: 'urgent' }] }],
+				[0, 1, { AND: [where, { priority: 'low' }] }],
+			]);
+
+			vi.mocked(prisma.task.findMany).mockClear();
+			const second = await listTasks(prisma, TEST_USER_ID, { groupBy: 'priority' }, { page: 2, pageSize: 3 });
+			// The low group continues on the next page, still reporting its full size.
+			expect(second.groups).toEqual([{ count: 3, key: 'low', taskIds: ['t1', 't2'] }]);
+			expect(vi.mocked(prisma.task.findMany).mock.calls.map(([args]) => [args?.skip, args?.take])).toEqual([[1, 2]]);
+		});
+
+		it('orders projects by name with the tasks that have none last, looking them up by owner', async () => {
+			const prisma = createMockPrisma();
+			const [a, b] = ['a1a1a1a1-0000-4000-8000-000000000001', 'b2b2b2b2-0000-4000-8000-000000000002'];
+			vi.mocked(prisma.task.groupBy).mockImplementation((async (args: { by: string[] }) =>
+				args.by[0] === 'projectId'
+					? [
+							{ _count: { _all: 3 }, projectId: null },
+							{ _count: { _all: 1 }, projectId: b },
+							{ _count: { _all: 2 }, projectId: a },
+						]
+					: []) as never);
+			vi.mocked(prisma.project.findMany).mockResolvedValue([
+				{ id: a, title: 'Alpha' },
+				{ id: b, title: 'Beta' },
+			] as never);
+			vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+			const page = await listTasks(prisma, TEST_USER_ID, { groupBy: 'project' }, { page: 1, pageSize: 10 });
+			expect(page.groups?.map(group => [group.key, group.count])).toEqual([
+				[a, 2],
+				[b, 1],
+				['none', 3],
+			]);
+			expect(prisma.project.findMany).toHaveBeenCalledWith({ select: { id: true, title: true }, where: { id: { in: [b, a] }, ownerId: TEST_USER_ID } });
+			expect(vi.mocked(prisma.task.findMany).mock.calls.at(-1)?.[0]?.where).toEqual({ AND: [where, { projectId: null }] });
+		});
+
+		it('buckets by due date with the server day, leaving empty buckets out', async () => {
+			vi.useFakeTimers();
+			vi.setSystemTime(new Date('2026-11-10T23:30:00Z'));
+			try {
+				const prisma = createMockPrisma();
+				// Bucket counts come first, in display order: overdue, today, week, later, none.
+				for (const count of [2, 0, 1, 0, 4]) vi.mocked(prisma.task.count).mockResolvedValueOnce(count);
+				vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+				vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+				const page = await listTasks(prisma, TEST_USER_ID, { groupBy: 'due' }, { page: 1, pageSize: 10 });
+				expect(page.groups?.map(group => [group.key, group.count])).toEqual([
+					['overdue', 2],
+					['week', 1],
+					['none', 4],
+				]);
+				expect(page.total).toBe(7);
+				const today = new Date('2026-11-10');
+				expect(vi.mocked(prisma.task.findMany).mock.calls.map(([args]) => args?.where)).toEqual([
+					{ AND: [where, { dueDate: { lt: today }, status: { in: ['todo', 'in_progress'] } }] },
+					{ AND: [where, { dueDate: { gt: today, lte: new Date('2026-11-16') } }] },
+					{ AND: [where, { dueDate: null }] },
+				]);
+			} finally {
+				vi.useRealTimers();
+			}
+		});
+	});
+
 	it('filters blocked and not blocked tasks', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
