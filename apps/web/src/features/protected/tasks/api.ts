@@ -1,9 +1,12 @@
-import { keepPreviousData, type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, type QueryClient, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type Body } from '~/lib/api';
 import { unwrap } from '~/lib/api-error';
 import { toDateOnly } from '../shared/dates';
 import { type OkBody, PAGE_SIZE, unwrapPage } from '../shared/paged';
 import { NO_PROJECT, type TaskSort, type TasksParams, type TaskView } from './search-params';
+
+/** Events per page of a task's history. */
+const HISTORY_PAGE_SIZE = 20;
 
 type TasksResponse = Awaited<ReturnType<typeof api.tasks.$get>>;
 
@@ -176,8 +179,21 @@ export function useResolveBlocker() {
 	});
 }
 
+type HistoryResponse = Awaited<ReturnType<(typeof api.tasks)[':id']['history']['$get']>>;
+
+/** One page of `GET /tasks/:id/history` (newest first), with the page meta (`page`, `pageCount`, `total`). */
+export type HistoryPage = OkBody<HistoryResponse>;
+export type TaskEvent = HistoryPage['data'][number];
+
+/** The functional history of a task, a page at a time: `fetchNextPage` loads the next older events. */
 export function useTaskHistory(id: string, enabled: boolean) {
-	return useQuery({ enabled, queryFn: () => unwrap(api.tasks[':id'].history.$get({ param: { id }, query: { pageSize: '50' } })), queryKey: ['tasks', 'history', id] });
+	return useInfiniteQuery({
+		enabled,
+		getNextPageParam: (last: HistoryPage) => (last.meta.page < last.meta.pageCount ? last.meta.page + 1 : undefined),
+		initialPageParam: 1,
+		queryFn: ({ pageParam }) => unwrapPage(api.tasks[':id'].history.$get({ param: { id }, query: { page: String(pageParam), pageSize: String(HISTORY_PAGE_SIZE) } })),
+		queryKey: ['tasks', 'history', id],
+	});
 }
 
 export function useTaskNotes(taskId: string, enabled: boolean) {
