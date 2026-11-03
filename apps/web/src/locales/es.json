@@ -978,22 +978,6 @@
       "projectNotFound": "No hay proyecto \"{{name}}\"",
       "estimate": "~{{minutes}} min"
     },
-    "next": {
-      "title": "Siguiente mejor tarea",
-      "open": "Abrir",
-      "reason": {
-        "due_soon": "Vence pronto",
-        "due_today": "Vence hoy",
-        "fits_available_slot": "Cabe en tu tiempo libre",
-        "in_progress": "Ya está en curso",
-        "linked_to_goal": "Ligada a una meta activa",
-        "overdue": "Vencida",
-        "planned_today": "Planificada para hoy",
-        "priority_high": "Prioridad alta",
-        "priority_urgent": "Urgente",
-        "unblocked": "Desbloquea otras tareas"
-      }
-    },
     "modal": {
       "title": "Nueva tarea",
       "description": "Captura lo que hay que hacer. Podrás afinarla después."

@@ -89,11 +89,10 @@ export function useGoalOptions() {
 	return useQuery({ queryFn: () => unwrap(api.goals.$get({ query: { pageSize: '100' } })), queryKey: ['goals', 'options'], staleTime: 60_000 });
 }
 
-/** Everything that depends on tasks refetches after a change (lists, subtasks, the drawer's task, the suggestion). */
+/** Everything that depends on tasks refetches after a change (lists, subtasks, the drawer's task). */
 function useRefreshTasks() {
 	const queryClient = useQueryClient();
-	return () =>
-		Promise.all([queryClient.invalidateQueries({ queryKey: ['tasks'] }), queryClient.invalidateQueries({ queryKey: ['suggestions'] }), queryClient.invalidateQueries({ queryKey: ['projects'] })]);
+	return () => Promise.all([queryClient.invalidateQueries({ queryKey: ['tasks'] }), queryClient.invalidateQueries({ queryKey: ['projects'] })]);
 }
 
 type Rollback = () => void;
@@ -204,11 +203,6 @@ export function useTaskFiles(taskId: string, enabled: boolean) {
 /** The time blocks planned for the task, all of them (no date range needed when the filter is a task). */
 export function useTaskBlocks(taskId: string, enabled: boolean) {
 	return useQuery({ enabled, queryFn: () => unwrap(api.planning.blocks.$get({ query: { taskId } })), queryKey: ['tasks', 'blocks', taskId] });
-}
-
-/** The best task to work on now, with the reasons (`GET /suggestions/next`). Read-only: it never changes data. */
-export function useNextTask() {
-	return useQuery({ queryFn: () => unwrap(api.suggestions.next.$get({ query: { limit: '1' } })), queryKey: ['suggestions', 'next'], staleTime: 30_000 });
 }
 
 const CYCLE_SEARCH_LIMIT = 40;
