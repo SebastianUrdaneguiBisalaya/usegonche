@@ -1334,5 +1334,41 @@
       "previewEmpty": "This version has no text.",
       "restoreHint": "The current version is saved as a new revision."
     }
+  },
+  "today": {
+    "title": "Today",
+    "subtitle": "Focus on what moves you forward.",
+    "backToToday": "Back to today",
+    "strip": {
+      "previous": "Previous days",
+      "next": "Next days"
+    },
+    "plan": {
+      "title": "Plan for this day",
+      "titleToday": "Plan for today",
+      "count": "{{done}} of {{total}} tasks",
+      "progress": "Day progress",
+      "add": "Add task…",
+      "addEmpty": "No task matches.",
+      "remove": "Remove “{{title}}” from the plan"
+    },
+    "empty": {
+      "title": "Nothing planned",
+      "description": "Add the tasks you want to work on this day."
+    },
+    "error": {
+      "title": "The plan could not be loaded.",
+      "retry": "Retry"
+    },
+    "blocked": {
+      "title": "Blocked",
+      "count_one": "{{count}} task",
+      "count_other": "{{count}} tasks"
+    },
+    "inbox": {
+      "title": "Inbox",
+      "viewAll": "View all",
+      "empty": "Your inbox is empty."
+    }
   }
 }
