@@ -12,7 +12,8 @@ type AvatarUploadBody = Body<(typeof api.profile.avatar)['upload-url']['$post']>
 export const settingsKey = ['profile', 'settings'] as const;
 
 export function useUserSettings() {
-	return useQuery({ queryFn: () => unwrap(api.profile.settings.$get()), queryKey: settingsKey });
+	// Silent: it also runs in the layout to sync preferences, where a failure must not toast (the local preference keeps working).
+	return useQuery({ meta: { silent: true }, queryFn: () => unwrap(api.profile.settings.$get()), queryKey: settingsKey, retry: false });
 }
 
 /** Country and time zone are saved together (`PATCH /profile/settings`); the answer replaces the cached settings. */

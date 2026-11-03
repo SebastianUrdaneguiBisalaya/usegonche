@@ -105,6 +105,14 @@ describe('PATCH /profile/settings', () => {
 		expect(prisma.userSettings.update).toHaveBeenCalledWith({ data: { language: 'es', timezone: 'America/Lima' }, where: { ownerId: TEST_USER_ID } });
 	});
 
+	it.each(['system', 'es', 'es-PE'])('accepts %s as language', async language => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.userSettings.update).mockResolvedValue({ ...settings, language });
+		const res = await app.request('/profile/settings', jsonRequest('PATCH', { language }));
+		expect(res.status).toBe(200);
+		expect(prisma.userSettings.update).toHaveBeenCalledWith({ data: { language }, where: { ownerId: TEST_USER_ID } });
+	});
+
 	it('answers 200 and writes nothing when the settings do not change', async () => {
 		const { app, prisma } = setup();
 		const res = await app.request('/profile/settings', jsonRequest('PATCH', { language: 'en', timezone: 'UTC' }));
@@ -117,6 +125,7 @@ describe('PATCH /profile/settings', () => {
 		['an unknown theme', { theme: 'neon' }],
 		['an invalid timezone', { timezone: 'Mars/Olympus' }],
 		['an invalid language', { language: 'not a language' }],
+		['a language that only looks like system', { language: 'systems' }],
 		['an empty body', {}],
 		['an owner override', { ownerId: 'x' }],
 	])('rejects %s with 422', async (_name, body) => {
