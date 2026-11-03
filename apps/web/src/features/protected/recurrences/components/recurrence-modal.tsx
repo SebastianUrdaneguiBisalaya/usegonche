@@ -17,6 +17,7 @@ import { apiDateOnly, fromDateOnly, toDateOnly } from '../../shared/dates';
 import { useProjectOptions } from '../../shared/projects';
 import { listStyles } from '../../shared/styles';
 import { useCreateTag, useTagOptions } from '../../shared/tags';
+import { useDateTime } from '../../shared/use-datetime';
 import { useGoalOptions } from '../../tasks/api';
 import { usePickerLang } from '../../tasks/components/task-pills';
 import { type TaskPriority, taskPriorities } from '../../tasks/search-params';
@@ -45,8 +46,6 @@ interface RecurrenceModalProps {
 	recurrence?: Recurrence;
 }
 
-const today = () => toDateOnly(new Date());
-
 /** The weekdays of a weekly rule (nothing is shown for the other frequencies). */
 function WeekdaysField({ locale }: { locale: string }) {
 	const t = useTranslate();
@@ -70,7 +69,7 @@ function WeekdaysField({ locale }: { locale: string }) {
 	);
 }
 
-function initialValues(recurrence: Recurrence | undefined, prefill: RecurrencePrefill | undefined) {
+function initialValues(recurrence: Recurrence | undefined, prefill: RecurrencePrefill | undefined, today: string) {
 	const parts = recurrence ? parseRule(recurrence.rule) : null;
 	return {
 		byDay: (parts?.byDay ?? []) as Weekday[],
@@ -82,7 +81,7 @@ function initialValues(recurrence: Recurrence | undefined, prefill: RecurrencePr
 		interval: String(parts?.interval ?? 1),
 		priority: (recurrence?.priority ?? prefill?.priority ?? 'medium') as TaskPriority,
 		projectId: (recurrence ? recurrence.projectId : prefill?.projectId) ?? '',
-		startDate: recurrence ? apiDateOnly(recurrence.startDate) : today(),
+		startDate: recurrence ? apiDateOnly(recurrence.startDate) : today,
 		tagIds: recurrence ? recurrence.tags.map(tag => tag.id) : (prefill?.tagIds ?? []),
 		time: minuteToTime(recurrence?.startMinute ?? null),
 		title: recurrence?.title ?? prefill?.title ?? '',
@@ -94,6 +93,7 @@ export function RecurrenceModal({ onOpenChange, open, prefill, recurrence }: Rec
 	const t = useTranslate();
 	const { locale } = useLanguage();
 	const pickerLang = usePickerLang();
+	const { today } = useDateTime();
 	const create = useCreateRecurrence();
 	const update = useUpdateRecurrence();
 	const projects = useProjectOptions();
@@ -108,7 +108,7 @@ export function RecurrenceModal({ onOpenChange, open, prefill, recurrence }: Rec
 		<Modal.Root onOpenChange={onOpenChange} open={open}>
 			<Modal.Content aria-labelledby='recurrence-title' className='max-w-xl rounded-2xl p-0'>
 				<Form
-					defaultValues={initialValues(recurrence, prefill)}
+					defaultValues={initialValues(recurrence, prefill, today())}
 					key={`${recurrence?.id ?? 'new'}:${open}`}
 					mode='onSubmit'
 					onSubmit={async values => {

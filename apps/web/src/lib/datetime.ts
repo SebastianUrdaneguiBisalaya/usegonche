@@ -11,6 +11,13 @@ export function formatDateTime(iso: string | Date, locale: string, timeZone: str
 	return new Intl.DateTimeFormat(locale, { ...options, timeZone }).format(typeof iso === 'string' ? fromApi(iso) : iso);
 }
 
+/** `YYYY-MM-DD` of the calendar day it is at `at` in `timeZone` (undefined: the browser's), shifted by `days`. */
+export function todayInZone(timeZone: string | undefined, days = 0, at: Date = new Date()): string {
+	const parts = new Intl.DateTimeFormat('en-US', { day: '2-digit', month: '2-digit', timeZone, year: 'numeric' }).formatToParts(at);
+	const get = (type: string): number => Number(parts.find(part => part.type === type)?.value);
+	return new Date(Date.UTC(get('year'), get('month') - 1, get('day') + days)).toISOString().slice(0, 10);
+}
+
 /** Minutes after midnight on the wall clock of `timeZone` (undefined: the browser's) at the instant `at`. */
 export function minuteInZone(at: Date, timeZone: string | undefined): number {
 	if (!timeZone) return at.getHours() * 60 + at.getMinutes();

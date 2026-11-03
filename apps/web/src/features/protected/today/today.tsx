@@ -12,6 +12,7 @@ import { QuickCapture } from '../inbox/components/quick-capture';
 import { useMaterializeRecurrences } from '../recurrences/api';
 import { fromDateOnly, toDateOnly } from '../shared/dates';
 import { listStyles } from '../shared/styles';
+import { useDateTime } from '../shared/use-datetime';
 import { useUpdateTask } from '../tasks/api';
 import { useDay, useSetDayItems } from './api';
 import { AgendaCard } from './components/agenda-card';
@@ -28,10 +29,9 @@ export default function TodayRoute() {
 	const { locale } = useLanguage();
 	const [param, setParam] = useQueryState('date', parseAsString.withDefault(''));
 
-	const today = useMemo(() => {
-		const now = new Date();
-		return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-	}, []);
+	const { today: todayOf } = useDateTime();
+	const todayValue = todayOf();
+	const today = useMemo(() => fromDateOnly(todayValue) ?? new Date(), [todayValue]);
 	const selected = (param && fromDateOnly(param)) || today;
 	const date = toDateOnly(selected);
 	const isToday = date === toDateOnly(today);
