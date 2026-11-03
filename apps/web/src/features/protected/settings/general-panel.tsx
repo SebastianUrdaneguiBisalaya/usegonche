@@ -5,13 +5,12 @@ import { type CountryFlags, CountrySelect } from '~/components/ui/forms-inputs/c
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { SettingsDialog } from '~/components/ui/overlays-feedback/settings-dialog/settings-dialog';
-import { useLanguage } from '~/hooks/use-language';
-import { useTheme } from '~/hooks/use-theme';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { listStyles } from '../shared/styles';
 import { useUpdateSettings, useUserSettings } from './api';
 import { timezoneForCountry } from './timezone';
+import { usePreferences } from './use-preferences';
 
 const languages = ['system', 'en', 'es'] as const;
 
@@ -28,11 +27,10 @@ function useFlags(): CountryFlags | undefined {
 	return flags;
 }
 
-/** Theme and language apply on this device right away (cookies); the country is saved on the account, together with its time zone. */
+/** Theme and language apply on this device right away and are saved on the account; the country is saved together with its time zone. */
 export function GeneralPanel() {
 	const t = useTranslate();
-	const { preference: theme, setPreference: setTheme } = useTheme();
-	const { locale, preference: language, setPreference: setLanguage } = useLanguage();
+	const { language, locale, setLanguage, setTheme, theme } = usePreferences();
 	const flags = useFlags();
 	const { data: settings, isLoading } = useUserSettings();
 	const update = useUpdateSettings();

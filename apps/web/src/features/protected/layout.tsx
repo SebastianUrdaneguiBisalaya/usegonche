@@ -7,6 +7,7 @@ import { Icon } from '~/components/ui/foundations/icon/icon';
 import { type Session, sessionKey, useSession } from '~/features/auth/api';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
+import { useSyncPreferences } from './settings/use-preferences';
 import { AppSidebar } from './shared/app-sidebar';
 import { CommandPalette } from './shared/command-palette';
 import { LayoutSkeleton } from './shared/layout-skeleton';
@@ -41,6 +42,7 @@ export default function ProtectedLayout() {
 	const { data: session, isPending } = useSession();
 	const [mobileOpen, setMobileOpen] = useState(false);
 	const [commandOpen, setCommandOpen] = useState(false);
+	useSyncPreferences();
 
 	if (isPending) return <LayoutSkeleton />;
 	if (!session) return <Navigate replace to='/auth/sign-in' />;
