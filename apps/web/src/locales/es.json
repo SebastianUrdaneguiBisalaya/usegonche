@@ -799,7 +799,8 @@
     "views": {
       "label": "Vista",
       "board": "Tablero",
-      "list": "Lista"
+      "list": "Lista",
+      "recurring": "Recurrentes"
     },
     "status": {
       "todo": "Por hacer",
@@ -1498,6 +1499,103 @@
       "set": "Recordatorio definido.",
       "updated": "Recordatorio actualizado.",
       "removed": "Recordatorio quitado."
+    }
+  },
+  "recurrences": {
+    "title": "Recurrentes",
+    "new": "Nueva recurrencia",
+    "empty": {
+      "title": "Aún no se repite nada",
+      "description": "Crea una regla para el trabajo que vuelve, como una revisión semanal o una reunión diaria."
+    },
+    "error": {
+      "title": "No se pudieron cargar las recurrencias.",
+      "retry": "Reintentar"
+    },
+    "rule": {
+      "daily_one": "Cada día",
+      "daily_other": "Cada {{count}} días",
+      "weekly_one": "Cada semana",
+      "weekly_other": "Cada {{count}} semanas",
+      "monthly_one": "Cada mes",
+      "monthly_other": "Cada {{count}} meses",
+      "yearly_one": "Cada año",
+      "yearly_other": "Cada {{count}} años",
+      "on": "el {{days}}"
+    },
+    "card": {
+      "edit": "Editar recurrencia",
+      "delete": "Eliminar recurrencia",
+      "upcoming": "Próximas:",
+      "noUpcoming": "Sin próximas ocurrencias",
+      "minutes": "{{count}} min"
+    },
+    "modal": {
+      "title": "Nueva recurrencia",
+      "description": "Repite una tarea según un calendario. Cada ocurrencia es una tarea normal.",
+      "editTitle": "Editar recurrencia",
+      "editDescription": "Los cambios se aplican a las ocurrencias futuras que aún no se han tocado."
+    },
+    "form": {
+      "create": "Crear recurrencia",
+      "save": "Guardar cambios",
+      "title": {
+        "label": "Título",
+        "placeholder": "¿Qué se repite?",
+        "required": "El título es obligatorio",
+        "tooLong": "El título admite hasta {{max}} caracteres"
+      },
+      "description": {
+        "label": "Descripción",
+        "placeholder": "Detalles opcionales"
+      },
+      "freq": {
+        "label": "Se repite",
+        "DAILY": "Cada día",
+        "WEEKLY": "Cada semana",
+        "MONTHLY": "Cada mes",
+        "YEARLY": "Cada año"
+      },
+      "interval": {
+        "label": "Cada",
+        "invalid": "Usa un número del 1 al 999"
+      },
+      "byDay": {
+        "label": "Estos días"
+      },
+      "startDate": {
+        "label": "Empieza",
+        "placeholder": "Elige una fecha",
+        "required": "Elige una fecha de inicio"
+      },
+      "time": {
+        "label": "Hora (opcional)",
+        "needsDuration": "Añade la duración del bloque de tiempo, o borra la hora"
+      },
+      "duration": {
+        "label": "Duración (min)",
+        "placeholder": "Minutos",
+        "invalid": "Usa una duración de 1 a 1440 minutos"
+      },
+      "estimate": {
+        "label": "Estimación"
+      }
+    },
+    "delete": {
+      "title": "¿Eliminar esta recurrencia?",
+      "description": "Se eliminarán “{{title}}” y sus ocurrencias futuras sin tocar. Las tareas pasadas o iniciadas se conservan.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar"
+    },
+    "drawer": {
+      "label": "Repetir",
+      "make": "Hacer recurrente",
+      "loading": "Cargando..."
+    },
+    "toast": {
+      "created": "Recurrencia creada.",
+      "updated": "Recurrencia actualizada.",
+      "deleted": "Recurrencia eliminada."
     }
   },
   "today": {

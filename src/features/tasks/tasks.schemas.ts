@@ -86,6 +86,8 @@ export const listTasksQuerySchema = z.object({
 	parentId: z.uuid().optional(),
 	priority: z.enum(taskPriorities).optional(),
 	projectId: z.uuid().optional(),
+	/** Only the occurrences of this recurrence rule. */
+	recurrenceId: z.uuid().optional(),
 	sort: z.enum(taskSortFields).default('createdAt'),
 	/** One or several statuses. */
 	status: statusList.optional(),

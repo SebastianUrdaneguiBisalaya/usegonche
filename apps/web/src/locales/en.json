@@ -799,7 +799,8 @@
     "views": {
       "label": "View",
       "board": "Board",
-      "list": "List"
+      "list": "List",
+      "recurring": "Recurring"
     },
     "status": {
       "todo": "To do",
@@ -1498,6 +1499,103 @@
       "set": "Reminder set.",
       "updated": "Reminder updated.",
       "removed": "Reminder removed."
+    }
+  },
+  "recurrences": {
+    "title": "Recurring",
+    "new": "New recurrence",
+    "empty": {
+      "title": "Nothing repeats yet",
+      "description": "Create a rule for work that comes back, like a weekly review or a daily stand-up."
+    },
+    "error": {
+      "title": "Recurrences could not be loaded.",
+      "retry": "Try again"
+    },
+    "rule": {
+      "daily_one": "Every day",
+      "daily_other": "Every {{count}} days",
+      "weekly_one": "Every week",
+      "weekly_other": "Every {{count}} weeks",
+      "monthly_one": "Every month",
+      "monthly_other": "Every {{count}} months",
+      "yearly_one": "Every year",
+      "yearly_other": "Every {{count}} years",
+      "on": "on {{days}}"
+    },
+    "card": {
+      "edit": "Edit recurrence",
+      "delete": "Delete recurrence",
+      "upcoming": "Next:",
+      "noUpcoming": "No upcoming occurrences",
+      "minutes": "{{count}} min"
+    },
+    "modal": {
+      "title": "New recurrence",
+      "description": "Repeat a task on a schedule. Each occurrence is a regular task.",
+      "editTitle": "Edit recurrence",
+      "editDescription": "Changes apply to future occurrences that are still untouched."
+    },
+    "form": {
+      "create": "Create recurrence",
+      "save": "Save changes",
+      "title": {
+        "label": "Title",
+        "placeholder": "What repeats?",
+        "required": "Title is required",
+        "tooLong": "Title can have up to {{max}} characters"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Optional details"
+      },
+      "freq": {
+        "label": "Repeats",
+        "DAILY": "Daily",
+        "WEEKLY": "Weekly",
+        "MONTHLY": "Monthly",
+        "YEARLY": "Yearly"
+      },
+      "interval": {
+        "label": "Every",
+        "invalid": "Use a number from 1 to 999"
+      },
+      "byDay": {
+        "label": "On these days"
+      },
+      "startDate": {
+        "label": "Starts",
+        "placeholder": "Pick a date",
+        "required": "Pick a start date"
+      },
+      "time": {
+        "label": "Time (optional)",
+        "needsDuration": "Add the duration of the time block, or clear the time"
+      },
+      "duration": {
+        "label": "Duration (min)",
+        "placeholder": "Minutes",
+        "invalid": "Use a duration from 1 to 1440 minutes"
+      },
+      "estimate": {
+        "label": "Estimate"
+      }
+    },
+    "delete": {
+      "title": "Delete this recurrence?",
+      "description": "“{{title}}” and its future untouched occurrences will be deleted. Past and started tasks stay.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "drawer": {
+      "label": "Repeat",
+      "make": "Make recurring",
+      "loading": "Loading..."
+    },
+    "toast": {
+      "created": "Recurrence created.",
+      "updated": "Recurrence updated.",
+      "deleted": "Recurrence deleted."
     }
   },
   "today": {

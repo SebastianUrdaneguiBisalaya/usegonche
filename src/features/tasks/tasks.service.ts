@@ -94,12 +94,13 @@ const NULLABLE_SORT: TaskSort[] = ['dueDate', 'startDate'];
  * Counters follow every filter except the status, so each status chip shows how many tasks it would hold. `overdue` uses the UTC date.
  */
 export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: ListTasksFilters, page: PageParams): Promise<TaskPage> => {
-	const { blocked, dueAfter, dueBefore, goalId, noDueDate, noProject, order = 'desc', parentId, priority, projectId, sort = 'createdAt', status, tagId } = filters;
+	const { blocked, dueAfter, dueBefore, goalId, noDueDate, noProject, order = 'desc', parentId, priority, projectId, recurrenceId, sort = 'createdAt', status, tagId } = filters;
 	const shared = scoped(ownerId, {
 		parentId: parentId ?? null,
 		...(dueAfter || dueBefore ? { dueDate: { ...(dueAfter && { gte: dueAfter }), ...(dueBefore && { lte: dueBefore }) } } : noDueDate ? { dueDate: null } : {}),
 		...(goalId && { goalId }),
 		...(priority && { priority }),
+		...(recurrenceId && { recurrenceId }),
 		...(projectId ? { projectId } : noProject ? { projectId: null } : {}),
 		...(tagId && { tags: { some: { tagId } } }),
 		...(blocked === undefined ? {} : blocked ? blockedWhere : { NOT: blockedWhere }),
