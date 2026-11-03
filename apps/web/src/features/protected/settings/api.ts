@@ -41,3 +41,25 @@ export async function uploadAvatar(file: File, onProgress: (percent: number) => 
 	await putToStorage(upload.uploadUrl, file, onProgress);
 	return upload.publicUrl;
 }
+
+export type Availability = Data<Awaited<ReturnType<typeof api.planning.availability.$get>>>;
+export type AvailabilityWindow = Body<typeof api.planning.availability.$put>['windows'][number];
+
+export const availabilityKey = ['planning', 'availability'] as const;
+
+/** The weekly working-hours template (`GET /planning/availability`). */
+export function useAvailability() {
+	return useQuery({ queryFn: () => unwrap(api.planning.availability.$get()), queryKey: availabilityKey });
+}
+
+/** Replaces the whole template (`PUT /planning/availability`). Today's capacity depends on it, so every plan refetches. */
+export function useSetAvailability() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (windows: AvailabilityWindow[]) => unwrap(api.planning.availability.$put({ json: { windows } })),
+		onSuccess: async availability => {
+			queryClient.setQueryData(availabilityKey, availability);
+			await queryClient.invalidateQueries({ queryKey: ['planning', 'day'] });
+		},
+	});
+}

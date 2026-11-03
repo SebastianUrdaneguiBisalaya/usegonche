@@ -15,6 +15,7 @@ import { useUpdateTask } from '../tasks/api';
 import { useDay, useSetDayItems } from './api';
 import { AgendaCard } from './components/agenda-card';
 import { BlockedCard } from './components/blocked-card';
+import { CapacityCard } from './components/capacity-card';
 import { InboxCard } from './components/inbox-card';
 import { PlanCard } from './components/plan-card';
 
@@ -81,17 +82,24 @@ export default function TodayRoute() {
 				<QuickCapture />
 				<div className='grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,18rem)]'>
 					<AgendaCard blocks={day.data?.blocks ?? []} date={date} isToday={isToday} />
-					<PlanCard
-						error={day.isError}
-						isLoading={day.isPending}
-						isToday={isToday}
-						items={items}
-						onAdd={id => save([...taskIds, id])}
-						onRemove={id => save(taskIds.filter(current => current !== id))}
-						onRetry={() => void day.refetch()}
-						onToggleDone={(id, done) => update.mutate({ changes: { status: done ? 'done' : 'todo' }, id }, { onError: fail, onSettled: () => void day.refetch() })}
-						pending={setItems.isPending || update.isPending}
-					/>
+					<div className='flex flex-col gap-4'>
+						{day.data && <CapacityCard capacity={day.data.capacity} />}
+						<PlanCard
+							error={day.isError}
+							isLoading={day.isPending}
+							isToday={isToday}
+							items={items}
+							onAdd={id => save([...taskIds, id])}
+							onRemove={id => save(taskIds.filter(current => current !== id))}
+							onRetry={() => void day.refetch()}
+							onToggleDone={(id, done) => update.mutate({ changes: { status: done ? 'done' : 'todo' }, id }, { onError: fail, onSettled: () => void day.refetch() })}
+							pending={setItems.isPending || update.isPending}
+						/>
+					</div>
+					<div className='flex flex-col gap-4'>
+						<BlockedCard />
+						<InboxCard />
+					</div>
 				</div>
 			</Page.Body>
 		</Page.Root>

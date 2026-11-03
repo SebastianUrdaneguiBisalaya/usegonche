@@ -249,6 +249,23 @@
           "navigation": "Navigation",
           "other": "Other"
         }
+      },
+      "availability": {
+        "nav": "Availability",
+        "title": "Availability",
+        "description": "Your weekly working hours. Today uses them to tell how much time you really have.",
+        "dayOff": "Day off",
+        "add": "Add window",
+        "remove": "Remove window",
+        "start": "{{day}}: start",
+        "end": "{{day}}: end",
+        "total": "Weekly total: {{total}}",
+        "save": "Save",
+        "saved": "Availability saved.",
+        "error": "Availability could not be loaded.",
+        "retry": "Retry",
+        "error_end_before_start": "The end must be after the start.",
+        "error_overlapping": "This window overlaps another one of the same day."
       }
     }
   },
@@ -1406,6 +1423,15 @@
         "overlaps_block": "Overlaps another block.",
         "overlaps_event": "Overlaps a calendar event."
       }
+    },
+    "capacity": {
+      "title": "Capacity",
+      "summary": "{{planned}} planned of {{available}} available",
+      "remaining": "{{time}} left",
+      "over": "Overcommitted by {{time}}",
+      "noHours": "Set your working hours in Settings > Availability to see your capacity.",
+      "unestimated_one": "{{count}} open task without an estimate counts as 0.",
+      "unestimated_other": "{{count}} open tasks without an estimate count as 0."
     }
   }
 }
