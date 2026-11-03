@@ -1432,6 +1432,19 @@
       "noHours": "Set your working hours in Settings > Availability to see your capacity.",
       "unestimated_one": "{{count}} open task without an estimate counts as 0.",
       "unestimated_other": "{{count}} open tasks without an estimate count as 0."
+    },
+    "replan": {
+      "title": "Replan",
+      "subtitle": "Missed or interrupted blocks. Nothing changes until you accept.",
+      "reason": {
+        "missed": "Missed",
+        "interrupted": "Interrupted"
+      },
+      "suggestion": "{{duration}} left · proposed: {{time}}",
+      "noSlot": "{{duration}} left · no free slot in the next 7 days",
+      "accept": "Accept",
+      "reject": "Dismiss",
+      "accepted": "Block rescheduled."
     }
   }
 }

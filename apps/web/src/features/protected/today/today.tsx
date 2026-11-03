@@ -18,6 +18,7 @@ import { BlockedCard } from './components/blocked-card';
 import { CapacityCard } from './components/capacity-card';
 import { InboxCard } from './components/inbox-card';
 import { PlanCard } from './components/plan-card';
+import { ReplanCard } from './components/replan-card';
 
 const STRIP_DAYS = 7;
 
@@ -83,6 +84,7 @@ export default function TodayRoute() {
 				<div className='grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,18rem)]'>
 					<AgendaCard blocks={day.data?.blocks ?? []} date={date} isToday={isToday} />
 					<div className='flex flex-col gap-4'>
+						<ReplanCard date={date} />
 						{day.data && <CapacityCard capacity={day.data.capacity} />}
 						<PlanCard
 							error={day.isError}
