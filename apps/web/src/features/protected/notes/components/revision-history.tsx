@@ -7,6 +7,7 @@ import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Drawer } from '~/components/ui/overlays-feedback/drawer/drawer';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
+import { formatRelativeLong } from '../../shared/relative-time';
 import { useRestoreRevision, useRevision, useRevisions } from '../api';
 
 interface RevisionHistoryProps {
@@ -150,7 +151,9 @@ export function RevisionHistory({ noteId, onRestored }: RevisionHistoryProps) {
 												type='button'
 											>
 												<span className='truncate text-sm font-medium'>{item.title || t('notes.history.untitled')}</span>
-												<span className='text-xs text-muted-foreground'>{t('notes.history.versionOf', { date: formatDate(item.createdAt) })}</span>
+												<span className='text-xs text-muted-foreground' title={formatDate(item.createdAt)}>
+													{formatRelativeLong(item.createdAt, locale)}
+												</span>
 											</button>
 										</li>
 									))}
