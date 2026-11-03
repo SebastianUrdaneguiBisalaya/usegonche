@@ -1,28 +1,28 @@
 {
-	"name": "@usegonche/api-client",
-	"version": "0.0.0",
-	"private": true,
-	"author": {
-		"name": "Sebastian Marat Urdanegui Bisalaya",
-		"url": "https://www.sebastianurdanegui.com/"
-	},
-	"type": "module",
-	"exports": {
-		".": {
-			"types": "./dist/packages/api-client/src/index.d.ts",
-			"default": "./src/index.ts"
-		}
-	},
-	"scripts": {
-		"build": "tsc -p tsconfig.build.json",
-		"format": "biome format --write",
-		"lint": "biome check",
-		"typecheck": "tsc --noEmit"
-	},
-	"dependencies": {
-		"hono": "4.13.16"
-	},
-	"devDependencies": {
-		"typescript": "7.0.2"
-	}
+  "name": "@usegonche/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "author": {
+    "name": "Sebastian Marat Urdanegui Bisalaya",
+    "url": "https://www.sebastianurdanegui.com/"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/packages/api-client/src/index.d.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "format": "biome format --write",
+    "lint": "biome check",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "4.13.16"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
 }

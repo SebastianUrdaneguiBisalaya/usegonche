@@ -17,24 +17,26 @@ Every command is run **from the repo root** unless it says otherwise.
 Requirements: Node.js 22 or newer, and pnpm (the exact version is pinned in `package.json` > `packageManager`; `corepack enable` installs it).
 
 1. Install dependencies. This also generates the Prisma clients (`postinstall`):
+
    ```bash
    pnpm install
    ```
 2. Create your env file and fill it in:
+
    ```bash
    cp .env.example .env
    ```
 3. Fill the **required** variables (get them from the Supabase dashboard):
 
-   | Variable | Where it comes from |
-   | --- | --- |
-   | `SUPABASE_URL` | Project Settings > API |
-   | `SUPABASE_PUBLISHABLE_KEY` | Project Settings > API Keys |
-   | `SUPABASE_SECRET_KEY` | Project Settings > API Keys. Server only, never in a client app |
-   | `DATABASE_URL` | Connect > pooled connection (Supavisor, port `6543`). Used at runtime |
-   | `DIRECT_URL` | Connect > direct or session pooler (port `5432`). Used **only by migrations** |
-   | `AUTH_REDIRECT_URL` | Where the browser lands after Google sign-in or the email link (e.g. `http://localhost:5173`) |
-   | `AUTH_CALLBACK_URL` | Public URL of `GET /v1/auth/callback` (e.g. `http://localhost:4000/v1/auth/callback`) |
+   | Variable                   | Where it comes from                                                                           |
+   | -------------------------- | --------------------------------------------------------------------------------------------- |
+   | `SUPABASE_URL`             | Project Settings > API                                                                        |
+   | `SUPABASE_PUBLISHABLE_KEY` | Project Settings > API Keys                                                                   |
+   | `SUPABASE_SECRET_KEY`      | Project Settings > API Keys. Server only, never in a client app                               |
+   | `DATABASE_URL`             | Connect > pooled connection (Supavisor, port `6543`). Used at runtime                         |
+   | `DIRECT_URL`               | Connect > direct or session pooler (port `5432`). Used **only by migrations**                 |
+   | `AUTH_REDIRECT_URL`        | Where the browser lands after Google sign-in or the email link (e.g. `http://localhost:5173`) |
+   | `AUTH_CALLBACK_URL`        | Public URL of `GET /v1/auth/callback` (e.g. `http://localhost:4000/v1/auth/callback`)         |
 
    Optional variables (`CORS_ORIGINS`, `COOKIE_DOMAIN`, Google sign-in, storage buckets, rate limits, `INTERNAL_CRON_SECRET`, `API_DOMAIN`) are documented inside `.env.example`.
 
@@ -92,11 +94,11 @@ pnpm --filter @usegonche/database studio     # browse the data in Prisma Studio
 
 `packages/database/prisma/`:
 
-| Path | What it is |
-| --- | --- |
-| `schema.prisma` | The data model (the source of truth for tables Prisma manages) |
-| `migrations/` | Ordered SQL migrations, committed to git. Some are hand-written (see below) |
-| `manual/` | SQL that is **not** a migration and that you run by hand in the Supabase SQL editor |
+| Path            | What it is                                                                          |
+| --------------- | ----------------------------------------------------------------------------------- |
+| `schema.prisma` | The data model (the source of truth for tables Prisma manages)                      |
+| `migrations/`   | Ordered SQL migrations, committed to git. Some are hand-written (see below)         |
+| `manual/`       | SQL that is **not** a migration and that you run by hand in the Supabase SQL editor |
 
 Prisma only manages the `public` schema. Supabase owns `auth` and `storage`; never model or migrate them.
 
@@ -111,12 +113,15 @@ Hand-written migrations (Prisma cannot express them) are still in `migrations/` 
 
 1. Edit `packages/database/prisma/schema.prisma`.
 2. Create and apply it to your Supabase project:
+
    ```bash
    pnpm --filter @usegonche/database migrate:dev
    ```
+
    It uses `DIRECT_URL`. Prisma asks for a name (e.g. `add_something`).
 3. Commit the new folder in `packages/database/prisma/migrations/`.
 4. Regenerate the clients and re-check types:
+
    ```bash
    pnpm --filter @usegonche/database generate
    pnpm --filter @usegonche/api-client build   # only if API routes or schemas changed
@@ -127,9 +132,11 @@ Notes:
 
 - IDs are UUID v4 (`@db.Uuid @default(uuid(4))`), no `Json` columns, and every user-owned table has an owner column. See `AGENTS.md`.
 - `migrate dev` cannot validate the migration that references `auth.users` on a shadow database. If it complains, generate the SQL file offline and apply it with the command in 4.2:
+
   ```bash
   pnpm --filter @usegonche/database exec prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script
   ```
+
   (Use it as a base; trim it to the new changes and place it in a new `migrations/<timestamp>_<name>/migration.sql`.)
 - Do not edit a migration that is already applied anywhere. Create a new one.
 
@@ -225,14 +232,17 @@ One-time setup on the droplet:
 Every release, in this order:
 
 1. **Migrate first** (from your machine or CI, with the production `DIRECT_URL`):
+
    ```bash
    pnpm --filter @usegonche/database migrate:deploy
    ```
 2. **Deploy on the droplet:**
+
    ```bash
    ./scripts/deploy.prod.sh            # git pull --ff-only, build, start, wait for healthchecks
    ./scripts/deploy.prod.sh --no-pull  # deploy the code already on the droplet
    ```
+
    If the new version does not become healthy, the script prints the logs and keeps the previous images so you can roll back. Caddy gets and renews the HTTPS certificate by itself (never prune the `caddy_data` volume).
 3. Check: `curl https://api.example.com/health`
 4. First deploy only: run the reminders SQL from section 4.3 with the production URL.
@@ -257,10 +267,12 @@ Set the env variables in the host (there is no `.env` file in production images)
 ### 5.3 Cloudflare Workers
 
 1. Set the secrets once (each prompts for the value): `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `INTERNAL_CRON_SECRET`, plus the rest of the variables you use:
+
    ```bash
    npx wrangler secret put DATABASE_URL
    ```
 2. Run migrations first (4.2), then:
+
    ```bash
    pnpm deploy:worker
    ```
@@ -273,11 +285,14 @@ The session lives in cookies set by the API. A browser only sends a cookie to th
 **Recommended: two subdomains of one domain** (e.g. web `app.example.com`, API `api.example.com`):
 
 1. In the API environment set the shared cookie domain, with the leading dot:
+
    ```
    COOKIE_DOMAIN=.example.com
    ```
+
    Now the session cookie is also sent to `app.example.com`, so the web server can check the session before rendering (a signed-in user who opens `/auth/*` is redirected to `/` with no flash).
 2. Point the API at the web app (no trailing slash needed, only the origin matters for CORS):
+
    ```
    AUTH_REDIRECT_URL=https://app.example.com
    AUTH_CALLBACK_URL=https://api.example.com/v1/auth/callback
@@ -304,14 +319,14 @@ The session lives in cookies set by the API. A browser only sends a cookie to th
 
 ## 7. Troubleshooting
 
-| Symptom | Likely cause and fix |
-| --- | --- |
-| `/health` fails or the API cannot reach the database | Wrong `DATABASE_URL` (it must be the pooled, port `6543` string) |
-| `migrate:*` fails to connect | `DIRECT_URL` missing or wrong (direct or session pooler, port `5432`) |
-| `Cannot find module '@usegonche/database'` or Prisma client errors | Run `pnpm --filter @usegonche/database generate` |
-| Google sign-in or the email link ends on a JSON error | `AUTH_REDIRECT_URL` / `AUTH_CALLBACK_URL` missing or wrong |
-| `401` on `/v1/internal/reminders/process` | `INTERNAL_CRON_SECRET` is unset, or differs from the one in the SQL |
-| Signed-in users still see the sign-in page for a moment in production | The web server does not receive the session cookie: set `COOKIE_DOMAIN=.example.com` on the API and use subdomains of one domain (5.4) |
-| Browser error `blocked by CORS policy` | The web origin is not allowed: the API allows the origin of `AUTH_REDIRECT_URL` (set it to the web URL, e.g. `http://localhost:5173`) plus the optional comma-separated `CORS_ORIGINS`. Restart the API after changing `.env` |
-| Web app types are stale after changing routes | `pnpm --filter @usegonche/api-client build` |
-| Too many requests (`429`) while testing | Raise `RATE_LIMIT_*_PER_MINUTE` in `.env` |
+| Symptom                                                               | Likely cause and fix                                                                                                                                                                                                          |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/health` fails or the API cannot reach the database                  | Wrong `DATABASE_URL` (it must be the pooled, port `6543` string)                                                                                                                                                              |
+| `migrate:*` fails to connect                                          | `DIRECT_URL` missing or wrong (direct or session pooler, port `5432`)                                                                                                                                                         |
+| `Cannot find module '@usegonche/database'` or Prisma client errors    | Run `pnpm --filter @usegonche/database generate`                                                                                                                                                                              |
+| Google sign-in or the email link ends on a JSON error                 | `AUTH_REDIRECT_URL` / `AUTH_CALLBACK_URL` missing or wrong                                                                                                                                                                    |
+| `401` on `/v1/internal/reminders/process`                             | `INTERNAL_CRON_SECRET` is unset, or differs from the one in the SQL                                                                                                                                                           |
+| Signed-in users still see the sign-in page for a moment in production | The web server does not receive the session cookie: set `COOKIE_DOMAIN=.example.com` on the API and use subdomains of one domain (5.4)                                                                                        |
+| Browser error `blocked by CORS policy`                                | The web origin is not allowed: the API allows the origin of `AUTH_REDIRECT_URL` (set it to the web URL, e.g. `http://localhost:5173`) plus the optional comma-separated `CORS_ORIGINS`. Restart the API after changing `.env` |
+| Web app types are stale after changing routes                         | `pnpm --filter @usegonche/api-client build`                                                                                                                                                                                   |
+| Too many requests (`429`) while testing                               | Raise `RATE_LIMIT_*_PER_MINUTE` in `.env`                                                                                                                                                                                     |

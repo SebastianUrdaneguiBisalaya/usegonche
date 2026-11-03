@@ -30,12 +30,12 @@ flowchart LR
     R -.->|new ideas| C
 ```
 
-| Stage       | App area                                                          | What happens                                                                                          |
-| ----------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| **Capture** | Inbox                                                             | Fast entry of anything, with no organizing required.                                                  |
-| **Process** | Inbox → Tasks / Projects / Notes                                  | Empty the inbox: convert, archive or discard each item. Priority is a simple level the user sets.    |
-| **Today**   | Today, Calendar, Tasks                                            | Pick the day's tasks against real capacity, optionally time-block them, work, log progress and blockers. |
-| **Reflect** | Reflect, Analytics                                                | Review what was planned vs. executed and decide what happens to what is left.                         |
+| Stage       | App area                         | What happens                                                                                             |
+| ----------- | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Capture** | Inbox                            | Fast entry of anything, with no organizing required.                                                     |
+| **Process** | Inbox → Tasks / Projects / Notes | Empty the inbox: convert, archive or discard each item. Priority is a simple level the user sets.        |
+| **Today**   | Today, Calendar, Tasks           | Pick the day's tasks against real capacity, optionally time-block them, work, log progress and blockers. |
+| **Reflect** | Reflect, Analytics               | Review what was planned vs. executed and decide what happens to what is left.                            |
 
 ## Domain model
 
@@ -120,16 +120,16 @@ A container of tasks, optionally under a goal.
 
 The unit of work. The model keeps these concerns **independent**:
 
-| Concept          | Where it lives                                  | Notes                                                                                  |
-| ---------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Status           | `todo` → `in_progress` → `done` / `cancelled`   | `completedAt` is set on `done`, and cleared on reopen or `cancelled`.                  |
-| Priority         | `low`, `medium` (default), `high`, `urgent`     | A simple level; no scoring.                                                            |
-| Deadlines        | `startDate`, `dueDate` (date-only)              | The user's own dates. `dueDate` must not be before `startDate`. Not planning.          |
-| Estimate         | `estimatedMinutes` (1–100,000)                  | Used for capacity.                                                                     |
-| Scheduling       | Daily plan and time blocks                      | A task has no "scheduled for" field; see [Today](#4-today-plan-and-execute).           |
-| Progress         | Derived from subtasks                           | Cancelled subtasks are not counted.                                                    |
-| Blocking         | Derived from blockers + dependencies            | Informational; never prevents any action.                                              |
-| History          | `task_events`                                   | Typed, written in the same transaction as the change.                                  |
+| Concept    | Where it lives                                | Notes                                                                         |
+| ---------- | --------------------------------------------- | ----------------------------------------------------------------------------- |
+| Status     | `todo` → `in_progress` → `done` / `cancelled` | `completedAt` is set on `done`, and cleared on reopen or `cancelled`.         |
+| Priority   | `low`, `medium` (default), `high`, `urgent`   | A simple level; no scoring.                                                   |
+| Deadlines  | `startDate`, `dueDate` (date-only)            | The user's own dates. `dueDate` must not be before `startDate`. Not planning. |
+| Estimate   | `estimatedMinutes` (1–100,000)                | Used for capacity.                                                            |
+| Scheduling | Daily plan and time blocks                    | A task has no "scheduled for" field; see [Today](#4-today-plan-and-execute).  |
+| Progress   | Derived from subtasks                         | Cancelled subtasks are not counted.                                           |
+| Blocking   | Derived from blockers + dependencies          | Informational; never prevents any action.                                     |
+| History    | `task_events`                                 | Typed, written in the same transaction as the change.                         |
 
 Other task rules:
 
@@ -177,15 +177,15 @@ flowchart TD
 
 The day view returns plain sums, not scores:
 
-| Figure              | Definition                                                                  |
-| ------------------- | --------------------------------------------------------------------------- |
-| `workingMinutes`    | Availability windows of that weekday.                                       |
-| `availableMinutes`  | Working minutes minus out-of-office and timed events.                       |
-| `plannedMinutes`    | Sum of estimates of the plan's **open** tasks.                              |
-| `unestimatedTasks`  | Open planned tasks with no estimate (they add 0 to `plannedMinutes`).       |
-| `scheduledMinutes`  | Minutes already covered by planned time blocks within the day.              |
-| `remainingMinutes`  | `availableMinutes − plannedMinutes` (negative when overcommitted).          |
-| `overcommitted`     | `plannedMinutes > availableMinutes`.                                        |
+| Figure             | Definition                                                            |
+| ------------------ | --------------------------------------------------------------------- |
+| `workingMinutes`   | Availability windows of that weekday.                                 |
+| `availableMinutes` | Working minutes minus out-of-office and timed events.                 |
+| `plannedMinutes`   | Sum of estimates of the plan's **open** tasks.                        |
+| `unestimatedTasks` | Open planned tasks with no estimate (they add 0 to `plannedMinutes`). |
+| `scheduledMinutes` | Minutes already covered by planned time blocks within the day.        |
+| `remainingMinutes` | `availableMinutes − plannedMinutes` (negative when overcommitted).    |
+| `overcommitted`    | `plannedMinutes > availableMinutes`.                                  |
 
 #### Time blocks
 
@@ -287,7 +287,7 @@ stateDiagram-v2
   - `reschedule`: move its due date to the target date (writes a `due_changed` event, and must not precede `startDate`);
   - `drop`: cancel it (writes a `status_changed` event);
   - `keep`: change nothing.
-  Only open tasks can be decided on.
+    Only open tasks can be decided on.
 - **Reflection** and **next focus** are plain text, editable only while the review is open.
 - **Close** snapshots four counters (planned tasks, completed tasks, planned minutes, actual minutes) so the review keeps its meaning even if tasks change later. Pending tasks do **not** need a decision to close. A closed review cannot be edited (409).
 - A review must produce **decisions, not reports to maintain**.
@@ -296,15 +296,15 @@ stateDiagram-v2
 
 Read-only dashboards, all computed on read in the user's time zone, for a date range, optionally narrowed by project, goal, tag or priority. Each aggregate reads at most 5,000 rows.
 
-| Metric              | What it shows                                                                                                                              |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Summary**         | Per period and previous period of the same length: tasks created/completed, focus minutes, planned minutes, on-time ratio (completed on or before due date), plan completion ratio (planned tasks now done), reschedules (due-date changes + moved blocks), estimate accuracy (estimated vs. real time of completed tasks that had an estimate and finished blocks). Plus a snapshot: open, blocked and overdue tasks, and the current and longest completion **streak** (consecutive local days with a completed task, looking back one year). |
-| **Throughput**      | Tasks created vs. completed per day or week (every bucket present, with zeros).                                                            |
-| **Focus time**      | Planned vs. actually worked minutes per day, and how many blocks ended `done` / `missed` / `interrupted`. Moved blocks are not counted twice. |
-| **Planning**        | For each daily plan, how many of its tasks are done now, and the overall rate.                                                             |
-| **Distribution**    | Tasks per project (open and completed), per priority, and per status.                                                                      |
-| **Blockers**        | Blockers started in the period grouped by reason, with open/resolved counts and average hours to resolve.                                  |
-| **Rhythm**          | Completed tasks by hour of day and by weekday, with the peak hour and weekday.                                                            |
+| Metric           | What it shows                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Summary**      | Per period and previous period of the same length: tasks created/completed, focus minutes, planned minutes, on-time ratio (completed on or before due date), plan completion ratio (planned tasks now done), reschedules (due-date changes + moved blocks), estimate accuracy (estimated vs. real time of completed tasks that had an estimate and finished blocks). Plus a snapshot: open, blocked and overdue tasks, and the current and longest completion **streak** (consecutive local days with a completed task, looking back one year). |
+| **Throughput**   | Tasks created vs. completed per day or week (every bucket present, with zeros).                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **Focus time**   | Planned vs. actually worked minutes per day, and how many blocks ended `done` / `missed` / `interrupted`. Moved blocks are not counted twice.                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **Planning**     | For each daily plan, how many of its tasks are done now, and the overall rate.                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **Distribution** | Tasks per project (open and completed), per priority, and per status.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **Blockers**     | Blockers started in the period grouped by reason, with open/resolved counts and average hours to resolve.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Rhythm**       | Completed tasks by hour of day and by weekday, with the peak hour and weekday.                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ### 12. Task history and activity
 

@@ -6,16 +6,16 @@ By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md). Securit
 
 ## Repository layout
 
-| Path                    | What it is                                                           |
-| ----------------------- | -------------------------------------------------------------------- |
-| `src/`                  | Hono API, feature-driven (`src/features/<name>`)                     |
-| `apps/web`              | React Router web app (SSR)                                           |
-| `apps/desktop`          | Electron shell that loads the web app                                |
-| `apps/www`              | Next.js landing page                                                 |
-| `packages/database`     | Prisma schema, migrations and clients (Supabase Postgres)            |
-| `packages/auth`         | Supabase Auth building blocks                                        |
-| `packages/storage`      | Signed-URL helpers for Supabase Storage                              |
-| `packages/api-client`   | Typed Hono RPC client for the API                                    |
+| Path                  | What it is                                                |
+| --------------------- | --------------------------------------------------------- |
+| `src/`                | Hono API, feature-driven (`src/features/<name>`)          |
+| `apps/web`            | React Router web app (SSR)                                |
+| `apps/desktop`        | Electron shell that loads the web app                     |
+| `apps/www`            | Next.js landing page                                      |
+| `packages/database`   | Prisma schema, migrations and clients (Supabase Postgres) |
+| `packages/auth`       | Supabase Auth building blocks                             |
+| `packages/storage`    | Signed-URL helpers for Supabase Storage                   |
+| `packages/api-client` | Typed Hono RPC client for the API                         |
 
 ## Setup
 
@@ -30,15 +30,15 @@ cp .env.example .env
 
 Every command is a `make` target that wraps the matching `pnpm` script. Run `make help` to list them all.
 
-| Area     | Targets                                                                                          |
-| -------- | ------------------------------------------------------------------------------------------------ |
-| API      | `api-dev`, `api-dev-worker`, `api-build`, `api-start`, `api-deploy-worker`, `api-client-build`   |
-| Web      | `web-dev`, `web-build`, `web-start`                                                              |
-| Desktop  | `desktop-dev`, `desktop-build`, `desktop-dist-mac`, `desktop-dist-win`, `desktop-dist-linux`     |
-| Landing  | `www-dev`, `www-build`, `www-start`                                                              |
-| Database | `db-generate`, `db-studio`                                                                       |
-| Quality  | `lint`, `format`, `typecheck`, `test`, `test-watch`, `test-coverage`, `check`                    |
-| Docker   | `docker-dev`, `docker-prod`                                                                      |
+| Area     | Targets                                                                                        |
+| -------- | ---------------------------------------------------------------------------------------------- |
+| API      | `api-dev`, `api-dev-worker`, `api-build`, `api-start`, `api-deploy-worker`, `api-client-build` |
+| Web      | `web-dev`, `web-build`, `web-start`                                                            |
+| Desktop  | `desktop-dev`, `desktop-build`, `desktop-dist-mac`, `desktop-dist-win`, `desktop-dist-linux`   |
+| Landing  | `www-dev`, `www-build`, `www-start`                                                            |
+| Database | `db-generate`, `db-studio`                                                                     |
+| Quality  | `lint`, `format`, `typecheck`, `test`, `test-watch`, `test-coverage`, `check`                  |
+| Docker   | `docker-dev`, `docker-prod`                                                                    |
 
 Notes:
 

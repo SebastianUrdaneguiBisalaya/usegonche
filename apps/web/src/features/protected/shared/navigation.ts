@@ -15,17 +15,20 @@ export interface NavEntry {
 export const primaryNav: readonly NavEntry[] = [
 	{ hotkey: 'g i', icon: Inbox, id: 'inbox', label: 'protected.nav.inbox', to: '/inbox' },
 	{ hotkey: 'g t', icon: CircleDot, id: 'today', label: 'protected.nav.today', to: '/' },
-	{ hotkey: 'g c', icon: Calendar, id: 'calendar', label: 'protected.nav.calendar', to: '/calendar'},
+	{ hotkey: 'g c', icon: Calendar, id: 'calendar', label: 'protected.nav.calendar', to: '/calendar' },
 	{ hotkey: 'g p', icon: FolderKanban, id: 'projects', label: 'protected.nav.projects', to: '/projects' },
 	{ hotkey: 'g o', icon: Target, id: 'goals', label: 'protected.nav.goals', to: '/goals' },
 	{ hotkey: 'g k', icon: CircleCheck, id: 'tasks', label: 'protected.nav.tasks', to: '/tasks' },
 	{ hotkey: 'g n', icon: FileText, id: 'notes', label: 'protected.nav.notes', to: '/notes' },
 	{ hotkey: 'g r', icon: Orbit, id: 'reflect', label: 'protected.nav.reflect', to: '/reflect' },
-
 ];
 
 /** Shown apart, below a divider. */
-export const secondaryNav: readonly NavEntry[] = [{ hotkey: 'g l', icon: Tag, id: 'tags', label: 'protected.nav.tags', to: '/tags' }, { hotkey: 'g a', icon: ChartNoAxesColumnIncreasing, id: 'stats', label: 'protected.nav.analytics', to: '/analytics'}, { hotkey: 'g u', icon: Bell, id: 'reminders', label: 'protected.nav.reminders', to: '/reminders'}];
+export const secondaryNav: readonly NavEntry[] = [
+	{ hotkey: 'g l', icon: Tag, id: 'tags', label: 'protected.nav.tags', to: '/tags' },
+	{ hotkey: 'g a', icon: ChartNoAxesColumnIncreasing, id: 'stats', label: 'protected.nav.analytics', to: '/analytics' },
+	{ hotkey: 'g u', icon: Bell, id: 'reminders', label: 'protected.nav.reminders', to: '/reminders' },
+];
 
 export const allNav: readonly NavEntry[] = [...primaryNav, ...secondaryNav];
 
