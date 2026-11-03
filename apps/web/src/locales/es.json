@@ -1424,6 +1424,82 @@
       "closed": "Esta revisión está cerrada."
     }
   },
+  "reminders": {
+    "title": "Recordatorios",
+    "subtitle": "Que nada importante se te pase.",
+    "unread": "Recordatorios sin leer",
+    "markAll": "Marcar todo como leído",
+    "markSelected": "Marcar como leídos ({{count}})",
+    "loadError": "No se pudieron cargar los recordatorios.",
+    "retry": "Reintentar",
+    "empty": "Aún no hay recordatorios. Añade uno desde una tarea o una nota.",
+    "noResults": "Ningún recordatorio coincide.",
+    "tabs": {
+      "label": "Estado del recordatorio",
+      "all": "Todos",
+      "upcoming": "Próximos",
+      "snoozed": "Pospuestos",
+      "dismissed": "Descartados"
+    },
+    "search": {
+      "label": "Buscar recordatorios",
+      "placeholder": "Buscar recordatorios...",
+      "clear": "Limpiar búsqueda"
+    },
+    "type": {
+      "event": "Evento",
+      "task": "Tarea",
+      "note": "Nota"
+    },
+    "row": {
+      "at": "a las",
+      "snoozedUntil": "Pospuesto hasta {{date}}",
+      "dismissed": "Descartado",
+      "priority": "Prioridad {{priority}}",
+      "select": "Seleccionar {{title}}",
+      "menu": "Opciones del recordatorio"
+    },
+    "actions": {
+      "title": "Acciones",
+      "snooze": "Posponer",
+      "dismiss": "Descartar",
+      "delete": "Eliminar"
+    },
+    "snooze": {
+      "hour": "En 1 hora ({{when}})",
+      "tomorrow": "Mañana ({{when}})",
+      "week": "La próxima semana ({{when}})"
+    },
+    "detail": {
+      "close": "Cerrar detalles",
+      "title": "Detalles",
+      "type": "Tipo",
+      "date": "Fecha",
+      "time": "Hora",
+      "created": "Creado",
+      "viewNote": "Ver nota"
+    },
+    "caughtUp": {
+      "title": "¡Todo al día!",
+      "subtitle": "No hay más recordatorios por ahora."
+    },
+    "toast": {
+      "snoozed": "Recordatorio pospuesto.",
+      "dismissed": "Recordatorio descartado.",
+      "deleted": "Recordatorio eliminado."
+    },
+    "target": {
+      "title": "Recordatorio",
+      "description": "Recibe un aviso sobre esto más tarde.",
+      "pending": "Te avisará {{when}}",
+      "none": "Definir recordatorio",
+      "change": "Cambiar recordatorio",
+      "remove": "Quitar recordatorio",
+      "set": "Recordatorio definido.",
+      "updated": "Recordatorio actualizado.",
+      "removed": "Recordatorio quitado."
+    }
+  },
   "today": {
     "title": "Hoy",
     "subtitle": "Enfócate en lo que te hace avanzar.",

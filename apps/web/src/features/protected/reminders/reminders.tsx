@@ -1,0 +1,152 @@
+import { Bell, Check } from 'lucide-react';
+import { parseAsString, parseAsStringLiteral, useQueryState } from 'nuqs';
+import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { Button } from '~/components/ui/actions-controls/button/button';
+import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
+import { Typography } from '~/components/ui/foundations/typography/typography';
+import { Page } from '~/components/ui/layout/page/page';
+import { useTranslate } from '~/hooks/use-translate';
+import { getApiErrorMessage } from '~/lib/api-error';
+import { ListSearch } from '../shared/list-search';
+import { StatusTabs } from '../shared/status-tabs';
+import { listStyles } from '../shared/styles';
+import { targetId, useDeleteReminder, useDismiss, useReminders, useTargets } from './api';
+import { ReminderDetail } from './components/reminder-detail';
+import { ReminderRow } from './components/reminder-row';
+import { type ReminderTab, tabOf } from './format';
+
+const tabs = ['all', 'upcoming', 'snoozed', 'dismissed'] as const;
+
+export default function RemindersRoute() {
+	const t = useTranslate();
+	const [tab, setTab] = useQueryState('tab', parseAsStringLiteral(tabs).withDefault('all'));
+	const [q, setQ] = useQueryState('q', parseAsString.withDefault(''));
+	const [openId, setOpenId] = useQueryState('reminder', parseAsString.withDefault(''));
+	const [checked, setChecked] = useState<ReadonlySet<string>>(new Set());
+
+	const list = useReminders();
+	const dismiss = useDismiss();
+	const remove = useDeleteReminder();
+	const reminders = list.data?.data ?? [];
+	const targets = useTargets(reminders);
+	const fail = (error: unknown) => toast.error(getApiErrorMessage(error));
+
+	const counts = useMemo(() => {
+		const result: Record<ReminderTab, number> = { all: reminders.length, dismissed: 0, snoozed: 0, upcoming: 0 };
+		for (const reminder of reminders) result[tabOf(reminder)] += 1;
+		return result;
+	}, [reminders]);
+
+	const visible = useMemo(() => {
+		const needle = q.toLowerCase();
+		return reminders.filter(reminder => (tab === 'all' || tabOf(reminder) === tab) && (needle === '' || (targets.get(targetId(reminder))?.title ?? '').toLowerCase().includes(needle)));
+	}, [reminders, tab, q, targets]);
+
+	const opened = reminders.find(reminder => reminder.id === openId);
+	const sent = reminders.filter(reminder => reminder.status === 'sent');
+	// With a selection "Mark as read" applies to it; otherwise to every reminder that already fired.
+	const toRead = checked.size > 0 ? [...checked].filter(id => reminders.some(reminder => reminder.id === id && reminder.status !== 'dismissed')) : sent.map(reminder => reminder.id);
+
+	const markRead = () =>
+		dismiss.mutate(toRead, {
+			onError: fail,
+			onSuccess: () => {
+				setChecked(new Set());
+				toast.success(t('reminders.toast.dismissed'));
+			},
+		});
+	const toggle = (id: string, on: boolean) =>
+		setChecked(current => {
+			const next = new Set(current);
+			if (on) next.add(id);
+			else next.delete(id);
+			return next;
+		});
+
+	return (
+		<Page.Root className='min-h-0 flex-1' size='full'>
+			<Page.Header>
+				<div>
+					<Page.Title>{t('reminders.title')}</Page.Title>
+					<Page.Description>{t('reminders.subtitle')}</Page.Description>
+				</div>
+				<Page.Actions>
+					<span className='relative flex size-10 items-center justify-center text-muted-foreground'>
+						<Bell aria-hidden className='size-6' />
+						{sent.length > 0 && <span aria-label={t('reminders.unread')} className='absolute top-2 right-2 size-2 rounded-full bg-destructive' role='img' />}
+					</span>
+					<Button className={listStyles.pillTrigger} disabled={toRead.length === 0 || dismiss.isPending} loading={dismiss.isPending} onClick={markRead} variant='secondary'>
+						<Button.Text>{checked.size > 0 ? t('reminders.markSelected', { count: toRead.length }) : t('reminders.markAll')}</Button.Text>
+					</Button>
+				</Page.Actions>
+			</Page.Header>
+			<Page.Body className='min-h-0 flex-1 gap-4'>
+				<div className={`${listStyles.card} flex flex-wrap items-center justify-between gap-3 p-2`}>
+					<StatusTabs
+						ariaLabel={t('reminders.tabs.label')}
+						counts={list.data ? counts : undefined}
+						onChange={next => void setTab(next)}
+						tabs={tabs.map(value => ({ label: t(`reminders.tabs.${value}`), value }))}
+						value={tab}
+					/>
+					<ListSearch
+						clearLabel={t('reminders.search.clear')}
+						label={t('reminders.search.label')}
+						onChange={value => void setQ(value)}
+						placeholder={t('reminders.search.placeholder')}
+						value={q}
+					/>
+				</div>
+				<div className={`grid items-start gap-4 ${opened ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]' : ''}`}>
+					<div className='flex flex-col gap-3'>
+						{list.isPending ? (
+							<Skeleton className='gap-3' label={t('reminders.title')}>
+								{[0, 1, 2, 3].map(index => (
+									<Skeleton.Item className='h-16 w-full rounded-2xl' key={index} />
+								))}
+							</Skeleton>
+						) : list.isError ? (
+							<div className='flex flex-col items-center gap-3 p-10 text-center'>
+								<p className='text-sm text-muted-foreground'>{t('reminders.loadError')}</p>
+								<Button onClick={() => void list.refetch()} variant='secondary'>
+									<Button.Text>{t('reminders.retry')}</Button.Text>
+								</Button>
+							</div>
+						) : visible.length === 0 ? (
+							<p className='p-10 text-center text-sm text-muted-foreground'>{t(reminders.length === 0 ? 'reminders.empty' : 'reminders.noResults')}</p>
+						) : (
+							<ul className='flex flex-col gap-3'>
+								{visible.map(reminder => (
+									<ReminderRow
+										checked={checked.has(reminder.id)}
+										info={targets.get(targetId(reminder))}
+										key={reminder.id}
+										onCheckedChange={on => toggle(reminder.id, on)}
+										onDelete={() => remove.mutate(reminder.id, { onError: fail, onSuccess: () => toast.success(t('reminders.toast.deleted')) })}
+										onDismiss={() => dismiss.mutate([reminder.id], { onError: fail, onSuccess: () => toast.success(t('reminders.toast.dismissed')) })}
+										onOpen={() => void setOpenId(reminder.id)}
+										reminder={reminder}
+										selected={reminder.id === openId}
+									/>
+								))}
+							</ul>
+						)}
+						{list.data && sent.length === 0 && (
+							<div className={`${listStyles.card} flex items-center gap-3 px-4 py-3`}>
+								<span className='flex size-10 items-center justify-center rounded-full border border-success text-success'>
+									<Check aria-hidden className='size-5' />
+								</span>
+								<div className='flex flex-col'>
+									<Typography.Span className='text-sm font-medium'>{t('reminders.caughtUp.title')}</Typography.Span>
+									<Typography.Span className='text-xs text-muted-foreground'>{t('reminders.caughtUp.subtitle')}</Typography.Span>
+								</div>
+							</div>
+						)}
+					</div>
+					{opened && <ReminderDetail info={targets.get(targetId(opened))} key={opened.id} onClose={() => void setOpenId(null)} reminder={opened} />}
+				</div>
+			</Page.Body>
+		</Page.Root>
+	);
+}
