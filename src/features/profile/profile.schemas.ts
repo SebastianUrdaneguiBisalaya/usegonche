@@ -38,9 +38,10 @@ export const updateProfileSchema = z
 export const updateSettingsSchema = z
 	.strictObject({
 		country: optionalText(100),
+		// `system` follows the device's language; otherwise a language code like `en` or `es-PE`.
 		language: z
 			.string()
-			.regex(/^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/)
+			.regex(/^(system|[a-z]{2,3}(-[A-Za-z0-9]{2,8})?)$/)
 			.max(10),
 		theme: z.enum(THEMES),
 		timezone: z.string().max(64).refine(isIanaTimezone),

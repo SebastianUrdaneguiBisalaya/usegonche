@@ -6,7 +6,7 @@ import type { AvatarUploadInput, UpdateProfileInput, UpdateSettingsInput } from 
 /** Identity taken from the verified JWT claims (never from the request body). */
 export type Identity = { email?: string; id: string };
 
-export const DEFAULT_SETTINGS = { language: 'en', theme: 'system', timezone: 'UTC' } as const;
+export const DEFAULT_SETTINGS = { language: 'system', theme: 'system', timezone: 'UTC' } as const;
 
 /** Returns the profile, creating it on first access (the sign-up trigger normally creates it first). */
 export const getProfile = (prisma: PrismaClient, user: Identity): Promise<Profile> => prisma.profile.upsert({ create: { email: user.email, id: user.id }, update: {}, where: { id: user.id } });

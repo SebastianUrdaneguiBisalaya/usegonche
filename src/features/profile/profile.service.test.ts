@@ -63,7 +63,7 @@ describe('updateSettings', () => {
 		vi.mocked(prisma.userSettings.upsert).mockResolvedValue(settings);
 		vi.mocked(prisma.userSettings.update).mockResolvedValue({ ...settings, theme: 'dark', timezone: 'America/Lima' });
 
-		await updateSettings(prisma, user, { language: 'en', theme: 'dark', timezone: 'America/Lima' });
+		await updateSettings(prisma, user, { language: 'system', theme: 'dark', timezone: 'America/Lima' });
 		expect(prisma.userSettings.update).toHaveBeenCalledWith({ data: { theme: 'dark', timezone: 'America/Lima' }, where: { ownerId: TEST_USER_ID } });
 	});
 
