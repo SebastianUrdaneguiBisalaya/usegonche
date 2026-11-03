@@ -223,7 +223,7 @@ export const defaultUploadDropzoneLang: UploadDropzoneLang = {
   preview: "Preview",
   uploaded: "Uploaded",
   maxFiles: (max, nounPlural) => `You can only upload ${max} ${nounPlural} in total.`,
-  selectedLabel: (plural) => `${plural[0].toUpperCase()}${plural.slice(1)} selected`,
+  selectedLabel: (plural) => `${plural[0]?.toUpperCase()}${plural.slice(1)} selected`,
   tooLarge: (noun, limit) => `The ${noun} can't exceed ${limit}.`,
   uploadFailed: (noun) => `Error uploading the ${noun}.`,
   uploadLabel: (noun) => `Upload ${noun}`,
@@ -436,7 +436,8 @@ function UploadDropzoneRoot({
   );
 
   const handleUpload = React.useCallback(
-    async (file: File) => {
+    async (file: File | undefined) => {
+	  if (file === undefined) return;
       const invalid = validate(file);
       if (invalid) {
         setState({

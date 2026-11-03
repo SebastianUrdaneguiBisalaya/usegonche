@@ -39,6 +39,7 @@
     "forms-inputs/select": "select@1.2.0",
     "forms-inputs/time-picker": "time-picker@1.1.0",
     "forms-inputs/upload-dropzone": "main",
+    "foundations/file-icon": "file-icon@1.0.0",
     "foundations/icon": "main",
     "foundations/kbd": "main",
     "foundations/link": "main",
