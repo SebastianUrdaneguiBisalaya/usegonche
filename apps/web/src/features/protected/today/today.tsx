@@ -13,6 +13,7 @@ import { fromDateOnly, toDateOnly } from '../shared/dates';
 import { listStyles } from '../shared/styles';
 import { useUpdateTask } from '../tasks/api';
 import { useDay, useSetDayItems } from './api';
+import { AgendaCard } from './components/agenda-card';
 import { BlockedCard } from './components/blocked-card';
 import { InboxCard } from './components/inbox-card';
 import { PlanCard } from './components/plan-card';
@@ -78,7 +79,8 @@ export default function TodayRoute() {
 					<MiniCalendar.Navigation direction='next' />
 				</MiniCalendar>
 				<QuickCapture />
-				<div className='grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]'>
+				<div className='grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,18rem)]'>
+					<AgendaCard blocks={day.data?.blocks ?? []} date={date} isToday={isToday} />
 					<PlanCard
 						error={day.isError}
 						isLoading={day.isPending}

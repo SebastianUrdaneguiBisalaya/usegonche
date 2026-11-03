@@ -41,3 +41,45 @@ export function useOpenTasks() {
 		staleTime: 30_000,
 	});
 }
+
+export type DayBlock = DayView['blocks'][number];
+
+/** A planned block changes what Today, the history and the metrics show, so they all refetch. */
+function useRefreshBlocks() {
+	const queryClient = useQueryClient();
+	return () => Promise.all([queryClient.invalidateQueries({ queryKey: ['planning'] }), queryClient.invalidateQueries({ queryKey: ['tasks'] })]);
+}
+
+/** `POST /planning/blocks`: a block for a task, a title, or both. */
+export function useCreateBlock() {
+	const refresh = useRefreshBlocks();
+	return useMutation({
+		mutationFn: (json: { plannedEnd: string; plannedStart: string; taskId?: string; title?: string }) => unwrap(api.planning.blocks.$post({ json })),
+		onSuccess: refresh,
+	});
+}
+
+/** `POST /planning/blocks/:id/move`: never edits the block, it plans a new one and keeps the old one as history. */
+export function useMoveBlock() {
+	const refresh = useRefreshBlocks();
+	return useMutation({
+		mutationFn: ({ id, plannedEnd, plannedStart }: { id: string; plannedEnd: string; plannedStart: string }) =>
+			unwrap(api.planning.blocks[':id'].move.$post({ json: { plannedEnd, plannedStart }, param: { id } })),
+		onSuccess: refresh,
+	});
+}
+
+/** `PATCH /planning/blocks/:id`: closes a planned block as done or missed. */
+export function useCloseBlock() {
+	const refresh = useRefreshBlocks();
+	return useMutation({
+		mutationFn: ({ id, status }: { id: string; status: 'done' | 'missed' }) => unwrap(api.planning.blocks[':id'].$patch({ json: { status }, param: { id } })),
+		onSuccess: refresh,
+	});
+}
+
+/** `DELETE /planning/blocks/:id` (only a planned, never moved block). */
+export function useDeleteBlock() {
+	const refresh = useRefreshBlocks();
+	return useMutation({ mutationFn: (id: string) => unwrap(api.planning.blocks[':id'].$delete({ param: { id } })), onSuccess: refresh });
+}
