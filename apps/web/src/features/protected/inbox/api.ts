@@ -5,36 +5,21 @@ import { type OkBody, PAGE_SIZE, unwrapPage } from '../shared/paged';
 import type { InboxParams, InboxStatus } from './search-params';
 
 type InboxResponse = Awaited<ReturnType<typeof api.inbox.$get>>;
-type SearchResponse = Awaited<ReturnType<typeof api.search.$get>>;
 
 /** One page of `GET /inbox`: the items, the page meta and the counter of every status tab. */
 export type InboxPage = OkBody<InboxResponse>;
 export type InboxItem = InboxPage['data'][number];
-/** One page of `GET /search?types=inbox`. */
-export type InboxSearchPage = OkBody<SearchResponse>;
-export type InboxSearchHit = InboxSearchPage['data'][number];
 
 export const inboxKey = ({ page, range, status }: Pick<InboxParams, 'page' | 'range' | 'status'>) => ['inbox', 'list', { page, range, status }] as const;
-export const inboxSearchKey = ({ page, q }: Pick<InboxParams, 'page' | 'q'>) => ['inbox', 'search', { page, q }] as const;
 
 /** Query string of `GET /inbox` (values are strings on the wire). */
 export const inboxQuery = ({ page, range, status }: Pick<InboxParams, 'page' | 'range' | 'status'>) => ({ page: String(page), pageSize: String(PAGE_SIZE), range, status });
 
-export function useInbox(params: Pick<InboxParams, 'page' | 'range' | 'status'>, enabled: boolean) {
+export function useInbox(params: Pick<InboxParams, 'page' | 'range' | 'status'>) {
 	return useQuery({
-		enabled,
 		placeholderData: keepPreviousData,
 		queryFn: () => unwrapPage(api.inbox.$get({ query: inboxQuery(params) })),
 		queryKey: inboxKey(params),
-	});
-}
-
-export function useInboxSearch({ page, q }: Pick<InboxParams, 'page' | 'q'>) {
-	return useQuery({
-		enabled: q.length > 0,
-		placeholderData: keepPreviousData,
-		queryFn: () => unwrapPage(api.search.$get({ query: { page: String(page), pageSize: String(PAGE_SIZE), q, types: 'inbox' } })),
-		queryKey: inboxSearchKey({ page, q }),
 	});
 }
 

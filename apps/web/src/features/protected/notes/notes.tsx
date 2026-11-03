@@ -11,16 +11,15 @@ import { Drawer } from '~/components/ui/overlays-feedback/drawer/drawer';
 import { useMediaQuery } from '~/hooks/use-media-query';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
-import { ListSearch } from '../shared/list-search';
 import { PAGE_SIZE } from '../shared/paged';
 import { useProjectOptions } from '../shared/projects';
 import { listStyles } from '../shared/styles';
 import { useTagOptions } from '../shared/tags';
-import { useDeleteNote, useNotes, useNotesSearch } from './api';
+import { useDeleteNote, useNotes } from './api';
 import { NewNoteModal } from './components/new-note-modal';
 import { NoteEditor } from './components/note-editor';
 import { NoteFilters } from './components/note-filters';
-import { NoteList, NoteSearchList } from './components/note-list';
+import { NoteList } from './components/note-list';
 import { type NoteView, noteParsers, noteViews } from './search-params';
 
 const viewIcons = { grid: LayoutGrid, list: List } as const;
@@ -34,13 +33,11 @@ export default function NotesRoute() {
 	const t = useTranslate();
 	const [params, setParams] = useQueryStates(noteParsers, { clearOnDefault: true });
 	const page = Math.max(1, params.page);
-	const searching = params.q.length > 0;
 	const wide = useMediaQuery('(min-width: 1024px)', true);
 	const inline = wide && params.view === 'list';
 	const filtered = params.project !== '' || params.tag !== '' || params.task !== '';
 
-	const list = useNotes({ page, project: params.project, tag: params.tag, task: params.task }, !searching);
-	const search = useNotesSearch(params.q, page);
+	const list = useNotes({ page, project: params.project, tag: params.tag, task: params.task });
 	const projects = useProjectOptions();
 	const tags = useTagOptions();
 	const projectTitles = useMemo(() => new Map((projects.data ?? []).map(project => [project.id, project.title])), [projects.data]);
@@ -78,22 +75,11 @@ export default function NotesRoute() {
 
 	useHotkeys('n', () => guard(() => setCreating(true)), { group: 'notes', label: t('notes.new') });
 
-	const active = searching ? search : list;
-	const meta = active.data?.meta;
-	const isLoading = active.isPending || (active.isPlaceholderData && active.isFetching && (active.data?.data.length ?? 0) === 0);
+	const meta = list.data?.meta;
+	const isLoading = list.isPending || (list.isPlaceholderData && list.isFetching && (list.data?.data.length ?? 0) === 0);
 	const clearFilters = () => void setParams({ page: 1, project: '', tag: '', task: '' });
 
-	const results = searching ? (
-		<NoteSearchList
-			hits={search.data?.data}
-			isError={search.isError}
-			isLoading={search.isPending}
-			layout={params.view}
-			onOpen={openNote}
-			onRetry={() => void search.refetch()}
-			selectedId={params.note}
-		/>
-	) : (
+	const results = (
 		<NoteList
 			error={list.isError}
 			filtered={filtered}
@@ -126,13 +112,6 @@ export default function NotesRoute() {
 					<Page.Description>{t('notes.subtitle')}</Page.Description>
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
-					<ListSearch
-						clearLabel={t('notes.search.clear')}
-						label={t('notes.search.label')}
-						onChange={q => void setParams({ page: 1, q })}
-						placeholder={t('notes.search.placeholder')}
-						value={params.q}
-					/>
 					<Button className={listStyles.pillTrigger} onClick={() => guard(() => setCreating(true))} variant='secondary'>
 						<Button.Icon icon={Plus} />
 						<Button.Text>{t('notes.new')}</Button.Text>
@@ -145,9 +124,9 @@ export default function NotesRoute() {
 						count={list.data?.meta.total}
 						filtered={filtered}
 						onClear={clearFilters}
-						onProjectChange={project => void setParams({ page: 1, project, q: '' })}
-						onTagChange={tag => void setParams({ page: 1, q: '', tag })}
-						onTaskChange={task => void setParams({ page: 1, q: '', task })}
+						onProjectChange={project => void setParams({ page: 1, project })}
+						onTagChange={tag => void setParams({ page: 1, tag })}
+						onTaskChange={task => void setParams({ page: 1, task })}
 						project={params.project}
 						projects={projectOptions}
 						tag={params.tag}

@@ -20,7 +20,6 @@ export type GoalDue = (typeof goalDues)[number];
 export const goalParsers = {
 	due: parseAsStringLiteral(goalDues).withDefault('all'),
 	page: parseAsInteger.withDefault(1),
-	q: parseAsString.withDefault(''),
 	sort: parseAsStringLiteral(goalSorts).withDefault('updated'),
 	status: parseAsStringLiteral(goalTabs).withDefault('active'),
 };
@@ -31,7 +30,6 @@ export const loadGoalsParams = createLoader(goalParsers);
 export interface GoalsParams {
 	due: GoalDue;
 	page: number;
-	q: string;
 	sort: GoalSort;
 	status: GoalTab;
 }

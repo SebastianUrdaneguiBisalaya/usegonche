@@ -6,13 +6,11 @@ import { type OkBody, PAGE_SIZE, unwrapPage } from '../shared/paged';
 import { NO_PROJECT, type TaskSort, type TasksParams, type TaskView } from './search-params';
 
 type TasksResponse = Awaited<ReturnType<typeof api.tasks.$get>>;
-type SearchResponse = Awaited<ReturnType<typeof api.search.$get>>;
 
 /** One page of `GET /tasks`: the tasks, the page meta and the counters (`todo`, `in_progress`, `done`, `cancelled`, `blocked`, `overdue`). */
 export type TasksPage = OkBody<TasksResponse>;
 export type Task = TasksPage['data'][number];
 export type TaskCounts = TasksPage['meta']['counts'];
-export type TaskSearchPage = OkBody<SearchResponse>;
 
 export type CreateTaskBody = Body<typeof api.tasks.$post>;
 export type UpdateTaskBody = Body<(typeof api.tasks)[':id']['$patch']>;
@@ -35,7 +33,6 @@ const shiftDay = (days: number): string => {
 };
 
 export const tasksKey = (view: TaskView, params: TasksParams) => ['tasks', 'list', view, params, shiftDay(0)] as const;
-export const tasksSearchKey = (q: string, page: number) => ['tasks', 'search', { page, q }] as const;
 
 /** Query string of `GET /tasks` (values are strings on the wire). The due filter becomes a date range, as the API knows no "overdue". */
 export const tasksQuery = (view: TaskView, { blocked, due, goal, page, project, sort, status, tag }: TasksParams) => ({
@@ -53,21 +50,12 @@ export const tasksQuery = (view: TaskView, { blocked, due, goal, page, project, 
 	pageSize: String(view !== 'list' ? BOARD_PAGE_SIZE : PAGE_SIZE),
 });
 
-export function useTasks(view: TaskView, params: TasksParams, enabled: boolean) {
+export function useTasks(view: TaskView, params: TasksParams, enabled = true) {
 	return useQuery({
 		enabled,
 		placeholderData: keepPreviousData,
 		queryFn: () => unwrapPage(api.tasks.$get({ query: tasksQuery(view, params) })),
 		queryKey: tasksKey(view, params),
-	});
-}
-
-export function useTasksSearch(q: string, page: number) {
-	return useQuery({
-		enabled: q.length > 0,
-		placeholderData: keepPreviousData,
-		queryFn: () => unwrapPage(api.search.$get({ query: { page: String(page), pageSize: String(PAGE_SIZE), q, types: 'task' } })),
-		queryKey: tasksSearchKey(q, page),
 	});
 }
 

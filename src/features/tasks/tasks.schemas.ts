@@ -92,6 +92,8 @@ export const listTasksQuerySchema = z.object({
 	/** One or several statuses. */
 	status: statusList.optional(),
 	tagId: z.uuid().optional(),
+	/** Tasks whose title contains this text (case-insensitive). A plain filter, not full-text search. */
+	title: title.optional(),
 });
 
 /**

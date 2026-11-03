@@ -9,13 +9,12 @@ import { Button } from '~/components/ui/actions-controls/button/button';
 import { Page } from '~/components/ui/layout/page/page';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
-import { ListSearch } from '../shared/list-search';
 import { OptionSelect } from '../shared/option-select';
 import { PageSelect } from '../shared/page-select';
 import { PAGE_SIZE } from '../shared/paged';
 import { StatusTabs } from '../shared/status-tabs';
 import { listStyles } from '../shared/styles';
-import { type BulkAction, type Goal, type GoalsPage, goalsKey, goalsQuery, useBulkGoalAction, useGoalList, useGoalSearch, useSetGoalArchived, useUpdateGoal } from './api';
+import { type BulkAction, type Goal, type GoalsPage, goalsKey, goalsQuery, useBulkGoalAction, useGoalList, useSetGoalArchived, useUpdateGoal } from './api';
 import { GoalDrawer } from './components/goal-drawer';
 import { type GoalRow, GoalsTable } from './components/goals-table';
 import { NewGoalModal } from './components/new-goal-modal';
@@ -29,13 +28,11 @@ interface LoaderData {
 
 /**
  * Loads the first page on the server from the URL's params (the request cookie is forwarded: a parent loader does not protect this one).
- * A search (`?q=`) is fetched by the client, and without the cookie the client-side query takes over behind skeleton rows.
  */
 export async function loader({ request }: LoaderFunctionArgs): Promise<LoaderData | null> {
 	const cookie = request.headers.get('cookie');
 	if (!cookie) return null;
 	const params = loadGoalsParams(request);
-	if (params.q) return null;
 	const res = await createClient(API_BASE, { headers: { cookie } })
 		.goals.$get({ query: goalsQuery(params) })
 		.catch(() => undefined);
@@ -54,7 +51,6 @@ export default function GoalsRoute() {
 	const loaderData = useLoaderData<typeof loader>();
 	const [params, setParams] = useQueryStates(goalParsers, { clearOnDefault: true });
 	const page = Math.max(1, params.page);
-	const searching = params.q.length > 0;
 
 	// Seeds the cache with what the loader resolved, so the first render already has the page (no extra request, no skeleton).
 	if (loaderData) {
@@ -67,22 +63,20 @@ export default function GoalsRoute() {
 		if (queryClient.getQueryData(key) === undefined) queryClient.setQueryData(key, loaderData.data);
 	}
 
-	const list = useGoalList({ due: params.due, page, sort: params.sort, status: params.status }, !searching);
-	const search = useGoalSearch({ page, q: params.q });
-	const active = searching ? search : list;
+	const list = useGoalList({ due: params.due, page, sort: params.sort, status: params.status });
+	const active = list;
 	const counts = list.data?.meta.counts;
 
 	const rows = useMemo<GoalRow[]>(() => {
-		if (searching) return (search.data?.data ?? []).map(hit => ({ id: hit.id, title: hit.title, updatedAt: hit.updatedAt }));
 		return (list.data?.data ?? []).map(goal => ({ goal, id: goal.id, title: goal.title, updatedAt: goal.updatedAt }));
-	}, [list.data, search.data, searching]);
+	}, [list.data]);
 
 	const meta = active.data?.meta;
 	const pageCount = meta?.pageCount ?? 1;
 	const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(emptyIds);
 	// A selection belongs to one page of one view.
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset whenever the view changes.
-	useEffect(() => setSelectedIds(emptyIds), [page, params.status, params.due, params.sort, params.q]);
+	useEffect(() => setSelectedIds(emptyIds), [page, params.status, params.due, params.sort]);
 
 	const [creating, setCreating] = useState(false);
 	const [opened, setOpened] = useState<Goal | undefined>(undefined);
@@ -164,13 +158,6 @@ export default function GoalsRoute() {
 					<Page.Description>{t('goals.subtitle')}</Page.Description>
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
-					<ListSearch
-						clearLabel={t('goals.search.clear')}
-						label={t('goals.search.label')}
-						onChange={q => void setParams({ page: 1, q })}
-						placeholder={t('goals.search.placeholder')}
-						value={params.q}
-					/>
 					<Button className={listStyles.pillTrigger} onClick={() => setCreating(true)} variant='secondary'>
 						<Button.Icon icon={Plus} />
 						<Button.Text>{t('goals.new')}</Button.Text>
@@ -179,7 +166,7 @@ export default function GoalsRoute() {
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
 				<div className={`${listStyles.card} flex flex-wrap items-center justify-between gap-3 p-3`}>
-					<StatusTabs ariaLabel={t('goals.tabs.label')} counts={counts} onChange={status => void setParams({ page: 1, q: '', status })} tabs={tabs} value={params.status} />
+					<StatusTabs ariaLabel={t('goals.tabs.label')} counts={counts} onChange={status => void setParams({ page: 1, status })} tabs={tabs} value={params.status} />
 					<div className='flex flex-wrap items-center gap-3'>
 						<OptionSelect icon={CalendarClock} label={t('goals.filters.due.label')} onChange={(due: GoalDue) => void setParams({ due, page: 1 })} options={dueOptions} value={params.due} />
 						<OptionSelect icon={ArrowDownUp} label={t('goals.sort.label')} onChange={(sort: GoalSort) => void setParams({ page: 1, sort })} options={sortOptions} value={params.sort} />
@@ -193,7 +180,7 @@ export default function GoalsRoute() {
 					</div>
 				</div>
 				<GoalsTable
-					emptyKind={searching ? 'search' : params.status}
+					emptyKind={params.status}
 					error={active.isError}
 					filtered={params.due !== 'all'}
 					isLoading={active.isPending || (active.isPlaceholderData && active.isFetching && rows.length === 0)}
@@ -208,7 +195,7 @@ export default function GoalsRoute() {
 					pageCount={pageCount}
 					pageSize={PAGE_SIZE}
 					rows={rows}
-					selectable={!searching}
+					selectable
 					selectedIds={selectedIds}
 					total={meta?.total ?? 0}
 				/>

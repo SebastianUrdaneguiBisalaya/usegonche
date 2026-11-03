@@ -16,7 +16,6 @@ export type ProjectStatus = (typeof projectStatuses)[number];
 export const projectParsers = {
 	goal: parseAsString.withDefault(''),
 	page: parseAsInteger.withDefault(1),
-	q: parseAsString.withDefault(''),
 	sort: parseAsStringLiteral(projectSorts).withDefault('updated'),
 	status: parseAsStringLiteral(projectTabs).withDefault('active'),
 	tag: parseAsString.withDefault(''),
@@ -29,7 +28,6 @@ export interface ProjectsParams {
 	/** Goal id, or empty for every goal. */
 	goal: string;
 	page: number;
-	q: string;
 	sort: ProjectSort;
 	status: ProjectTab;
 	/** Tag id, or empty for every tag. */

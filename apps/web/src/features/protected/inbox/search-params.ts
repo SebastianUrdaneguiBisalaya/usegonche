@@ -9,7 +9,6 @@ export type InboxRange = (typeof inboxRanges)[number];
 /** Everything the inbox page keeps in the URL, so a reload, a shared link or the back button restore the same view. */
 export const inboxParsers = {
 	page: parseAsInteger.withDefault(1),
-	q: parseAsString.withDefault(''),
 	range: parseAsStringLiteral(inboxRanges).withDefault('all'),
 	status: parseAsStringLiteral(inboxStatuses).withDefault('pending'),
 };
@@ -19,7 +18,6 @@ export const loadInboxParams = createLoader(inboxParsers);
 
 export interface InboxParams {
 	page: number;
-	q: string;
 	range: InboxRange;
 	status: InboxStatus;
 }

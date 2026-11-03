@@ -1,12 +1,10 @@
-import { FileText, Search } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { Pagination } from '~/components/ui/data-display/pagination/pagination';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { ListEmpty } from '../../shared/list-table';
-import { formatRelative } from '../../shared/relative-time';
-import type { NoteSearchPage, NoteSummary } from '../api';
-import { plainSnippet } from '../display';
+import type { NoteSummary } from '../api';
 import { NoteCard } from './note-card';
 
 type Layout = 'grid' | 'list';
@@ -110,45 +108,5 @@ export function NoteList({
 				<Pagination className='mx-auto shrink-0' onPageChange={onPageChange} page={page} pageCount={pageCount} pageSize={pageSize} showEdges={false} showSummary={false} total={total} />
 			)}
 		</div>
-	);
-}
-
-interface NoteSearchListProps {
-	hits: NoteSearchPage['data'] | undefined;
-	isError: boolean;
-	isLoading: boolean;
-	layout: Layout;
-	onOpen: (id: string) => void;
-	onRetry: () => void;
-	selectedId: string;
-}
-
-/** What `GET /search?types=note` found: the title and the snippet with the matched words. */
-export function NoteSearchList({ hits, isError, isLoading, layout, onOpen, onRetry, selectedId }: NoteSearchListProps) {
-	const t = useTranslate();
-	const { locale } = useLanguage();
-
-	if (isLoading) return <NoteListSkeleton layout={layout} />;
-	if (isError || !hits || hits.length === 0) {
-		return <ListEmpty error={isError} errorTitle={t('notes.error.title')} icon={Search} onRetry={onRetry} retryLabel={t('notes.error.retry')} title={t('notes.search.empty')} />;
-	}
-	return (
-		<ul className={layout === 'grid' ? 'grid gap-3 sm:grid-cols-2 xl:grid-cols-3' : 'flex flex-col gap-3'}>
-			{hits.map(hit => (
-				<li key={hit.id}>
-					<button
-						className={`flex w-full cursor-pointer flex-col gap-1.5 rounded-2xl border p-4 text-left transition-colors ${
-							hit.id === selectedId ? 'border-border-strong bg-foreground/[0.08]' : 'border-border bg-foreground/[0.03] hover:bg-foreground/[0.05]'
-						}`}
-						onClick={() => onOpen(hit.id)}
-						type='button'
-					>
-						<span className='truncate text-base font-medium'>{hit.title}</span>
-						<span className='line-clamp-2 text-sm text-muted-foreground'>{plainSnippet(hit.snippet)}</span>
-						<span className='text-xs text-muted-foreground'>{formatRelative(hit.updatedAt, locale)}</span>
-					</button>
-				</li>
-			))}
-		</ul>
 	);
 }

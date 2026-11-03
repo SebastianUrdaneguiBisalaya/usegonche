@@ -148,7 +148,6 @@
       "placeholder": "Search or jump to...",
       "empty": "No results",
       "navigate": "Navigate",
-      "notes": "Notes",
       "toggle": "Open command palette",
       "close": "Close"
     },
@@ -273,13 +272,6 @@
   "inbox": {
     "title": "Inbox",
     "subtitle": "Capture anything, organize later.",
-    "search": {
-      "placeholder": "Search in inbox...",
-      "label": "Search in inbox",
-      "clear": "Clear search",
-      "results": "Results for “{{q}}”",
-      "empty": "Nothing matches your search."
-    },
     "range": {
       "label": "Time range",
       "all": "All time",
@@ -373,12 +365,6 @@
     "title": "Projects",
     "subtitle": "Plan, organize and track your projects.",
     "new": "New project",
-    "search": {
-      "placeholder": "Search in projects...",
-      "label": "Search in projects",
-      "clear": "Clear search",
-      "empty": "No project matches your search."
-    },
     "tabs": {
       "label": "Project status",
       "active": "Active",
@@ -535,12 +521,6 @@
     "title": "Goals",
     "subtitle": "Set and track your goals.",
     "new": "New goal",
-    "search": {
-      "placeholder": "Search in goals...",
-      "label": "Search in goals",
-      "clear": "Clear search",
-      "empty": "No goal matches your search."
-    },
     "tabs": {
       "label": "Goal status",
       "active": "Active",
@@ -789,13 +769,6 @@
     "title": "Tasks",
     "subtitle": "Plan, organize and get things done.",
     "new": "New task",
-    "search": {
-      "placeholder": "Search in tasks...",
-      "label": "Search in tasks",
-      "clear": "Clear search",
-      "empty": "No task matches your search.",
-      "loading": "Searching..."
-    },
     "views": {
       "label": "View",
       "board": "Board",
@@ -1119,13 +1092,6 @@
     "title": "Notes",
     "subtitle": "Capture ideas, write and keep your thoughts.",
     "new": "New note",
-    "search": {
-      "placeholder": "Search in notes...",
-      "label": "Search in notes",
-      "clear": "Clear search",
-      "empty": "No note matches your search.",
-      "loading": "Searching..."
-    },
     "views": {
       "label": "View",
       "list": "List",

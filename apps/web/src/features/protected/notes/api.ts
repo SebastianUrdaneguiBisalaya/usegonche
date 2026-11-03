@@ -8,7 +8,6 @@ import type { NotesParams } from './search-params';
 type NotesResponse = Awaited<ReturnType<typeof api.notes.$get>>;
 type NoteResponse = Awaited<ReturnType<(typeof api.notes)[':id']['$get']>>;
 type RevisionsResponse = Awaited<ReturnType<(typeof api.notes)[':id']['revisions']['$get']>>;
-type SearchResponse = Awaited<ReturnType<typeof api.search.$get>>;
 type AttachmentsResponse = Awaited<ReturnType<typeof api.attachments.$get>>;
 
 /** One page of `GET /notes`: the summaries (title, excerpt, tags, linked task ids) and the page meta. */
@@ -17,7 +16,6 @@ export type NoteSummary = NotesPage['data'][number];
 /** One note with its body, as `GET /notes/:id` answers. */
 export type Note = Data<NoteResponse>;
 export type NoteRevision = OkBody<RevisionsResponse>['data'][number];
-export type NoteSearchPage = OkBody<SearchResponse>;
 export type NoteAttachment = OkBody<AttachmentsResponse>['data'][number];
 
 export type CreateNoteBody = Body<typeof api.notes.$post>;
@@ -25,26 +23,15 @@ export type UpdateNoteBody = Body<(typeof api.notes)[':id']['$patch']>;
 
 export const notesKey = (params: NotesParams) => ['notes', 'list', params] as const;
 
-export function useNotes(params: NotesParams, enabled: boolean) {
+export function useNotes(params: NotesParams) {
 	const { page, project, tag, task } = params;
 	return useQuery({
-		enabled,
 		placeholderData: keepPreviousData,
 		queryFn: () =>
 			unwrapPage(
 				api.notes.$get({ query: { page: String(page), pageSize: String(PAGE_SIZE), ...(project && { projectId: project }), ...(tag && { tagId: tag }), ...(task && { taskId: task }) } })
 			),
 		queryKey: notesKey(params),
-	});
-}
-
-/** What `GET /search?types=note` found (title and a snippet with the matched words between « and »). */
-export function useNotesSearch(q: string, page: number) {
-	return useQuery({
-		enabled: q.length > 0,
-		placeholderData: keepPreviousData,
-		queryFn: () => unwrapPage(api.search.$get({ query: { page: String(page), pageSize: String(PAGE_SIZE), q, types: 'note' } })),
-		queryKey: ['notes', 'search', { page, q }] as const,
 	});
 }
 
