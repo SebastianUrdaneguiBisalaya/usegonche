@@ -1353,6 +1353,77 @@
       "restoreHint": "The current version is saved as a new revision."
     }
   },
+  "reflect": {
+    "title": "Reflect",
+    "subtitle": "Review your progress. Make decisions. Set what's next.",
+    "date": "Pick a date",
+    "loadError": "The review could not be loaded.",
+    "retry": "Try again",
+    "kind": {
+      "daily": "Daily",
+      "weekly": "Weekly"
+    },
+    "period": {
+      "title": "This period",
+      "planned": "Planned",
+      "completed": "Completed",
+      "pending": "Pending",
+      "rate": "Completion rate"
+    },
+    "reflection": {
+      "title": "Your reflection",
+      "subtitle": "What went well? What could be better? What's your focus for next period?",
+      "placeholder": "Write your thoughts here...",
+      "status": {
+        "saved": "Saved",
+        "saving": "Saving...",
+        "unsaved": "Unsaved changes",
+        "error": "Could not save"
+      }
+    },
+    "decisions": {
+      "title": "Decisions",
+      "subtitle": "Review your pending tasks and decide what to do.",
+      "selected": "Selected: {{count}}",
+      "keepAll": "Keep all",
+      "apply": "Apply decisions ({{count}})",
+      "applied": "Decisions applied.",
+      "empty": "Nothing pending: every planned task is done.",
+      "noneTaken": "No decisions were taken in this review.",
+      "select": "Select {{title}}",
+      "date": "Date",
+      "action": {
+        "carry_over": "Carry over",
+        "reschedule": "Reschedule",
+        "drop": "Drop",
+        "keep": "Keep"
+      }
+    },
+    "focus": {
+      "title": "Next focus",
+      "subtitle": "What do you want to focus on next period?",
+      "placeholder": "Ship v2.0 and improve onboarding experience...",
+      "save": "Save focus",
+      "saved": "Focus saved."
+    },
+    "summary": {
+      "title": "Review summary",
+      "onTrack": "On track",
+      "overdue": "Overdue",
+      "recurring": "Recurring blockers",
+      "noBlockers": "No recurring blockers.",
+      "details": "See details"
+    },
+    "actions": {
+      "title": "Actions",
+      "close": "Close review",
+      "or": "or",
+      "draft": "Save as draft",
+      "draftSaved": "Draft saved.",
+      "closeDone": "Review closed.",
+      "closed": "This review is closed."
+    }
+  },
   "today": {
     "title": "Today",
     "subtitle": "Focus on what moves you forward.",

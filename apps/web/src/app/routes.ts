@@ -8,6 +8,7 @@ export default [
 		route('goals', '../features/protected/goals/goals.tsx'),
 		route('tasks', '../features/protected/tasks/tasks.tsx'),
 		route('notes', '../features/protected/notes/notes.tsx'),
+		route('reflect', '../features/protected/reflect/reflect.tsx'),
 		route('tags', '../features/protected/tags/tags.tsx'),
 	]),
 	layout(
