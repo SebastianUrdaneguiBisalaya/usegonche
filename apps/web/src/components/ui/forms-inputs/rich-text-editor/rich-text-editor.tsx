@@ -167,6 +167,15 @@ export interface RichTextEditorRootProps {
   readonly value?: RichTextEditorValue;
   /** Initial content as JSON (uncontrolled usage). */
   readonly defaultValue?: RichTextEditorValue;
+  /**
+   * Markdown mode (controlled): the document is this Markdown text instead of JSON. Use it with `onMarkdownChange`/`onMarkdownSave`
+   * and leave `value`/`defaultValue` out. Formatting with no Markdown form (underline, highlight, alignment) is not kept.
+   */
+  readonly markdown?: string;
+  /** Called with the Markdown of the document on every edit (Markdown mode). */
+  readonly onMarkdownChange?: (markdown: string) => void;
+  /** Persists the Markdown of the document, like `onSave` does for the JSON (Markdown mode). */
+  readonly onMarkdownSave?: (markdown: string) => void | Promise<void>;
   /** Called with the new document JSON on every edit. */
   readonly onChange?: (value: RichTextEditorValue) => void;
   /** Disables editing; the toolbar/bubble menu/slash menu should be omitted by the consumer when this is `true`. @default false */
@@ -230,7 +239,10 @@ function RichTextEditorRoot({
   lang,
   value: controlledValue,
   defaultValue,
+  markdown,
   onChange,
+  onMarkdownChange,
+  onMarkdownSave,
   onSave,
   autoSaveDelay,
   readOnly = false,
@@ -240,6 +252,7 @@ function RichTextEditorRoot({
   children,
 }: RichTextEditorRootProps) {
   const isControlled = controlledValue !== undefined;
+  const isMarkdown = markdown !== undefined;
 
   // Kept as refs (not read directly by the long-lived `onUpdate` closure below) so a new
   // `onChange`/`onSave`/`autoSaveDelay` identity on a later render — an inline arrow function is
@@ -248,11 +261,15 @@ function RichTextEditorRoot({
   const latestOptionsRef = React.useRef({
     autoSaveDelay,
     onChange,
+    onMarkdownChange,
+    onMarkdownSave,
     onSave,
   });
   latestOptionsRef.current = {
     autoSaveDelay,
     onChange,
+    onMarkdownChange,
+    onMarkdownSave,
     onSave,
   };
 
@@ -278,7 +295,7 @@ function RichTextEditorRoot({
   // only captures its options once, at creation — would otherwise permanently reference
   // whatever `editor` happened to be on that very first render (possibly still `null`).
   const runSaveCycle = React.useCallback((activeEditor: Editor) => {
-    if (!latestOptionsRef.current.onSave) return;
+    if (!latestOptionsRef.current.onSave && !latestOptionsRef.current.onMarkdownSave) return;
     if (savingRef.current) {
       dirtyDuringSaveRef.current = true;
       return;
@@ -289,8 +306,8 @@ function RichTextEditorRoot({
       dirtyDuringSaveRef.current = false;
       setSaveStatus("saving");
 
-      const snapshot = activeEditor.getJSON();
-      Promise.resolve(latestOptionsRef.current.onSave?.(snapshot)).then(
+      const { onMarkdownSave: saveMarkdown, onSave: saveJson } = latestOptionsRef.current;
+      Promise.resolve(saveMarkdown ? saveMarkdown(activeEditor.getMarkdown()) : saveJson?.(activeEditor.getJSON())).then(
         () => {
           // A change landed while this save was in flight (ours, or an external `value` update):
           // re-run immediately with the now-current content instead of reporting "saved" for a
@@ -313,7 +330,8 @@ function RichTextEditorRoot({
   }, []);
 
   const editor = useEditor({
-    content: controlledValue ?? defaultValue ?? "",
+    content: markdown ?? controlledValue ?? defaultValue ?? "",
+    contentType: isMarkdown ? "markdown" : "json",
     editable: !readOnly,
     editorProps: {
       attributes: {
@@ -353,13 +371,14 @@ function RichTextEditorRoot({
     immediatelyRender: false,
     onUpdate: ({ editor: currentEditor }) => {
       latestOptionsRef.current.onChange?.(currentEditor.getJSON());
+      latestOptionsRef.current.onMarkdownChange?.(currentEditor.getMarkdown());
 
       if (!hasSkippedInitialUpdateRef.current) {
         hasSkippedInitialUpdateRef.current = true;
         return;
       }
 
-      if (!latestOptionsRef.current.onSave) return;
+      if (!latestOptionsRef.current.onSave && !latestOptionsRef.current.onMarkdownSave) return;
       if (savingRef.current) {
         dirtyDuringSaveRef.current = true;
       } else {
@@ -394,6 +413,19 @@ function RichTextEditorRoot({
     controlledValue,
     editor,
     isControlled,
+  ]);
+
+  React.useEffect(() => {
+    if (!editor || !isMarkdown) return;
+    if (markdown === editor.getMarkdown()) return;
+    editor.commands.setContent(markdown, {
+      contentType: "markdown",
+      emitUpdate: false,
+    });
+  }, [
+    editor,
+    isMarkdown,
+    markdown,
   ]);
 
   React.useEffect(() => {
