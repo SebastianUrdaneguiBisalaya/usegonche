@@ -1110,5 +1110,197 @@
       "title": "¿Eliminar esta tarea?",
       "description": "\"{{title}}\" y sus subtareas, bloqueos y archivos se eliminarán. No se puede deshacer."
     }
+  },
+  "notes": {
+    "title": "Notas",
+    "subtitle": "Captura ideas, escribe y guarda tus pensamientos.",
+    "new": "Nueva nota",
+    "search": {
+      "placeholder": "Buscar en notas...",
+      "label": "Buscar en notas",
+      "clear": "Borrar búsqueda",
+      "empty": "Ninguna nota coincide con tu búsqueda.",
+      "loading": "Buscando..."
+    },
+    "views": {
+      "label": "Vista",
+      "list": "Lista",
+      "grid": "Cuadrícula"
+    },
+    "filters": {
+      "all": "Todas",
+      "project": {
+        "label": "Filtrar por proyecto",
+        "all": "Proyecto"
+      },
+      "tag": {
+        "label": "Filtrar por etiqueta",
+        "all": "Etiqueta"
+      },
+      "task": {
+        "label": "Filtrar por tarea vinculada",
+        "all": "Tarea"
+      }
+    },
+    "card": {
+      "noExcerpt": "Aún sin contenido",
+      "more": "Más acciones para {{title}}",
+      "project": "Proyecto"
+    },
+    "actions": {
+      "open": "Abrir",
+      "copyLink": "Copiar enlace",
+      "delete": "Eliminar"
+    },
+    "empty": {
+      "title": "No hay notas aquí",
+      "description": "Crea una nota o convierte un elemento de la bandeja en una.",
+      "filtered": "Ninguna nota coincide con estos filtros."
+    },
+    "error": {
+      "title": "No se pudieron cargar tus notas",
+      "retry": "Reintentar"
+    },
+    "modal": {
+      "title": "Nueva nota",
+      "description": "Ponle un título; el resto lo escribes en el editor."
+    },
+    "form": {
+      "title": {
+        "label": "Título",
+        "placeholder": "Título de la nota",
+        "required": "Ponle un título a la nota.",
+        "tooLong": "Usa como máximo {{max}} caracteres."
+      },
+      "cancel": "Cancelar",
+      "create": "Crear nota"
+    },
+    "toast": {
+      "created": "Nota creada",
+      "saved": "Nota guardada",
+      "deleted": "Nota eliminada",
+      "linkCopied": "Enlace copiado",
+      "markdownCopied": "Markdown copiado",
+      "restored": "Versión restaurada",
+      "fileRemoved": "Archivo eliminado",
+      "filesAdded": "Archivos añadidos"
+    },
+    "delete": {
+      "cancel": "Conservar",
+      "confirm": "Eliminar nota",
+      "title": "¿Eliminar esta nota?",
+      "description": "\"{{title}}\" y sus adjuntos se eliminarán. No se puede deshacer."
+    },
+    "discard": {
+      "title": "¿Descartar tus cambios?",
+      "description": "Esta nota tiene cambios sin guardar.",
+      "cancel": "Seguir editando",
+      "confirm": "Descartar cambios"
+    },
+    "editor": {
+      "back": "Volver",
+      "close": "Cerrar",
+      "save": "Guardar",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Nota sin título",
+      "placeholder": "Escribe tu nota... (Markdown)",
+      "copyLink": "Copiar enlace",
+      "copyMarkdown": "Copiar Markdown",
+      "delete": "Eliminar nota",
+      "loadError": "No se pudo cargar esta nota.",
+      "retry": "Reintentar",
+      "panel": "Editor de la nota",
+      "status": {
+        "idle": "",
+        "saved": "Guardada",
+        "saving": "Guardando...",
+        "unsaved": "Cambios sin guardar",
+        "error": "No se pudo guardar"
+      },
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "link": "Enlace",
+      "linkPrompt": "URL",
+      "bulletList": "Lista con viñetas",
+      "numberedList": "Lista numerada",
+      "checklist": "Lista de tareas",
+      "quote": "Cita",
+      "divider": "Separador",
+      "code": "Código",
+      "more": "Más",
+      "heading1": "Encabezado 1",
+      "heading2": "Encabezado 2",
+      "heading3": "Encabezado 3",
+      "highlight": "Resaltar",
+      "strikethrough": "Tachado",
+      "underline": "Subrayado",
+      "undo": "Deshacer",
+      "redo": "Rehacer",
+      "placeholderEmpty": "Elige una nota para leerla o editarla.",
+      "placeholderEmptyHint": "O crea una nueva con el botón de arriba.",
+      "saveShortcut": "Guardar nota"
+    },
+    "meta": {
+      "project": {
+        "label": "Proyecto",
+        "none": "Sin proyecto"
+      },
+      "tags": {
+        "label": "Etiquetas",
+        "placeholder": "Añadir etiqueta",
+        "create": "Crear \"{{name}}\"",
+        "empty": "Aún no hay etiquetas."
+      },
+      "tasks": {
+        "label": "Tareas vinculadas",
+        "add": "Vincular tarea",
+        "search": "Buscar tareas...",
+        "empty": "Ninguna tarea coincide.",
+        "none": "Sin tareas vinculadas",
+        "remove": "Desvincular {{title}}",
+        "count": "{{count}} vinculadas"
+      }
+    },
+    "files": {
+      "title": "Adjuntos ({{count}})",
+      "loading": "Cargando adjuntos",
+      "empty": "Aún no hay archivos adjuntos.",
+      "add": "Añadir archivos",
+      "viewAll": "Ver todos",
+      "viewLess": "Ver menos",
+      "download": "Descargar {{name}}",
+      "remove": "Quitar {{name}}",
+      "more": "Más acciones para {{name}}",
+      "uploadTitle": "Añadir archivos",
+      "uploadDescription": "Se suben directamente al almacenamiento y se adjuntan a esta nota.",
+      "limits": "Hasta {{max}} archivos, {{size}} en total ({{used}} usados).",
+      "full": "Esta nota ya tiene el máximo de archivos.",
+      "totalExceeded": "Añadir este archivo superaría {{size}} en total.",
+      "done": "Listo",
+      "loadError": "No se pudieron cargar los adjuntos.",
+      "retry": "Reintentar",
+      "removeError": "No se pudo quitar el archivo.",
+      "downloadError": "No se pudo abrir el archivo."
+    },
+    "history": {
+      "title": "Historial de revisiones",
+      "description": "Mira y restaura versiones anteriores.",
+      "view": "Ver historial",
+      "drawerTitle": "Historial de revisiones",
+      "drawerDescription": "Cada vez que cambias el título o el texto, la versión anterior se guarda aquí.",
+      "empty": "Aún no hay versiones anteriores.",
+      "emptyHint": "Aparecen cuando cambias el título o el texto.",
+      "loadError": "No se pudo cargar el historial.",
+      "retry": "Reintentar",
+      "versionOf": "Versión del {{date}}",
+      "untitled": "Sin título",
+      "preview": "Vista previa",
+      "back": "Todas las versiones",
+      "restore": "Restaurar esta versión",
+      "restoring": "Restaurando...",
+      "close": "Cerrar",
+      "previewEmpty": "Esta versión no tiene texto.",
+      "restoreHint": "La versión actual se guarda como una nueva revisión."
+    }
   }
 }
