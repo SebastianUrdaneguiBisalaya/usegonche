@@ -816,7 +816,8 @@
     "chips": {
       "label": "Quick filters",
       "overdue": "Overdue",
-      "blocked": "Blocked"
+      "blocked": "Blocked",
+      "focus": "Working set"
     },
     "filters": {
       "project": {
@@ -919,7 +920,9 @@
       "card": "Draggable task",
       "empty": "No tasks.",
       "add": "Add task to {{status}}",
-      "addTask": "Add task..."
+      "addTask": "Add task...",
+      "more_one": "{{count}} more task in list view",
+      "more_other": "{{count}} more tasks in list view"
     },
     "list": {
       "collapse": "Hide subtasks",

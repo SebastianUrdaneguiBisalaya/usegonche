@@ -70,6 +70,14 @@ export const listTasksQuerySchema = z.object({
 		.optional(),
 	dueAfter: date.optional(),
 	dueBefore: date.optional(),
+	/**
+	 * `true` keeps the working set: open tasks that are overdue, due in the next 7 days (today included) or have no due date, plus the tasks finished or
+	 * cancelled in the last 7 days. It combines with every other filter (they all apply), and the counters and the total follow it.
+	 */
+	focus: z
+		.enum(['true'])
+		.transform(() => true)
+		.optional(),
 	goalId: z.uuid().optional(),
 	order: z.enum(['asc', 'desc']).default('desc'),
 	/** `true` keeps only tasks with no due date. Ignored when `dueAfter`/`dueBefore` are given. */

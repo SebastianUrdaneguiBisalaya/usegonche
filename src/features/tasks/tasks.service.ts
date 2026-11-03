@@ -85,6 +85,22 @@ const assertParent = async (prisma: Db, ownerId: string, parentId: string, taskI
 };
 
 const OPEN: TaskStatus[] = ['todo', 'in_progress'];
+const CLOSED: TaskStatus[] = ['done', 'cancelled'];
+
+/** Days ahead (today included) a task can be due and still be in the working set; also how long a finished task stays in it. */
+const FOCUS_DAYS = 7;
+const DAY_MS = 86_400_000;
+
+/** The working set: what needs attention (open and overdue, due soon or undated) and what was just closed. Dates use UTC, like `overdue`. */
+const focusWhere = (now: Date): Prisma.TaskWhereInput => {
+	const today = new Date(now.toISOString().slice(0, 10));
+	return {
+		OR: [
+			{ OR: [{ dueDate: null }, { dueDate: { lte: new Date(today.getTime() + (FOCUS_DAYS - 1) * DAY_MS) } }], status: { in: OPEN } },
+			{ status: { in: CLOSED }, updatedAt: { gte: new Date(now.getTime() - FOCUS_DAYS * DAY_MS) } },
+		],
+	};
+};
 /** Same rule as `TaskView.blocked`: an open manual blocker or a dependency that is not finished. */
 const blockedWhere: Prisma.TaskWhereInput = { OR: [{ blockers: { some: { resolvedAt: null } } }, { dependencies: { some: { dependsOn: { status: { in: OPEN } } } } }] };
 const NULLABLE_SORT: TaskSort[] = ['dueDate', 'startDate'];
@@ -94,7 +110,7 @@ const NULLABLE_SORT: TaskSort[] = ['dueDate', 'startDate'];
  * Counters follow every filter except the status, so each status chip shows how many tasks it would hold. `overdue` uses the UTC date.
  */
 export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: ListTasksFilters, page: PageParams): Promise<TaskPage> => {
-	const { blocked, dueAfter, dueBefore, goalId, noDueDate, noProject, order = 'desc', parentId, priority, projectId, recurrenceId, sort = 'createdAt', status, tagId, title } = filters;
+	const { blocked, dueAfter, dueBefore, focus, goalId, noDueDate, noProject, order = 'desc', parentId, priority, projectId, recurrenceId, sort = 'createdAt', status, tagId, title } = filters;
 	const shared = scoped(ownerId, {
 		parentId: parentId ?? null,
 		...(dueAfter || dueBefore ? { dueDate: { ...(dueAfter && { gte: dueAfter }), ...(dueBefore && { lte: dueBefore }) } } : noDueDate ? { dueDate: null } : {}),
@@ -105,6 +121,7 @@ export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: 
 		...(projectId ? { projectId } : noProject ? { projectId: null } : {}),
 		...(tagId && { tags: { some: { tagId } } }),
 		...(blocked === undefined ? {} : blocked ? blockedWhere : { NOT: blockedWhere }),
+		...(focus && { AND: [focusWhere(new Date())] }),
 	});
 	const where = { ...shared, ...(status && { status: { in: status } }) };
 	const orderBy = [NULLABLE_SORT.includes(sort) ? { [sort]: { nulls: 'last', sort: order } } : { [sort]: order }, { id: order }] as Prisma.TaskOrderByWithRelationInput[];
@@ -195,7 +212,6 @@ const applyUpdate = async (tx: Db, ownerId: string, id: string, { tagIds, ...fie
 	return getTask(tx, ownerId, id);
 };
 
-const DAY_MS = 86_400_000;
 const shifted = (date: Date | null, days: number): Date | undefined => (date ? new Date(date.getTime() + days * DAY_MS) : undefined);
 
 /**

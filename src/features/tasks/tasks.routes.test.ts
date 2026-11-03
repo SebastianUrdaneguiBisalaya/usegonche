@@ -109,9 +109,19 @@ describe('GET /tasks', () => {
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ dueDate: null, ownerId: TEST_USER_ID, parentId: null, projectId: null });
 	});
 
+	it('accepts the working-set filter', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+		expect((await app.request('/tasks?focus=true')).status).toBe(200);
+		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toMatchObject({ AND: [{ OR: expect.any(Array) }], ownerId: TEST_USER_ID });
+	});
+
 	it.each([
 		'noProject=false',
 		'noDueDate=1',
+		'focus=1',
+		'focus=false',
 		'status=nope',
 		'sort=nope',
 		'order=up',

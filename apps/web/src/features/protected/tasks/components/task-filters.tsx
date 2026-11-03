@@ -1,4 +1,4 @@
-import { CalendarDays, FolderKanban, OctagonAlert, Tag, Target, TimerOff } from 'lucide-react';
+import { CalendarDays, Focus, FolderKanban, OctagonAlert, Tag, Target, TimerOff } from 'lucide-react';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { useTranslate } from '~/hooks/use-translate';
@@ -12,14 +12,18 @@ interface TaskChipsProps {
 	blocked: boolean;
 	counts: (Record<TaskStatus, number> & { blocked: number; overdue: number }) | undefined;
 	due: TaskDue;
+	focus: boolean;
 	onBlockedChange: (blocked: boolean) => void;
 	onDueChange: (due: TaskDue) => void;
+	onFocusChange: (focus: boolean) => void;
 	onStatusChange: (status: TaskStatus[]) => void;
+	/** The working-set chip is for the list: the board always shows that set. */
+	showFocus: boolean;
 	status: readonly TaskStatus[];
 }
 
 /** One chip per status (several can be on), then the two quick filters that need attention: overdue and blocked. */
-export function TaskChips({ blocked, counts, due, onBlockedChange, onDueChange, onStatusChange, status }: TaskChipsProps) {
+export function TaskChips({ blocked, counts, due, focus, onBlockedChange, onDueChange, onFocusChange, onStatusChange, showFocus, status }: TaskChipsProps) {
 	const t = useTranslate();
 
 	const toggle = (value: TaskStatus) => {
@@ -41,6 +45,7 @@ export function TaskChips({ blocked, counts, due, onBlockedChange, onDueChange, 
 				/>
 			))}
 			<span aria-hidden className='mx-1 hidden h-6 w-px bg-border sm:block' />
+			{showFocus && <FilterChip active={focus} icon={<Icon aria-hidden icon={Focus} size='sm' />} label={t('tasks.chips.focus')} onClick={() => onFocusChange(!focus)} />}
 			<FilterChip
 				active={due === 'overdue'}
 				count={counts?.overdue}

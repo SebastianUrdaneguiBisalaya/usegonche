@@ -19,8 +19,11 @@ export type CreateTaskBody = Body<typeof api.tasks.$post>;
 export type UpdateTaskBody = Body<(typeof api.tasks)[':id']['$patch']>;
 export type BulkChanges = Body<typeof api.tasks.bulk.$patch>['changes'];
 
-/** The board loads one big page (the API caps a page at 100); the list pages through the tasks. */
-export const BOARD_PAGE_SIZE = 100;
+/** The most rows the API returns in one page. Not "all the tasks": anything that can exceed it pages (the list) or says it was cut (the board). */
+export const MAX_PAGE_SIZE = 100;
+
+/** Hard ceiling of the board's working set: past it the board links to the list instead of showing more cards. */
+export const BOARD_PAGE_SIZE = MAX_PAGE_SIZE;
 
 const SORT_QUERY: Record<TaskSort, { order: 'asc' | 'desc'; sort: 'createdAt' | 'dueDate' | 'priority' | 'title' | 'updatedAt' }> = {
 	created: { order: 'desc', sort: 'createdAt' },
@@ -37,28 +40,50 @@ const shiftDay = (days: number): string => {
 
 export const tasksKey = (view: TaskView, params: TasksParams) => ['tasks', 'list', view, params, shiftDay(0)] as const;
 
-/** Query string of `GET /tasks` (values are strings on the wire). The due filter becomes a date range, as the API knows no "overdue". */
-export const tasksQuery = (view: TaskView, { blocked, due, goal, page, project, sort, status, tag }: TasksParams) => ({
+/** The filters of `GET /tasks` (values are strings on the wire). The due filter becomes a date range, as the API knows no "overdue". */
+const filterQuery = ({ blocked, due, focus, goal, project, sort, status, tag }: TasksParams) => ({
 	// An overdue task is an open one: the status chips cannot bring the finished ones back into that filter.
 	...(due === 'overdue' ? { dueBefore: shiftDay(-1), status: status.filter(value => value === 'todo' || value === 'in_progress') } : { status }),
 	...(due === 'today' && { dueAfter: shiftDay(0), dueBefore: shiftDay(0) }),
 	...(due === 'week' && { dueAfter: shiftDay(0), dueBefore: shiftDay(6) }),
 	...(due === 'none' && { noDueDate: 'true' as const }),
 	...(blocked && { blocked: 'true' as const }),
+	...(focus && { focus: 'true' as const }),
 	...(goal && { goalId: goal }),
 	...(project === NO_PROJECT ? { noProject: 'true' as const } : project ? { projectId: project } : {}),
 	...(tag && { tagId: tag }),
 	...SORT_QUERY[sort],
-	page: view !== 'list' ? '1' : String(page),
-	pageSize: String(view !== 'list' ? BOARD_PAGE_SIZE : PAGE_SIZE),
 });
 
-export function useTasks(view: TaskView, params: TasksParams, enabled = true) {
+/** Query of one page of the list. */
+export const tasksQuery = (params: TasksParams) => ({ ...filterQuery(params), page: String(params.page), pageSize: String(PAGE_SIZE) });
+
+/** One page of the list view, with the counters of the status chips. */
+export function useTasks(params: TasksParams, enabled = true) {
 	return useQuery({
 		enabled,
 		placeholderData: keepPreviousData,
-		queryFn: () => unwrapPage(api.tasks.$get({ query: tasksQuery(view, params) })),
-		queryKey: tasksKey(view, params),
+		queryFn: () => unwrapPage(api.tasks.$get({ query: tasksQuery(params) })),
+		queryKey: tasksKey('list', params),
+	});
+}
+
+/** The board's tasks, capped to the working set. `hidden` is how many tasks of the set did not fit under the ceiling. */
+export type BoardPage = TasksPage & { hidden: number };
+
+/**
+ * `GET /tasks` for the board: the working set (`focus`: what needs attention plus what was just closed), at most `BOARD_PAGE_SIZE` cards, and how many were left out.
+ * A due filter picked by the user replaces the working set.
+ */
+export function useBoardTasks(params: TasksParams, enabled = true) {
+	return useQuery({
+		enabled,
+		placeholderData: keepPreviousData,
+		queryFn: async (): Promise<BoardPage> => {
+			const page = await unwrapPage(api.tasks.$get({ query: { ...filterQuery({ ...params, focus: params.due === 'any' }), page: '1', pageSize: String(BOARD_PAGE_SIZE) } }));
+			return { ...page, hidden: Math.max(page.meta.total - page.data.length, 0) };
+		},
+		queryKey: tasksKey('board', params),
 	});
 }
 
@@ -66,7 +91,7 @@ export function useTasks(view: TaskView, params: TasksParams, enabled = true) {
 export function useSubtasks(parentId: string, enabled: boolean) {
 	return useQuery({
 		enabled,
-		queryFn: () => unwrap(api.tasks.$get({ query: { pageSize: String(BOARD_PAGE_SIZE), parentId, order: 'asc', sort: 'createdAt' } })),
+		queryFn: () => unwrap(api.tasks.$get({ query: { pageSize: String(MAX_PAGE_SIZE), parentId, order: 'asc', sort: 'createdAt' } })),
 		queryKey: ['tasks', 'subtasks', parentId],
 	});
 }
