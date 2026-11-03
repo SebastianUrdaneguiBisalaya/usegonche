@@ -9,6 +9,7 @@ export default [
 		route('tasks', '../features/protected/tasks/tasks.tsx'),
 		route('notes', '../features/protected/notes/notes.tsx'),
 		route('reflect', '../features/protected/reflect/reflect.tsx'),
+		route('reminders', '../features/protected/reminders/reminders.tsx'),
 		route('tags', '../features/protected/tags/tags.tsx'),
 	]),
 	layout(

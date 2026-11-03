@@ -1424,6 +1424,82 @@
       "closed": "This review is closed."
     }
   },
+  "reminders": {
+    "title": "Reminders",
+    "subtitle": "Never miss what matters.",
+    "unread": "Unread reminders",
+    "markAll": "Mark all as read",
+    "markSelected": "Mark as read ({{count}})",
+    "loadError": "Reminders could not be loaded.",
+    "retry": "Try again",
+    "empty": "No reminders yet. Add one from a task or a note.",
+    "noResults": "No reminders match.",
+    "tabs": {
+      "label": "Reminder status",
+      "all": "All",
+      "upcoming": "Upcoming",
+      "snoozed": "Snoozed",
+      "dismissed": "Dismissed"
+    },
+    "search": {
+      "label": "Search reminders",
+      "placeholder": "Search reminders...",
+      "clear": "Clear search"
+    },
+    "type": {
+      "event": "Event",
+      "task": "Task",
+      "note": "Note"
+    },
+    "row": {
+      "at": "at",
+      "snoozedUntil": "Snoozed until {{date}}",
+      "dismissed": "Dismissed",
+      "priority": "{{priority}} priority",
+      "select": "Select {{title}}",
+      "menu": "Reminder options"
+    },
+    "actions": {
+      "title": "Actions",
+      "snooze": "Snooze",
+      "dismiss": "Dismiss",
+      "delete": "Delete"
+    },
+    "snooze": {
+      "hour": "In 1 hour ({{when}})",
+      "tomorrow": "Tomorrow ({{when}})",
+      "week": "Next week ({{when}})"
+    },
+    "detail": {
+      "close": "Close details",
+      "title": "Details",
+      "type": "Type",
+      "date": "Date",
+      "time": "Time",
+      "created": "Created",
+      "viewNote": "View note"
+    },
+    "caughtUp": {
+      "title": "All caught up!",
+      "subtitle": "No more reminders for now."
+    },
+    "toast": {
+      "snoozed": "Reminder snoozed.",
+      "dismissed": "Reminder dismissed.",
+      "deleted": "Reminder deleted."
+    },
+    "target": {
+      "title": "Reminder",
+      "description": "Get reminded about this later.",
+      "pending": "Reminds you {{when}}",
+      "none": "Set a reminder",
+      "change": "Change reminder",
+      "remove": "Remove reminder",
+      "set": "Reminder set.",
+      "updated": "Reminder updated.",
+      "removed": "Reminder removed."
+    }
+  },
   "today": {
     "title": "Today",
     "subtitle": "Focus on what moves you forward.",

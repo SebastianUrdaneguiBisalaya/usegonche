@@ -14,6 +14,7 @@ import { useLanguage } from '~/hooks/use-language';
 import { useRetained } from '~/hooks/use-retained';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
+import { TargetReminder } from '../../reminders/components/target-reminder';
 import { shortcutKeys } from '../../shared/shortcut-keys';
 import { type Task, type UpdateTaskBody, useDeleteTask, useTask, useUpdateTask } from '../api';
 import { statusIcon, taskIcon } from '../display';
@@ -127,6 +128,7 @@ function Body({ onClose, onOpenTask, onSetStatus, task }: Omit<TaskDrawerProps, 
 				<SubtasksSection onOpen={onOpenTask} task={task} />
 				<DependenciesSection onOpen={onOpenTask} task={task} />
 				<BlockersSection task={task} />
+				<TargetReminder target={{ taskId: task.id }} />
 				<TaskTabs task={task} />
 			</Drawer.Body>
 			<Drawer.Footer className='flex flex-wrap items-center justify-between gap-2'>
