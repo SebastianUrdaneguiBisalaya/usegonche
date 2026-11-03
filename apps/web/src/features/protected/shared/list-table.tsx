@@ -48,6 +48,8 @@ interface ListTableProps<TData extends Record<string, any>> {
 	empty: React.ReactNode;
 	/** Left side of the footer: the selection actions, or the count. */
 	footer: React.ReactNode;
+	/** Extra classes for one row (e.g. a group header). */
+	getRowClassName?: (row: TData) => string | undefined;
 	isLoading: boolean;
 	onRowClick?: (row: TData) => void;
 	pagination: TablePagination;
@@ -64,6 +66,7 @@ export function ListTable<TData extends Record<string, any>>({
 	columns,
 	empty,
 	footer,
+	getRowClassName,
 	isLoading,
 	onRowClick,
 	pagination,
@@ -80,6 +83,7 @@ export function ListTable<TData extends Record<string, any>>({
 				containerClassName='rounded-none border-0 bg-transparent'
 				data={rows}
 				emptyState={empty}
+				getRowClassName={getRowClassName}
 				headerClassName='bg-transparent backdrop-blur'
 				isLoading={isLoading}
 				onRowClick={onRowClick}

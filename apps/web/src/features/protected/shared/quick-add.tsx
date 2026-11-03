@@ -17,6 +17,8 @@ interface QuickAddProps {
 	maxLength: number;
 	/** Called with the trimmed text when it is not empty; resolve to clear the field, reject to keep the text. */
 	onSubmit: (text: string) => Promise<unknown> | undefined;
+	/** Called with the raw text on every keystroke and when it is cleared (e.g. to preview what will be parsed from it). */
+	onTextChange?: (text: string) => void;
 	pending: boolean;
 	placeholder: string;
 	/** Icon of the submit button. */
@@ -26,7 +28,7 @@ interface QuickAddProps {
 }
 
 /** One-line add bar of a list page: Enter or the round button submits the text. The field is cleared once `onSubmit` resolves. */
-export function QuickAdd({ extra, hint, icon, inputRef, label, maxLength, onSubmit, pending, placeholder, submitIcon = ArrowRight, submitLabel }: QuickAddProps) {
+export function QuickAdd({ extra, hint, icon, inputRef, label, maxLength, onSubmit, onTextChange, pending, placeholder, submitIcon = ArrowRight, submitLabel }: QuickAddProps) {
 	const [value, setValue] = useState('');
 	const text = value.trim();
 
@@ -35,6 +37,7 @@ export function QuickAdd({ extra, hint, icon, inputRef, label, maxLength, onSubm
 		try {
 			await onSubmit(text);
 			setValue('');
+			onTextChange?.('');
 		} catch {
 			// The page reports the error (toast); the text stays so it can be fixed and sent again.
 		}
@@ -54,7 +57,10 @@ export function QuickAdd({ extra, hint, icon, inputRef, label, maxLength, onSubm
 					aria-label={label}
 					autoComplete='off'
 					maxLength={maxLength}
-					onChange={event => setValue(event.target.value)}
+					onChange={event => {
+						setValue(event.target.value);
+						onTextChange?.(event.target.value);
+					}}
 					onKeyDown={event => {
 						if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
 							event.preventDefault();
