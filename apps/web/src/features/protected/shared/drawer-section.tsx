@@ -39,7 +39,7 @@ export function DrawerSection<T extends { id: string }>({ empty, error, errorLab
 	return (
 		<ul className='flex flex-col gap-2'>
 			{items.map(item => (
-				<li className='flex items-center justify-between gap-3 rounded-xl border border-border bg-foreground/[0.03] px-4 py-3 text-sm' key={item.id}>
+				<li className='flex items-center justify-between gap-3 rounded-xl border border-border bg-foreground/3 px-4 py-3 text-sm' key={item.id}>
 					{render(item)}
 				</li>
 			))}
