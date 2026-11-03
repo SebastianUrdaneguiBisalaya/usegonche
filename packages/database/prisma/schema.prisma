@@ -610,6 +610,7 @@ model TaskEvent {
 
   @@index([taskId, occurredAt])
   @@index([ownerId, type, occurredAt])
+  @@index([ownerId, occurredAt])
   @@map("task_events")
 }
 
