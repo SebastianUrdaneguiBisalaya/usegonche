@@ -11,6 +11,7 @@ import { Drawer } from '~/components/ui/overlays-feedback/drawer/drawer';
 import { useMediaQuery } from '~/hooks/use-media-query';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
+import { ListSearch } from '../shared/list-search';
 import { PAGE_SIZE } from '../shared/paged';
 import { useProjectOptions } from '../shared/projects';
 import { listStyles } from '../shared/styles';
@@ -20,6 +21,7 @@ import { NewNoteModal } from './components/new-note-modal';
 import { NoteEditor } from './components/note-editor';
 import { NoteFilters } from './components/note-filters';
 import { NoteList } from './components/note-list';
+import { filterNotes } from './filter';
 import { type NoteView, noteParsers, noteViews } from './search-params';
 
 const viewIcons = { grid: LayoutGrid, list: List } as const;
@@ -75,6 +77,8 @@ export default function NotesRoute() {
 
 	useHotkeys('n', () => guard(() => setCreating(true)), { group: 'notes', label: t('notes.new') });
 
+	// The search box filters the notes of the page already loaded (title and excerpt), in memory.
+	const visible = useMemo(() => filterNotes(list.data?.data ?? [], params.q), [list.data?.data, params.q]);
 	const meta = list.data?.meta;
 	const isLoading = list.isPending || (list.isPlaceholderData && list.isFetching && (list.data?.data.length ?? 0) === 0);
 	const clearFilters = () => void setParams({ page: 1, project: '', tag: '', task: '' });
@@ -82,10 +86,10 @@ export default function NotesRoute() {
 	const results = (
 		<NoteList
 			error={list.isError}
-			filtered={filtered}
+			filtered={filtered || params.q !== ''}
 			isLoading={isLoading}
 			layout={params.view}
-			notes={list.data?.data ?? []}
+			notes={visible}
 			onCopyLink={note => void copyLink(note.id)}
 			onDelete={note => setDeleting({ id: note.id, title: note.title })}
 			onOpen={note => openNote(note.id)}
@@ -120,19 +124,28 @@ export default function NotesRoute() {
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
 				<div className='flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4'>
-					<NoteFilters
-						count={list.data?.meta.total}
-						filtered={filtered}
-						onClear={clearFilters}
-						onProjectChange={project => void setParams({ page: 1, project })}
-						onTagChange={tag => void setParams({ page: 1, tag })}
-						onTaskChange={task => void setParams({ page: 1, task })}
-						project={params.project}
-						projects={projectOptions}
-						tag={params.tag}
-						tags={tagOptions}
-						task={params.task}
-					/>
+					<div className='flex flex-1 flex-wrap items-center gap-3'>
+						<ListSearch
+							clearLabel={t('notes.search.clear')}
+							label={t('notes.search.label')}
+							onChange={q => void setParams({ q })}
+							placeholder={t('notes.search.placeholder')}
+							value={params.q}
+						/>
+						<NoteFilters
+							count={list.data?.meta.total}
+							filtered={filtered}
+							onClear={clearFilters}
+							onProjectChange={project => void setParams({ page: 1, project })}
+							onTagChange={tag => void setParams({ page: 1, tag })}
+							onTaskChange={task => void setParams({ page: 1, task })}
+							project={params.project}
+							projects={projectOptions}
+							tag={params.tag}
+							tags={tagOptions}
+							task={params.task}
+						/>
+					</div>
 					<div aria-label={t('notes.views.label')} className='flex items-center gap-1 rounded-full border border-border bg-foreground/[0.03] p-1' role='group'>
 						{noteViews.map((view: NoteView) => (
 							<button
