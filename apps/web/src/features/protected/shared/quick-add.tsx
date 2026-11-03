@@ -5,6 +5,8 @@ import { Input } from '~/components/ui/forms-inputs/input/input';
 import { listStyles } from './styles';
 
 interface QuickAddProps {
+	/** Extra control between the field and the button (e.g. a color). */
+	extra?: ReactNode;
 	/** Shown at the end of the field, before the button (e.g. a shortcut hint). */
 	hint?: ReactNode;
 	icon: LucideIcon;
@@ -24,7 +26,7 @@ interface QuickAddProps {
 }
 
 /** One-line add bar of a list page: Enter or the round button submits the text. The field is cleared once `onSubmit` resolves. */
-export function QuickAdd({ hint, icon, inputRef, label, maxLength, onSubmit, pending, placeholder, submitIcon = ArrowRight, submitLabel }: QuickAddProps) {
+export function QuickAdd({ extra, hint, icon, inputRef, label, maxLength, onSubmit, pending, placeholder, submitIcon = ArrowRight, submitLabel }: QuickAddProps) {
 	const [value, setValue] = useState('');
 	const text = value.trim();
 
@@ -64,6 +66,7 @@ export function QuickAdd({ hint, icon, inputRef, label, maxLength, onSubmit, pen
 					value={value}
 				/>
 				{hint}
+				{extra}
 				<Button aria-label={submitLabel} className='size-9 rounded-full p-0' disabled={!text} loading={pending} lang={{ loadingText: '' }} size='icon' type='submit'>
 					<Button.Icon icon={submitIcon} />
 				</Button>

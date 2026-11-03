@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import type { DataTableFeatures } from '~/components/ui/data-display/data-table/data-table';
 import { Progress } from '~/components/ui/data-display/progress/progress';
-import { Tag } from '~/components/ui/data-display/tag/tag';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
@@ -17,7 +16,7 @@ import { ListEmpty, ListTable } from '../../shared/list-table';
 import { formatRelative } from '../../shared/relative-time';
 import { StatusMenu } from '../../shared/status-pill';
 import { listStyles } from '../../shared/styles';
-import { tagColor } from '../../shared/tags';
+import { TagChip } from '../../shared/tag-chip';
 import type { BulkAction, Project } from '../api';
 import { displayStatus, projectIcon, statusDot } from '../display';
 import { type ProjectStatus, type ProjectTab, projectStatuses } from '../search-params';
@@ -146,9 +145,7 @@ export function ProjectsTable({
 				cell: ({ row }) => (
 					<Layout.HStack gap='xs' wrap>
 						{(row.original.project?.tags ?? []).map(tag => (
-							<Tag color={tagColor(tag.name)} key={tag.id} size='sm'>
-								<Tag.Text>{tag.name}</Tag.Text>
-							</Tag>
+							<TagChip color={tag.color} key={tag.id} name={tag.name} />
 						))}
 					</Layout.HStack>
 				),

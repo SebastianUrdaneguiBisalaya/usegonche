@@ -621,11 +621,11 @@
       "total_other": "{{count}} tags"
     },
     "actions": {
-      "rename": "Rename",
       "delete": "Delete",
       "deleteSelected": "Delete selected",
       "more": "More actions",
-      "clearSelection": "Clear selection"
+      "clearSelection": "Clear selection",
+      "edit": "Edit"
     },
     "toast": {
       "created": "Tag created",
@@ -641,17 +641,6 @@
       "title": "Could not load your tags",
       "retry": "Retry"
     },
-    "rename": {
-      "title": "Rename tag",
-      "description": "The new name shows everywhere the tag is used.",
-      "label": "Name",
-      "placeholder": "Tag name",
-      "required": "Give the tag a name.",
-      "tooLong": "Use at most {{max}} characters.",
-      "exists": "You already have a tag with this name.",
-      "save": "Save name",
-      "cancel": "Cancel"
-    },
     "delete": {
       "title_one": "Delete this tag?",
       "title_other": "Delete {{count}} tags?",
@@ -660,6 +649,26 @@
       "used_other": "It will be removed from {{count}} items; the items stay. This can't be undone.",
       "cancel": "Cancel",
       "confirm": "Delete"
+    },
+    "edit": {
+      "title": "Edit tag",
+      "description": "Change the name or the color of the tag. It updates everywhere the tag is used.",
+      "label": "Name",
+      "placeholder": "Tag name",
+      "required": "Give the tag a name.",
+      "tooLong": "Use at most {{max}} characters.",
+      "exists": "You already have a tag with this name.",
+      "save": "Save name",
+      "cancel": "Cancel"
+    },
+    "color": {
+      "label": "Color",
+      "set": "Set color",
+      "remove": "Remove color",
+      "choose": "Choose a color",
+      "picker": "Color picker",
+      "hex": "Hex color value",
+      "eyedropper": "Pick color from screen"
     }
   }
 }

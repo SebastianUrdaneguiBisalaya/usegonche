@@ -62,7 +62,7 @@ export function ProjectFields({ withStatus }: { withStatus?: boolean }) {
 				{field => (
 					<Combobox
 						multiple
-						onCreate={name => createTag.mutate(name, { onSuccess: tag => field.onChange([...(field.value as string[]), tag.id]) })}
+						onCreate={name => createTag.mutate({ name }, { onSuccess: tag => field.onChange([...(field.value as string[]), tag.id]) })}
 						onValueChange={field.onChange}
 						value={field.value as string[]}
 					>

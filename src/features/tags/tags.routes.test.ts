@@ -4,7 +4,7 @@ import { createMockPrisma, createTestApp, jsonRequest, TEST_USER_ID } from '../.
 import routes from './tags.routes.js';
 
 const TAG_ID = '0b9c7d1a-5e2f-4c3b-9a8d-6f4e3d2c1b0a';
-const tag = { id: TAG_ID, name: 'work', ownerId: TEST_USER_ID } as Tag;
+const tag = { color: null, id: TAG_ID, name: 'work', ownerId: TEST_USER_ID } as Tag;
 const usage = { notes: 1, projects: 2, tasks: 3 };
 const row = { ...tag, _count: usage };
 const body = { ...tag, usage };
@@ -87,6 +87,36 @@ describe('POST /tags', () => {
 		expect(res.status).toBe(422);
 		expect(await res.json()).toMatchObject({ error: { code: 'validation_error' } });
 		expect(prisma.tag.create).not.toHaveBeenCalled();
+	});
+});
+
+describe('tag color', () => {
+	it('creates a tag with the color the user picked, stored in lowercase', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.tag.create).mockResolvedValue({ ...tag, color: '#3b82f6', _count: usage } as Tag);
+
+		const res = await app.request('/tags', jsonRequest('POST', { color: '#3B82F6', name: 'work' }));
+		expect(res.status).toBe(201);
+		expect(prisma.tag.create).toHaveBeenCalledWith(expect.objectContaining({ data: { color: '#3b82f6', name: 'work', ownerId: TEST_USER_ID } }));
+	});
+
+	it('changes only the color, and removes it with null', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.tag.updateMany).mockResolvedValue({ count: 1 });
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue({ ...row, color: '#3b82f6' } as never);
+
+		expect((await app.request(`/tags/${TAG_ID}`, jsonRequest('PATCH', { color: null }))).status).toBe(200);
+		expect(prisma.tag.updateMany).toHaveBeenCalledWith({ data: { color: null }, where: { id: TAG_ID, ownerId: TEST_USER_ID } });
+	});
+
+	it.each([
+		['POST', '/tags', { color: 'red', name: 'work' }],
+		['POST', '/tags', { color: '#fff', name: 'work' }],
+		['PATCH', `/tags/${TAG_ID}`, { color: '#12345g' }],
+		['PATCH', `/tags/${TAG_ID}`, {}],
+	])('answers 422 for %s %s %j', async (method, path, body) => {
+		const { app } = setup();
+		expect((await app.request(path, jsonRequest(method as 'PATCH' | 'POST', body))).status).toBe(422);
 	});
 });
 

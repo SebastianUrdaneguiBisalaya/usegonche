@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from '~/lib/api';
+import { api, type Body } from '~/lib/api';
 import { unwrap } from '~/lib/api-error';
 import { type OkBody, PAGE_SIZE, unwrapPage } from '../shared/paged';
 import type { TagsParams } from './search-params';
@@ -19,6 +19,8 @@ const SORT_QUERY = {
 	updated: { order: 'desc', sort: 'updatedAt' },
 } as const;
 
+export type UpdateTagBody = Body<(typeof api.tags)[':id']['$patch']>;
+
 export const tagsKey = (params: TagsParams) => ['tags', 'list', params] as const;
 
 /** Query string of `GET /tags` (values are strings on the wire). The search (`q`) is the API's name filter. */
@@ -28,15 +30,15 @@ export function useTagList(params: TagsParams) {
 	return useQuery({ placeholderData: keepPreviousData, queryFn: () => unwrapPage(api.tags.$get({ query: tagsQuery(params) })), queryKey: tagsKey(params) });
 }
 
-/** Tags show on projects too (names, filters), so a rename or a delete refreshes them as well. */
+/** Tags show on projects too (names, filters), so an edit or a delete refreshes them as well. */
 function useRefreshTags() {
 	const queryClient = useQueryClient();
 	return () => Promise.all([queryClient.invalidateQueries({ queryKey: ['tags'] }), queryClient.invalidateQueries({ queryKey: ['projects'] })]);
 }
 
-export function useRenameTag() {
+export function useUpdateTag() {
 	const refresh = useRefreshTags();
-	return useMutation({ mutationFn: ({ id, name }: { id: string; name: string }) => unwrap(api.tags[':id'].$patch({ json: { name }, param: { id } })), onSuccess: refresh });
+	return useMutation({ mutationFn: ({ changes, id }: { changes: UpdateTagBody; id: string }) => unwrap(api.tags[':id'].$patch({ json: changes, param: { id } })), onSuccess: refresh });
 }
 
 /** The API has no batch endpoint: one request per tag, so a partial failure surfaces as a toast and the list refetches. */
