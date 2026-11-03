@@ -1737,5 +1737,64 @@
     "toast": {
       "deleted": "Event deleted"
     }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "Understand your productivity. Make data-driven decisions.",
+    "error": "This metric could not be loaded.",
+    "retry": "Try again",
+    "range": {
+      "label": "Date range of {{title}}",
+      "page": "Date range",
+      "last": "Last {{count}} days"
+    },
+    "summary": {
+      "completed": "Completed",
+      "focus": "Focus time",
+      "planning": "Planning reliability"
+    },
+    "throughput": {
+      "title": "Throughput",
+      "subtitle": "Tasks completed over time",
+      "series": "Completed"
+    },
+    "focus": {
+      "title": "Focus time",
+      "subtitle": "Time spent on focused work",
+      "series": "Hours worked"
+    },
+    "planning": {
+      "title": "Planning reliability",
+      "subtitle": "How often you meet your plan",
+      "series": "Plan met"
+    },
+    "blockers": {
+      "title": "Blockers",
+      "subtitle": "Why tasks got blocked",
+      "series": "Blockers",
+      "split": "{{open}} open · {{resolved}} resolved",
+      "empty": "No blockers in this period."
+    },
+    "rhythm": {
+      "title": "Rhythm",
+      "subtitle": "Your productivity rhythm",
+      "unit": "task",
+      "unitPlural": "tasks",
+      "low": "Low",
+      "high": "High",
+      "peak": "You get the most done on {{weekday}}s, around {{hour}}."
+    },
+    "insights": {
+      "title": "Key insights",
+      "tasksUp": "You completed {{percent}}% more tasks than the previous period.",
+      "tasksDown": "You completed {{percent}}% fewer tasks than the previous period.",
+      "tasksSame": "You completed {{count}} tasks in this period.",
+      "focusUp": "Your focus time increased by {{percent}}%. Great momentum!",
+      "focusDown": "Your focus time decreased by {{percent}}%.",
+      "focusSame": "You focused for {{time}} in this period.",
+      "planning": "Planning reliability is at {{rate}}.",
+      "overdue": "{{count}} open tasks are overdue.",
+      "streak": "You are on a {{count}}-day completion streak."
+    }
   }
 }

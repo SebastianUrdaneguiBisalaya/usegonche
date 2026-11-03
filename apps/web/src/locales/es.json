@@ -1737,5 +1737,64 @@
     "toast": {
       "deleted": "Evento eliminado"
     }
+  },
+  "analytics": {
+    "title": "Analíticas",
+    "subtitle": "Entiende tu productividad. Decide con datos.",
+    "error": "No se pudo cargar esta métrica.",
+    "retry": "Reintentar",
+    "range": {
+      "label": "Rango de fechas de {{title}}",
+      "page": "Rango de fechas",
+      "last": "Últimos {{count}} días"
+    },
+    "summary": {
+      "completed": "Completadas",
+      "focus": "Tiempo de enfoque",
+      "planning": "Fiabilidad de planificación"
+    },
+    "throughput": {
+      "title": "Rendimiento",
+      "subtitle": "Tareas completadas en el tiempo",
+      "series": "Completadas"
+    },
+    "focus": {
+      "title": "Tiempo de enfoque",
+      "subtitle": "Tiempo dedicado a trabajo enfocado",
+      "series": "Horas trabajadas"
+    },
+    "planning": {
+      "title": "Fiabilidad de planificación",
+      "subtitle": "Cuántas veces cumples tu plan",
+      "series": "Plan cumplido"
+    },
+    "blockers": {
+      "title": "Bloqueos",
+      "subtitle": "Por qué se bloquearon las tareas",
+      "series": "Bloqueos",
+      "split": "{{open}} abiertos · {{resolved}} resueltos",
+      "empty": "No hay bloqueos en este periodo."
+    },
+    "rhythm": {
+      "title": "Ritmo",
+      "subtitle": "Tu ritmo de productividad",
+      "unit": "tarea",
+      "unitPlural": "tareas",
+      "low": "Bajo",
+      "high": "Alto",
+      "peak": "Rindes más los {{weekday}}, alrededor de las {{hour}}."
+    },
+    "insights": {
+      "title": "Ideas clave",
+      "tasksUp": "Completaste un {{percent}}% más de tareas que en el periodo anterior.",
+      "tasksDown": "Completaste un {{percent}}% menos de tareas que en el periodo anterior.",
+      "tasksSame": "Completaste {{count}} tareas en este periodo.",
+      "focusUp": "Tu tiempo de enfoque aumentó un {{percent}}%. ¡Buen impulso!",
+      "focusDown": "Tu tiempo de enfoque bajó un {{percent}}%.",
+      "focusSame": "Te enfocaste {{time}} en este periodo.",
+      "planning": "La fiabilidad de planificación es del {{rate}}.",
+      "overdue": "{{count}} tareas abiertas están vencidas.",
+      "streak": "Llevas una racha de {{count}} días completando tareas."
+    }
   }
 }
