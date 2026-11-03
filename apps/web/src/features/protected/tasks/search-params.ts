@@ -1,4 +1,4 @@
-import { createLoader, parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString, parseAsStringLiteral } from 'nuqs/server';
+import { createLoader, createSerializer, parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString, parseAsStringLiteral } from 'nuqs/server';
 
 export const taskStatuses = ['todo', 'in_progress', 'done', 'cancelled'] as const;
 export type TaskStatus = (typeof taskStatuses)[number];
@@ -32,6 +32,8 @@ export const defaultStatuses: TaskStatus[] = ['todo', 'in_progress', 'done'];
 export const taskParsers = {
 	blocked: parseAsBoolean.withDefault(false),
 	due: parseAsStringLiteral(taskDues).withDefault('any'),
+	/** The working set (what needs attention plus what was just closed). The board always uses it; the list only when this is on. */
+	focus: parseAsBoolean.withDefault(false),
 	goal: parseAsString.withDefault(''),
 	group: parseAsStringLiteral(taskGroups).withDefault('none'),
 	page: parseAsInteger.withDefault(1),
@@ -45,9 +47,13 @@ export const taskParsers = {
 /** Reads the same params from a request. */
 export const loadTaskParams = createLoader(taskParsers);
 
+/** Builds a link to the tasks page with these params (the ones left at their default stay out of the URL). */
+export const serializeTaskParams = createSerializer(taskParsers);
+
 export interface TasksParams {
 	blocked: boolean;
 	due: TaskDue;
+	focus: boolean;
 	/** Goal id, or empty for every goal. */
 	goal: string;
 	page: number;

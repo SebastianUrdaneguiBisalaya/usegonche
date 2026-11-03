@@ -1,5 +1,6 @@
-import { CalendarDays, MoreHorizontal, Plus } from 'lucide-react';
+import { ArrowRight, CalendarDays, MoreHorizontal, Plus } from 'lucide-react';
 import { useMemo } from 'react';
+import { Link } from 'react-router';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Kanban, type KanbanItem } from '~/components/ui/data-display/kanban/kanban';
 import { Progress } from '~/components/ui/data-display/progress/progress';
@@ -17,7 +18,11 @@ import { BlockedTag, PriorityPill, taskDay, useFormatDay } from './task-pills';
 
 interface TaskBoardProps {
 	error: boolean;
+	/** Tasks of the board's working set that did not fit under its ceiling. */
+	hidden: number;
 	isLoading: boolean;
+	/** The list view with the same filters, where those tasks can be reached. */
+	listHref: string;
 	onAdd: (status: TaskStatus) => void;
 	onMove: (task: Task, status: TaskStatus) => void;
 	onOpen: (task: Task) => void;
@@ -107,8 +112,11 @@ function BoardSkeleton({ columns }: { columns: number }) {
 	);
 }
 
-/** The board: a column per status, draggable cards (dropping one in Done completes the task) and an "Add task" button per column. */
-export function TaskBoard({ error, isLoading, onAdd, onMove, onOpen, onRetry, onSetPriority, statuses, tasks }: TaskBoardProps) {
+/**
+ * The board: a column per status, draggable cards (dropping one in Done completes the task) and an "Add task" button per column. It shows a working set,
+ * not every task: when some of it is cut by the ceiling, a link says how many and opens the list.
+ */
+export function TaskBoard({ error, hidden, isLoading, listHref, onAdd, onMove, onOpen, onRetry, onSetPriority, statuses, tasks }: TaskBoardProps) {
 	const t = useTranslate();
 	const ordered = useMemo(() => taskStatuses.filter(status => statuses.includes(status)), [statuses]);
 	const byId = useMemo(() => new Map(tasks.map(task => [task.id, task])), [tasks]);
@@ -126,48 +134,56 @@ export function TaskBoard({ error, isLoading, onAdd, onMove, onOpen, onRetry, on
 	if (error) return <ListEmpty error errorTitle={t('tasks.error.title')} icon={Plus} onRetry={onRetry} retryLabel={t('tasks.error.retry')} />;
 
 	return (
-		<Kanban.Root
-			className='min-h-0 flex-1'
-			dateFormat={date => date.toLocaleDateString()}
-			items={items}
-			lang={lang}
-			onItemMove={({ itemId, toColumnId }) => {
-				const task = byId.get(itemId);
-				if (task && task.status !== toColumnId) onMove(task, toColumnId as TaskStatus);
-			}}
-		>
-			<Kanban.Board className='min-h-0 flex-1 gap-4 overflow-x-auto pb-2'>
-				{ordered.map(status => (
-					<Kanban.Column
-						action={
-							<Button
-								aria-label={t('tasks.board.add', { status: t(`tasks.status.${status}`) })}
-								className='size-7 rounded-full p-0 text-muted-foreground'
-								onClick={() => onAdd(status)}
-								size='icon'
-								variant='ghost'
-							>
+		<div className='flex min-h-0 flex-1 flex-col gap-3'>
+			<Kanban.Root
+				className='min-h-0 flex-1'
+				dateFormat={date => date.toLocaleDateString()}
+				items={items}
+				lang={lang}
+				onItemMove={({ itemId, toColumnId }) => {
+					const task = byId.get(itemId);
+					if (task && task.status !== toColumnId) onMove(task, toColumnId as TaskStatus);
+				}}
+			>
+				<Kanban.Board className='min-h-0 flex-1 gap-4 overflow-x-auto pb-2'>
+					{ordered.map(status => (
+						<Kanban.Column
+							action={
+								<Button
+									aria-label={t('tasks.board.add', { status: t(`tasks.status.${status}`) })}
+									className='size-7 rounded-full p-0 text-muted-foreground'
+									onClick={() => onAdd(status)}
+									size='icon'
+									variant='ghost'
+								>
+									<Button.Icon icon={Plus} />
+								</Button>
+							}
+							cardClassName={cardSurface}
+							className={`${listStyles.card} w-80 shrink-0 border-l! p-4 first:pl-4 last:pr-4`}
+							icon={<span aria-hidden className={`size-2.5 rounded-full ${statusDot[status]} ${statusColor[status]}`} />}
+							id={status}
+							key={status}
+							renderItem={item => {
+								const task = byId.get(item.id);
+								return task ? <TaskCard onOpen={onOpen} onSetPriority={onSetPriority} task={task} /> : null;
+							}}
+							title={t(`tasks.status.${status}`)}
+						>
+							<Button className='justify-start gap-2 rounded-xl px-2 text-muted-foreground' onClick={() => onAdd(status)} variant='ghost'>
 								<Button.Icon icon={Plus} />
+								<Button.Text className='text-sm'>{t('tasks.board.addTask')}</Button.Text>
 							</Button>
-						}
-						cardClassName={cardSurface}
-						className={`${listStyles.card} w-80 shrink-0 border-l! p-4 first:pl-4 last:pr-4`}
-						icon={<span aria-hidden className={`size-2.5 rounded-full ${statusDot[status]} ${statusColor[status]}`} />}
-						id={status}
-						key={status}
-						renderItem={item => {
-							const task = byId.get(item.id);
-							return task ? <TaskCard onOpen={onOpen} onSetPriority={onSetPriority} task={task} /> : null;
-						}}
-						title={t(`tasks.status.${status}`)}
-					>
-						<Button className='justify-start gap-2 rounded-xl px-2 text-muted-foreground' onClick={() => onAdd(status)} variant='ghost'>
-							<Button.Icon icon={Plus} />
-							<Button.Text className='text-sm'>{t('tasks.board.addTask')}</Button.Text>
-						</Button>
-					</Kanban.Column>
-				))}
-			</Kanban.Board>
-		</Kanban.Root>
+						</Kanban.Column>
+					))}
+				</Kanban.Board>
+			</Kanban.Root>
+			{hidden > 0 && (
+				<Link className={`${listStyles.card} flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground`} to={listHref}>
+					{t(hidden === 1 ? 'tasks.board.more_one' : 'tasks.board.more_other', { count: hidden })}
+					<ArrowRight aria-hidden className='size-4' />
+				</Link>
+			)}
+		</div>
 	);
 }

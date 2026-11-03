@@ -137,6 +137,39 @@ describe('listTasks', () => {
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ dueDate: { lte: new Date('2026-11-30') }, ownerId: TEST_USER_ID, parentId: null, projectId: REF_ID });
 	});
 
+	it('keeps the working set: open tasks overdue, due within 7 days or undated, and tasks closed in the last 7 days', async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date('2026-11-10T15:00:00Z'));
+		try {
+			const prisma = createMockPrisma();
+			vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+			vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+			await listTasks(prisma, TEST_USER_ID, { focus: true, status: ['todo'] }, { page: 1, pageSize: 10 });
+			const focus = {
+				OR: [
+					{ OR: [{ dueDate: null }, { dueDate: { lte: new Date('2026-11-16') } }], status: { in: ['todo', 'in_progress'] } },
+					{ status: { in: ['done', 'cancelled'] }, updatedAt: { gte: new Date('2026-11-03T15:00:00Z') } },
+				],
+			};
+			expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where).toEqual({ AND: [focus], ownerId: TEST_USER_ID, parentId: null, status: { in: ['todo'] } });
+			// The counters follow the working set too (every filter but the status).
+			expect(vi.mocked(prisma.task.groupBy).mock.calls[0]?.[0]?.where).toEqual({ AND: [focus], ownerId: TEST_USER_ID, parentId: null });
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it('scopes the working set to the owner and combines it with the other filters', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.task.groupBy).mockResolvedValue([] as never);
+		await listTasks(prisma, TEST_USER_ID, { blocked: true, focus: true, projectId: REF_ID }, { page: 1, pageSize: 10 });
+		const where = vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]?.where;
+		expect(where).toMatchObject({ ownerId: TEST_USER_ID, projectId: REF_ID });
+		expect(where?.AND).toHaveLength(1);
+		expect(where).toHaveProperty('OR');
+	});
+
 	it('filters blocked and not blocked tasks', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);

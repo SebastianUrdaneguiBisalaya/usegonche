@@ -19,14 +19,14 @@ import { PAGE_SIZE } from '../shared/paged';
 import { useProjectOptions } from '../shared/projects';
 import { listStyles } from '../shared/styles';
 import { useTagOptions } from '../shared/tags';
-import { BOARD_PAGE_SIZE, type BulkChanges, type Task, useBulkUpdate, useDeleteTask, useGoalOptions, useTasks, useUpdateTask } from './api';
+import { type BulkChanges, MAX_PAGE_SIZE, type Task, useBoardTasks, useBulkUpdate, useDeleteTask, useGoalOptions, useTasks, useUpdateTask } from './api';
 import { NewTaskModal } from './components/new-task-modal';
 import { TaskBoard } from './components/task-board';
 import { TaskDrawer } from './components/task-drawer';
 import { DueFilter, GoalFilter, ProjectFilter, TagFilter, TaskChips } from './components/task-filters';
 import { TaskList } from './components/task-list';
 import { TaskQuickAdd } from './components/task-quick-add';
-import { type TaskGroup, type TaskPriority, type TaskSort, type TaskStatus, taskGroups, taskParsers, taskSorts } from './search-params';
+import { serializeTaskParams, type TaskGroup, type TaskPriority, type TaskSort, type TaskStatus, taskGroups, taskParsers, taskSorts } from './search-params';
 
 const emptyIds: ReadonlySet<string> = new Set();
 
@@ -36,12 +36,16 @@ export default function TasksRoute() {
 	const page = Math.max(1, params.page);
 	const view = params.view;
 	const queryParams = useMemo(
-		() => ({ blocked: params.blocked, due: params.due, goal: params.goal, page, project: params.project, sort: params.sort, status: params.status, tag: params.tag }),
-		[page, params.blocked, params.due, params.goal, params.project, params.sort, params.status, params.tag]
+		() => ({ blocked: params.blocked, due: params.due, focus: params.focus, goal: params.goal, page, project: params.project, sort: params.sort, status: params.status, tag: params.tag }),
+		[page, params.blocked, params.due, params.focus, params.goal, params.project, params.sort, params.status, params.tag]
 	);
 
-	const list = useTasks(view, queryParams, view !== 'recurring');
+	const listPage = useTasks(queryParams, view === 'list');
+	const boardPage = useBoardTasks(queryParams, view === 'board');
+	const list = view === 'board' ? boardPage : listPage;
 	const active = list;
+	// The board shows a working set; what it leaves out is reached in the list, with the same filters.
+	const listHref = serializeTaskParams('/tasks', { ...queryParams, focus: params.due === 'any', page: 1, view: 'list' });
 	const counts = list.data?.meta.counts;
 	const tasks = list.data?.data ?? [];
 	const projects = useProjectOptions();
@@ -57,19 +61,19 @@ export default function TasksRoute() {
 
 	const meta = active.data?.meta;
 	const pageCount = meta?.pageCount ?? 1;
-	const filtered = params.goal !== '' || params.project !== '' || params.tag !== '' || params.due !== 'any' || params.blocked;
+	const filtered = params.goal !== '' || params.project !== '' || params.tag !== '' || params.due !== 'any' || params.focus || params.blocked;
 
 	// Selection (list only): it belongs to one page of one view.
 	const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(emptyIds);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset whenever the view changes.
-	useEffect(() => setSelectedIds(emptyIds), [page, view, params.status, params.goal, params.project, params.tag, params.due, params.blocked]);
+	useEffect(() => setSelectedIds(emptyIds), [page, view, params.status, params.goal, params.project, params.tag, params.due, params.focus, params.blocked]);
 
 	// Subtasks of the expanded parents (each its own query, so a change refreshes them with the rest).
 	const [expanded, setExpanded] = useState<ReadonlySet<string>>(emptyIds);
 	const expandedIds = useMemo(() => [...expanded], [expanded]);
 	const subtaskQueries = useQueries({
 		queries: expandedIds.map(parentId => ({
-			queryFn: () => unwrap(api.tasks.$get({ query: { order: 'asc' as const, pageSize: String(BOARD_PAGE_SIZE), parentId, sort: 'createdAt' as const } })),
+			queryFn: () => unwrap(api.tasks.$get({ query: { order: 'asc' as const, pageSize: String(MAX_PAGE_SIZE), parentId, sort: 'createdAt' as const } })),
 			queryKey: ['tasks', 'subtasks', parentId],
 		})),
 	});
@@ -163,8 +167,11 @@ export default function TasksRoute() {
 							blocked={params.blocked}
 							counts={counts}
 							due={params.due}
+							focus={params.focus}
 							onBlockedChange={blocked => void setParams({ blocked, page: 1 })}
 							onDueChange={due => void setParams({ due, page: 1 })}
+							onFocusChange={focus => void setParams({ focus, page: 1 })}
+							showFocus={view === 'list'}
 							onStatusChange={status => void setParams({ page: 1, status })}
 							status={params.status}
 						/>
@@ -216,7 +223,9 @@ export default function TasksRoute() {
 				) : view === 'board' ? (
 					<TaskBoard
 						error={list.isError}
+						hidden={boardPage.data?.hidden ?? 0}
 						isLoading={rowsLoading}
+						listHref={listHref}
 						onAdd={status => setCreating(status === 'in_progress' ? 'in_progress' : 'todo')}
 						onMove={onSetStatus}
 						onOpen={task => setOpenedId(task.id)}

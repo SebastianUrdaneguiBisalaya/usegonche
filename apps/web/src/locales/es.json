@@ -816,7 +816,8 @@
     "chips": {
       "label": "Filtros rápidos",
       "overdue": "Vencidas",
-      "blocked": "Bloqueadas"
+      "blocked": "Bloqueadas",
+      "focus": "Conjunto de trabajo"
     },
     "filters": {
       "project": {
@@ -919,7 +920,9 @@
       "card": "Tarea arrastrable",
       "empty": "Sin tareas.",
       "add": "Añadir tarea a {{status}}",
-      "addTask": "Añadir tarea..."
+      "addTask": "Añadir tarea...",
+      "more_one": "{{count}} tarea más en la vista de lista",
+      "more_other": "{{count}} tareas más en la vista de lista"
     },
     "list": {
       "collapse": "Ocultar subtareas",
