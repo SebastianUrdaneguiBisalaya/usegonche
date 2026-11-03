@@ -1712,6 +1712,20 @@
       "saved": "Focus session saved.",
       "savedStopped": "Session stopped and saved.",
       "tooShort": "Under a minute: nothing was saved."
+    },
+    "activity": {
+      "title": "Recent activity",
+      "empty": "Nothing has happened to your tasks yet.",
+      "error": "Could not load your recent activity.",
+      "retry": "Try again",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "started": "Started",
+      "reopened": "Reopened",
+      "priority": "Priority changed",
+      "due": "Due date changed",
+      "project": "Project changed",
+      "moved": "Moved"
     }
   },
   "calendar": {
