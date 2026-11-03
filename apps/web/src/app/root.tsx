@@ -2,7 +2,8 @@ import { NuqsAdapter } from 'nuqs/adapters/react-router/v8';
 import { I18nextProvider } from 'react-i18next';
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteLoaderData } from 'react-router';
 import { Layout as L } from '~/components/ui/layout/layout/layout';
-import { defaultLocale, getI18n, localeFromRequest, readLanguagePreference } from '~/i18n';
+import { defaultLocale, getI18n, localeFromPreference, readLanguagePreference } from '~/i18n';
+import { accountPreferences } from '~/lib/account-preferences.server';
 import { themeFromRequest } from '~/lib/theme';
 import { HotkeysClientProvider } from '~/providers/hotkeys-client';
 import { QueryProvider } from '~/providers/query-client';
@@ -18,12 +19,17 @@ export const meta: Route.MetaFunction = ({ loaderData }) => {
 	return [{ title: t('meta.title') }, { name: 'description', content: t('meta.description') }];
 };
 
-/** Decides language and theme on the server (stored cookies, else `Accept-Language` / system) so the first paint is already right. */
-export function loader({ request }: Route.LoaderArgs) {
+/**
+ * Decides language and theme on the server so the first paint is already right. The signed-in account's saved settings come first (they are the
+ * source of truth), then the stored cookies, then the system theme / `Accept-Language`.
+ */
+export async function loader({ request }: Route.LoaderArgs) {
+	const account = await accountPreferences(request);
+	const languagePreference = account.language ?? readLanguagePreference(request.headers.get('cookie'));
 	return {
-		languagePreference: readLanguagePreference(request.headers.get('cookie')),
-		locale: localeFromRequest(request),
-		theme: themeFromRequest(request),
+		languagePreference,
+		locale: localeFromPreference(languagePreference, request),
+		theme: account.theme ?? themeFromRequest(request),
 	};
 }
 
