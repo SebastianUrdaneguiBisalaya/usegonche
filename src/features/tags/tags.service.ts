@@ -4,7 +4,7 @@ import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { type Paged, type PageParams, pageArgs } from '../../lib/pagination.js';
 import { isUniqueViolation } from '../../lib/prisma-errors.js';
-import type { tagSortFields } from './tags.schemas.js';
+import type { CreateTagInput, tagSortFields, UpdateTagInput } from './tags.schemas.js';
 
 type TagSort = (typeof tagSortFields)[number];
 
@@ -34,22 +34,23 @@ export const listTags = async (prisma: PrismaClient, ownerId: string, filters: T
 	return { items: rows.map(toTag), total };
 };
 
-export const createTag = async (prisma: PrismaClient, ownerId: string, name: string): Promise<TagWithUsage> => {
+export const createTag = async (prisma: PrismaClient, ownerId: string, input: CreateTagInput): Promise<TagWithUsage> => {
 	try {
-		return toTag(await prisma.tag.create({ data: { name, ownerId }, include: withUsage }));
+		return toTag(await prisma.tag.create({ data: { color: input.color, name: input.name, ownerId }, include: withUsage }));
 	} catch (error) {
 		if (isUniqueViolation(error)) throw new AppError('already_exists', 409);
 		throw error;
 	}
 };
 
-/** Renaming to the current name changes nothing and answers with the tag as it is. */
-export const renameTag = async (prisma: PrismaClient, ownerId: string, id: string, name: string): Promise<TagWithUsage> => {
+/** Writes only what changed (name and/or color); an update that changes nothing answers with the tag as it is and writes nothing. */
+export const updateTag = async (prisma: PrismaClient, ownerId: string, id: string, input: UpdateTagInput): Promise<TagWithUsage> => {
 	const current = await prisma.tag.findFirst({ include: withUsage, where: scoped(ownerId, { id }) });
 	if (!current) throw new AppError('not_found', 404);
-	if (!hasChanges(changedFields(current, { name }))) return toTag(current);
+	const changed = changedFields(current, input);
+	if (!hasChanges(changed)) return toTag(current);
 	try {
-		const { count } = await prisma.tag.updateMany({ data: { name }, where: scoped(ownerId, { id }) });
+		const { count } = await prisma.tag.updateMany({ data: changed, where: scoped(ownerId, { id }) });
 		if (count === 0) throw new AppError('not_found', 404);
 	} catch (error) {
 		if (isUniqueViolation(error)) throw new AppError('already_exists', 409);

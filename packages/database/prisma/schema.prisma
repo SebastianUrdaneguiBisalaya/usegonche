@@ -90,6 +90,8 @@ model Tag {
   id        String   @id @default(uuid(4)) @db.Uuid
   ownerId   String   @map("owner_id") @db.Uuid
   name      String   @db.VarChar(50)
+  /// `#rrggbb`, chosen by the user. No default: a tag without color simply has none.
+  color     String?  @db.VarChar(7)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
