@@ -1,16 +1,21 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import type { AppEnv } from '../../env.js';
-import { ok } from '../../lib/http.js';
+import { ok, okWithMeta } from '../../lib/http.js';
+import { pageMeta } from '../../lib/pagination.js';
 import { validationHook } from '../../lib/validator.js';
 import { requireUser } from '../../middleware/auth.js';
-import { createTagSchema, tagParamSchema, updateTagSchema } from './tags.schemas.js';
+import { createTagSchema, listTagsQuerySchema, tagParamSchema, updateTagSchema } from './tags.schemas.js';
 import { createTag, deleteTag, listTags, renameTag } from './tags.service.js';
 
 // The owner always comes from the verified claims, never from the body.
 export default new Hono<AppEnv>()
 	.use(requireUser())
-	.get('/', async c => ok(c, await listTags(c.get('prisma'), c.get('claims').sub), 200))
+	.get('/', zValidator('query', listTagsQuerySchema, validationHook), async c => {
+		const { order, page, pageSize, q, sort } = c.req.valid('query');
+		const { items, total } = await listTags(c.get('prisma'), c.get('claims').sub, { order, q, sort }, { page, pageSize });
+		return okWithMeta(c, items, pageMeta({ page, pageSize }, total), 200);
+	})
 	.post('/', zValidator('json', createTagSchema, validationHook), async c => ok(c, await createTag(c.get('prisma'), c.get('claims').sub, c.req.valid('json').name), 201))
 	.patch('/:id', zValidator('param', tagParamSchema, validationHook), zValidator('json', updateTagSchema, validationHook), async c =>
 		ok(c, await renameTag(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id, c.req.valid('json').name), 200)

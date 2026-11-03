@@ -15,20 +15,8 @@ import { PageSelect } from '../shared/page-select';
 import { PAGE_SIZE } from '../shared/paged';
 import { type StatusTab, StatusTabs } from '../shared/status-tabs';
 import { listStyles } from '../shared/styles';
-import {
-	type BulkAction,
-	type Project,
-	type ProjectsPage,
-	projectsKey,
-	projectsQuery,
-	useBulkAction,
-	useGoals,
-	useProjects,
-	useProjectsSearch,
-	useSetArchived,
-	useTags,
-	useUpdateProject,
-} from './api';
+import { useTagOptions } from '../shared/tags';
+import { type BulkAction, type Project, type ProjectsPage, projectsKey, projectsQuery, useBulkAction, useGoals, useProjects, useProjectsSearch, useSetArchived, useUpdateProject } from './api';
 import { GoalFilter, TagFilter } from './components/filters';
 import { NewProjectModal } from './components/new-project-modal';
 import { ProjectDrawer } from './components/project-drawer';
@@ -87,7 +75,7 @@ export default function ProjectsRoute() {
 	const active = searching ? search : list;
 	const counts = list.data?.meta.counts;
 	const goals = useGoals();
-	const tags = useTags();
+	const tags = useTagOptions();
 
 	const goalTitles = useMemo(() => new Map((goals.data ?? []).map(goal => [goal.id, goal.title])), [goals.data]);
 	const goalOptions = useMemo(() => (goals.data ?? []).map(goal => ({ id: goal.id, name: goal.title })), [goals.data]);

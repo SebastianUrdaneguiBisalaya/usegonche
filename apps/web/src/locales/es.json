@@ -569,5 +569,97 @@
       "loadError": "No se pudo cargar esta sección.",
       "retry": "Reintentar"
     }
+  },
+  "tags": {
+    "title": "Etiquetas",
+    "subtitle": "Organiza tu contenido con etiquetas.",
+    "new": "Nueva etiqueta",
+    "search": {
+      "placeholder": "Buscar etiquetas...",
+      "label": "Buscar etiquetas",
+      "clear": "Borrar búsqueda",
+      "empty": "Ninguna etiqueta coincide con tu búsqueda."
+    },
+    "add": {
+      "placeholder": "Escribe el nombre de una etiqueta...",
+      "label": "Nombre de la nueva etiqueta",
+      "submit": "Añadir etiqueta"
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "name": "Nombre (A–Z)",
+      "updated": "Actualizadas recientemente",
+      "created": "Más nuevas primero",
+      "tasks": "Más tareas",
+      "projects": "Más proyectos",
+      "notes": "Más notas"
+    },
+    "filters": {
+      "page": {
+        "label": "Página",
+        "value": "Página: {{page}}"
+      }
+    },
+    "columns": {
+      "tag": "Etiqueta",
+      "usedIn": "Usada en",
+      "created": "Creada",
+      "updated": "Actualizada"
+    },
+    "usage": {
+      "tasks_one": "{{count}} tarea",
+      "tasks_other": "{{count}} tareas",
+      "projects_one": "{{count}} proyecto",
+      "projects_other": "{{count}} proyectos",
+      "notes_one": "{{count}} nota",
+      "notes_other": "{{count}} notas",
+      "openProjects": "Ver proyectos con esta etiqueta"
+    },
+    "selection": {
+      "count": "{{count}} seleccionadas",
+      "total_one": "{{count}} etiqueta",
+      "total_other": "{{count}} etiquetas"
+    },
+    "actions": {
+      "rename": "Renombrar",
+      "delete": "Eliminar",
+      "deleteSelected": "Eliminar selección",
+      "more": "Más acciones",
+      "clearSelection": "Limpiar selección"
+    },
+    "toast": {
+      "created": "Etiqueta creada",
+      "updated": "Etiqueta actualizada correctamente",
+      "deleted_one": "Etiqueta eliminada",
+      "deleted_other": "{{count}} etiquetas eliminadas"
+    },
+    "empty": {
+      "title": "Aún no hay etiquetas",
+      "description": "Añade tu primera etiqueta arriba para empezar a organizar."
+    },
+    "error": {
+      "title": "No se pudieron cargar tus etiquetas",
+      "retry": "Reintentar"
+    },
+    "rename": {
+      "title": "Renombrar etiqueta",
+      "description": "El nuevo nombre se ve en todos los sitios donde se usa la etiqueta.",
+      "label": "Nombre",
+      "placeholder": "Nombre de la etiqueta",
+      "required": "Ponle un nombre a la etiqueta.",
+      "tooLong": "Usa como máximo {{max}} caracteres.",
+      "exists": "Ya tienes una etiqueta con este nombre.",
+      "save": "Guardar nombre",
+      "cancel": "Cancelar"
+    },
+    "delete": {
+      "title_one": "¿Eliminar esta etiqueta?",
+      "title_other": "¿Eliminar {{count}} etiquetas?",
+      "unused": "Ningún elemento la usa. No se puede deshacer.",
+      "used_one": "Se quitará de {{count}} elemento; los elementos se quedan. No se puede deshacer.",
+      "used_other": "Se quitará de {{count}} elementos; los elementos se quedan. No se puede deshacer.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar"
+    }
   }
 }

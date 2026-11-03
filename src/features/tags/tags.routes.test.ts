@@ -5,6 +5,9 @@ import routes from './tags.routes.js';
 
 const TAG_ID = '0b9c7d1a-5e2f-4c3b-9a8d-6f4e3d2c1b0a';
 const tag = { id: TAG_ID, name: 'work', ownerId: TEST_USER_ID } as Tag;
+const usage = { notes: 1, projects: 2, tasks: 3 };
+const row = { ...tag, _count: usage };
+const body = { ...tag, usage };
 const unique = () => Object.assign(new Error('unique'), { code: 'P2002' });
 
 const setup = (claims?: { sub: string } | null) => {
@@ -27,26 +30,41 @@ describe.each([
 });
 
 describe('GET /tags', () => {
-	it('lists the tags of the authenticated user', async () => {
+	it('lists the tags of the authenticated user with usage and page meta', async () => {
 		const { app, prisma } = setup();
-		vi.mocked(prisma.tag.findMany).mockResolvedValue([tag]);
+		vi.mocked(prisma.tag.findMany).mockResolvedValue([row]);
+		vi.mocked(prisma.tag.count).mockResolvedValue(1);
 
 		const res = await app.request('/tags');
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: [tag] });
-		expect(prisma.tag.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { ownerId: TEST_USER_ID } }));
+		expect(await res.json()).toEqual({ data: [body], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(prisma.tag.findMany).toHaveBeenCalledWith(expect.objectContaining({ orderBy: [{ name: 'asc' }, { id: 'asc' }], skip: 0, take: 50, where: { ownerId: TEST_USER_ID } }));
+	});
+
+	it('applies search, sort, order and page size', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.tag.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.tag.count).mockResolvedValue(0);
+		await app.request('/tags?q=%20wo%20&sort=projects&order=desc&page=2&pageSize=5');
+		expect(prisma.tag.findMany).toHaveBeenCalledWith(
+			expect.objectContaining({ orderBy: [{ projects: { _count: 'desc' } }, { id: 'desc' }], skip: 5, take: 5, where: { name: { contains: 'wo', mode: 'insensitive' }, ownerId: TEST_USER_ID } })
+		);
+	});
+
+	it.each(['sort=nope', 'order=up', 'page=0', `q=${'x'.repeat(51)}`])('answers 422 for ?%s', async query => {
+		expect((await setup().app.request(`/tags?${query}`)).status).toBe(422);
 	});
 });
 
 describe('POST /tags', () => {
 	it('creates a tag with 201 and trims the name', async () => {
 		const { app, prisma } = setup();
-		vi.mocked(prisma.tag.create).mockResolvedValue(tag);
+		vi.mocked(prisma.tag.create).mockResolvedValue({ ...tag, _count: { notes: 0, projects: 0, tasks: 0 } } as Tag);
 
 		const res = await app.request('/tags', jsonRequest('POST', { name: '  work  ' }));
 		expect(res.status).toBe(201);
-		expect(await res.json()).toEqual({ data: tag });
-		expect(prisma.tag.create).toHaveBeenCalledWith({ data: { name: 'work', ownerId: TEST_USER_ID } });
+		expect(await res.json()).toEqual({ data: { ...tag, usage: { notes: 0, projects: 0, tasks: 0 } } });
+		expect(prisma.tag.create).toHaveBeenCalledWith(expect.objectContaining({ data: { name: 'work', ownerId: TEST_USER_ID } }));
 	});
 
 	it('answers 409 already_exists for a duplicate name', async () => {
@@ -77,20 +95,20 @@ describe('PATCH /tags/:id', () => {
 		const { app, prisma } = setup();
 		vi.mocked(prisma.tag.updateMany).mockResolvedValue({ count: 1 });
 		vi.mocked(prisma.tag.findFirst)
-			.mockResolvedValueOnce(tag)
-			.mockResolvedValue({ ...tag, name: 'home' });
+			.mockResolvedValueOnce(row)
+			.mockResolvedValue({ ...row, name: 'home' });
 
 		const res = await app.request(`/tags/${TAG_ID}`, jsonRequest('PATCH', { name: 'home' }));
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: { ...tag, name: 'home' } });
+		expect(await res.json()).toEqual({ data: { ...body, name: 'home' } });
 	});
 
 	it('answers 200 with the tag and writes nothing when the name is the same', async () => {
 		const { app, prisma } = setup();
-		vi.mocked(prisma.tag.findFirst).mockResolvedValue(tag);
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue(row);
 		const res = await app.request(`/tags/${TAG_ID}`, jsonRequest('PATCH', { name: tag.name }));
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ data: tag });
+		expect(await res.json()).toEqual({ data: body });
 		expect(prisma.tag.updateMany).not.toHaveBeenCalled();
 	});
 
@@ -105,7 +123,7 @@ describe('PATCH /tags/:id', () => {
 
 	it('answers 409 when the new name is taken', async () => {
 		const { app, prisma } = setup();
-		vi.mocked(prisma.tag.findFirst).mockResolvedValue(tag);
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue(row);
 		vi.mocked(prisma.tag.updateMany).mockRejectedValue(unique());
 		const res = await app.request(`/tags/${TAG_ID}`, jsonRequest('PATCH', { name: 'home' }));
 		expect(res.status).toBe(409);
