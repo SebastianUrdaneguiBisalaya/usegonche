@@ -4,6 +4,7 @@ import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
 import { isUniqueViolation } from '../../lib/prisma-errors.js';
+import { createOwnerUploadUrl } from '../../lib/upload-url.js';
 import type { AttachmentTarget, RegisterAttachmentInput, UploadUrlInput } from './attachments.schemas.js';
 
 /** Attachments always live in the private bucket. Layout: `<ownerId>/<uuid>/file` (the original name is kept in the database). */
@@ -29,7 +30,7 @@ const assertTarget = async (prisma: PrismaClient, ownerId: string, target: Attac
 /** Step 1: signed URL for the client to upload the file straight to Storage. Nothing is stored in the database yet. */
 export const createUploadUrl = async (prisma: PrismaClient, storage: Storage, ownerId: string, input: UploadUrlInput): Promise<UploadUrl> => {
 	await assertTarget(prisma, ownerId, input);
-	return storage.uploadUrl(VISIBILITY, `${ownerId}/${crypto.randomUUID()}/${FILE_NAME}`);
+	return createOwnerUploadUrl(storage, ownerId, { filename: FILE_NAME, visibility: VISIBILITY });
 };
 
 /** Step 3 (after the upload): records the metadata. The path must be one of the owner's and the file must exist in Storage. */

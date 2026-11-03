@@ -1,6 +1,7 @@
 import type { PrismaClient, Profile, UserSettings } from '@usegonche/database';
 import type { Storage, UploadUrl } from '@usegonche/storage';
 import { changedFields, hasChanges } from '../../lib/diff.js';
+import { createOwnerUploadUrl } from '../../lib/upload-url.js';
 import type { AvatarUploadInput, UpdateProfileInput, UpdateSettingsInput } from './profile.schemas.js';
 
 /** Identity taken from the verified JWT claims (never from the request body). */
@@ -41,6 +42,6 @@ const AVATAR_EXTENSIONS = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp
  * Every avatar lives under the owner's folder with a fresh name, so a new picture never serves a stale cached one.
  */
 export const createAvatarUploadUrl = async (storage: Storage, ownerId: string, input: AvatarUploadInput): Promise<UploadUrl & { publicUrl: string }> => {
-	const upload = await storage.uploadUrl('public', `${ownerId}/avatar/${crypto.randomUUID()}.${AVATAR_EXTENSIONS[input.mimeType]}`);
+	const upload = await createOwnerUploadUrl(storage, ownerId, { extension: AVATAR_EXTENSIONS[input.mimeType], folder: 'avatar', visibility: 'public' });
 	return { ...upload, publicUrl: await storage.readUrl('public', upload.path) };
 };
