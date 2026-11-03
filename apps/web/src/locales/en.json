@@ -137,8 +137,9 @@
       "notes": "Notes",
       "reflect": "Reflect",
       "tags": "Tags",
-      "stats": "Stats",
-      "calendar": "Calendar"
+      "analytics": "Analytics",
+      "calendar": "Calendar",
+      "reminders": "Reminders"
     },
     "menu": {
       "open": "Open menu"

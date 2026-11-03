@@ -137,8 +137,9 @@
       "notes": "Notas",
       "reflect": "Reflexión",
       "tags": "Etiquetas",
-      "stats": "Estadísticas",
-      "calendar": "Calendario"
+      "analytics": "Analíticas",
+      "calendar": "Calendario",
+      "reminders": "Recordatorios"
     },
     "menu": {
       "open": "Abrir menú"
