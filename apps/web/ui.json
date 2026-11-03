@@ -16,6 +16,7 @@
     "data-display/color-picker": "main",
     "data-display/countdown": "countdown@1.0.0",
     "data-display/data-table": "data-table@1.0.0",
+    "data-display/kanban": "kanban@1.0.0",
     "data-display/pagination": "pagination@1.0.0",
     "data-display/pill": "main",
     "data-display/progress": "progress@1.0.0",

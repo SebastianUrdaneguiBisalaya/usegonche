@@ -1,4 +1,4 @@
-import { CircleCheck, CircleDot, FileText, FolderKanban, Inbox, type LucideIcon, Orbit, Tag, Target } from 'lucide-react';
+import { Calendar, ChartNoAxesColumnIncreasing, CircleCheck, CircleDot, FileText, FolderKanban, Inbox, type LucideIcon, Orbit, Tag, Target } from 'lucide-react';
 import type { TranslationKey } from '~/i18n';
 
 export interface NavEntry {
@@ -6,7 +6,7 @@ export interface NavEntry {
 	hotkey: string;
 	icon: LucideIcon;
 	/** Key suffix under `protected.nav.*`. */
-	id: 'goals' | 'inbox' | 'notes' | 'projects' | 'reflect' | 'tags' | 'tasks' | 'today';
+	id: 'goals' | 'inbox' | 'notes' | 'projects' | 'reflect' | 'tags' | 'tasks' | 'today' | 'stats' | 'calendar';
 	label: TranslationKey;
 	to: string;
 }
@@ -15,6 +15,7 @@ export interface NavEntry {
 export const primaryNav: readonly NavEntry[] = [
 	{ hotkey: 'g i', icon: Inbox, id: 'inbox', label: 'protected.nav.inbox', to: '/inbox' },
 	{ hotkey: 'g t', icon: CircleDot, id: 'today', label: 'protected.nav.today', to: '/' },
+	{ hotkey: 'g c', icon: Calendar, id: 'calendar', label: 'protected.nav.calendar', to: '/calendar'},
 	{ hotkey: 'g p', icon: FolderKanban, id: 'projects', label: 'protected.nav.projects', to: '/projects' },
 	{ hotkey: 'g o', icon: Target, id: 'goals', label: 'protected.nav.goals', to: '/goals' },
 	{ hotkey: 'g k', icon: CircleCheck, id: 'tasks', label: 'protected.nav.tasks', to: '/tasks' },
@@ -23,7 +24,7 @@ export const primaryNav: readonly NavEntry[] = [
 ];
 
 /** Shown apart, below a divider. */
-export const secondaryNav: readonly NavEntry[] = [{ hotkey: 'g l', icon: Tag, id: 'tags', label: 'protected.nav.tags', to: '/tags' }];
+export const secondaryNav: readonly NavEntry[] = [{ hotkey: 'g l', icon: Tag, id: 'tags', label: 'protected.nav.tags', to: '/tags' }, { hotkey: 'g s', icon: ChartNoAxesColumnIncreasing, id: 'stats', label: 'protected.nav.stats', to: '/stats'}];
 
 export const allNav: readonly NavEntry[] = [...primaryNav, ...secondaryNav];
 

@@ -478,12 +478,6 @@ function SidebarNavItem({
 
   return (
     <li className="relative">
-      {active && (
-        <span
-          aria-hidden="true"
-          className="absolute top-1/2 left-0 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-foreground"
-        />
-      )}
       <SidebarHint label={label}>
         <a
           aria-current={active ? "page" : undefined}

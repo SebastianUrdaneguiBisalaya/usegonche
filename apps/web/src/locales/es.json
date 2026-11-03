@@ -136,7 +136,9 @@
       "tasks": "Tareas",
       "notes": "Notas",
       "reflect": "Reflexión",
-      "tags": "Etiquetas"
+      "tags": "Etiquetas",
+      "stats": "Estadísticas",
+      "calendar": "Calendario"
     },
     "menu": {
       "open": "Abrir menú"

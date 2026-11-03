@@ -136,7 +136,9 @@
       "tasks": "Tasks",
       "notes": "Notes",
       "reflect": "Reflect",
-      "tags": "Tags"
+      "tags": "Tags",
+      "stats": "Stats",
+      "calendar": "Calendar"
     },
     "menu": {
       "open": "Open menu"
