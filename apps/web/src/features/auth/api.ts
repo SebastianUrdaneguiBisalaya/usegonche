@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRevalidator } from 'react-router';
 import { api, type Body } from '~/lib/api';
 import { type Data, unwrap } from '~/lib/api-error';
 
@@ -27,10 +28,17 @@ export function useSession() {
 	});
 }
 
-/** Refetches the session; returned from `onSuccess` so the mutation settles once the new session is known. */
+/**
+ * Refetches the session; returned from `onSuccess` so the mutation settles once the new session is known. It also reruns the loaders: the root one
+ * decides theme and language from the account's saved settings, which on a sign-in (no full page load) were not known when the page was rendered.
+ */
 function useRefreshSession() {
 	const queryClient = useQueryClient();
-	return () => queryClient.invalidateQueries({ queryKey: sessionKey });
+	const { revalidate } = useRevalidator();
+	return async () => {
+		await queryClient.invalidateQueries({ queryKey: sessionKey });
+		await revalidate();
+	};
 }
 
 export function useLogin() {

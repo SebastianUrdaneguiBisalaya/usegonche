@@ -50,9 +50,19 @@ export function readLanguagePreference(cookieHeader: string | null): LanguagePre
 	return value === 'system' || isLocale(value) ? value : 'system';
 }
 
-/** Server side: the stored preference, else the first supported `Accept-Language` entry, else `defaultLocale`. */
-export function localeFromRequest(request: Request): Locale {
-	const preference = readLanguagePreference(request.headers.get('cookie'));
+/**
+ * The language an account saved (`UserSettings.language`): `"system"`, a supported code, or a regional one like `es-PE`, which reads as its language (`es`).
+ * `undefined` for a language the app has no catalog for, so it counts as unset and the browser's language applies.
+ */
+export function languagePreferenceOf(value: unknown): LanguagePreference | undefined {
+	if (value === 'system') return 'system';
+	if (typeof value !== 'string') return undefined;
+	const language = value.toLowerCase().split('-')[0];
+	return isLocale(language) ? language : undefined;
+}
+
+/** Server side: the locale a preference stands for; `"system"` reads the first supported `Accept-Language` entry, else `defaultLocale`. */
+export function localeFromPreference(preference: LanguagePreference, request: Request): Locale {
 	if (preference !== 'system') return preference;
 	const header = request.headers.get('accept-language') ?? '';
 	for (const part of header.split(',')) {
@@ -60,6 +70,11 @@ export function localeFromRequest(request: Request): Locale {
 		if (isLocale(language)) return language;
 	}
 	return defaultLocale;
+}
+
+/** Server side: the locale of the stored cookie, else the first supported `Accept-Language` entry, else `defaultLocale`. */
+export function localeFromRequest(request: Request): Locale {
+	return localeFromPreference(readLanguagePreference(request.headers.get('cookie')), request);
 }
 
 function createI18n(locale: Locale) {
