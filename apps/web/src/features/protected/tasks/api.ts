@@ -41,7 +41,7 @@ const shiftDay = (days: number): string => {
 export const tasksKey = (view: TaskView, params: TasksParams) => ['tasks', 'list', view, params, shiftDay(0)] as const;
 
 /** The filters of `GET /tasks` (values are strings on the wire). The due filter becomes a date range, as the API knows no "overdue". */
-const filterQuery = ({ blocked, due, focus, goal, project, sort, status, tag }: TasksParams) => ({
+const filterQuery = ({ blocked, due, focus, goal, project, sort, status, tag }: Omit<TasksParams, 'group' | 'page'>) => ({
 	// An overdue task is an open one: the status chips cannot bring the finished ones back into that filter.
 	...(due === 'overdue' ? { dueBefore: shiftDay(-1), status: status.filter(value => value === 'todo' || value === 'in_progress') } : { status }),
 	...(due === 'today' && { dueAfter: shiftDay(0), dueBefore: shiftDay(0) }),
@@ -55,8 +55,8 @@ const filterQuery = ({ blocked, due, focus, goal, project, sort, status, tag }: 
 	...SORT_QUERY[sort],
 });
 
-/** Query of one page of the list. */
-export const tasksQuery = (params: TasksParams) => ({ ...filterQuery(params), page: String(params.page), pageSize: String(PAGE_SIZE) });
+/** Query of one page of the list. The grouping is done by the API over the whole filtered set, so a group is never cut short by the page. */
+export const tasksQuery = (params: TasksParams) => ({ ...filterQuery(params), groupBy: params.group, page: String(params.page), pageSize: String(PAGE_SIZE) });
 
 /** One page of the list view, with the counters of the status chips. */
 export function useTasks(params: TasksParams, enabled = true) {

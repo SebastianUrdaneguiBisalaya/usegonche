@@ -8,6 +8,7 @@ import { attachmentPaths, removeFiles } from '../attachments/attachments.service
 import { diffTaskChanges, recordTaskEvents } from '../history/history.service.js';
 import { markConverted } from '../inbox/inbox.service.js';
 import { createNextOccurrence } from '../recurrences/recurrences.service.js';
+import { CLOSED, dueBucketWhere, OPEN, planGroups, sliceGroups, type TaskGroupPage, taskToday, WEEK_DAYS, weekEnd } from './tasks.groups.js';
 import type { BulkUpdateTasksInput, CreateTaskInput, ListTasksFilters, TaskSort, UpdateTaskInput } from './tasks.schemas.js';
 
 export type Db = PrismaClient | Prisma.TransactionClient;
@@ -27,7 +28,8 @@ export type TaskView = Task & {
 
 /** Open tasks per status plus `blocked` and `overdue` (open tasks only). Follows every filter but the status. */
 export type TaskListCounts = Record<TaskStatus | 'blocked' | 'overdue', number>;
-export type TaskPage = { counts: TaskListCounts; items: TaskView[]; total: number };
+/** `groups` is set when the list was grouped (`groupBy`): the groups of this page, each with the size it has in the whole filtered set. */
+export type TaskPage = { counts: TaskListCounts; groups: TaskGroupPage[] | null; items: TaskView[]; total: number };
 
 const include = {
 	blockers: { select: { id: true }, where: { resolvedAt: null } },
@@ -84,23 +86,15 @@ const assertParent = async (prisma: Db, ownerId: string, parentId: string, taskI
 	if (taskId && (await prisma.task.count({ where: scoped(ownerId, { parentId: taskId }) })) > 0) throw invalidReference('parentId', 'has_subtasks');
 };
 
-const OPEN: TaskStatus[] = ['todo', 'in_progress'];
-const CLOSED: TaskStatus[] = ['done', 'cancelled'];
-
-/** Days ahead (today included) a task can be due and still be in the working set; also how long a finished task stays in it. */
-const FOCUS_DAYS = 7;
 const DAY_MS = 86_400_000;
 
-/** The working set: what needs attention (open and overdue, due soon or undated) and what was just closed. Dates use UTC, like `overdue`. */
-const focusWhere = (now: Date): Prisma.TaskWhereInput => {
-	const today = new Date(now.toISOString().slice(0, 10));
-	return {
-		OR: [
-			{ OR: [{ dueDate: null }, { dueDate: { lte: new Date(today.getTime() + (FOCUS_DAYS - 1) * DAY_MS) } }], status: { in: OPEN } },
-			{ status: { in: CLOSED }, updatedAt: { gte: new Date(now.getTime() - FOCUS_DAYS * DAY_MS) } },
-		],
-	};
-};
+/** The working set: what needs attention (open and overdue, due soon or undated) and what was just closed. Day boundaries come from `taskToday`. */
+const focusWhere = (now: Date): Prisma.TaskWhereInput => ({
+	OR: [
+		{ OR: [{ dueDate: null }, { dueDate: { lte: weekEnd(taskToday(now)) } }], status: { in: OPEN } },
+		{ status: { in: CLOSED }, updatedAt: { gte: new Date(now.getTime() - WEEK_DAYS * DAY_MS) } },
+	],
+});
 /** Same rule as `TaskView.blocked`: an open manual blocker or a dependency that is not finished. */
 const blockedWhere: Prisma.TaskWhereInput = { OR: [{ blockers: { some: { resolvedAt: null } } }, { dependencies: { some: { dependsOn: { status: { in: OPEN } } } } }] };
 const NULLABLE_SORT: TaskSort[] = ['dueDate', 'startDate'];
@@ -110,7 +104,25 @@ const NULLABLE_SORT: TaskSort[] = ['dueDate', 'startDate'];
  * Counters follow every filter except the status, so each status chip shows how many tasks it would hold. `overdue` uses the UTC date.
  */
 export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: ListTasksFilters, page: PageParams): Promise<TaskPage> => {
-	const { blocked, dueAfter, dueBefore, focus, goalId, noDueDate, noProject, order = 'desc', parentId, priority, projectId, recurrenceId, sort = 'createdAt', status, tagId, title } = filters;
+	const {
+		blocked,
+		dueAfter,
+		dueBefore,
+		focus,
+		goalId,
+		groupBy = 'none',
+		noDueDate,
+		noProject,
+		order = 'desc',
+		parentId,
+		priority,
+		projectId,
+		recurrenceId,
+		sort = 'createdAt',
+		status,
+		tagId,
+		title,
+	} = filters;
 	const shared = scoped(ownerId, {
 		parentId: parentId ?? null,
 		...(dueAfter || dueBefore ? { dueDate: { ...(dueAfter && { gte: dueAfter }), ...(dueBefore && { lte: dueBefore }) } } : noDueDate ? { dueDate: null } : {}),
@@ -125,17 +137,35 @@ export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: 
 	});
 	const where = { ...shared, ...(status && { status: { in: status } }) };
 	const orderBy = [NULLABLE_SORT.includes(sort) ? { [sort]: { nulls: 'last', sort: order } } : { [sort]: order }, { id: order }] as Prisma.TaskOrderByWithRelationInput[];
-	const today = new Date(new Date().toISOString().slice(0, 10));
-	const [rows, total, grouped, blockedCount, overdue] = await Promise.all([
-		prisma.task.findMany({ include, orderBy, ...pageArgs(page), where }),
-		prisma.task.count({ where }),
-		prisma.task.groupBy({ _count: { _all: true }, by: ['status'], where: shared }),
-		prisma.task.count({ where: { AND: [shared, blockedWhere], status: { in: OPEN } } }),
-		prisma.task.count({ where: { ...shared, dueDate: { lt: today }, status: { in: OPEN } } }),
+	const now = new Date();
+	const today = taskToday(now);
+	// The counters (and the blocked / overdue chips) follow every filter but the status, grouped or not.
+	const loadChips = () =>
+		Promise.all([
+			prisma.task.groupBy({ _count: { _all: true }, by: ['status'], where: shared }),
+			prisma.task.count({ where: { AND: [shared, blockedWhere], status: { in: OPEN } } }),
+			prisma.task.count({ where: { AND: [shared, dueBucketWhere('overdue', today)] } }),
+		]);
+	const toCounts = ([grouped, blockedCount, overdue]: Awaited<ReturnType<typeof loadChips>>): TaskListCounts => {
+		const counts: TaskListCounts = { blocked: blockedCount, cancelled: 0, done: 0, in_progress: 0, overdue, todo: 0 };
+		for (const group of grouped) counts[group.status] = group._count._all;
+		return counts;
+	};
+
+	if (groupBy === 'none') {
+		const [rows, total, chipValues] = await Promise.all([prisma.task.findMany({ include, orderBy, ...pageArgs(page), where }), prisma.task.count({ where }), loadChips()]);
+		return { counts: toCounts(chipValues), groups: null, items: rows.map(toView), total };
+	}
+
+	// Grouped: the groups are sized over the whole filtered set and laid end to end, so a page is a window over them (a group may continue on the next page).
+	const plan = await planGroups(prisma, ownerId, where, groupBy, today);
+	const slices = sliceGroups(plan, page);
+	const [pages, chipValues] = await Promise.all([
+		Promise.all(slices.map(slice => prisma.task.findMany({ include, orderBy, skip: slice.skip, take: slice.take, where: { AND: [where, slice.where] } }))),
+		loadChips(),
 	]);
-	const counts: TaskListCounts = { blocked: blockedCount, cancelled: 0, done: 0, in_progress: 0, overdue, todo: 0 };
-	for (const group of grouped) counts[group.status] = group._count._all;
-	return { counts, items: rows.map(toView), total };
+	const groups: TaskGroupPage[] = slices.map((slice, index) => ({ count: slice.count, key: slice.key, taskIds: (pages[index] ?? []).map(row => row.id) }));
+	return { counts: toCounts(chipValues), groups, items: pages.flat().map(toView), total: plan.reduce((sum, group) => sum + group.count, 0) };
 };
 
 export const getTask = async (prisma: Db, ownerId: string, id: string): Promise<TaskView> => {
