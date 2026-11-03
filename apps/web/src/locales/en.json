@@ -1304,6 +1304,11 @@
       "close": "Close",
       "previewEmpty": "This version has no text.",
       "restoreHint": "The current version is saved as a new revision."
+    },
+    "search": {
+      "label": "Search notes",
+      "placeholder": "Search notes...",
+      "clear": "Clear search"
     }
   },
   "reflect": {

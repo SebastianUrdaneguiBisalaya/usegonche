@@ -9,6 +9,8 @@ export const noteParsers = {
 	note: parseAsString.withDefault(''),
 	page: parseAsInteger.withDefault(1),
 	project: parseAsString.withDefault(''),
+	/** Text typed in the search box: only narrows the notes already loaded, it never reaches the API. */
+	q: parseAsString.withDefault(''),
 	tag: parseAsString.withDefault(''),
 	task: parseAsString.withDefault(''),
 	view: parseAsStringLiteral(noteViews).withDefault('list'),

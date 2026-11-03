@@ -1304,6 +1304,11 @@
       "close": "Cerrar",
       "previewEmpty": "Esta versión no tiene texto.",
       "restoreHint": "La versión actual se guarda como una nueva revisión."
+    },
+    "search": {
+      "label": "Buscar notas",
+      "placeholder": "Buscar notas...",
+      "clear": "Borrar búsqueda"
     }
   },
   "reflect": {
