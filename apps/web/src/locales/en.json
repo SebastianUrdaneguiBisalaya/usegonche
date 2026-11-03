@@ -1276,11 +1276,22 @@
       "limits": "Up to {{max}} files, {{size}} in total ({{used}} used).",
       "full": "This note already has the maximum number of files.",
       "totalExceeded": "Adding this file would exceed {{size}} in total.",
+      "sessionLimit": "You can only add {{max}} more files right now.",
       "done": "Done",
       "loadError": "Could not load the attachments.",
       "retry": "Retry",
       "removeError": "Could not remove the file.",
-      "downloadError": "Could not open the file."
+      "downloadError": "Could not open the file.",
+      "dropzone": {
+        "dragOrClick": "Drag files or click to upload",
+        "dropHere": "Drop here",
+        "invalidType": "This file isn't a supported type.",
+        "tooLarge": "The file can't exceed {{limit}}.",
+        "uploading": "Uploading...",
+        "uploaded": "Uploaded",
+        "uploadFailed": "Error uploading the file.",
+        "cancelled": "Upload cancelled."
+      }
     },
     "history": {
       "title": "Revision history",

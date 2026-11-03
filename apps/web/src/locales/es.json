@@ -1276,11 +1276,22 @@
       "limits": "Hasta {{max}} archivos, {{size}} en total ({{used}} usados).",
       "full": "Esta nota ya tiene el máximo de archivos.",
       "totalExceeded": "Añadir este archivo superaría {{size}} en total.",
+      "sessionLimit": "Solo puedes añadir {{max}} archivos más por ahora.",
       "done": "Listo",
       "loadError": "No se pudieron cargar los adjuntos.",
       "retry": "Reintentar",
       "removeError": "No se pudo quitar el archivo.",
-      "downloadError": "No se pudo abrir el archivo."
+      "downloadError": "No se pudo abrir el archivo.",
+      "dropzone": {
+        "dragOrClick": "Arrastra archivos o haz clic para subir",
+        "dropHere": "Suelta aquí",
+        "invalidType": "Este archivo no es de un tipo compatible.",
+        "tooLarge": "El archivo no puede superar {{limit}}.",
+        "uploading": "Subiendo...",
+        "uploaded": "Subido",
+        "uploadFailed": "Error al subir el archivo.",
+        "cancelled": "Subida cancelada."
+      }
     },
     "history": {
       "title": "Historial de revisiones",
