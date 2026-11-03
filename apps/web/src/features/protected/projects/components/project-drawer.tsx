@@ -1,5 +1,5 @@
-import { Archive, RotateCcw, X } from 'lucide-react';
-import { useMemo } from 'react';
+import { Archive, Plus, RotateCcw, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Progress } from '~/components/ui/data-display/progress/progress';
@@ -12,6 +12,7 @@ import { useLanguage } from '~/hooks/use-language';
 import { useRetained } from '~/hooks/use-retained';
 import { useTranslate } from '~/hooks/use-translate';
 import { diffPayload } from '~/utils/diff-payload';
+import { NewNoteModal } from '../../notes/components/new-note-modal';
 import { DrawerSection } from '../../shared/drawer-section';
 import { formatRelative } from '../../shared/relative-time';
 import { StatusBadge } from '../../shared/status-pill';
@@ -48,6 +49,7 @@ function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'
 	const schema = useMemo(() => createProjectFormSchema(t), [t]);
 	const tasks = useProjectTasks(project.id, true);
 	const notes = useProjectNotes(project.id, true);
+	const [newNote, setNewNote] = useState(false);
 	const files = useProjectFiles(project.id, true);
 	const { done, total } = project.taskCounts;
 	const status = displayStatus(project);
@@ -159,6 +161,12 @@ function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'
 						/>
 					</Tabs.Content>
 					<Tabs.Content className='pt-5' value='notes'>
+						<div className='mb-3 flex justify-end'>
+							<Button onClick={() => setNewNote(true)} type='button' variant='secondary'>
+								<Button.Icon icon={Plus} />
+								<Button.Text>{t('notes.new')}</Button.Text>
+							</Button>
+						</div>
 						<DrawerSection
 							empty={t('projects.drawer.notesEmpty')}
 							errorLabel={t('projects.drawer.loadError')}
@@ -193,6 +201,7 @@ function Body({ onChange, onClose, project }: Omit<ProjectDrawerProps, 'project'
 						/>
 					</Tabs.Content>
 				</Tabs>
+				<NewNoteModal links={{ projectId: project.id }} onOpenChange={setNewNote} open={newNote} />
 			</Drawer.Body>
 		</>
 	);
