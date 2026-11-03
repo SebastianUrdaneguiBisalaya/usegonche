@@ -1712,6 +1712,20 @@
       "saved": "Sesión de enfoque guardada.",
       "savedStopped": "Sesión detenida y guardada.",
       "tooShort": "Menos de un minuto: no se guardó nada."
+    },
+    "activity": {
+      "title": "Actividad reciente",
+      "empty": "Aún no ha pasado nada en tus tareas.",
+      "error": "No se pudo cargar tu actividad reciente.",
+      "retry": "Reintentar",
+      "completed": "Completada",
+      "cancelled": "Cancelada",
+      "started": "Iniciada",
+      "reopened": "Reabierta",
+      "priority": "Prioridad cambiada",
+      "due": "Fecha límite cambiada",
+      "project": "Proyecto cambiado",
+      "moved": "Movida"
     }
   },
   "calendar": {

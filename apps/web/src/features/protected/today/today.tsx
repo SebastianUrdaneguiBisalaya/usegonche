@@ -22,6 +22,7 @@ import { EventsCard } from './components/events-card';
 import { FocusCard } from './components/focus-card';
 import { InboxCard } from './components/inbox-card';
 import { PlanCard } from './components/plan-card';
+import { RecentActivityCard } from './components/recent-activity-card';
 import { ReplanCard } from './components/replan-card';
 
 const STRIP_DAYS = 7;
@@ -105,6 +106,7 @@ export default function TodayRoute() {
 					</div>
 					<div className='flex flex-col gap-4'>
 						<BlockedCard />
+						<RecentActivityCard />
 						<InboxCard />
 					</div>
 				</div>

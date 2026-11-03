@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '~/lib/api';
-import { unwrap } from '~/lib/api-error';
+import { type Data, unwrap } from '~/lib/api-error';
 import { unwrapPage } from '../shared/paged';
 
 type DayResponse = Awaited<ReturnType<(typeof api.planning.days)[':date']['$get']>>;
@@ -113,6 +113,14 @@ export function useCloseBlock() {
 export function useDeleteBlock() {
 	const refresh = useRefreshBlocks();
 	return useMutation({ mutationFn: (id: string) => unwrap(api.planning.blocks[':id'].$delete({ param: { id } })), onSuccess: refresh });
+}
+
+type ActivityResponse = Awaited<ReturnType<typeof api.history.$get>>;
+export type ActivityEvent = Data<ActivityResponse>[number];
+
+/** The latest events across all tasks (`GET /history`, newest first). It sits under `tasks` so every task or block change refreshes it. */
+export function useRecentActivity(size = 5) {
+	return useQuery({ queryFn: () => unwrap(api.history.$get({ query: { page: '1', pageSize: String(size) } })), queryKey: ['tasks', 'activity', size] });
 }
 
 type ReplanResponse = Awaited<ReturnType<(typeof api.planning)['replan-proposals']['$get']>>;
