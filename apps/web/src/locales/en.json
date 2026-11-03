@@ -1079,7 +1079,9 @@
       "due": "Due date: {{from}} → {{to}}",
       "project": "Project: {{from}} → {{to}}",
       "rescheduled": "Rescheduled: {{from}} → {{to}}",
-      "created": "Task created"
+      "created": "Task created",
+      "shown": "Showing {{shown}} of {{total}} events",
+      "more": "Load older events"
     },
     "delete": {
       "cancel": "Keep it",

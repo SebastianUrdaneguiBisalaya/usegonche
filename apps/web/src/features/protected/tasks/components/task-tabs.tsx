@@ -1,78 +1,18 @@
-import { ArrowRightLeft, CalendarClock, CircleDot, Flag, FolderKanban, Plus } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Tabs } from '~/components/ui/data-display/tabs/tabs';
-import { Timeline, type TimelineTone } from '~/components/ui/data-display/timeline/timeline';
-import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { NewNoteModal } from '../../notes/components/new-note-modal';
 import { DrawerSection } from '../../shared/drawer-section';
-import { useProjectOptions } from '../../shared/projects';
 import { formatRelative } from '../../shared/relative-time';
 import { useDateTime } from '../../shared/use-datetime';
-import { type Task, useTaskBlocks, useTaskFiles, useTaskHistory, useTaskNotes } from '../api';
+import { type Task, useTaskBlocks, useTaskFiles, useTaskNotes } from '../api';
+import { TaskHistory } from './task-history';
 
 const formatSize = (bytes: number): string => (bytes < 1024 ? `${bytes} B` : bytes < 1_048_576 ? `${(bytes / 1024).toFixed(0)} KB` : `${(bytes / 1_048_576).toFixed(1)} MB`);
-
-const day = (iso: string | null): string => (iso ? iso.slice(0, 10) : '');
-
-function History({ task }: { task: Task }) {
-	const t = useTranslate();
-	const { locale } = useLanguage();
-	const history = useTaskHistory(task.id, true);
-	const projects = useProjectOptions();
-	const projectTitle = useMemo(() => new Map((projects.data ?? []).map(project => [project.id, project.title])), [projects.data]);
-	const { formatDateTime } = useDateTime();
-
-	if (history.isPending) {
-		return (
-			<Skeleton className='gap-4 pl-6'>
-				{[0, 1, 2].map(key => (
-					<Skeleton.Item className='h-10 w-full rounded-lg' key={key} />
-				))}
-			</Skeleton>
-		);
-	}
-	if (history.isError) return <Typography.Span className='block py-10 text-center text-sm text-muted-foreground'>{t('tasks.drawer.loadError')}</Typography.Span>;
-
-	return (
-		<Timeline>
-			{(history.data ?? []).map(event => {
-				const none = t('tasks.history.none');
-				let title = '';
-				let tone: TimelineTone = 'default';
-				let icon = CircleDot;
-				if (event.type === 'status_changed') {
-					title = t('tasks.history.status', { from: t(`tasks.status.${event.fromStatus ?? 'todo'}`), to: t(`tasks.status.${event.toStatus ?? 'todo'}`) });
-					tone = event.toStatus === 'done' ? 'success' : 'default';
-				} else if (event.type === 'priority_changed') {
-					title = t('tasks.history.priority', { from: t(`tasks.priority.${event.fromPriority ?? 'medium'}`), to: t(`tasks.priority.${event.toPriority ?? 'medium'}`) });
-					icon = Flag;
-					tone = event.toPriority === 'urgent' ? 'warning' : 'default';
-				} else if (event.type === 'due_changed') {
-					title = t('tasks.history.due', { from: day(event.fromDueDate) || none, to: day(event.toDueDate) || none });
-					icon = CalendarClock;
-				} else if (event.type === 'project_changed') {
-					title = t('tasks.history.project', {
-						from: (event.fromProjectId && projectTitle.get(event.fromProjectId)) || none,
-						to: (event.toProjectId && projectTitle.get(event.toProjectId)) || none,
-					});
-					icon = FolderKanban;
-				} else {
-					title = t('tasks.history.rescheduled', {
-						from: event.fromStart ? formatDateTime(event.fromStart) : none,
-						to: event.toStart ? formatDateTime(event.toStart) : none,
-					});
-					icon = ArrowRightLeft;
-				}
-				return <Timeline.Item icon={icon} key={event.id} time={formatRelative(event.occurredAt, locale)} title={title} tone={tone} />;
-			})}
-			<Timeline.Item icon={Plus} time={formatRelative(task.createdAt, locale)} title={t('tasks.history.created')} />
-		</Timeline>
-	);
-}
 
 /** The four tabs under the task: its history, notes, files and time (the estimate and the time blocks planned for it). */
 export function TaskTabs({ task }: { task: Task }) {
@@ -96,7 +36,7 @@ export function TaskTabs({ task }: { task: Task }) {
 				))}
 			</Tabs.List>
 			<Tabs.Content className='w-full pt-5' value='history'>
-				<History task={task} />
+				<TaskHistory task={task} />
 			</Tabs.Content>
 			<Tabs.Content className='w-full pt-5' value='notes'>
 				<div className='mb-3 flex justify-end'>

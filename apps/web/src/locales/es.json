@@ -1079,7 +1079,9 @@
       "due": "Fecha límite: {{from}} → {{to}}",
       "project": "Proyecto: {{from}} → {{to}}",
       "rescheduled": "Reprogramada: {{from}} → {{to}}",
-      "created": "Tarea creada"
+      "created": "Tarea creada",
+      "shown": "Mostrando {{shown}} de {{total}} eventos",
+      "more": "Cargar eventos anteriores"
     },
     "delete": {
       "cancel": "Conservarla",
