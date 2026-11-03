@@ -15,7 +15,7 @@ import { usePreferences } from './use-preferences';
 const languages = ['system', 'en', 'es'] as const;
 
 /** Flags are a big chunk of SVGs: they load the first time this panel opens, and the country list works without them meanwhile. */
-function useFlags(): CountryFlags | undefined {
+export function useFlags(): CountryFlags | undefined {
 	const [flags, setFlags] = useState<CountryFlags>();
 	useEffect(() => {
 		let active = true;

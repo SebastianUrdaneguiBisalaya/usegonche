@@ -1548,6 +1548,49 @@
       "deleted": "Recurrencia eliminada."
     }
   },
+  "onboarding": {
+    "progress": "Progreso de la bienvenida",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "steps": {
+      "appearance": "Apariencia",
+      "region": "Región",
+      "finish": "Final"
+    },
+    "appearance": {
+      "title": "¿Qué tema prefieres?",
+      "subtitle": "Elige cómo quieres que se vea gonche.",
+      "dark": {
+        "label": "Oscuro",
+        "description": "Una experiencia oscura y enfocada."
+      },
+      "light": {
+        "label": "Claro",
+        "description": "Un aspecto limpio y minimalista."
+      },
+      "system": {
+        "label": "Sistema",
+        "description": "Sigue la preferencia de tu sistema."
+      }
+    },
+    "region": {
+      "title": "¿Dónde estás?",
+      "subtitle": "El idioma, el país y la zona horaria definen cómo se muestran las fechas y horas.",
+      "language": "Idioma",
+      "country": "País",
+      "timezone": "Zona horaria",
+      "timezoneHint": "Detectada desde tu dispositivo. Sigue al país que elijas."
+    },
+    "finish": {
+      "title": "Todo listo",
+      "subtitle": "Puedes cambiar esto más adelante en Ajustes.",
+      "theme": "Tema",
+      "language": "Idioma",
+      "country": "País",
+      "timezone": "Zona horaria",
+      "start": "Empezar"
+    }
+  },
   "today": {
     "title": "Hoy",
     "subtitle": "Enfócate en lo que te hace avanzar.",

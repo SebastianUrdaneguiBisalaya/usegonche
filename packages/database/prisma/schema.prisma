@@ -65,15 +65,17 @@ model Profile {
 
 /// One row per profile (1:1).
 model UserSettings {
-  id        String   @id @default(uuid(4)) @db.Uuid
-  ownerId   String   @unique @map("owner_id") @db.Uuid
-  language  String?  @db.VarChar(10)
-  theme     String?  @db.VarChar(10)
+  id                    String    @id @default(uuid(4)) @db.Uuid
+  ownerId               String    @unique @map("owner_id") @db.Uuid
+  language              String?   @db.VarChar(10)
+  theme                 String?   @db.VarChar(10)
   /// IANA time zone name, e.g. `America/Lima`.
-  timezone  String?  @db.VarChar(64)
-  country   String?  @db.VarChar(100)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  timezone              String?   @db.VarChar(64)
+  country               String?   @db.VarChar(100)
+  /// Set when the user finishes the mandatory onboarding (theme, language, country and time zone). `null` = still pending.
+  onboardingCompletedAt DateTime? @map("onboarding_completed_at") @db.Timestamptz(6)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 

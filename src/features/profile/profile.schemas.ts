@@ -43,6 +43,8 @@ export const updateSettingsSchema = z
 			.string()
 			.regex(/^(system|[a-z]{2,3}(-[A-Za-z0-9]{2,8})?)$/)
 			.max(10),
+		/** Finishes the mandatory onboarding. Needs theme, language, country and time zone to be set (422 `onboarding_incomplete` otherwise); it cannot be undone. */
+		onboardingCompleted: z.literal(true),
 		theme: z.enum(THEMES),
 		timezone: z.string().max(64).refine(isIanaTimezone),
 	})
