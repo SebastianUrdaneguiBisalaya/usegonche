@@ -444,3 +444,18 @@ select:autofill {
 	background-color: transparent;
 	color: var(--foreground);
 }
+
+/* Background image of the signed-in layout: `--bg-light` / `--bg-dark` are set by the component, the theme picks one (same rules as the color tokens). */
+.app-bg {
+	background-image: var(--bg-light);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .app-bg {
+		background-image: var(--bg-dark);
+	}
+}
+
+:root[data-theme="dark"] .app-bg {
+	background-image: var(--bg-dark);
+}

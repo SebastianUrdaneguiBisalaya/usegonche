@@ -1,19 +1,20 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@usegonche/api-client';
 import { Menu } from 'lucide-react';
-import { useState } from 'react';
+import { type CSSProperties, useState } from 'react';
 import { type LoaderFunctionArgs, Navigate, Outlet, redirect, useLoaderData } from 'react-router';
 import { Icon } from '~/components/ui/foundations/icon/icon';
+import { Page } from '~/components/ui/layout/page/page';
 import { type Session, sessionKey, useSession } from '~/features/auth/api';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
+import bgDark from '../../assets/bg-usegonche-dark.png';
+import bgLight from '../../assets/bg-usegonche-light.png';
 import { useUserSettings } from './settings/api';
 import { useSyncPreferences } from './settings/use-preferences';
 import { AppSidebar } from './shared/app-sidebar';
 import { CommandPalette } from './shared/command-palette';
 import { LayoutSkeleton } from './shared/layout-skeleton';
-import { Page } from '~/components/ui/layout/page/page';
-import bgCompress from "../../assets/bg-usegonche-compress.png"
 
 /**
  * Resolves the session on the server before anything renders: the request cookie is forwarded to `GET /v1/me`. A 401 redirects to sign-in
@@ -57,8 +58,8 @@ export default function ProtectedLayout() {
 		<div className='relative isolate flex h-screen w-full bg-background text-foreground'>
 			<div
 				aria-hidden
-				className='pointer-events-none absolute inset-0 -z-10 bg-cover bg-center'
-				style={{ backgroundImage: `url(${bgCompress})` }}
+				className='app-bg pointer-events-none absolute inset-0 -z-10 bg-cover bg-center'
+				style={{ '--bg-dark': `url(${bgDark})`, '--bg-light': `url(${bgLight})` } as CSSProperties}
 			/>
 			<AppSidebar mobileOpen={mobileOpen} onMobileOpenChange={setMobileOpen} onOpenCommand={() => setCommandOpen(true)} />
 			<div className='flex min-w-0 flex-1 flex-col'>

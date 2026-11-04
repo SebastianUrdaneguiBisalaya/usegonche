@@ -1,7 +1,6 @@
 import { createClient } from '@usegonche/api-client';
 import { type LoaderFunctionArgs, Navigate, Outlet, redirect } from 'react-router';
-import authBg from '~/assets/bg-auth.webp';
-import bgCompress from '~/assets/bg-usegonche-compress.png';
+import bgCompress from '~/assets/bg-usegonche-dark.png';
 import icon from '~/assets/usegonche-icon.png';
 import { Logo } from '~/components/ui/foundations/logo/logo';
 import { Layout } from '~/components/ui/layout/layout/layout';
