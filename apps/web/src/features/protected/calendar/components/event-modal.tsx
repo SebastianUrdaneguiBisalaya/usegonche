@@ -1,16 +1,22 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Switch } from '~/components/ui/actions-controls/switch/switch';
+import { DatePicker } from '~/components/ui/forms-inputs/date-picker/date-picker';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Select } from '~/components/ui/forms-inputs/select/select';
+import { minutesToTime, TimePicker, type TimePickerLang, type TimeValue, toTimeString } from '~/components/ui/forms-inputs/time-picker/time-picker';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
+import { cn } from '~/components/ui/utils/tailwind/cn';
+import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { minuteInZone, todayInZone } from '~/lib/datetime';
+import { fromDateOnly, toDateOnly } from '../../shared/dates';
 import { listStyles } from '../../shared/styles';
 import { useDateTime } from '../../shared/use-datetime';
+import { usePickerLang } from '../../tasks/components/task-pills';
 import { fromTimeValue, toTimeValue } from '../../today/blocks';
 import { type CalendarEventItem, type EventInput, type EventKind, useCreateEvent, useUpdateEvent } from '../api';
 
@@ -67,6 +73,12 @@ function initialValues(state: EventModalState, timeZone: string | undefined) {
 
 function EventForm({ onClose, onDelete, state }: { onClose: () => void; onDelete: EventModalProps['onDelete']; state: EventModalState }) {
 	const t = useTranslate();
+	const { locale } = useLanguage();
+	const pickerLang = usePickerLang();
+	const timeLang = useMemo<Partial<TimePickerLang>>(
+		() => ({ apply: t('tasks.picker.apply'), clear: t('tasks.picker.clear'), hour: t('notes.reminder.picker.hour'), minute: t('notes.reminder.picker.minute') }),
+		[t]
+	);
 	const { timeZone, toApi } = useDateTime();
 	const editing = state.kind === 'edit';
 	const initial = initialValues(state, timeZone);
@@ -131,26 +143,10 @@ function EventForm({ onClose, onDelete, state }: { onClose: () => void; onDelete
 						<Switch.Toggle />
 					</Switch>
 					<Layout.Grid cols={{ base: 1, md: allDay ? 1 : 2 }} gap='md'>
-						<Input className={listStyles.field}>
-							<Input.Label>{t('calendar.event.startDate')}</Input.Label>
-							<Input.Field onChange={event => setStartDate(event.target.value)} type='date' value={startDate} />
-						</Input>
-						{!allDay && (
-							<Input className={listStyles.field}>
-								<Input.Label>{t('calendar.event.startTime')}</Input.Label>
-								<Input.Field onChange={event => setStartTime(event.target.value)} type='time' value={startTime} />
-							</Input>
-						)}
-						<Input className={listStyles.field}>
-							<Input.Label>{t('calendar.event.endDate')}</Input.Label>
-							<Input.Field onChange={event => setEndDate(event.target.value)} type='date' value={endDate} />
-						</Input>
-						{!allDay && (
-							<Input className={listStyles.field}>
-								<Input.Label>{t('calendar.event.endTime')}</Input.Label>
-								<Input.Field onChange={event => setEndTime(event.target.value)} type='time' value={endTime} />
-							</Input>
-						)}
+						<DayField label={t('calendar.event.startDate')} lang={pickerLang} locale={locale} onChange={setStartDate} value={startDate} />
+						{!allDay && <TimeField label={t('calendar.event.startTime')} lang={timeLang} onChange={setStartTime} value={startTime} />}
+						<DayField label={t('calendar.event.endDate')} lang={pickerLang} locale={locale} onChange={setEndDate} value={endDate} />
+						{!allDay && <TimeField label={t('calendar.event.endTime')} lang={timeLang} onChange={setEndTime} value={endTime} />}
 					</Layout.Grid>
 					{!rangeValid && <p className='text-xs text-destructive'>{t('calendar.event.endBeforeStart')}</p>}
 				</Layout.Stack>
@@ -175,5 +171,29 @@ function EventForm({ onClose, onDelete, state }: { onClose: () => void; onDelete
 				</Layout.HStack>
 			</Modal.Footer>
 		</>
+	);
+}
+
+/** A date of the event (`YYYY-MM-DD`) with the app's date picker. */
+function DayField({ label, lang, locale, onChange, value }: { label: string; lang: ReturnType<typeof usePickerLang>; locale: string; onChange: (value: string) => void; value: string }) {
+	return (
+		<DatePicker.Root lang={lang} locale={locale} onChange={date => date && onChange(toDateOnly(date))} value={fromDateOnly(value)}>
+			<DatePicker.Label>{label}</DatePicker.Label>
+			<DatePicker.Trigger className={cn(listStyles.pillTrigger, 'h-auto')} />
+			<DatePicker.Content />
+		</DatePicker.Root>
+	);
+}
+
+/** A time of the event (`HH:mm`) with the app's time picker. */
+function TimeField({ label, lang, onChange, value }: { label: string; lang: Partial<TimePickerLang>; onChange: (value: string) => void; value: string }) {
+	const minute = fromTimeValue(value);
+	const time: TimeValue | null = minute === null ? null : minutesToTime(minute);
+	return (
+		<TimePicker.Root lang={{ ...lang, picker: label }} minuteStep={5} onChange={next => next && onChange(toTimeString(next))} value={time}>
+			<TimePicker.Label>{label}</TimePicker.Label>
+			<TimePicker.Trigger className={cn(listStyles.pillTrigger, 'h-auto')} />
+			<TimePicker.Content />
+		</TimePicker.Root>
 	);
 }
