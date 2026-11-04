@@ -2,6 +2,7 @@ import { ArrowRightLeft, Ban, CalendarClock, CircleCheck, CirclePlay, Flag, Fold
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { ApplicationState } from '~/components/ui/overlays-feedback/application-state/application-state';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
@@ -31,25 +32,29 @@ function readEvent(event: ActivityEvent): Reading {
 }
 
 /** The latest things that happened to the user's tasks (completed, moved, re-prioritized...), newest first, with how long ago. */
-export function RecentActivityCard() {
+export function RecentActivityCard({ className }: { className?: string }) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
 	const activity = useRecentActivity();
 	const events = activity.data ?? [];
 
 	return (
-		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5')}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5', className)}>
 			<Typography.H3 className='flex items-center gap-3 text-base font-semibold'>
 				<Zap aria-hidden className='size-5 text-muted-foreground' />
 				{t('today.activity.title')}
 			</Typography.H3>
 			{activity.isError ? (
-				<div className='flex flex-col items-start gap-2'>
-					<Typography.Span className='text-sm text-muted-foreground'>{t('today.activity.error')}</Typography.Span>
-					<Button onClick={() => void activity.refetch()} variant='secondary'>
-						<Button.Text>{t('today.activity.retry')}</Button.Text>
-					</Button>
-				</div>
+				<ApplicationState.ErrorState
+					actions={
+						<Button onClick={() => void activity.refetch()} variant='secondary'>
+							<Button.Text>{t('today.activity.retry')}</Button.Text>
+						</Button>
+					}
+					className='flex-1 py-4'
+					description={null}
+					title={t('today.activity.error')}
+				/>
 			) : activity.isPending ? (
 				<Skeleton className='gap-3'>
 					{[0, 1, 2].map(key => (
@@ -57,7 +62,7 @@ export function RecentActivityCard() {
 					))}
 				</Skeleton>
 			) : events.length === 0 ? (
-				<Typography.Span className='text-sm text-muted-foreground'>{t('today.activity.empty')}</Typography.Span>
+				<ApplicationState.EmptyState className='flex-1 py-4' description={null} icon={Zap} title={t('today.activity.empty')} />
 			) : (
 				<ul className='flex flex-col gap-3'>
 					{events.map(event => {

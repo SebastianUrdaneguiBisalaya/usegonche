@@ -6,15 +6,16 @@ import { Checkbox } from '~/components/ui/forms-inputs/checkbox/checkbox';
 import { Combobox } from '~/components/ui/forms-inputs/combobox/combobox';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { ApplicationState } from '~/components/ui/overlays-feedback/application-state/application-state';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
-import { ListEmpty } from '../../shared/list-table';
 import { listStyles } from '../../shared/styles';
 import { PriorityPill } from '../../tasks/components/task-pills';
 import { type DayItem, useOpenTasks } from '../api';
 import { formatMinutes } from '../format';
 
 interface PlanCardProps {
+	className?: string;
 	error: boolean;
 	isLoading: boolean;
 	isToday: boolean;
@@ -27,12 +28,12 @@ interface PlanCardProps {
 }
 
 /** The day's plan: progress, the planned tasks (check one to finish it) and a picker to add more. */
-export function PlanCard({ error, isLoading, isToday, items, onAdd, onRemove, onRetry, onToggleDone, pending }: PlanCardProps) {
+export function PlanCard({ className, error, isLoading, isToday, items, onAdd, onRemove, onRetry, onToggleDone, pending }: PlanCardProps) {
 	const t = useTranslate();
 	const done = items.filter(item => item.task.status === 'done').length;
 
 	return (
-		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5')}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5', className)}>
 			<div className='flex items-center justify-between gap-3'>
 				<Typography.H3 className='text-lg font-semibold'>{isToday ? t('today.plan.titleToday') : t('today.plan.title')}</Typography.H3>
 				{!isLoading && !error && <Typography.Span className='text-sm text-muted-foreground tabular-nums'>{t('today.plan.count', { done, total: items.length })}</Typography.Span>}
@@ -41,48 +42,57 @@ export function PlanCard({ error, isLoading, isToday, items, onAdd, onRemove, on
 				<Progress.Indicator />
 			</Progress>
 
-			{isLoading ? (
-				<div className='flex flex-col gap-3'>
-					{[0, 1, 2].map(row => (
-						<Skeleton className='h-8 w-full' key={row} />
-					))}
-				</div>
-			) : error || items.length === 0 ? (
-				<ListEmpty
-					description={t('today.empty.description')}
-					error={error}
-					errorTitle={t('today.error.title')}
-					icon={ListChecks}
-					onRetry={onRetry}
-					retryLabel={t('today.error.retry')}
-					title={t('today.empty.title')}
-				/>
-			) : (
-				<ul className='flex flex-col'>
-					{items.map(({ id, task }) => {
-						const finished = task.status === 'done';
-						return (
-							<li className='group flex items-center gap-3 rounded-lg px-1 py-2 hover:bg-foreground/[0.04]' key={id}>
-								<Checkbox checked={finished} className='min-w-0 flex-1' disabled={pending || task.status === 'cancelled'} onCheckedChange={checked => onToggleDone(task.id, checked)}>
-									<Checkbox.Toggle />
-									<Checkbox.Label className={finished || task.status === 'cancelled' ? 'truncate text-muted-foreground line-through' : 'truncate'}>{task.title}</Checkbox.Label>
-								</Checkbox>
-								{task.estimatedMinutes !== null && <Typography.Span className='text-xs text-muted-foreground tabular-nums'>{formatMinutes(task.estimatedMinutes)}</Typography.Span>}
-								<PriorityPill priority={task.priority} />
-								<Button
-									aria-label={t('today.plan.remove', { title: task.title })}
-									className='size-7 rounded-full p-0 text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
-									disabled={pending}
-									onClick={() => onRemove(task.id)}
-									variant='ghost'
-								>
-									<Button.Icon icon={X} />
-								</Button>
-							</li>
-						);
-					})}
-				</ul>
-			)}
+			<div className={cn('flex min-h-0 flex-1 flex-col overflow-y-auto', (error || items.length === 0) && !isLoading && 'justify-center')}>
+				{isLoading ? (
+					<div className='flex flex-col gap-3'>
+						{[0, 1, 2].map(row => (
+							<Skeleton className='h-8 w-full' key={row} />
+						))}
+					</div>
+				) : error ? (
+					<ApplicationState.ErrorState
+						actions={
+							<Button onClick={onRetry} variant='secondary'>
+								<Button.Text>{t('today.error.retry')}</Button.Text>
+							</Button>
+						}
+						description={null}
+						title={t('today.error.title')}
+					/>
+				) : items.length === 0 ? (
+					<ApplicationState.EmptyState description={t('today.empty.description')} icon={ListChecks} title={t('today.empty.title')} />
+				) : (
+					<ul className='flex flex-col'>
+						{items.map(({ id, task }) => {
+							const finished = task.status === 'done';
+							return (
+								<li className='group flex items-center gap-3 rounded-lg px-1 py-2 hover:bg-foreground/[0.04]' key={id}>
+									<Checkbox
+										checked={finished}
+										className='min-w-0 flex-1'
+										disabled={pending || task.status === 'cancelled'}
+										onCheckedChange={checked => onToggleDone(task.id, checked)}
+									>
+										<Checkbox.Toggle />
+										<Checkbox.Label className={finished || task.status === 'cancelled' ? 'truncate text-muted-foreground line-through' : 'truncate'}>{task.title}</Checkbox.Label>
+									</Checkbox>
+									{task.estimatedMinutes !== null && <Typography.Span className='text-xs text-muted-foreground tabular-nums'>{formatMinutes(task.estimatedMinutes)}</Typography.Span>}
+									<PriorityPill priority={task.priority} />
+									<Button
+										aria-label={t('today.plan.remove', { title: task.title })}
+										className='size-7 rounded-full p-0 text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+										disabled={pending}
+										onClick={() => onRemove(task.id)}
+										variant='ghost'
+									>
+										<Button.Icon icon={X} />
+									</Button>
+								</li>
+							);
+						})}
+					</ul>
+				)}
+			</div>
 
 			{!isLoading && !error && <AddTask exclude={items.map(item => item.task.id)} onAdd={onAdd} pending={pending} />}
 		</section>

@@ -4,6 +4,7 @@ import { Fragment, useMemo } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { MiniCalendar } from '~/components/ui/data-display/mini-calendar/mini-calendar';
+import { Layout } from '~/components/ui/layout/layout/layout';
 import { Page } from '~/components/ui/layout/page/page';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
@@ -75,25 +76,28 @@ export default function TodayRoute() {
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
-				<MiniCalendar
-					className='max-w-full shrink-0 self-start overflow-x-auto'
-					days={STRIP_DAYS}
-					defaultStartDate={startDate}
-					lang={{ nextDays: t('today.strip.next'), previousDays: t('today.strip.previous') }}
-					locale={locale}
-					onValueChange={next => next && void setParam(toDateOnly(next) === toDateOnly(today) ? null : toDateOnly(next))}
-					value={selected}
-				>
-					<MiniCalendar.Navigation direction='prev' />
-					<MiniCalendar.Days>{d => <MiniCalendar.Day date={d} key={d.toISOString()} />}</MiniCalendar.Days>
-					<MiniCalendar.Navigation direction='next' />
-				</MiniCalendar>
-				<div className='grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,18rem)]'>
-					<AgendaCard blocks={day.data?.blocks ?? []} date={date} isToday={isToday} />
+				<Layout.Grid className='lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)]' cols={1} gap='md'>
+					<div className='flex flex-col gap-4'>
+						<MiniCalendar
+							className='shrink-0'
+							days={STRIP_DAYS}
+							defaultStartDate={startDate}
+							lang={{ nextDays: t('today.strip.next'), previousDays: t('today.strip.previous') }}
+							locale={locale}
+							onValueChange={next => next && void setParam(toDateOnly(next) === toDateOnly(today) ? null : toDateOnly(next))}
+							value={selected}
+						>
+							<MiniCalendar.Navigation direction='prev' />
+							<MiniCalendar.Days>{d => <MiniCalendar.Day date={d} key={d.toISOString()} />}</MiniCalendar.Days>
+							<MiniCalendar.Navigation direction='next' />
+						</MiniCalendar>
+						<AgendaCard blocks={day.data?.blocks ?? []} date={date} isToday={isToday} />
+					</div>
 					<div className='flex flex-col gap-4'>
 						<ReplanCard date={date} />
 						{day.data && <CapacityCard capacity={day.data.capacity} />}
 						<PlanCard
+							className='min-h-0 flex-1'
 							error={day.isError}
 							isLoading={day.isPending}
 							isToday={isToday}
@@ -107,10 +111,10 @@ export default function TodayRoute() {
 					</div>
 					<div className='flex flex-col gap-4'>
 						<BlockedCard />
-						<RecentActivityCard />
-						<InboxCard />
+						<RecentActivityCard className='min-h-0 flex-1 basis-0 overflow-y-auto' />
+						<InboxCard className='min-h-0 flex-1 basis-0 overflow-y-auto' />
 					</div>
-				</div>
+				</Layout.Grid>
 			</Page.Body>
 		</Fragment>
 	);

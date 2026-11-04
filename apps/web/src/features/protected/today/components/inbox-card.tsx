@@ -1,7 +1,8 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Inbox } from 'lucide-react';
 import { Link } from 'react-router';
 import { Pill } from '~/components/ui/data-display/pill/pill';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { ApplicationState } from '~/components/ui/overlays-feedback/application-state/application-state';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { useInbox } from '../../inbox/api';
@@ -10,14 +11,14 @@ import { listStyles } from '../../shared/styles';
 const PREVIEW = 3;
 
 /** The latest pending inbox items and how many are waiting; processing happens in the Inbox page. */
-export function InboxCard() {
+export function InboxCard({ className }: { className?: string }) {
 	const t = useTranslate();
 	const inbox = useInbox({ page: 1, range: 'all', status: 'pending' });
 	const items = (inbox.data?.data ?? []).slice(0, PREVIEW);
 	const pending = inbox.data?.meta.counts.pending ?? 0;
 
 	return (
-		<section className={cn(listStyles.card, 'flex flex-col gap-3 p-5')}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-3 p-5', className)}>
 			<div className='flex items-center justify-between gap-3'>
 				<span className='flex items-center gap-2 text-base font-semibold'>
 					{t('today.inbox.title')}
@@ -31,7 +32,7 @@ export function InboxCard() {
 				</Link>
 			</div>
 			{items.length === 0 ? (
-				<Typography.Span className='text-sm text-muted-foreground'>{t('today.inbox.empty')}</Typography.Span>
+				<ApplicationState.EmptyState className='flex-1 py-4' description={null} icon={Inbox} title={t('today.inbox.empty')} />
 			) : (
 				<ul className='flex flex-col gap-2'>
 					{items.map(item => (
