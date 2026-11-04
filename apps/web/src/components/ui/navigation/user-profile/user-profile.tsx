@@ -74,7 +74,7 @@ export interface UserProfileContentProps
 function UserProfileContent({ className, ...props }: UserProfileContentProps) {
   return (
     <Dropdown.Content
-      className={cn("min-w-56", className)}
+      className={cn("min-w-56 space-y-0.5", className)}
       {...props}
     />
   );

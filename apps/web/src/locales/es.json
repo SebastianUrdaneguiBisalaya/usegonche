@@ -159,6 +159,7 @@
       "title": "Configuración",
       "group": "Configuración",
       "close": "Cerrar",
+      "logout": "Cerrar sesión",
       "search": "Buscar en configuración",
       "noResults": "Sin resultados",
       "general": {

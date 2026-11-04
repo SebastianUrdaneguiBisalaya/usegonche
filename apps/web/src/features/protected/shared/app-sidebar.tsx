@@ -1,4 +1,4 @@
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, LogOut, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import icon from '~/assets/usegonche-icon.png';
@@ -11,7 +11,7 @@ import { Sidebar } from '~/components/ui/navigation/sidebar/sidebar';
 import { UserProfile } from '~/components/ui/navigation/user-profile/user-profile';
 import { SettingsDialog } from '~/components/ui/overlays-feedback/settings-dialog/settings-dialog';
 import { cn } from '~/components/ui/utils/tailwind/cn';
-import { useSession } from '~/features/auth/api';
+import { useLogout, useSession } from '~/features/auth/api';
 import { useTranslate } from '~/hooks/use-translate';
 import { SettingsContent } from '../settings/settings-content';
 import { initialsOf } from './initials';
@@ -65,6 +65,7 @@ export function AppSidebar({ mobileOpen, onMobileOpenChange, onOpenCommand }: Ap
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
 	const { data: session } = useSession();
+	const logout = useLogout();
 	const [collapsed, setCollapsed] = useState(false);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -130,7 +131,7 @@ export function AppSidebar({ mobileOpen, onMobileOpenChange, onOpenCommand }: Ap
 				{!collapsed && <DailyProgress done={0} total={0} />}
 
 				<Sidebar.Footer className='gap-1'>
-					<UserProfile onOpenChange={open => open && setSettingsOpen(true)} open={false}>
+					<UserProfile>
 						<UserProfile.Trigger
 							avatar={
 								<Avatar size='sm'>
@@ -154,6 +155,14 @@ export function AppSidebar({ mobileOpen, onMobileOpenChange, onOpenCommand }: Ap
 								</span>
 							}
 						/>
+						<UserProfile.Content align='start'>
+							<UserProfile.Item icon={Settings} onSelect={() => setSettingsOpen(true)}>
+								{t('protected.settings.title')}
+							</UserProfile.Item>
+							<UserProfile.Item icon={LogOut} onSelect={() => logout.mutate(undefined, { onSettled: () => window.location.assign('/auth/sign-in') })}>
+								{t('protected.settings.logout')}
+							</UserProfile.Item>
+						</UserProfile.Content>
 					</UserProfile>
 				</Sidebar.Footer>
 			</Sidebar>
