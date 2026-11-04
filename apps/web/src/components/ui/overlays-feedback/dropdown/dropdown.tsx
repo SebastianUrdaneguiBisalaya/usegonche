@@ -135,7 +135,7 @@ function focusMenuItemAt(menu: HTMLElement, index: number) {
     ),
   );
   if (items.length === 0) return;
-  items[((index % items.length) + items.length) % items.length].focus();
+  items[((index % items?.length) + items?.length) % items?.length]?.focus();
 }
 
 export interface DropdownContentProps

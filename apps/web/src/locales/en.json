@@ -159,6 +159,7 @@
       "title": "Settings",
       "group": "Settings",
       "close": "Close",
+      "logout": "Log out",
       "search": "Search settings",
       "noResults": "No results",
       "general": {
