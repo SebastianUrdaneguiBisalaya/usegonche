@@ -4,9 +4,9 @@ import { useMemo } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { DataTable, type DataTableFeatures } from '~/components/ui/data-display/data-table/data-table';
 import { Pill } from '~/components/ui/data-display/pill/pill';
-import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
+import { ApplicationState } from '~/components/ui/overlays-feedback/application-state/application-state';
 import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
@@ -166,24 +166,23 @@ export function InboxTable({
 	);
 
 	const empty = error ? (
-		<Layout.Stack align='center' className='px-4 py-16 text-center' gap='sm'>
-			<Typography.Span className='text-sm text-muted-foreground'>{t('inbox.error.title')}</Typography.Span>
-			<Button onClick={onRetry} variant='secondary'>
-				<Button.Text>{t('inbox.error.retry')}</Button.Text>
-			</Button>
-		</Layout.Stack>
+		<ApplicationState.ErrorState
+			actions={
+				<Button onClick={onRetry} variant='secondary'>
+					<Button.Text>{t('inbox.error.retry')}</Button.Text>
+				</Button>
+			}
+			description={null}
+			title={t('inbox.error.title')}
+		/>
 	) : (
-		<Layout.Stack align='center' className='px-4 py-16 text-center' gap='sm'>
-			<Icon aria-hidden className='text-muted-foreground' icon={Inbox} size='xl' />
-			<Typography.Span className='text-sm font-medium'>{t(`inbox.empty.${emptyKind}.title`)}</Typography.Span>
-			<Typography.Span className='text-xs text-muted-foreground'>{rangeActive ? t('inbox.empty.range') : t(`inbox.empty.${emptyKind}.description`)}</Typography.Span>
-		</Layout.Stack>
+		<ApplicationState.EmptyState description={rangeActive ? t('inbox.empty.range') : t(`inbox.empty.${emptyKind}.description`)} icon={Inbox} title={t(`inbox.empty.${emptyKind}.title`)} />
 	);
 
 	return (
 		<DataTable
 			cellClassName='px-5 py-3.5'
-			className='min-h-64'
+			className='h-full min-h-64'
 			columns={columns}
 			containerClassName={`${listStyles.card} bg-transparent`}
 			data={rows}
