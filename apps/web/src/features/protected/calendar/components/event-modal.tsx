@@ -130,7 +130,7 @@ function EventForm({ onClose, onDelete, state }: { onClose: () => void; onDelete
 						<Switch.Label>{t('calendar.event.allDay')}</Switch.Label>
 						<Switch.Toggle />
 					</Switch>
-					<Layout.Grid cols={{ base: allDay ? 1 : 2 }} gap='md'>
+					<Layout.Grid cols={{ base: 1, md: allDay ? 1 : 2 }} gap='md'>
 						<Input className={listStyles.field}>
 							<Input.Label>{t('calendar.event.startDate')}</Input.Label>
 							<Input.Field onChange={event => setStartDate(event.target.value)} type='date' value={startDate} />
