@@ -95,7 +95,7 @@ export function FocusCard() {
 				</Typography.H3>
 				{!active && (
 					<Select.Root onChange={next => session.setPlannedMinutes(Number(next))} value={String(plannedMinutes)}>
-						<Select.Trigger aria-label={t('today.focus.duration')} className={cn(listStyles.pillTrigger, '!py-1 text-xs')}>
+						<Select.Trigger aria-label={t('today.focus.duration')} className={cn(listStyles.pillTrigger, 'py-1 text-xs')}>
 							<Select.Value />
 						</Select.Trigger>
 						<Select.Content>
@@ -137,7 +137,7 @@ export function FocusCard() {
 					)}
 					<Button
 						aria-label={t(phase === 'idle' ? 'today.focus.start' : running ? 'today.focus.pause' : 'today.focus.resume')}
-						className='size-12 rounded-full border border-border bg-foreground/[0.06] p-0'
+						className='size-12 rounded-full border border-border bg-foreground/6 p-0'
 						onClick={() => (phase === 'idle' ? session.start() : running ? session.pause() : session.resume())}
 						size='icon'
 						variant='ghost'

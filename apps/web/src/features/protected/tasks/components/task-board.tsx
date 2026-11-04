@@ -53,7 +53,7 @@ function TaskCard({ onOpen, onSetPriority, task }: { onOpen: (task: Task) => voi
 					aria-hidden
 					className={cn(
 						'flex size-10 shrink-0 items-center justify-center rounded-xl border border-border',
-						finished ? 'bg-success/15 text-success' : 'bg-foreground/[0.06] text-muted-foreground'
+						finished ? 'bg-success/15 text-success' : 'bg-foreground/6 text-muted-foreground'
 					)}
 				>
 					<Icon icon={finished ? statusIcon.done : taskIcon(task.id)} size='md' />
