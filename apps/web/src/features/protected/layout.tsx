@@ -12,6 +12,8 @@ import { useSyncPreferences } from './settings/use-preferences';
 import { AppSidebar } from './shared/app-sidebar';
 import { CommandPalette } from './shared/command-palette';
 import { LayoutSkeleton } from './shared/layout-skeleton';
+import { Page } from '~/components/ui/layout/page/page';
+import bgCompress from "../../assets/bg-usegonche-compress.png"
 
 /**
  * Resolves the session on the server before anything renders: the request cookie is forwarded to `GET /v1/me`. A 401 redirects to sign-in
@@ -52,7 +54,12 @@ export default function ProtectedLayout() {
 	if (settings.data && !settings.data.onboardingCompletedAt) return <Navigate replace to='/onboarding' />;
 
 	return (
-		<div className='flex h-screen w-full bg-background text-foreground'>
+		<div className='relative isolate flex h-screen w-full bg-background text-foreground'>
+			<div
+				aria-hidden
+				className='pointer-events-none absolute inset-0 -z-10 bg-cover bg-center'
+				style={{ backgroundImage: `url(${bgCompress})` }}
+			/>
 			<AppSidebar mobileOpen={mobileOpen} onMobileOpenChange={setMobileOpen} onOpenCommand={() => setCommandOpen(true)} />
 			<div className='flex min-w-0 flex-1 flex-col'>
 				<div className='flex h-12 shrink-0 items-center border-b border-border px-3 md:hidden'>
@@ -66,7 +73,9 @@ export default function ProtectedLayout() {
 					</button>
 				</div>
 				<main className='flex min-h-0 flex-1 flex-col overflow-y-auto'>
-					<Outlet />
+					<Page.Root className='min-h-0 flex-1 py-4 sm:py-4 lg:py-4' size='full'>
+						<Outlet />
+					</Page.Root>
 				</main>
 			</div>
 			<CommandPalette onOpenChange={setCommandOpen} open={commandOpen} />
