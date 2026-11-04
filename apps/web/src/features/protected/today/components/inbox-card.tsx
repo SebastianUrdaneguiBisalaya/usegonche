@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
 import { Pill } from '~/components/ui/data-display/pill/pill';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { useInbox } from '../../inbox/api';
 import { listStyles } from '../../shared/styles';
@@ -16,7 +17,7 @@ export function InboxCard() {
 	const pending = inbox.data?.meta.counts.pending ?? 0;
 
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-3 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-3 p-5')}>
 			<div className='flex items-center justify-between gap-3'>
 				<span className='flex items-center gap-2 text-base font-semibold'>
 					{t('today.inbox.title')}

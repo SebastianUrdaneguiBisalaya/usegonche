@@ -6,6 +6,7 @@ import { Button } from '~/components/ui/actions-controls/button/button';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Page } from '~/components/ui/layout/page/page';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { ListSearch } from '../shared/list-search';
@@ -82,7 +83,7 @@ export default function RemindersRoute() {
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
-				<div className={`${listStyles.card} flex flex-wrap items-center justify-between gap-3 p-2`}>
+				<div className={cn(listStyles.card, 'flex flex-wrap items-center justify-between gap-3 p-2')}>
 					<StatusTabs
 						ariaLabel={t('reminders.tabs.label')}
 						counts={list.data ? counts : undefined}
@@ -98,7 +99,7 @@ export default function RemindersRoute() {
 						value={q}
 					/>
 				</div>
-				<div className={`grid items-start gap-4 ${opened ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]' : ''}`}>
+				<div className={cn('grid items-start gap-4', opened ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]' : '')}>
 					<div className='flex flex-col gap-3'>
 						{list.isPending ? (
 							<Skeleton className='gap-3' label={t('reminders.title')}>
@@ -133,7 +134,7 @@ export default function RemindersRoute() {
 							</ul>
 						)}
 						{list.data && sent.length === 0 && (
-							<div className={`${listStyles.card} flex items-center gap-3 px-4 py-3`}>
+							<div className={cn(listStyles.card, 'flex items-center gap-3 px-4 py-3')}>
 								<span className='flex size-10 items-center justify-center rounded-full border border-success text-success'>
 									<Check aria-hidden className='size-5' />
 								</span>

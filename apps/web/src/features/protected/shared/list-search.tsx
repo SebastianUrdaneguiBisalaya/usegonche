@@ -2,6 +2,7 @@ import { Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Kbd } from '~/components/ui/foundations/kbd/kbd';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { listStyles } from './styles';
 
 interface ListSearchProps {
@@ -44,7 +45,7 @@ export function ListSearch({ clearLabel, label, onChange, placeholder, value }: 
 	}, []);
 
 	return (
-		<Input className={`${listStyles.pillInput} w-full sm:w-72`}>
+		<Input className={cn(listStyles.pillInput, 'w-full sm:w-72')}>
 			<Input.Icon icon={Search} />
 			<Input.Field aria-label={label} autoComplete='off' onChange={event => type(event.target.value)} placeholder={placeholder} ref={ref} value={text} />
 			{text ? (

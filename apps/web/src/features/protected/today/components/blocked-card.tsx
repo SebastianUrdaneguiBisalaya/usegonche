@@ -1,6 +1,7 @@
 import { ArrowRight, OctagonAlert } from 'lucide-react';
 import { Link } from 'react-router';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 import { useBlockedTasks } from '../api';
@@ -14,7 +15,7 @@ export function BlockedCard() {
 	if (blocked.isError || total === 0) return null;
 
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-3 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-3 p-5')}>
 			<div className='flex items-center justify-between gap-3'>
 				<span className='flex items-center gap-2 text-base font-semibold'>
 					<OctagonAlert aria-hidden className='size-5 text-destructive' />

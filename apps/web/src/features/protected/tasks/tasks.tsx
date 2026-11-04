@@ -9,6 +9,7 @@ import { Tabs } from '~/components/ui/data-display/tabs/tabs';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Page } from '~/components/ui/layout/page/page';
 import { ConfirmDialog } from '~/components/ui/overlays-feedback/confirm-dialog/confirm-dialog';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { api } from '~/lib/api';
 import { getApiErrorMessage, unwrap } from '~/lib/api-error';
@@ -173,7 +174,7 @@ export default function TasksRoute() {
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
 				{!recurring && (
-					<div className={`${listStyles.card} flex flex-col gap-3 overflow-x-auto p-3`}>
+					<div className={cn(listStyles.card, 'flex flex-col gap-3 overflow-x-auto p-3')}>
 						<TaskChips
 							blocked={params.blocked}
 							counts={counts}
@@ -188,7 +189,7 @@ export default function TasksRoute() {
 						/>
 					</div>
 				)}
-				<div className={`${listStyles.card} flex flex-wrap items-center justify-between gap-3 p-3`}>
+				<div className={cn(listStyles.card, 'flex flex-wrap items-center justify-between gap-3 p-3')}>
 					{!recurring ? (
 						<div className='flex flex-wrap items-center gap-3'>
 							<ProjectFilter onChange={project => void setParams({ page: 1, project })} options={projectOptions} value={params.project} />

@@ -2,6 +2,7 @@ import { ArrowRight, type LucideIcon } from 'lucide-react';
 import { type ReactNode, type Ref, useState } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Input } from '~/components/ui/forms-inputs/input/input';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useCloseQuickAdd } from './quick-add-dialog';
 import { listStyles } from './styles';
 
@@ -54,7 +55,7 @@ export function QuickAdd({ extra, hint, icon, inputRef, label, maxLength, onSubm
 				void submit();
 			}}
 		>
-			<Input className={`${listStyles.card} px-5 py-4`}>
+			<Input className={cn(listStyles.card, 'px-5 py-4')}>
 				<Input.Icon className='text-foreground' icon={icon} />
 				<Input.Field
 					aria-label={label}

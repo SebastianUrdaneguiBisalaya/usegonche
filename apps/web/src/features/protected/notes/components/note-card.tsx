@@ -2,6 +2,7 @@ import { Ellipsis, FolderKanban, Link2, Trash2 } from 'lucide-react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { formatRelative } from '../../shared/relative-time';
@@ -32,9 +33,11 @@ export function NoteCard({ layout, note, onCopyLink, onDelete, onOpen, projectTi
 	return (
 		<article
 			aria-current={selected ? 'true' : undefined}
-			className={`group relative flex gap-4 rounded-2xl border p-4 transition-colors ${
-				selected ? 'border-border-strong bg-foreground/[0.08] shadow-sm' : 'border-border bg-foreground/[0.03] hover:bg-foreground/[0.05]'
-			} ${grid ? 'min-h-40 flex-col' : 'items-start'}`}
+			className={cn(
+				'group relative flex gap-4 rounded-2xl border p-4 transition-colors',
+				selected ? 'border-border-strong bg-foreground/[0.08] shadow-sm' : 'border-border bg-foreground/[0.03] hover:bg-foreground/[0.05]',
+				grid ? 'min-h-40 flex-col' : 'items-start'
+			)}
 		>
 			<span aria-hidden className='flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-foreground/[0.06] text-muted-foreground'>
 				<Icon icon={noteIcon(note.id)} size='lg' />
@@ -47,7 +50,7 @@ export function NoteCard({ layout, note, onCopyLink, onDelete, onOpen, projectTi
 				>
 					{note.title}
 				</button>
-				<p className={`text-sm text-muted-foreground ${grid ? 'line-clamp-3' : 'truncate'}`}>{note.excerpt || t('notes.card.noExcerpt')}</p>
+				<p className={cn('text-sm text-muted-foreground', grid ? 'line-clamp-3' : 'truncate')}>{note.excerpt || t('notes.card.noExcerpt')}</p>
 				<div className='mt-1 flex flex-wrap items-center gap-2'>
 					{note.tags.slice(0, TAGS_SHOWN).map(tag => (
 						<TagChip color={tag.color} key={tag.id} name={tag.name} />

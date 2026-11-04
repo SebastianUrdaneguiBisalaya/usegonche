@@ -7,6 +7,7 @@ import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Page } from '~/components/ui/layout/page/page';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
 import { OptionSelect } from '../shared/option-select';
@@ -176,10 +177,10 @@ export default function ProjectsRoute() {
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
-				<div className={`${listStyles.card} overflow-x-auto p-3`}>
+				<div className={cn(listStyles.card, 'overflow-x-auto p-3')}>
 					<StatusTabs ariaLabel={t('projects.tabs.label')} counts={counts} onChange={status => void setParams({ page: 1, status })} tabs={tabs} value={params.status} />
 				</div>
-				<div className={`${listStyles.card} flex flex-wrap items-center justify-between gap-3 p-3`}>
+				<div className={cn(listStyles.card, 'flex flex-wrap items-center justify-between gap-3 p-3')}>
 					<div className='flex flex-wrap items-center gap-3'>
 						<GoalFilter onChange={goal => void setParams({ goal, page: 1 })} options={goalOptions} value={params.goal} />
 						<TagFilter onChange={tag => void setParams({ page: 1, tag })} options={tagOptions} value={params.tag} />

@@ -2,6 +2,7 @@ import { CalendarClock, ChevronDown, CircleDot, Flag, FolderKanban, X } from 'lu
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import type { BulkChanges } from '../api';
 import { priorityDot, statusDot } from '../display';
@@ -35,7 +36,7 @@ export function TaskBulkBar({ count, onApply, onClear, pending, projects }: Task
 				<Dropdown.Content align='start'>
 					{taskStatuses.map(status => (
 						<Dropdown.Item key={status} onSelect={() => onApply({ status })}>
-							<span aria-hidden className={`size-2 rounded-full ${statusDot[status]}`} />
+							<span aria-hidden className={cn('size-2 rounded-full', statusDot[status])} />
 							{t(`tasks.status.${status}`)}
 						</Dropdown.Item>
 					))}
@@ -52,7 +53,7 @@ export function TaskBulkBar({ count, onApply, onClear, pending, projects }: Task
 				<Dropdown.Content align='start'>
 					{taskPriorities.map(priority => (
 						<Dropdown.Item key={priority} onSelect={() => onApply({ priority })}>
-							<span aria-hidden className={`size-2 rounded-full ${priorityDot[priority]}`} />
+							<span aria-hidden className={cn('size-2 rounded-full', priorityDot[priority])} />
 							{t(`tasks.priority.${priority}`)}
 						</Dropdown.Item>
 					))}

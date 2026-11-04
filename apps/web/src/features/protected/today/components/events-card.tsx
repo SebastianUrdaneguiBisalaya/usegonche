@@ -2,6 +2,7 @@ import { Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import type { CalendarEventItem } from '../../calendar/api';
 import { DeleteEventDialog } from '../../calendar/components/delete-event-dialog';
@@ -23,7 +24,7 @@ export function EventsCard({ date, events }: EventsCardProps) {
 	const sorted = useMemo(() => [...events].sort((a, b) => Number(b.allDay) - Number(a.allDay) || a.startsAt.localeCompare(b.startsAt)), [events]);
 
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-3 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-3 p-5')}>
 			<div className='flex items-center justify-between gap-3'>
 				<Typography.H3 className='text-base font-semibold'>{t('today.events.title')}</Typography.H3>
 				<Button className={listStyles.pillTrigger} onClick={() => setModal({ date, kind: 'create', startMinute: 9 * 60 })} variant='secondary'>

@@ -3,6 +3,7 @@ import { Button } from '~/components/ui/actions-controls/button/button';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Separator } from '~/components/ui/foundations/separator/separator';
 import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import type { StatusLook } from './status-pill';
 
 /** One action of the bar: a label with a colored dot or an icon. */
@@ -28,7 +29,7 @@ const pill = 'gap-2 rounded-full border-border bg-foreground/[0.03] px-4 py-2';
 function ActionButton({ action }: { action: BulkBarAction }) {
 	return (
 		<Button className={pill} onClick={action.onClick} variant='secondary'>
-			{action.icon ? <Icon aria-hidden className={action.iconClassName} icon={action.icon} size='sm' /> : <span aria-hidden className={`size-2 rounded-full ${action.dotClassName ?? ''}`} />}
+			{action.icon ? <Icon aria-hidden className={action.iconClassName} icon={action.icon} size='sm' /> : <span aria-hidden className={cn('size-2 rounded-full', action.dotClassName ?? '')} />}
 			<Button.Text className='text-xs'>{action.label}</Button.Text>
 		</Button>
 	);

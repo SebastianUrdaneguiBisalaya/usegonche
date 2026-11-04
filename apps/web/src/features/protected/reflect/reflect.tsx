@@ -6,6 +6,7 @@ import { ToggleGroup } from '~/components/ui/actions-controls/toggle-group/toggl
 import { DatePicker } from '~/components/ui/forms-inputs/date-picker/date-picker';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Page } from '~/components/ui/layout/page/page';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useDebouncedValue } from '~/hooks/use-debounced-value';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
@@ -115,7 +116,7 @@ export default function ReflectRoute() {
 					<Page.Description>{t('reflect.subtitle')}</Page.Description>
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
-					<ToggleGroup className={`${listStyles.pillTrigger} flex gap-1 p-1`} onValueChange={next => next && void setKind(next as ReviewKind)} type='single' value={kind}>
+					<ToggleGroup className={cn(listStyles.pillTrigger, 'flex gap-1 p-1')} onValueChange={next => next && void setKind(next as ReviewKind)} type='single' value={kind}>
 						{kinds.map(value => (
 							<ToggleGroup.Item className='rounded-full' key={value} value={value}>
 								{t(`reflect.kind.${value}`)}
@@ -123,7 +124,7 @@ export default function ReflectRoute() {
 						))}
 					</ToggleGroup>
 					<DatePicker.Root lang={pickerLang} locale={locale} onChange={next => void setParam(next ? toDateOnly(next) : null)} value={fromDateOnly(date)}>
-						<DatePicker.Trigger aria-label={t('reflect.date')} className={`${listStyles.pillTrigger} h-auto`} placeholder={t('reflect.date')} />
+						<DatePicker.Trigger aria-label={t('reflect.date')} className={cn(listStyles.pillTrigger, 'h-auto')} placeholder={t('reflect.date')} />
 						<DatePicker.Content />
 					</DatePicker.Root>
 				</Page.Actions>

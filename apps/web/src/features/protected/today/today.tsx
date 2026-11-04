@@ -1,10 +1,11 @@
 import { CalendarDays } from 'lucide-react';
 import { parseAsString, useQueryState } from 'nuqs';
-import { useMemo, Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { MiniCalendar } from '~/components/ui/data-display/mini-calendar/mini-calendar';
 import { Page } from '~/components/ui/layout/page/page';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
@@ -66,7 +67,7 @@ export default function TodayRoute() {
 							<Button.Text>{t('today.backToToday')}</Button.Text>
 						</Button>
 					)}
-					<div className={`${listStyles.pillTrigger} flex items-center gap-2 text-sm`}>
+					<div className={cn(listStyles.pillTrigger, 'flex items-center gap-2 text-sm')}>
 						<CalendarDays aria-hidden className='size-4 text-muted-foreground' />
 						<span className='tabular-nums'>{label}</span>
 					</div>

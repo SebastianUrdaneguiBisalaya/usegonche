@@ -1,6 +1,6 @@
-import { Fragment } from 'react';
 import { CalendarDays } from 'lucide-react';
 import { parseAsStringLiteral, useQueryState } from 'nuqs';
+import { Fragment } from 'react';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Page } from '~/components/ui/layout/page/page';
 import { useTranslate } from '~/hooks/use-translate';

@@ -2,6 +2,7 @@ import { ArrowRightLeft, Ban, CalendarClock, CircleCheck, CirclePlay, Flag, Fold
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import type { TranslationKey } from '~/i18n';
@@ -37,7 +38,7 @@ export function RecentActivityCard() {
 	const events = activity.data ?? [];
 
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-4 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5')}>
 			<Typography.H3 className='flex items-center gap-3 text-base font-semibold'>
 				<Zap aria-hidden className='size-5 text-muted-foreground' />
 				{t('today.activity.title')}
@@ -63,7 +64,7 @@ export function RecentActivityCard() {
 						const { icon: Icon, iconClassName = 'text-muted-foreground', label } = readEvent(event);
 						return (
 							<li className='flex items-center gap-3 text-sm' key={event.id}>
-								<Icon aria-hidden className={`size-5 shrink-0 ${iconClassName}`} strokeWidth={1.5} />
+								<Icon aria-hidden className={cn('size-5 shrink-0', iconClassName)} strokeWidth={1.5} />
 								<span className='flex min-w-0 flex-1 items-baseline gap-2'>
 									<span className='shrink-0 font-medium'>{t(label)}</span>
 									<span className='truncate text-muted-foreground' title={event.taskTitle}>

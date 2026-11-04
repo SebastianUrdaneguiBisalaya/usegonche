@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Pill } from '~/components/ui/data-display/pill/pill';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
@@ -34,7 +35,7 @@ export function ReplanCard({ date }: { date: string }) {
 	if (proposals.isError || pending.length === 0) return null;
 
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-3 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-3 p-5')}>
 			<div className='flex flex-col gap-1'>
 				<span className='flex items-center gap-2 text-base font-semibold'>
 					<CalendarClock aria-hidden className='size-5 text-muted-foreground' />

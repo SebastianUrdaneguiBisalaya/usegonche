@@ -4,6 +4,7 @@ import { type ReactNode, useState } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 import { useDateTime } from '../../shared/use-datetime';
@@ -29,10 +30,10 @@ export function MetricCard({ base, children, icon: Icon, iconClassName = '', sub
 	const preset = own ?? base;
 
 	return (
-		<section className={`${listStyles.card} flex min-w-0 flex-col gap-4 p-5`}>
+		<section className={cn(listStyles.card, 'flex min-w-0 flex-col gap-4 p-5')}>
 			<header className='flex items-start justify-between gap-3'>
 				<div className='flex min-w-0 items-start gap-3'>
-					<Icon aria-hidden className={`mt-0.5 size-6 shrink-0 text-muted-foreground ${iconClassName}`} />
+					<Icon aria-hidden className={cn('mt-0.5 size-6 shrink-0 text-muted-foreground', iconClassName)} />
 					<div className='flex min-w-0 flex-col'>
 						<Typography.H3 className='text-lg font-medium leading-tight'>{title}</Typography.H3>
 						<Typography.Span className='text-sm text-muted-foreground'>{subtitle}</Typography.Span>

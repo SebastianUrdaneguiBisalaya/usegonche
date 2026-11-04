@@ -4,6 +4,7 @@ import { Combobox } from '~/components/ui/forms-inputs/combobox/combobox';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Icon } from '~/components/ui/foundations/icon/icon';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { RepeatProperty } from '../../recurrences/components/repeat-property';
 import { useProjectOptions } from '../../shared/projects';
@@ -82,7 +83,7 @@ export function TaskProperties({ onChange, task }: TaskPropertiesProps) {
 			</Row>
 			<Row icon={FolderKanban} label={t('tasks.columns.project')}>
 				<Select.Root onChange={next => onChange({ projectId: next === NONE ? null : next })} value={task.projectId ?? NONE}>
-					<Select.Trigger aria-label={t('tasks.columns.project')} className={`${listStyles.pillTrigger} w-full`}>
+					<Select.Trigger aria-label={t('tasks.columns.project')} className={cn(listStyles.pillTrigger, 'w-full')}>
 						<Select.Value />
 					</Select.Trigger>
 					<Select.Content>
@@ -99,7 +100,7 @@ export function TaskProperties({ onChange, task }: TaskPropertiesProps) {
 			</Row>
 			<Row icon={Target} label={t('tasks.properties.goal')}>
 				<Select.Root onChange={next => onChange({ goalId: next === NONE ? null : next })} value={task.goalId ?? NONE}>
-					<Select.Trigger aria-label={t('tasks.properties.goal')} className={`${listStyles.pillTrigger} w-full`}>
+					<Select.Trigger aria-label={t('tasks.properties.goal')} className={cn(listStyles.pillTrigger, 'w-full')}>
 						<Select.Value />
 					</Select.Trigger>
 					<Select.Content>

@@ -2,6 +2,7 @@ import { OctagonAlert } from 'lucide-react';
 import { useMemo } from 'react';
 import { Pill } from '~/components/ui/data-display/pill/pill';
 import { DatePicker, type DatePickerLang } from '~/components/ui/forms-inputs/date-picker/date-picker';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { apiDateOnly, fromDateOnly, toDateOnly } from '../../shared/dates';
@@ -116,7 +117,11 @@ export function DueDate({ ariaLabel, className, emptyLabel, onChange, status, va
 		<DatePicker.Root lang={lang} locale={locale} onChange={date => onChange(date ? toDateOnly(date) : null)} value={fromDateOnly(value)}>
 			<DatePicker.Trigger
 				aria-label={ariaLabel ?? t('tasks.due.change')}
-				className={`h-auto w-fit gap-1.5 border-0 bg-transparent px-2 py-1 text-sm shadow-none hover:bg-foreground/[0.06] ${overdue ? 'text-destructive' : 'text-muted-foreground'} ${className ?? ''}`}
+				className={cn(
+					'h-auto w-fit gap-1.5 border-0 bg-transparent px-2 py-1 text-sm shadow-none hover:bg-foreground/[0.06]',
+					overdue ? 'text-destructive' : 'text-muted-foreground',
+					className ?? ''
+				)}
 				placeholder={emptyLabel ?? t('tasks.due.none')}
 			/>
 			<DatePicker.Content />

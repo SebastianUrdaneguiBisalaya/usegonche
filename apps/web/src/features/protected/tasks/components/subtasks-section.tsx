@@ -6,6 +6,7 @@ import { Checkbox } from '~/components/ui/forms-inputs/checkbox/checkbox';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { type Task, useCreateTask, useSubtasks, useUpdateTask } from '../api';
@@ -63,7 +64,10 @@ export function SubtasksSection({ onOpen, task }: { onOpen: (id: string) => void
 								<Checkbox.Label className='sr-only'>{t('tasks.subtasks.toggle', { title: item.title })}</Checkbox.Label>
 							</Checkbox>
 							<button
-								className={`min-w-0 flex-1 cursor-pointer truncate text-left text-sm ${item.status === 'done' || item.status === 'cancelled' ? 'text-muted-foreground line-through' : ''}`}
+								className={cn(
+									'min-w-0 flex-1 cursor-pointer truncate text-left text-sm',
+									item.status === 'done' || item.status === 'cancelled' ? 'text-muted-foreground line-through' : ''
+								)}
 								onClick={() => onOpen(item.id)}
 								type='button'
 							>

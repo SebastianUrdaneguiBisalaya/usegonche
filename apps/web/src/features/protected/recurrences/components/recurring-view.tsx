@@ -6,6 +6,7 @@ import { Pill } from '~/components/ui/data-display/pill/pill';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { ConfirmDialog } from '~/components/ui/overlays-feedback/confirm-dialog/confirm-dialog';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
@@ -56,7 +57,7 @@ function RuleCard({ onDelete, onEdit, rule }: { onDelete: () => void; onEdit: ()
 	const when = rule.startMinute === null || rule.durationMinutes === null ? null : `${formatMinute(rule.startMinute, locale)} · ${t('recurrences.card.minutes', { count: rule.durationMinutes })}`;
 
 	return (
-		<li className={`${listStyles.card} flex flex-col gap-3 p-4`}>
+		<li className={cn(listStyles.card, 'flex flex-col gap-3 p-4')}>
 			<div className='flex items-start justify-between gap-3'>
 				<div className='flex min-w-0 flex-col gap-1'>
 					<Typography.Span className='truncate text-base font-medium' title={rule.title}>
@@ -121,7 +122,7 @@ export function RecurringView({ creating, onCreatingChange }: RecurringViewProps
 					</Button>
 				</div>
 			) : items.length === 0 ? (
-				<div className={`${listStyles.card} flex flex-col items-center gap-3 px-4 py-16 text-center`}>
+				<div className={cn(listStyles.card, 'flex flex-col items-center gap-3 px-4 py-16 text-center')}>
 					<Repeat aria-hidden className='size-8 text-muted-foreground' />
 					<Typography.Span className='text-base font-medium'>{t('recurrences.empty.title')}</Typography.Span>
 					<Typography.Span className='max-w-sm text-sm text-muted-foreground'>{t('recurrences.empty.description')}</Typography.Span>

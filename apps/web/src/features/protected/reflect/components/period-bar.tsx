@@ -1,5 +1,6 @@
 import { CalendarDays } from 'lucide-react';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
@@ -27,7 +28,7 @@ export function PeriodBar({ review }: { review: Review }) {
 	const rate = completionRate(planned, completed);
 
 	return (
-		<section className={`${listStyles.card} flex flex-wrap items-center gap-x-8 gap-y-4 px-5 py-4`}>
+		<section className={cn(listStyles.card, 'flex flex-wrap items-center gap-x-8 gap-y-4 px-5 py-4')}>
 			<div className='flex items-center gap-3'>
 				<span className='flex size-11 items-center justify-center rounded-xl border border-border bg-foreground/[0.04]'>
 					<CalendarDays aria-hidden className='size-5 text-muted-foreground' />

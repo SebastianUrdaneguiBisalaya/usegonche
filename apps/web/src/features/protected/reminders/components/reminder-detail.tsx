@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
@@ -34,7 +35,7 @@ export function ReminderDetail({ info, onClose, reminder }: { info: TargetInfo |
 	const fail = (error: unknown) => toast.error(getApiErrorMessage(error));
 
 	return (
-		<aside className={`${listStyles.card} relative flex flex-col gap-5 p-5`}>
+		<aside className={cn(listStyles.card, 'relative flex flex-col gap-5 p-5')}>
 			<Button aria-label={t('reminders.detail.close')} className='absolute top-3 right-3 size-8 rounded-full p-0' onClick={onClose} size='icon' variant='ghost'>
 				<Button.Icon icon={X} />
 			</Button>

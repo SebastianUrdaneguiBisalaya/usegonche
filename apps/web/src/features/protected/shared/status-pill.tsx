@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Pill } from '~/components/ui/data-display/pill/pill';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 
 /** How a status looks: its label plus a colored dot, or an icon. */
 export interface StatusLook {
@@ -52,7 +53,7 @@ export function StatusMenu<T extends string>({ ariaLabel, current, onChange, opt
 						{option.icon ? (
 							<Icon aria-hidden className={option.iconClassName} icon={option.icon} size='sm' />
 						) : (
-							<span aria-hidden className={`size-2 rounded-full ${option.dotClassName ?? ''}`} />
+							<span aria-hidden className={cn('size-2 rounded-full', option.dotClassName ?? '')} />
 						)}
 						{option.label}
 					</Dropdown.Item>

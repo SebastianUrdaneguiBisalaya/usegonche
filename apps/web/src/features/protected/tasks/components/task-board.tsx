@@ -8,6 +8,7 @@ import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { ListEmpty } from '../../shared/list-table';
 import { listStyles } from '../../shared/styles';
@@ -50,11 +51,14 @@ function TaskCard({ onOpen, onSetPriority, task }: { onOpen: (task: Task) => voi
 			<div className='flex items-start gap-3'>
 				<span
 					aria-hidden
-					className={`flex size-10 shrink-0 items-center justify-center rounded-xl border border-border ${finished ? 'bg-success/15 text-success' : 'bg-foreground/[0.06] text-muted-foreground'}`}
+					className={cn(
+						'flex size-10 shrink-0 items-center justify-center rounded-xl border border-border',
+						finished ? 'bg-success/15 text-success' : 'bg-foreground/[0.06] text-muted-foreground'
+					)}
 				>
 					<Icon icon={finished ? statusIcon.done : taskIcon(task.id)} size='md' />
 				</span>
-				<Typography.Span className={`min-w-0 flex-1 text-sm font-medium leading-snug ${finished ? 'text-muted-foreground' : ''}`} title={task.title}>
+				<Typography.Span className={cn('min-w-0 flex-1 text-sm font-medium leading-snug', finished ? 'text-muted-foreground' : '')} title={task.title}>
 					<span className='line-clamp-2'>{task.title}</span>
 				</Typography.Span>
 				<div onClick={event => event.stopPropagation()} onKeyDown={event => event.stopPropagation()}>
@@ -85,7 +89,7 @@ function TaskCard({ onOpen, onSetPriority, task }: { onOpen: (task: Task) => voi
 			)}
 			<div className='flex flex-wrap items-center gap-2'>
 				{due && (
-					<span className={`flex items-center gap-1.5 text-xs tabular-nums ${overdue ? 'text-destructive' : 'text-muted-foreground'}`}>
+					<span className={cn('flex items-center gap-1.5 text-xs tabular-nums', overdue ? 'text-destructive' : 'text-muted-foreground')}>
 						<Icon aria-hidden icon={CalendarDays} size='xs' />
 						{formatDay(due)}
 					</span>
@@ -103,7 +107,7 @@ function BoardSkeleton({ columns }: { columns: number }) {
 	return (
 		<div className='flex min-h-0 flex-1 gap-4 overflow-x-auto pb-2'>
 			{taskStatuses.slice(0, columns).map(column => (
-				<Skeleton className={`${listStyles.card} w-80 shrink-0 gap-3 p-4`} key={column}>
+				<Skeleton className={cn(listStyles.card, 'w-80 shrink-0 gap-3 p-4')} key={column}>
 					<Skeleton.Item className='h-5 w-32' />
 					{[0, 1, 2].map(card => (
 						<Skeleton.Item className='h-24 w-full rounded-2xl' key={card} />
@@ -162,8 +166,8 @@ export function TaskBoard({ error, hidden, isLoading, listHref, onAdd, onMove, o
 								</Button>
 							}
 							cardClassName={cardSurface}
-							className={`${listStyles.card} w-80 shrink-0 border-l! p-4 first:pl-4 last:pr-4`}
-							icon={<span aria-hidden className={`size-2.5 rounded-full ${statusDot[status]} ${statusColor[status]}`} />}
+							className={cn(listStyles.card, 'w-80 shrink-0 border-l! p-4 first:pl-4 last:pr-4')}
+							icon={<span aria-hidden className={cn('size-2.5 rounded-full', statusDot[status], statusColor[status])} />}
 							id={status}
 							key={status}
 							renderItem={item => {
@@ -181,7 +185,7 @@ export function TaskBoard({ error, hidden, isLoading, listHref, onAdd, onMove, o
 				</Kanban.Board>
 			</Kanban.Root>
 			{hidden > 0 && (
-				<Link className={`${listStyles.card} flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground`} to={listHref}>
+				<Link className={cn(listStyles.card, 'flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground')} to={listHref}>
 					{t(hidden === 1 ? 'tasks.board.more_one' : 'tasks.board.more_other', { count: hidden })}
 					<ArrowRight aria-hidden className='size-4' />
 				</Link>

@@ -7,6 +7,7 @@ import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 import { useBrainDump } from '../api';
@@ -43,7 +44,7 @@ export function BrainDump() {
 
 	return (
 		<>
-			<Layout.HStack className={`${listStyles.card} px-6 py-5`} collapseBelow='sm' justify='between'>
+			<Layout.HStack className={cn(listStyles.card, 'px-6 py-5')} collapseBelow='sm' justify='between'>
 				<Layout.HStack gap='lg'>
 					<Icon aria-hidden className='text-foreground' icon={Layers} size='xl' />
 					<Layout.Stack gap='xs'>

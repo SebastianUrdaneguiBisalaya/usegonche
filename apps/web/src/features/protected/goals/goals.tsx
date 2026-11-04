@@ -7,6 +7,7 @@ import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Page } from '~/components/ui/layout/page/page';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
 import { OptionSelect } from '../shared/option-select';
@@ -165,7 +166,7 @@ export default function GoalsRoute() {
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
-				<div className={`${listStyles.card} flex flex-wrap items-center justify-between gap-3 p-3`}>
+				<div className={cn(listStyles.card, 'flex flex-wrap items-center justify-between gap-3 p-3')}>
 					<StatusTabs ariaLabel={t('goals.tabs.label')} counts={counts} onChange={status => void setParams({ page: 1, status })} tabs={tabs} value={params.status} />
 					<div className='flex flex-wrap items-center gap-3'>
 						<OptionSelect icon={CalendarClock} label={t('goals.filters.due.label')} onChange={(due: GoalDue) => void setParams({ due, page: 1 })} options={dueOptions} value={params.due} />

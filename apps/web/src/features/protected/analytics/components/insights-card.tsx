@@ -1,5 +1,6 @@
 import { CalendarCheck, Clock, Flame, Lightbulb, type LucideIcon, TrendingUp, TriangleAlert } from 'lucide-react';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 import { formatMinutes } from '../../today/format';
@@ -36,7 +37,7 @@ export function InsightsCard({ range }: { range: DateRange }) {
 	}
 
 	return (
-		<section className={`${listStyles.card} flex min-w-0 flex-col gap-4 p-5`}>
+		<section className={cn(listStyles.card, 'flex min-w-0 flex-col gap-4 p-5')}>
 			<Typography.H3 className='flex items-center gap-3 text-base font-medium'>
 				<Lightbulb aria-hidden className='size-6 text-muted-foreground' />
 				{t('analytics.insights.title')}

@@ -6,6 +6,7 @@ import { Button } from '~/components/ui/actions-controls/button/button';
 import type { DataTableFeatures } from '~/components/ui/data-display/data-table/data-table';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { BulkBar } from '../../shared/bulk-bar';
@@ -70,7 +71,7 @@ export function TagsTable({ error, isLoading, onDelete, onPageChange, onEdit, on
 							{projects > 0 ? (
 								<Link
 									aria-label={`${label('projects', projects)}. ${t('tags.usage.openProjects')}`}
-									className={`${chip} transition-colors hover:bg-foreground/[0.12]`}
+									className={cn(chip, 'transition-colors hover:bg-foreground/[0.12]')}
 									onClick={event => event.stopPropagation()}
 									title={t('tags.usage.openProjects')}
 									to={`/projects?tag=${row.original.id}`}

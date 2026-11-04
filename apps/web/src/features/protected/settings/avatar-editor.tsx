@@ -6,6 +6,7 @@ import { Avatar } from '~/components/ui/data-display/avatar/avatar';
 import { UploadDropzone } from '~/components/ui/forms-inputs/upload-dropzone/upload-dropzone';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { initialsOf } from '../shared/initials';
@@ -56,7 +57,7 @@ export function AvatarEditor({ avatarUrl, name }: AvatarEditorProps) {
 							<Avatar.Fallback className={initialsClassName}>{initialsOf(name)}</Avatar.Fallback>
 						</>
 					) : (
-						<span className={`absolute inset-0 ${initialsClassName}`}>{initialsOf(name)}</span>
+						<span className={cn('absolute inset-0', initialsClassName)}>{initialsOf(name)}</span>
 					)}
 				</Avatar>
 				<Button

@@ -1,4 +1,5 @@
 import { Select } from '~/components/ui/forms-inputs/select/select';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { listStyles } from './styles';
 
 interface PageSelectProps {
@@ -15,7 +16,7 @@ interface PageSelectProps {
 export function PageSelect({ label, onChange, page, pageCount, valueLabel }: PageSelectProps) {
 	return (
 		<Select.Root onChange={next => onChange(Number(next))} value={String(page)}>
-			<Select.Trigger aria-label={label} className={`${listStyles.pillTrigger} min-w-28`}>
+			<Select.Trigger aria-label={label} className={cn(listStyles.pillTrigger, 'min-w-28')}>
 				<span className='text-sm'>{valueLabel}</span>
 			</Select.Trigger>
 			<Select.Content>

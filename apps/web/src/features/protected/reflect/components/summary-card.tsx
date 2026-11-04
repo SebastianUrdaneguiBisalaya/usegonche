@@ -1,6 +1,7 @@
 import { ArrowRight, CircleAlert, CircleCheck, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { apiDateOnly } from '../../shared/dates';
 import { listStyles } from '../../shared/styles';
@@ -30,7 +31,7 @@ export function SummaryCard({ review }: { review: Review }) {
 	const blockers = prefill.recurringBlockers;
 
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-4 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5')}>
 			<Typography.H3 className='text-base font-semibold'>{t('reflect.summary.title')}</Typography.H3>
 			<ul className='flex flex-col gap-3'>
 				<Row icon={<CircleCheck aria-hidden className='size-5 text-success' />} label={t('reflect.summary.onTrack')} value={`${Math.min(completedTasks, plannedTasks)} / ${plannedTasks}`} />

@@ -2,6 +2,7 @@ import { FolderKanban } from 'lucide-react';
 import { Combobox } from '~/components/ui/forms-inputs/combobox/combobox';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Icon } from '~/components/ui/foundations/icon/icon';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { useProjectOptions } from '../../shared/projects';
 import { listStyles } from '../../shared/styles';
@@ -31,7 +32,7 @@ export function NoteMeta({ onChange, value }: NoteMetaProps) {
 	return (
 		<div className='flex flex-wrap items-start gap-3'>
 			<Select.Root onChange={next => onChange({ ...value, projectId: next === NONE ? null : next })} value={value.projectId ?? NONE}>
-				<Select.Trigger aria-label={t('notes.meta.project.label')} className={`${listStyles.pillTrigger} w-44`}>
+				<Select.Trigger aria-label={t('notes.meta.project.label')} className={cn(listStyles.pillTrigger, 'w-44')}>
 					<span className='flex min-w-0 items-center gap-2'>
 						<Icon aria-hidden className='text-muted-foreground' icon={FolderKanban} size='sm' />
 						<Select.Value />

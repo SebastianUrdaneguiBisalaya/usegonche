@@ -3,6 +3,7 @@ import { type PointerEvent as ReactPointerEvent, useEffect, useMemo, useRef, use
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
@@ -88,7 +89,7 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 	};
 
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-3 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-3 p-5')}>
 			<div className='flex items-center justify-between gap-3'>
 				<Typography.H3 className='text-lg font-semibold'>{t('today.agenda.title')}</Typography.H3>
 				<Button className={listStyles.pillTrigger} onClick={() => setModal({ date, kind: 'create', startMinute: isToday ? Math.ceil(nowMinute / 15) * 15 : 9 * 60 })} variant='secondary'>
@@ -122,7 +123,12 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 						const shownStart = atMinute(date, top, timeZone);
 						return (
 							<button
-								className={`absolute inset-x-1 z-20 flex flex-col gap-0.5 overflow-hidden rounded-xl border px-3 py-1.5 text-left ${tone[block.status] ?? tone.planned} ${block.status === 'planned' ? 'cursor-grab touch-none active:cursor-grabbing' : 'cursor-pointer'} ${drag?.id === block.id ? 'shadow-lg' : ''}`}
+								className={cn(
+									'absolute inset-x-1 z-20 flex flex-col gap-0.5 overflow-hidden rounded-xl border px-3 py-1.5 text-left',
+									tone[block.status] ?? tone.planned,
+									block.status === 'planned' ? 'cursor-grab touch-none active:cursor-grabbing' : 'cursor-pointer',
+									drag?.id === block.id ? 'shadow-lg' : ''
+								)}
 								key={block.id}
 								onClick={event => event.detail === 0 && setModal({ block, date, kind: 'edit', title: titleOf(block) })}
 								onPointerDown={event => startDrag(event, block, startMinute, endMinute)}
@@ -131,7 +137,7 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 							>
 								<span className='flex items-center gap-1.5 truncate text-sm font-medium'>
 									{block.warnings.length > 0 && <TriangleAlert aria-label={t('today.agenda.conflict')} className='size-3.5 shrink-0 text-warning' />}
-									<span className={`truncate ${block.status === 'missed' ? 'line-through' : ''}`}>{titleOf(block)}</span>
+									<span className={cn('truncate', block.status === 'missed' ? 'line-through' : '')}>{titleOf(block)}</span>
 								</span>
 								{endMinute - startMinute >= 30 && (
 									<span className='truncate text-xs text-muted-foreground tabular-nums'>

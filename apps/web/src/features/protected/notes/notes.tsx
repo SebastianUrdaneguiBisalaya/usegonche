@@ -8,6 +8,7 @@ import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Page } from '~/components/ui/layout/page/page';
 import { ConfirmDialog } from '~/components/ui/overlays-feedback/confirm-dialog/confirm-dialog';
 import { Drawer } from '~/components/ui/overlays-feedback/drawer/drawer';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useMediaQuery } from '~/hooks/use-media-query';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
@@ -151,9 +152,10 @@ export default function NotesRoute() {
 							<button
 								aria-label={t(`notes.views.${view}`)}
 								aria-pressed={params.view === view}
-								className={`flex size-9 cursor-pointer items-center justify-center rounded-full transition-colors ${
+								className={cn(
+									'flex size-9 cursor-pointer items-center justify-center rounded-full transition-colors',
 									params.view === view ? 'bg-foreground/[0.1] text-foreground' : 'text-muted-foreground hover:text-foreground'
-								}`}
+								)}
 								key={view}
 								onClick={() => void setParams({ view })}
 								title={t(`notes.views.${view}`)}
@@ -167,7 +169,7 @@ export default function NotesRoute() {
 				{inline ? (
 					<div className='grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(20rem,26rem)_minmax(0,1fr)]'>
 						<div className='flex min-h-0 flex-col'>{results}</div>
-						<section aria-label={t('notes.editor.panel')} className={`${listStyles.card} flex min-h-0 flex-col overflow-hidden`}>
+						<section aria-label={t('notes.editor.panel')} className={cn(listStyles.card, 'flex min-h-0 flex-col overflow-hidden')}>
 							{editor ?? (
 								<div className='flex flex-1 flex-col items-center justify-center gap-2 p-10 text-center'>
 									<Icon aria-hidden className='text-muted-foreground' icon={FileText} size='xl' />

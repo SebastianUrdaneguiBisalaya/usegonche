@@ -12,6 +12,7 @@ import { Logo } from '~/components/ui/foundations/logo/logo';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Image } from '~/components/ui/media-files/image/image';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { useSession } from '../auth/api';
@@ -179,12 +180,12 @@ function Wizard({ initialCountry, initialTimezone }: { initialCountry: string | 
 						<Button.Text>{t('onboarding.back')}</Button.Text>
 					</Button>
 					{step < STEPS.length - 1 ? (
-						<Button className={`${authStyles.primary} w-auto px-6`} disabled={(step === 1 && !country) || update.isPending} loading={update.isPending} onClick={next} type='button'>
+						<Button className={cn(authStyles.primary, 'w-auto px-6')} disabled={(step === 1 && !country) || update.isPending} loading={update.isPending} onClick={next} type='button'>
 							<Button.Text className={authStyles.primaryText}>{t('onboarding.continue')}</Button.Text>
 							<Button.Icon icon={ArrowRight} />
 						</Button>
 					) : (
-						<Button className={`${authStyles.primary} w-auto px-6`} disabled={update.isPending} loading={update.isPending} onClick={finish} type='button'>
+						<Button className={cn(authStyles.primary, 'w-auto px-6')} disabled={update.isPending} loading={update.isPending} onClick={finish} type='button'>
 							<Button.Text className={authStyles.primaryText}>{t('onboarding.finish.start')}</Button.Text>
 							<Button.Icon icon={ArrowRight} />
 						</Button>

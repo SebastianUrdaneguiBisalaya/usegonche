@@ -8,6 +8,7 @@ import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { ListEmpty, ListTable } from '../../shared/list-table';
 import { listStyles } from '../../shared/styles';
@@ -159,7 +160,7 @@ export function TaskList(props: TaskListProps) {
 									size='icon'
 									variant='ghost'
 								>
-									<ChevronRight aria-hidden className={`size-4 transition-transform ${expanded.has(task.id) ? 'rotate-90' : ''}`} />
+									<ChevronRight aria-hidden className={cn('size-4 transition-transform', expanded.has(task.id) ? 'rotate-90' : '')} />
 								</Button>
 							) : (
 								<span aria-hidden className='size-7 shrink-0' />
@@ -169,7 +170,7 @@ export function TaskList(props: TaskListProps) {
 							</span>
 							<Layout.Stack className='min-w-0' gap='xs'>
 								<Layout.HStack gap='sm'>
-									<Typography.Span className={`truncate text-sm font-medium ${finished ? 'text-muted-foreground line-through' : ''}`} title={task.title}>
+									<Typography.Span className={cn('truncate text-sm font-medium', finished ? 'text-muted-foreground line-through' : '')} title={task.title}>
 										{task.title}
 									</Typography.Span>
 									{task.blocked && <BlockedTag openBlockers={task.openBlockers} />}

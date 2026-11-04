@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { addDays, Calendar, type CalendarEventMove, type CalendarEventResize, type CalendarView, isSameDay, startOfWeek } from '~/components/ui/data-display/calendar/calendar';
 import { Page } from '~/components/ui/layout/page/page';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
@@ -125,7 +126,7 @@ export default function CalendarRoute() {
 						<Calendar.DayHeader className={HEADER_HEIGHT}>
 							{(day, { isToday }) => (
 								<div className='flex w-full flex-col items-center leading-tight'>
-									<span className={`text-sm ${isToday ? 'font-semibold text-foreground' : 'text-foreground-secondary'}`}>{dayLabel.format(day)}</span>
+									<span className={cn('text-sm', isToday ? 'font-semibold text-foreground' : 'text-foreground-secondary')}>{dayLabel.format(day)}</span>
 									<span className='text-xs text-foreground-secondary'>{dayNumber.format(day)}</span>
 								</div>
 							)}

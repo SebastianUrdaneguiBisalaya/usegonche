@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Combobox } from '~/components/ui/forms-inputs/combobox/combobox';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 import { useTaskSearch, useTasksByIds } from '../../shared/task-lookup';
@@ -59,7 +60,7 @@ export function TaskFilter({ onChange, value }: TaskFilterProps) {
 
 	return (
 		<Combobox filter={false} loading={loading} onInputChange={setQuery} onValueChange={next => onChange(next ?? '')} value={value || null}>
-			<Combobox.Input aria-label={t('notes.filters.task.label')} className='min-w-28' containerClassName={`${listStyles.pillInput} w-48`} placeholder={t('notes.filters.task.all')} />
+			<Combobox.Input aria-label={t('notes.filters.task.label')} className='min-w-28' containerClassName={cn(listStyles.pillInput, 'w-48')} placeholder={t('notes.filters.task.all')} />
 			<Combobox.Content emptyMessage={t('notes.meta.tasks.empty')}>
 				{options.map(task => (
 					<Combobox.Item key={task.id} label={task.title} value={task.id}>

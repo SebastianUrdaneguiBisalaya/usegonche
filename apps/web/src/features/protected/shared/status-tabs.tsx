@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { Tabs } from '~/components/ui/data-display/tabs/tabs';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 
 export interface StatusTab<T extends string> {
 	/** Leading icon of the tab. */
@@ -28,7 +29,7 @@ export function StatusTabs<T extends string>({ ariaLabel, counts, onChange, tabs
 			<Tabs.List aria-label={ariaLabel} className='gap-2 bg-transparent p-0'>
 				{tabs.map(tab => (
 					<Tabs.Trigger
-						className={`rounded-full border px-4 py-2 ${tab.value === value ? 'border-border-strong bg-foreground/[0.06] shadow-none' : 'border-border'}`}
+						className={cn('rounded-full border px-4 py-2', tab.value === value ? 'border-border-strong bg-foreground/[0.06] shadow-none' : 'border-border')}
 						key={tab.value}
 						value={tab.value}
 					>

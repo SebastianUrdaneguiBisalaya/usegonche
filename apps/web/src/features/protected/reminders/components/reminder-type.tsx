@@ -1,6 +1,7 @@
 import { CalendarDays, FileText, ListChecks } from 'lucide-react';
 import { Pill } from '~/components/ui/data-display/pill/pill';
 import { Icon } from '~/components/ui/foundations/icon/icon';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import type { ReminderType } from '../api';
 
@@ -16,7 +17,7 @@ export function TypeIcon({ muted, type }: { muted?: boolean; type: ReminderType 
 	return (
 		<span
 			aria-hidden
-			className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${type === 'event' ? 'bg-chart-4/15 text-chart-4' : 'text-muted-foreground'} ${muted ? 'opacity-60' : ''}`}
+			className={cn('flex size-10 shrink-0 items-center justify-center rounded-xl', type === 'event' ? 'bg-chart-4/15 text-chart-4' : 'text-muted-foreground', muted ? 'opacity-60' : '')}
 		>
 			<Icon icon={icons[type]} size='md' />
 		</span>

@@ -1,4 +1,5 @@
 import { Select } from '~/components/ui/forms-inputs/select/select';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 import { RANGE_PRESETS, type RangePreset } from '../range';
@@ -16,7 +17,7 @@ export function RangeSelect({ children, className = '', label, onChange, value }
 	const t = useTranslate();
 	return (
 		<Select.Root onChange={next => onChange(next as RangePreset)} value={value}>
-			<Select.Trigger aria-label={label} className={`${listStyles.pillTrigger} !py-1.5 text-sm ${className}`}>
+			<Select.Trigger aria-label={label} className={cn(listStyles.pillTrigger, '!py-1.5 text-sm', className)}>
 				{children}
 				<Select.Value />
 			</Select.Trigger>

@@ -1,4 +1,5 @@
 import { Tag } from '~/components/ui/data-display/tag/tag';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 
 /** Black or white, whichever reads better on a `#rrggbb` background. */
 export const readableOn = (hex: string): '#000000' | '#ffffff' => {
@@ -25,5 +26,5 @@ export function TagChip({ color, name }: TagChipProps) {
 
 /** The dot next to a tag name: the chosen color, or an empty ring when the tag has none. */
 export function TagDot({ color }: { color: string | null }) {
-	return <span aria-hidden className={`size-3 shrink-0 rounded-full ${color ? '' : 'border border-border'}`} style={color ? { backgroundColor: color } : undefined} />;
+	return <span aria-hidden className={cn('size-3 shrink-0 rounded-full', color ? '' : 'border border-border')} style={color ? { backgroundColor: color } : undefined} />;
 }

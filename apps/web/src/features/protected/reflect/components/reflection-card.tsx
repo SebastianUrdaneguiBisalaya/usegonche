@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { RichTextEditor, type RichTextEditorLang } from '~/components/ui/forms-inputs/rich-text-editor/rich-text-editor';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 
@@ -42,7 +43,7 @@ export function ReflectionCard({ markdown, onChange, readOnly, status }: Reflect
 	);
 
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-4 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5')}>
 			<div className='flex items-start justify-between gap-3'>
 				<div className='flex flex-col gap-1'>
 					<span className='flex items-center gap-3 text-lg font-semibold'>
@@ -52,7 +53,7 @@ export function ReflectionCard({ markdown, onChange, readOnly, status }: Reflect
 					<Typography.Span className='text-sm text-muted-foreground'>{t('reflect.reflection.subtitle')}</Typography.Span>
 				</div>
 				{!readOnly && (
-					<span aria-live='polite' className={`flex shrink-0 items-center gap-1.5 text-xs ${status === 'error' ? 'text-destructive' : 'text-muted-foreground'}`}>
+					<span aria-live='polite' className={cn('flex shrink-0 items-center gap-1.5 text-xs', status === 'error' ? 'text-destructive' : 'text-muted-foreground')}>
 						{status === 'saving' && <Icon className='animate-spin motion-reduce:animate-none' icon={LoaderCircle} size='xs' />}
 						{status === 'saved' && <Icon className='text-success' icon={Check} size='xs' />}
 						{status === 'unsaved' && <span aria-hidden className='size-1.5 rounded-full bg-current' />}
@@ -62,7 +63,7 @@ export function ReflectionCard({ markdown, onChange, readOnly, status }: Reflect
 			</div>
 			<RichTextEditor lang={lang} markdown={markdown} onMarkdownChange={onChange} placeholder={t('reflect.reflection.placeholder')} readOnly={readOnly}>
 				{!readOnly && <RichTextEditor.Toolbar className='rounded-t-xl border border-border bg-foreground/[0.03]' />}
-				<RichTextEditor.Content className={`min-h-32 bg-foreground/[0.03] ${readOnly ? 'rounded-xl' : 'rounded-b-xl'}`} />
+				<RichTextEditor.Content className={cn('min-h-32 bg-foreground/[0.03]', readOnly ? 'rounded-xl' : 'rounded-b-xl')} />
 			</RichTextEditor>
 		</section>
 	);

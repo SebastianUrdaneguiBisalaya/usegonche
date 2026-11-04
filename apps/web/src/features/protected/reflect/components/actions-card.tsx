@@ -1,6 +1,7 @@
 import { Check, Save, Zap } from 'lucide-react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 
@@ -16,7 +17,7 @@ interface ActionsCardProps {
 export function ActionsCard({ closed, closing, onClose, onDraft, saving }: ActionsCardProps) {
 	const t = useTranslate();
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-4 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5')}>
 			<span className='flex items-center gap-3 text-base font-semibold'>
 				<Zap aria-hidden className='size-5 text-muted-foreground' />
 				{t('reflect.actions.title')}

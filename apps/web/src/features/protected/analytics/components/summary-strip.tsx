@@ -2,6 +2,7 @@ import { CalendarCheck, CircleCheck, Clock, type LucideIcon } from 'lucide-react
 import type { ReactNode } from 'react';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 import { formatMinutes } from '../../today/format';
@@ -30,7 +31,7 @@ export function SummaryStrip({ range }: { range: DateRange }) {
 	const previous = data?.previous;
 
 	return (
-		<section className={`${listStyles.card} overflow-hidden`}>
+		<section className={cn(listStyles.card, 'overflow-hidden')}>
 			<Layout.Grid className='divide-y divide-border md:divide-x md:divide-y-0' cols={{ base: 1, md: 3 }} gap='none'>
 				<Tile
 					delta={current && previous && <Delta value={percentChange(current.tasksCompleted, previous.tasksCompleted)} />}

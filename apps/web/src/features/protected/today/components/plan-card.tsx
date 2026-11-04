@@ -6,6 +6,7 @@ import { Checkbox } from '~/components/ui/forms-inputs/checkbox/checkbox';
 import { Combobox } from '~/components/ui/forms-inputs/combobox/combobox';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { ListEmpty } from '../../shared/list-table';
 import { listStyles } from '../../shared/styles';
@@ -31,7 +32,7 @@ export function PlanCard({ error, isLoading, isToday, items, onAdd, onRemove, on
 	const done = items.filter(item => item.task.status === 'done').length;
 
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-4 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5')}>
 			<div className='flex items-center justify-between gap-3'>
 				<Typography.H3 className='text-lg font-semibold'>{isToday ? t('today.plan.titleToday') : t('today.plan.title')}</Typography.H3>
 				{!isLoading && !error && <Typography.Span className='text-sm text-muted-foreground tabular-nums'>{t('today.plan.count', { done, total: items.length })}</Typography.Span>}

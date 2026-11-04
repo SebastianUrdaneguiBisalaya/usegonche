@@ -3,6 +3,7 @@ import { Button } from '~/components/ui/actions-controls/button/button';
 import { Checkbox } from '~/components/ui/forms-inputs/checkbox/checkbox';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 import type { SettableStatus } from '../api';
@@ -32,7 +33,7 @@ export function SelectionBar({ allSelected, disabled, onClear, onSetStatus, onTo
 			</Checkbox>
 			<Dropdown>
 				<Dropdown.Trigger>
-					<Button aria-label={t('inbox.actions.more')} className={`${listStyles.iconButton} border border-border`} disabled={!hasSelection} size='icon' variant='ghost'>
+					<Button aria-label={t('inbox.actions.more')} className={cn(listStyles.iconButton, 'border border-border')} disabled={!hasSelection} size='icon' variant='ghost'>
 						<Button.Icon icon={MoreHorizontal} />
 					</Button>
 				</Dropdown.Trigger>

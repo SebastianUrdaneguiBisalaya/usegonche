@@ -1,4 +1,5 @@
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 
 interface FilterChipProps {
 	active: boolean;
@@ -16,9 +17,11 @@ export function FilterChip({ active, count, hasCount = true, icon, label, onClic
 	return (
 		<button
 			aria-pressed={active}
-			className={`flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-				active ? 'border-border-strong bg-foreground/[0.06]' : 'border-border hover:bg-foreground/[0.04]'
-			} ${tone === 'danger' && active ? 'text-destructive' : ''}`}
+			className={cn(
+				'flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+				active ? 'border-border-strong bg-foreground/[0.06]' : 'border-border hover:bg-foreground/[0.04]',
+				tone === 'danger' && active ? 'text-destructive' : ''
+			)}
 			onClick={onClick}
 			type='button'
 		>
@@ -29,7 +32,7 @@ export function FilterChip({ active, count, hasCount = true, icon, label, onClic
 					<Skeleton.Item className='h-4 w-6 rounded-full' />
 				</Skeleton>
 			) : (
-				<span className={`rounded-full px-2 py-0.5 text-xs tabular-nums ${tone === 'danger' && count > 0 ? 'bg-destructive/10 text-destructive' : 'bg-muted'}`}>{count}</span>
+				<span className={cn('rounded-full px-2 py-0.5 text-xs tabular-nums', tone === 'danger' && count > 0 ? 'bg-destructive/10 text-destructive' : 'bg-muted')}>{count}</span>
 			)}
 		</button>
 	);

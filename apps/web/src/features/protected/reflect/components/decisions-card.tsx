@@ -6,6 +6,7 @@ import { Pill } from '~/components/ui/data-display/pill/pill';
 import { Checkbox } from '~/components/ui/forms-inputs/checkbox/checkbox';
 import { DatePicker } from '~/components/ui/forms-inputs/date-picker/date-picker';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
@@ -65,7 +66,7 @@ export function DecisionsCard({ review }: { review: Review }) {
 		);
 
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-4 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5')}>
 			<div className='flex flex-wrap items-start justify-between gap-3'>
 				<div className='flex flex-col gap-1'>
 					<span className='flex items-center gap-3 text-lg font-semibold'>
@@ -134,7 +135,7 @@ export function DecisionsCard({ review }: { review: Review }) {
 											{ACTIONS.map(action => (
 												<Button
 													aria-pressed={choice?.action === action}
-													className={`rounded-full px-3 py-1.5 text-xs ${choice?.action === action ? 'bg-foreground/[0.12]' : ''}`}
+													className={cn('rounded-full px-3 py-1.5 text-xs', choice?.action === action ? 'bg-foreground/[0.12]' : '')}
 													key={action}
 													onClick={() => set(row.id, action)}
 													variant='ghost'

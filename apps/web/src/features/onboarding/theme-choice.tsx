@@ -1,4 +1,5 @@
 import type { ThemePreference } from '~/components/ui/actions-controls/switch-theme/switch-theme';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 
 interface ThemeChoiceProps {
 	description: string;
@@ -26,7 +27,7 @@ function Preview({ value }: { value: ThemePreference }) {
 					<span className='w-1/2 bg-neutral-200' />
 				</>
 			) : (
-				<span className={`size-full ${value === 'dark' ? 'bg-black' : 'bg-neutral-100'}`} />
+				<span className={cn('size-full', value === 'dark' ? 'bg-black' : 'bg-neutral-100')} />
 			)}
 			{dots}
 		</span>
@@ -38,14 +39,15 @@ export function ThemeChoice({ description, label, onSelect, selected, value }: T
 	return (
 		<button
 			aria-checked={selected}
-			className={`relative flex cursor-pointer flex-col items-center gap-3 rounded-2xl border px-4 pt-8 pb-5 text-center transition-colors ${
+			className={cn(
+				'relative flex cursor-pointer flex-col items-center gap-3 rounded-2xl border px-4 pt-8 pb-5 text-center transition-colors',
 				selected ? 'border-white/60 bg-white/[0.07]' : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.05]'
-			}`}
+			)}
 			onClick={onSelect}
 			role='radio'
 			type='button'
 		>
-			<span aria-hidden className={`absolute top-3 right-3 flex size-5 items-center justify-center rounded-full border ${selected ? 'border-transparent bg-white' : 'border-white/30'}`}>
+			<span aria-hidden className={cn('absolute top-3 right-3 flex size-5 items-center justify-center rounded-full border', selected ? 'border-transparent bg-white' : 'border-white/30')}>
 				{selected && <span className='size-2 rounded-full bg-black' />}
 			</span>
 			<Preview value={value} />

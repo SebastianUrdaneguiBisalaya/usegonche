@@ -6,6 +6,7 @@ import { Pagination } from '~/components/ui/data-display/pagination/pagination';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Layout } from '~/components/ui/layout/layout/layout';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { listStyles } from './styles';
 
 interface ListEmptyProps {
@@ -75,7 +76,7 @@ export function ListTable<TData extends Record<string, any>>({
 	selection,
 }: ListTableProps<TData>) {
 	return (
-		<div className={`${listStyles.card} flex min-h-64 min-h-0 flex-1 flex-col overflow-hidden`}>
+		<div className={cn(listStyles.card, 'flex min-h-64 min-h-0 flex-1 flex-col overflow-hidden')}>
 			<DataTable
 				cellClassName={cellClassName}
 				className='min-h-0'

@@ -10,6 +10,7 @@ import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
@@ -207,7 +208,7 @@ export function RecurrenceModal({ onOpenChange, open, prefill, recurrence }: Rec
 									{field => (
 										<DatePicker.Root lang={pickerLang} locale={locale} onChange={date => field.onChange(date ? toDateOnly(date) : '')} value={fromDateOnly(field.value as string)}>
 											<DatePicker.Label>{t('recurrences.form.startDate.label')}</DatePicker.Label>
-											<DatePicker.Trigger className={`${listStyles.pillTrigger} h-auto`} placeholder={t('recurrences.form.startDate.placeholder')} />
+											<DatePicker.Trigger className={cn(listStyles.pillTrigger, 'h-auto')} placeholder={t('recurrences.form.startDate.placeholder')} />
 											<DatePicker.Content />
 										</DatePicker.Root>
 									)}

@@ -4,6 +4,7 @@ import { Form } from '~/components/ui/forms-inputs/form/form';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Layout } from '~/components/ui/layout/layout/layout';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { fromDateOnly, toDateOnly } from '../../shared/dates';
@@ -57,7 +58,7 @@ export function GoalFields({ withStatus }: { withStatus?: boolean }) {
 				{field => (
 					<DatePicker.Root lang={pickerLang} locale={locale} onChange={date => field.onChange(date ? toDateOnly(date) : '')} value={fromDateOnly(field.value as string)}>
 						<DatePicker.Label>{t('goals.form.targetDate.label')}</DatePicker.Label>
-						<DatePicker.Trigger className={`${listStyles.pillTrigger} h-auto`} placeholder={t('goals.form.targetDate.placeholder')} />
+						<DatePicker.Trigger className={cn(listStyles.pillTrigger, 'h-auto')} placeholder={t('goals.form.targetDate.placeholder')} />
 						<DatePicker.Content />
 					</DatePicker.Root>
 				)}

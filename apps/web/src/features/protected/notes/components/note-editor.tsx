@@ -6,6 +6,7 @@ import { Button } from '~/components/ui/actions-controls/button/button';
 import { RichTextEditor, type RichTextEditorLang } from '~/components/ui/forms-inputs/rich-text-editor/rich-text-editor';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { formatRelative } from '../../shared/relative-time';
@@ -150,7 +151,7 @@ function Draft({ note, onBack, onDelete, onDirtyChange, onRestored }: DraftProps
 					</Button>
 				)}
 				<div className='ml-auto flex items-center gap-1'>
-					<span aria-live='polite' className={`mr-2 flex items-center gap-1.5 text-xs ${status === 'error' ? 'text-destructive' : 'text-muted-foreground'}`}>
+					<span aria-live='polite' className={cn('mr-2 flex items-center gap-1.5 text-xs', status === 'error' ? 'text-destructive' : 'text-muted-foreground')}>
 						{status === 'saving' && <Icon className='animate-spin motion-reduce:animate-none' icon={LoaderCircle} size='xs' />}
 						{status === 'saved' && <Icon className='text-success' icon={Check} size='xs' />}
 						{status === 'unsaved' && <span aria-hidden className='size-1.5 rounded-full bg-current' />}

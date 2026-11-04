@@ -6,6 +6,7 @@ import { Countdown } from '~/components/ui/data-display/countdown/countdown';
 import { Combobox } from '~/components/ui/forms-inputs/combobox/combobox';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Typography } from '~/components/ui/foundations/typography/typography';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { listStyles } from '../../shared/styles';
@@ -86,7 +87,7 @@ export function FocusCard() {
 	const seconds = Math.floor((left % 60_000) / 1000);
 
 	return (
-		<section className={`${listStyles.card} flex flex-col gap-4 p-5`}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5')}>
 			<div className='flex items-center justify-between gap-3'>
 				<Typography.H3 className='flex items-center gap-3 text-base font-semibold'>
 					<Zap aria-hidden className='size-5 text-muted-foreground' />
@@ -94,7 +95,7 @@ export function FocusCard() {
 				</Typography.H3>
 				{!active && (
 					<Select.Root onChange={next => session.setPlannedMinutes(Number(next))} value={String(plannedMinutes)}>
-						<Select.Trigger aria-label={t('today.focus.duration')} className={`${listStyles.pillTrigger} !py-1 text-xs`}>
+						<Select.Trigger aria-label={t('today.focus.duration')} className={cn(listStyles.pillTrigger, '!py-1 text-xs')}>
 							<Select.Value />
 						</Select.Trigger>
 						<Select.Content>

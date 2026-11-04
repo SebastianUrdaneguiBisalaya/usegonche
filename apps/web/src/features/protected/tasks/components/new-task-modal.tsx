@@ -8,6 +8,7 @@ import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { fromDateOnly, toDateOnly } from '../../shared/dates';
@@ -109,7 +110,7 @@ export function NewTaskModal({ onOpenChange, open, status }: NewTaskModalProps) 
 									{field => (
 										<DatePicker.Root lang={pickerLang} locale={locale} onChange={date => field.onChange(date ? toDateOnly(date) : '')} value={fromDateOnly(field.value as string)}>
 											<DatePicker.Label>{t('tasks.form.dueDate.label')}</DatePicker.Label>
-											<DatePicker.Trigger className={`${listStyles.pillTrigger} h-auto`} placeholder={t('tasks.form.dueDate.placeholder')} />
+											<DatePicker.Trigger className={cn(listStyles.pillTrigger, 'h-auto')} placeholder={t('tasks.form.dueDate.placeholder')} />
 											<DatePicker.Content />
 										</DatePicker.Root>
 									)}

@@ -1,6 +1,7 @@
 import { Palette, X } from 'lucide-react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { ColorPicker } from '~/components/ui/data-display/color-picker/color-picker';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 
@@ -19,7 +20,7 @@ export function TagColorField({ onChange, value }: TagColorFieldProps) {
 
 	if (!value) {
 		return (
-			<Button className={`${listStyles.pillTrigger} shrink-0`} onClick={() => onChange(PICKER_START)} type='button' variant='secondary'>
+			<Button className={cn(listStyles.pillTrigger, 'shrink-0')} onClick={() => onChange(PICKER_START)} type='button' variant='secondary'>
 				<Button.Icon icon={Palette} />
 				<Button.Text className='text-xs'>{t('tags.color.set')}</Button.Text>
 			</Button>
