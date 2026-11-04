@@ -336,13 +336,7 @@ function RichTextEditorRoot({
     editorProps: {
       attributes: {
         class: cn(
-          // `pl-12` (not `px-4`) reserves a gutter for each block's hover
-          // `BlockMenu` (drag/move/duplicate/delete), which sits at `-left-8`
-          // of the block itself — without this gutter that menu pokes past
-          // this container's own left edge and gets clipped by an ancestor's
-          // `overflow-auto`/`overflow-hidden` (`RichTextEditor.Content`, a
-          // `Resizable.Panel`, …).
-          "min-h-32 py-3 pr-4 pl-12 font-primary text-sm text-foreground outline-none",
+          "min-h-32 px-4 py-3 font-primary text-sm text-foreground outline-none",
           "[&_p]:mb-2 [&_h1]:mt-4 [&_h1]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:mt-3 [&_h2]:mb-2 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1.5 [&_h3]:text-base [&_h3]:font-semibold",
           "[&_ul]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-2 [&_ol]:list-decimal [&_ol]:pl-5",
           "[&_ul[data-type=taskList]]:mb-2 [&_ul[data-type=taskList]]:list-none [&_ul[data-type=taskList]]:pl-0 [&_ul[data-type=taskList]_li]:flex [&_ul[data-type=taskList]_li]:items-start [&_ul[data-type=taskList]_li]:gap-2",
