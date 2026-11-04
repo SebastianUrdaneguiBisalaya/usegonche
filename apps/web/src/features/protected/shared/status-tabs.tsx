@@ -33,9 +33,9 @@ export function StatusTabs<T extends string>({ ariaLabel, counts, onChange, tabs
 						value={tab.value}
 					>
 						{tab.icon && <Tabs.TriggerIcon className={tab.iconClassName} icon={tab.icon} />}
-						<Tabs.TriggerTitle className='text-sm'>{tab.label}</Tabs.TriggerTitle>
+						<Tabs.TriggerTitle className='text-xs'>{tab.label}</Tabs.TriggerTitle>
 						{counts ? (
-							<span className='rounded-full bg-muted px-2 py-0.5 text-xs tabular-nums'>{counts[tab.value]}</span>
+							<span className='rounded-full bg-muted px-2 py-0.5 text-[11px] tabular-nums'>{counts[tab.value]}</span>
 						) : (
 							<Skeleton className='gap-0'>
 								<Skeleton.Item className='h-4 w-6 rounded-full' />

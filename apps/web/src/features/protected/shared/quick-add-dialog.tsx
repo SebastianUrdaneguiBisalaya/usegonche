@@ -36,7 +36,7 @@ export function QuickAddDialog({ children, label }: QuickAddDialogProps) {
 	return (
 		<Command onOpenChange={setOpen} open={open} shortcut={null}>
 			<Command.Trigger>
-				<Button aria-label={label} className='size-10 shrink-0 rounded-full p-0' size='icon' title={label}>
+				<Button aria-label={label} className='size-9 shrink-0 rounded-full p-0' size='icon' title={label}>
 					<Button.Icon icon={Plus} />
 				</Button>
 			</Command.Trigger>
