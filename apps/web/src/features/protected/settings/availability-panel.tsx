@@ -2,10 +2,11 @@ import { Plus, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
-import { Input } from '~/components/ui/forms-inputs/input/input';
+import { minutesToTime, TimePicker, type TimePickerLang, timeToMinutes, toTimeString } from '~/components/ui/forms-inputs/time-picker/time-picker';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { SettingsDialog } from '~/components/ui/overlays-feedback/settings-dialog/settings-dialog';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
@@ -43,6 +44,10 @@ export function AvailabilityPanel() {
 function AvailabilityForm({ saved }: { saved: AvailabilityWindow[] }) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
+	const timeLang = useMemo<Partial<TimePickerLang>>(
+		() => ({ apply: t('tasks.picker.apply'), clear: t('tasks.picker.clear'), hour: t('notes.reminder.picker.hour'), minute: t('notes.reminder.picker.minute') }),
+		[t]
+	);
 	const save = useSetAvailability();
 	const [drafts, setDrafts] = useState<Draft[]>(() => withKeys(saved));
 
@@ -81,25 +86,21 @@ function AvailabilityForm({ saved }: { saved: AvailabilityWindow[] }) {
 									return (
 										<div className='flex flex-col gap-1' key={window.key}>
 											<div className='flex items-center gap-2'>
-												<Input className={listStyles.field}>
-													<Input.Field
-														aria-label={t('protected.settings.availability.start', { day: dayName(weekday) })}
-														onChange={event => update(window.key, { startMinute: fromTimeValue(event.target.value) ?? window.startMinute })}
-														type='time'
-														value={toTimeValue(window.startMinute)}
-													/>
-												</Input>
+												<WindowTime
+													label={t('protected.settings.availability.start', { day: dayName(weekday) })}
+													lang={timeLang}
+													minute={window.startMinute}
+													onChange={minute => update(window.key, { startMinute: minute })}
+												/>
 												<span aria-hidden className='text-muted-foreground'>
 													–
 												</span>
-												<Input className={listStyles.field}>
-													<Input.Field
-														aria-label={t('protected.settings.availability.end', { day: dayName(weekday) })}
-														onChange={event => update(window.key, { endMinute: fromTimeValue(event.target.value) ?? window.endMinute })}
-														type='time'
-														value={toTimeValue(window.endMinute)}
-													/>
-												</Input>
+												<WindowTime
+													label={t('protected.settings.availability.end', { day: dayName(weekday) })}
+													lang={timeLang}
+													minute={window.endMinute}
+													onChange={minute => update(window.key, { endMinute: minute })}
+												/>
 												<Button
 													aria-label={t('protected.settings.availability.remove')}
 													className={listStyles.iconButton}
@@ -137,5 +138,16 @@ function AvailabilityForm({ saved }: { saved: AvailabilityWindow[] }) {
 				</Button>
 			</Layout.HStack>
 		</div>
+	);
+}
+
+/** One end of an availability window, with the app's time picker (no visible label: the row already says which day). */
+function WindowTime({ label, lang, minute, onChange }: { label: string; lang: Partial<TimePickerLang>; minute: number; onChange: (minute: number) => void }) {
+	return (
+		<TimePicker.Root className='w-36' lang={{ ...lang, picker: label }} minuteStep={5} onChange={next => next && onChange(timeToMinutes(next))} value={minutesToTime(minute)}>
+			<TimePicker.Label className='sr-only'>{label}</TimePicker.Label>
+			<TimePicker.Trigger className={cn(listStyles.pillTrigger, 'h-auto')} />
+			<TimePicker.Content />
+		</TimePicker.Root>
 	);
 }
