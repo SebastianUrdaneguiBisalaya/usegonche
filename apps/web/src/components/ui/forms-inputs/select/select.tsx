@@ -641,7 +641,7 @@ function ItemList({
 }) {
   return (
     <div
-      className={cn("flex-1 overflow-y-auto p-1 scrollbar-quiet", className)}
+      className={cn("flex-1 overflow-y-auto p-1 space-y-0.5 scrollbar-quiet", className)}
     >
       {children}
     </div>
