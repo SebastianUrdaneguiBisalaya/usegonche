@@ -74,7 +74,7 @@ export default function ProtectedLayout() {
 					</button>
 				</div>
 				<main className='flex min-h-0 flex-1 flex-col overflow-y-auto'>
-					<Page.Root className='min-h-0 flex-1 py-4 sm:py-4 lg:py-4' size='full'>
+					<Page.Root className='flex-1 py-4 sm:py-4 lg:py-4' size='full'>
 						<Outlet />
 					</Page.Root>
 				</main>
