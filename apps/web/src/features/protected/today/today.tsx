@@ -70,6 +70,7 @@ export default function TodayRoute() {
 						<CalendarDays aria-hidden className='size-4 text-muted-foreground' />
 						<span className='tabular-nums'>{label}</span>
 					</div>
+					<QuickCapture />
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
@@ -86,7 +87,6 @@ export default function TodayRoute() {
 					<MiniCalendar.Days>{d => <MiniCalendar.Day date={d} key={d.toISOString()} />}</MiniCalendar.Days>
 					<MiniCalendar.Navigation direction='next' />
 				</MiniCalendar>
-				<QuickCapture />
 				<div className='grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,18rem)]'>
 					<AgendaCard blocks={day.data?.blocks ?? []} date={date} isToday={isToday} />
 					<div className='flex flex-col gap-4'>

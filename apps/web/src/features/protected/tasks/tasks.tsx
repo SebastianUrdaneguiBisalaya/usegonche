@@ -164,6 +164,7 @@ export default function TasksRoute() {
 					<Page.Description>{t('tasks.subtitle')}</Page.Description>
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
+					{!recurring && <TaskQuickAdd projects={projectList} />}
 					<Button className={listStyles.pillTrigger} onClick={() => (recurring ? setCreatingRule(true) : setCreating('todo'))} variant='secondary'>
 						<Button.Icon icon={Plus} />
 						<Button.Text>{t(recurring ? 'recurrences.new' : 'tasks.new')}</Button.Text>
@@ -171,7 +172,6 @@ export default function TasksRoute() {
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
-				{!recurring && <TaskQuickAdd projects={projectList} />}
 				{!recurring && (
 					<div className={`${listStyles.card} flex flex-col gap-3 overflow-x-auto p-3`}>
 						<TaskChips

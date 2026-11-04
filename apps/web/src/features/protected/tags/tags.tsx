@@ -2,10 +2,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@usegonche/api-client';
 import { ArrowDownUp, Plus, Tag as TagIcon } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router';
 import { toast } from 'sonner';
-import { Button } from '~/components/ui/actions-controls/button/button';
 import { Page } from '~/components/ui/layout/page/page';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
@@ -14,6 +13,7 @@ import { OptionSelect } from '../shared/option-select';
 import { PageSelect } from '../shared/page-select';
 import { PAGE_SIZE } from '../shared/paged';
 import { QuickAdd } from '../shared/quick-add';
+import { QuickAddDialog } from '../shared/quick-add-dialog';
 import { listStyles } from '../shared/styles';
 import { useCreateTag } from '../shared/tags';
 import { type Tag, type TagsPage, tagsKey, tagsQuery, useTagList } from './api';
@@ -75,7 +75,6 @@ export default function TagsRoute() {
 	const [newColor, setNewColor] = useState('');
 	const [editing, setEditing] = useState<Tag | undefined>(undefined);
 	const [deleting, setDeleting] = useState<Tag[] | undefined>(undefined);
-	const addField = useRef<HTMLInputElement>(null);
 	const create = useCreateTag();
 	const sortOptions = useMemo(() => tagSorts.map(value => ({ label: t(`tags.sort.${value}`), value })), [t]);
 
@@ -94,29 +93,26 @@ export default function TagsRoute() {
 						placeholder={t('tags.search.placeholder')}
 						value={params.q}
 					/>
-					<Button className={listStyles.pillTrigger} onClick={() => addField.current?.focus()} variant='secondary'>
-						<Button.Icon icon={Plus} />
-						<Button.Text>{t('tags.new')}</Button.Text>
-					</Button>
+					<QuickAddDialog label={t('tags.add.label')}>
+						<QuickAdd
+							extra={<TagColorField onChange={setNewColor} value={newColor} />}
+							icon={TagIcon}
+							label={t('tags.add.label')}
+							maxLength={NAME_MAX}
+							onSubmit={async name => {
+								await create.mutateAsync({ ...(newColor && { color: newColor }), name });
+								setNewColor('');
+								toast.success(t('tags.toast.created'));
+							}}
+							pending={create.isPending}
+							placeholder={t('tags.add.placeholder')}
+							submitIcon={Plus}
+							submitLabel={t('tags.add.submit')}
+						/>
+					</QuickAddDialog>
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
-				<QuickAdd
-					extra={<TagColorField onChange={setNewColor} value={newColor} />}
-					icon={TagIcon}
-					inputRef={addField}
-					label={t('tags.add.label')}
-					maxLength={NAME_MAX}
-					onSubmit={async name => {
-						await create.mutateAsync({ ...(newColor && { color: newColor }), name });
-						setNewColor('');
-						toast.success(t('tags.toast.created'));
-					}}
-					pending={create.isPending}
-					placeholder={t('tags.add.placeholder')}
-					submitIcon={Plus}
-					submitLabel={t('tags.add.submit')}
-				/>
 				<div className='flex flex-wrap items-center justify-end gap-3'>
 					<OptionSelect icon={ArrowDownUp} label={t('tags.sort.label')} onChange={(sort: TagSort) => void setParams({ page: 1, sort })} options={sortOptions} value={params.sort} />
 					<PageSelect

@@ -6,6 +6,7 @@ import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { fromDateOnly } from '../../shared/dates';
 import { QuickAdd } from '../../shared/quick-add';
+import { QuickAddDialog } from '../../shared/quick-add-dialog';
 import { useDateTime } from '../../shared/use-datetime';
 import { useCreateTask, useDeleteTask } from '../api';
 import { priorityClass } from '../display';
@@ -30,7 +31,7 @@ export function matchProject(projects: readonly { id: string; title: string }[],
 	return containing.length === 1 ? containing[0] : undefined;
 }
 
-/** The bar that creates a task from a line like "Review contract #project !high tomorrow ~1h" and shows what it understood before it is sent. */
+/** The "+" button (and `c` key) that opens the bar that creates a task from a line like "Review contract #project !high tomorrow ~1h" and shows what it understood before it is sent. */
 export function TaskQuickAdd({ projects }: TaskQuickAddProps) {
 	const t = useTranslate();
 	const formatDay = useFormatDay();
@@ -68,45 +69,47 @@ export function TaskQuickAdd({ projects }: TaskQuickAddProps) {
 	};
 
 	return (
-		<div className='flex flex-col gap-2'>
-			<QuickAdd
-				icon={Sparkles}
-				label={t('tasks.quickAdd.label')}
-				maxLength={TITLE_MAX + 80}
-				onSubmit={submit}
-				onTextChange={setText}
-				pending={create.isPending}
-				placeholder={t('tasks.quickAdd.placeholder')}
-				submitLabel={t('tasks.quickAdd.submit')}
-			/>
-			{understood && (
-				<div aria-live='polite' className='flex flex-wrap items-center gap-2 px-2'>
-					<span className='text-xs text-muted-foreground'>{t('tasks.quickAdd.understood')}</span>
-					{parsed.projectName && (
-						<Pill variant={project ? 'outline' : 'warning'}>
-							<FolderKanban aria-hidden className='size-3' />
-							<Pill.Text>{project ? project.title : t('tasks.quickAdd.projectNotFound', { name: parsed.projectName })}</Pill.Text>
-						</Pill>
-					)}
-					{parsed.priority && (
-						<Pill className={priorityClass[parsed.priority]}>
-							<Pill.Text>{t(`tasks.priority.${parsed.priority}`)}</Pill.Text>
-						</Pill>
-					)}
-					{parsed.dueDate && (
-						<Pill variant='outline'>
-							<CalendarDays aria-hidden className='size-3' />
-							<Pill.Text>{formatDay(parsed.dueDate)}</Pill.Text>
-						</Pill>
-					)}
-					{parsed.estimatedMinutes && (
-						<Pill variant='outline'>
-							<Clock aria-hidden className='size-3' />
-							<Pill.Text>{t('tasks.quickAdd.estimate', { minutes: parsed.estimatedMinutes })}</Pill.Text>
-						</Pill>
-					)}
-				</div>
-			)}
-		</div>
+		<QuickAddDialog label={t('tasks.quickAdd.label')}>
+			<div className='flex flex-col gap-2'>
+				<QuickAdd
+					icon={Sparkles}
+					label={t('tasks.quickAdd.label')}
+					maxLength={TITLE_MAX + 80}
+					onSubmit={submit}
+					onTextChange={setText}
+					pending={create.isPending}
+					placeholder={t('tasks.quickAdd.placeholder')}
+					submitLabel={t('tasks.quickAdd.submit')}
+				/>
+				{understood && (
+					<div aria-live='polite' className='flex flex-wrap items-center gap-2 px-2'>
+						<span className='text-xs text-muted-foreground'>{t('tasks.quickAdd.understood')}</span>
+						{parsed.projectName && (
+							<Pill variant={project ? 'outline' : 'warning'}>
+								<FolderKanban aria-hidden className='size-3' />
+								<Pill.Text>{project ? project.title : t('tasks.quickAdd.projectNotFound', { name: parsed.projectName })}</Pill.Text>
+							</Pill>
+						)}
+						{parsed.priority && (
+							<Pill className={priorityClass[parsed.priority]}>
+								<Pill.Text>{t(`tasks.priority.${parsed.priority}`)}</Pill.Text>
+							</Pill>
+						)}
+						{parsed.dueDate && (
+							<Pill variant='outline'>
+								<CalendarDays aria-hidden className='size-3' />
+								<Pill.Text>{formatDay(parsed.dueDate)}</Pill.Text>
+							</Pill>
+						)}
+						{parsed.estimatedMinutes && (
+							<Pill variant='outline'>
+								<Clock aria-hidden className='size-3' />
+								<Pill.Text>{t('tasks.quickAdd.estimate', { minutes: parsed.estimatedMinutes })}</Pill.Text>
+							</Pill>
+						)}
+					</div>
+				)}
+			</div>
+		</QuickAddDialog>
 	);
 }

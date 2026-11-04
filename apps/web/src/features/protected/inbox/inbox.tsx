@@ -115,10 +115,10 @@ export default function InboxPage() {
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
 					<RangeSelect onChange={range => void setParams({ page: 1, range })} value={params.range} />
+					<QuickCapture />
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-5'>
-				<QuickCapture />
 				<BrainDump />
 				<div className='flex min-h-0 flex-1 flex-col gap-4'>
 					<div className='flex flex-wrap items-center justify-between gap-3'>
