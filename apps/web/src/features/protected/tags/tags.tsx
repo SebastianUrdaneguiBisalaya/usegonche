@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@usegonche/api-client';
 import { ArrowDownUp, Plus, Tag as TagIcon } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
@@ -80,7 +80,7 @@ export default function TagsRoute() {
 	const sortOptions = useMemo(() => tagSorts.map(value => ({ label: t(`tags.sort.${value}`), value })), [t]);
 
 	return (
-		<Page.Root className='min-h-0 flex-1' size='full'>
+		<Fragment>
 			<Page.Header>
 				<div>
 					<Page.Title>{t('tags.title')}</Page.Title>
@@ -146,6 +146,6 @@ export default function TagsRoute() {
 			</Page.Body>
 			<EditTagModal onClose={() => setEditing(undefined)} tag={editing} />
 			<DeleteTagsDialog onClose={() => setDeleting(undefined)} onDeleted={() => setSelectedIds(emptyIds)} tags={deleting} />
-		</Page.Root>
+		</Fragment>
 	);
 }

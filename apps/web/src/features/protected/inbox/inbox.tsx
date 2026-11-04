@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@usegonche/api-client';
 import { useQueryStates } from 'nuqs';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router';
 import { toast } from 'sonner';
 import { Page } from '~/components/ui/layout/page/page';
@@ -107,7 +107,7 @@ export default function InboxPage() {
 	const selectable = params.status !== 'converted';
 
 	return (
-		<Page.Root className='min-h-0 flex-1' size='full'>
+		<Fragment>
 			<Page.Header>
 				<div>
 					<Page.Title>{t('inbox.title')}</Page.Title>
@@ -169,6 +169,6 @@ export default function InboxPage() {
 					/>
 				</div>
 			</Page.Body>
-		</Page.Root>
+		</Fragment>
 	);
 }

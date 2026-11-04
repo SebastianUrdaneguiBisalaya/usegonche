@@ -1,6 +1,6 @@
 import { Bell, Check } from 'lucide-react';
 import { parseAsString, parseAsStringLiteral, useQueryState } from 'nuqs';
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
@@ -65,7 +65,7 @@ export default function RemindersRoute() {
 		});
 
 	return (
-		<Page.Root className='min-h-0 flex-1' size='full'>
+		<Fragment>
 			<Page.Header>
 				<div>
 					<Page.Title>{t('reminders.title')}</Page.Title>
@@ -147,6 +147,6 @@ export default function RemindersRoute() {
 					{opened && <ReminderDetail info={targets.get(targetId(opened))} key={opened.id} onClose={() => void setOpenId(null)} reminder={opened} />}
 				</div>
 			</Page.Body>
-		</Page.Root>
+		</Fragment>
 	);
 }

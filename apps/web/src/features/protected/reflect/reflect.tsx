@@ -1,5 +1,5 @@
 import { parseAsString, parseAsStringLiteral, useQueryState } from 'nuqs';
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { ToggleGroup } from '~/components/ui/actions-controls/toggle-group/toggle-group';
@@ -108,7 +108,7 @@ export default function ReflectRoute() {
 	const review = useReview(kind as ReviewKind, date);
 
 	return (
-		<Page.Root className='min-h-0 flex-1' size='full'>
+		<Fragment>
 			<Page.Header>
 				<div>
 					<Page.Title>{t('reflect.title')}</Page.Title>
@@ -145,6 +145,6 @@ export default function ReflectRoute() {
 					<Workspace key={review.data.id} review={review.data} />
 				)}
 			</Page.Body>
-		</Page.Root>
+		</Fragment>
 	);
 }

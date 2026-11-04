@@ -1,6 +1,6 @@
 import { CalendarDays } from 'lucide-react';
 import { parseAsString, useQueryState } from 'nuqs';
-import { useMemo } from 'react';
+import { useMemo, Fragment } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { MiniCalendar } from '~/components/ui/data-display/mini-calendar/mini-calendar';
@@ -54,22 +54,22 @@ export default function TodayRoute() {
 	const label = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', weekday: 'short', year: 'numeric' }).format(selected);
 
 	return (
-		<Page.Root className='min-h-0 flex-1' size='full'>
+		<Fragment>
 			<Page.Header>
 				<div>
 					<Page.Title>{t('today.title')}</Page.Title>
 					<Page.Description>{t('today.subtitle')}</Page.Description>
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
-					<div className={`${listStyles.pillTrigger} flex items-center gap-2 text-sm`}>
-						<CalendarDays aria-hidden className='size-4 text-muted-foreground' />
-						<span className='tabular-nums'>{label}</span>
-					</div>
 					{!isToday && (
 						<Button className={listStyles.pillTrigger} onClick={() => void setParam(null)} variant='secondary'>
 							<Button.Text>{t('today.backToToday')}</Button.Text>
 						</Button>
 					)}
+					<div className={`${listStyles.pillTrigger} flex items-center gap-2 text-sm`}>
+						<CalendarDays aria-hidden className='size-4 text-muted-foreground' />
+						<span className='tabular-nums'>{label}</span>
+					</div>
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
@@ -111,6 +111,6 @@ export default function TodayRoute() {
 					</div>
 				</div>
 			</Page.Body>
-		</Page.Root>
+		</Fragment>
 	);
 }

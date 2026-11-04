@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@usegonche/api-client';
 import { ArrowDownUp, CalendarClock, Plus } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
@@ -151,7 +151,7 @@ export default function GoalsRoute() {
 	const dueOptions = useMemo(() => goalDues.map(value => ({ label: t(`goals.filters.due.${value}`), value })), [t]);
 
 	return (
-		<Page.Root className='min-h-0 flex-1' size='full'>
+		<Fragment>
 			<Page.Header>
 				<div>
 					<Page.Title>{t('goals.title')}</Page.Title>
@@ -202,6 +202,6 @@ export default function GoalsRoute() {
 			</Page.Body>
 			<NewGoalModal onOpenChange={setCreating} open={creating} />
 			<GoalDrawer goal={opened} onChange={setOpened} onClose={() => setOpened(undefined)} />
-		</Page.Root>
+		</Fragment>
 	);
 }

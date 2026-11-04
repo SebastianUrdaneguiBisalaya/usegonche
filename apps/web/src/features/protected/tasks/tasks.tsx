@@ -2,7 +2,7 @@ import { useQueries } from '@tanstack/react-query';
 import { useHotkeys } from '@usehotkeys/react';
 import { ArrowDownUp, KanbanSquare, Layers, List, Plus, Repeat, Trash2 } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Tabs } from '~/components/ui/data-display/tabs/tabs';
@@ -157,7 +157,7 @@ export default function TasksRoute() {
 	const rowsLoading = active.isPending || (active.isPlaceholderData && active.isFetching && (active.data?.data.length ?? 0) === 0);
 
 	return (
-		<Page.Root className='min-h-0 flex-1' size='full'>
+		<Fragment>
 			<Page.Header>
 				<div>
 					<Page.Title>{t('tasks.title')}</Page.Title>
@@ -301,6 +301,6 @@ export default function TasksRoute() {
 					</ConfirmDialog.Footer>
 				</ConfirmDialog.Content>
 			</ConfirmDialog.Root>
-		</Page.Root>
+		</Fragment>
 	);
 }

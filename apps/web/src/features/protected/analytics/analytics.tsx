@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { CalendarDays } from 'lucide-react';
 import { parseAsStringLiteral, useQueryState } from 'nuqs';
 import { Layout } from '~/components/ui/layout/layout/layout';
@@ -21,7 +22,7 @@ export default function AnalyticsRoute() {
 	const range = rangeOf(param, today);
 
 	return (
-		<Page.Root className='min-h-0 flex-1' size='full'>
+		<Fragment>
 			<Page.Header>
 				<div>
 					<Page.Title>{t('analytics.title')}</Page.Title>
@@ -45,6 +46,6 @@ export default function AnalyticsRoute() {
 					<InsightsCard range={range} />
 				</Layout.Grid>
 			</Page.Body>
-		</Page.Root>
+		</Fragment>
 	);
 }

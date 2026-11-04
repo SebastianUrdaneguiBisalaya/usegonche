@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@usegonche/api-client';
 import { ArrowDownUp, Plus } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
@@ -162,7 +162,7 @@ export default function ProjectsRoute() {
 	);
 
 	return (
-		<Page.Root className='min-h-0 flex-1' size='full'>
+		<Fragment>
 			<Page.Header>
 				<div>
 					<Page.Title>{t('projects.title')}</Page.Title>
@@ -219,6 +219,6 @@ export default function ProjectsRoute() {
 			</Page.Body>
 			<NewProjectModal onOpenChange={setCreating} open={creating} />
 			<ProjectDrawer onChange={setOpened} onClose={() => setOpened(undefined)} project={opened} />
-		</Page.Root>
+		</Fragment>
 	);
 }

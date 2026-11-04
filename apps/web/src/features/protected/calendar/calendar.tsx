@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react';
 import { parseAsString, parseAsStringLiteral, useQueryStates } from 'nuqs';
-import { type MouseEvent, useEffect, useMemo, useState } from 'react';
+import { Fragment, type MouseEvent, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { addDays, Calendar, type CalendarEventMove, type CalendarEventResize, type CalendarView, isSameDay, startOfWeek } from '~/components/ui/data-display/calendar/calendar';
@@ -74,7 +74,7 @@ export default function CalendarRoute() {
 	const dayNumber = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' });
 
 	return (
-		<Page.Root className='min-h-0 flex-1' size='full'>
+		<Fragment>
 			<Page.Header>
 				<div>
 					<Page.Title>{t('calendar.title')}</Page.Title>
@@ -179,6 +179,6 @@ export default function CalendarRoute() {
 				state={modal}
 			/>
 			<DeleteEventDialog event={deleting} onClose={() => setDeleting(undefined)} />
-		</Page.Root>
+		</Fragment>
 	);
 }

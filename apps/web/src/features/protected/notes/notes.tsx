@@ -1,7 +1,7 @@
 import { useHotkeys } from '@usehotkeys/react';
 import { FileText, LayoutGrid, List, Plus, Trash2 } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
-import { useCallback, useMemo, useState } from 'react';
+import { Fragment, useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Icon } from '~/components/ui/foundations/icon/icon';
@@ -109,7 +109,7 @@ export default function NotesRoute() {
 	) : null;
 
 	return (
-		<Page.Root className='min-h-0 flex-1' size='full'>
+		<Fragment>
 			<Page.Header>
 				<div>
 					<Page.Title>{t('notes.title')}</Page.Title>
@@ -250,6 +250,6 @@ export default function NotesRoute() {
 					</ConfirmDialog.Footer>
 				</ConfirmDialog.Content>
 			</ConfirmDialog.Root>
-		</Page.Root>
+		</Fragment>
 	);
 }
