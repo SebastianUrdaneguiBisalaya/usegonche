@@ -13,8 +13,6 @@ import { noteIcon } from '../display';
 const TAGS_SHOWN = 2;
 
 interface NoteCardProps {
-	/** `list` is a row of the list next to the editor; `grid` is a taller card of the grid. */
-	layout: 'grid' | 'list';
 	note: NoteSummary;
 	onCopyLink: (note: NoteSummary) => void;
 	onDelete: (note: NoteSummary) => void;
@@ -24,10 +22,9 @@ interface NoteCardProps {
 }
 
 /** One note of the list: icon, title, the start of its text, its tags, project and last edit. The whole card opens the note; the menu has the rest. */
-export function NoteCard({ layout, note, onCopyLink, onDelete, onOpen, projectTitle, selected }: NoteCardProps) {
+export function NoteCard({ note, onCopyLink, onDelete, onOpen, projectTitle, selected }: NoteCardProps) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
-	const grid = layout === 'grid';
 	const hidden = note.tags.length - TAGS_SHOWN;
 
 	return (
@@ -35,8 +32,8 @@ export function NoteCard({ layout, note, onCopyLink, onDelete, onOpen, projectTi
 			aria-current={selected ? 'true' : undefined}
 			className={cn(
 				'group relative flex gap-4 rounded-2xl border p-4 transition-colors',
-				selected ? 'border-border-strong bg-foreground/[0.08] shadow-sm' : 'border-border bg-foreground/[0.03] hover:bg-foreground/[0.05]',
-				grid ? 'min-h-40 flex-col' : 'items-start'
+				'items-start',
+				selected ? 'border-border-strong bg-foreground/[0.08] shadow-sm' : 'border-border bg-foreground/[0.03] hover:bg-foreground/[0.05]'
 			)}
 		>
 			<span aria-hidden className='flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-foreground/[0.06] text-muted-foreground'>
@@ -50,7 +47,7 @@ export function NoteCard({ layout, note, onCopyLink, onDelete, onOpen, projectTi
 				>
 					{note.title}
 				</button>
-				<p className={cn('text-sm text-muted-foreground', grid ? 'line-clamp-3' : 'truncate')}>{note.excerpt || t('notes.card.noExcerpt')}</p>
+				<p className='truncate text-sm text-muted-foreground'>{note.excerpt || t('notes.card.noExcerpt')}</p>
 				<div className='mt-1 flex flex-wrap items-center gap-2'>
 					{note.tags.slice(0, TAGS_SHOWN).map(tag => (
 						<TagChip color={tag.color} key={tag.id} name={tag.name} />

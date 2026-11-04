@@ -1106,11 +1106,6 @@
     "title": "Notes",
     "subtitle": "Capture ideas, write and keep your thoughts.",
     "new": "New note",
-    "views": {
-      "label": "View",
-      "list": "List",
-      "grid": "Grid"
-    },
     "filters": {
       "all": "All",
       "project": {

@@ -1106,11 +1106,6 @@
     "title": "Notas",
     "subtitle": "Captura ideas, escribe y guarda tus pensamientos.",
     "new": "Nueva nota",
-    "views": {
-      "label": "Vista",
-      "list": "Lista",
-      "grid": "Cuadrícula"
-    },
     "filters": {
       "all": "Todas",
       "project": {
