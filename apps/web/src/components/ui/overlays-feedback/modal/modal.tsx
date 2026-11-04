@@ -255,10 +255,10 @@ export function useFocusTrap(
       const last = elements[elements.length - 1];
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
-        last.focus();
+        last?.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
         event.preventDefault();
-        first.focus();
+        first?.focus();
       }
     }
 
@@ -323,7 +323,7 @@ function Content({
         aria-labelledby={ariaLabelledBy}
         aria-modal="true"
         className={cn(
-          "relative z-50 w-full max-w-lg rounded-lg border border-border bg-background p-6 text-foreground shadow-lg",
+          "relative z-50 flex max-h-[85dvh] w-full max-w-lg flex-col overflow-y-auto rounded-lg border border-border bg-background p-6 text-foreground shadow-lg",
           "transition-all duration-300",
           animate
             ? "translate-y-0 scale-100 opacity-100 ease-out"
@@ -345,17 +345,20 @@ function Content({
 function Header({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("flex flex-col space-y-1.5", className)}
+      className={cn("flex shrink-0 flex-col space-y-1.5", className)}
       {...props}
     />
   );
 }
 
-/** Main scrollable content area between `Header` and `Footer`. */
+/**
+ * Main content area between `Header` and `Footer`. Scrolls on its own once the dialog reaches its max height,
+ * keeping `Header` and `Footer` pinned.
+ */
 function Body({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("py-4", className)}
+      className={cn("min-h-0 flex-1 overflow-y-auto py-4", className)}
       {...props}
     />
   );
@@ -365,7 +368,7 @@ function Body({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 function Footer({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("flex items-center justify-end gap-2", className)}
+      className={cn("flex shrink-0 items-center justify-end gap-2", className)}
       {...props}
     />
   );
