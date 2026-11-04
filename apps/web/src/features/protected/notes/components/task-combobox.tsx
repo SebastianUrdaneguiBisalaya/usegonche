@@ -60,7 +60,12 @@ export function TaskFilter({ onChange, value }: TaskFilterProps) {
 
 	return (
 		<Combobox filter={false} loading={loading} onInputChange={setQuery} onValueChange={next => onChange(next ?? '')} value={value || null}>
-			<Combobox.Input aria-label={t('notes.filters.task.label')} className='min-w-28' containerClassName={cn(listStyles.pillInput, 'w-48')} placeholder={t('notes.filters.task.all')} />
+			<Combobox.Input
+				aria-label={t('notes.filters.task.label')}
+				className='min-w-0'
+				containerClassName={cn(listStyles.pillInput, 'min-h-[2.625rem] w-full px-4')}
+				placeholder={t('notes.filters.task.all')}
+			/>
 			<Combobox.Content emptyMessage={t('notes.meta.tasks.empty')}>
 				{options.map(task => (
 					<Combobox.Item key={task.id} label={task.title} value={task.id}>

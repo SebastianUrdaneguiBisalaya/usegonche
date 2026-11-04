@@ -1,5 +1,5 @@
 import { useHotkeys } from '@usehotkeys/react';
-import { FileText, LayoutGrid, List, Plus, Trash2 } from 'lucide-react';
+import { FileText, Plus, Trash2 } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
 import { Fragment, useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -23,9 +23,7 @@ import { NoteEditor } from './components/note-editor';
 import { NoteFilters } from './components/note-filters';
 import { NoteList } from './components/note-list';
 import { filterNotes } from './filter';
-import { type NoteView, noteParsers, noteViews } from './search-params';
-
-const viewIcons = { grid: LayoutGrid, list: List } as const;
+import { noteParsers } from './search-params';
 
 interface Target {
 	id: string;
@@ -37,7 +35,7 @@ export default function NotesRoute() {
 	const [params, setParams] = useQueryStates(noteParsers, { clearOnDefault: true });
 	const page = Math.max(1, params.page);
 	const wide = useMediaQuery('(min-width: 1024px)', true);
-	const inline = wide && params.view === 'list';
+	const inline = wide;
 	const filtered = params.project !== '' || params.tag !== '' || params.task !== '';
 
 	const list = useNotes({ page, project: params.project, tag: params.tag, task: params.task });
@@ -89,7 +87,6 @@ export default function NotesRoute() {
 			error={list.isError}
 			filtered={filtered || params.q !== ''}
 			isLoading={isLoading}
-			layout={params.view}
 			notes={visible}
 			onCopyLink={note => void copyLink(note.id)}
 			onDelete={note => setDeleting({ id: note.id, title: note.title })}
@@ -124,47 +121,29 @@ export default function NotesRoute() {
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
-				<div className='flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4'>
-					<div className='flex flex-1 flex-wrap items-center gap-3'>
-						<ListSearch
-							clearLabel={t('notes.search.clear')}
-							label={t('notes.search.label')}
-							onChange={q => void setParams({ q })}
-							placeholder={t('notes.search.placeholder')}
-							value={params.q}
-						/>
-						<NoteFilters
-							count={list.data?.meta.total}
-							filtered={filtered}
-							onClear={clearFilters}
-							onProjectChange={project => void setParams({ page: 1, project })}
-							onTagChange={tag => void setParams({ page: 1, tag })}
-							onTaskChange={task => void setParams({ page: 1, task })}
-							project={params.project}
-							projects={projectOptions}
-							tag={params.tag}
-							tags={tagOptions}
-							task={params.task}
-						/>
-					</div>
-					<div aria-label={t('notes.views.label')} className='flex items-center gap-1 rounded-full border border-border bg-foreground/[0.03] p-1' role='group'>
-						{noteViews.map((view: NoteView) => (
-							<button
-								aria-label={t(`notes.views.${view}`)}
-								aria-pressed={params.view === view}
-								className={cn(
-									'flex size-9 cursor-pointer items-center justify-center rounded-full transition-colors',
-									params.view === view ? 'bg-foreground/[0.1] text-foreground' : 'text-muted-foreground hover:text-foreground'
-								)}
-								key={view}
-								onClick={() => void setParams({ view })}
-								title={t(`notes.views.${view}`)}
-								type='button'
-							>
-								<Icon aria-hidden icon={viewIcons[view]} size='md' />
-							</button>
-						))}
-					</div>
+				<div className={cn(listStyles.card, 'flex flex-col gap-3 p-3 lg:flex-row lg:items-stretch lg:justify-between')}>
+					<ListSearch
+						className='h-full sm:w-full lg:w-72 lg:shrink-0'
+						clearLabel={t('notes.search.clear')}
+						label={t('notes.search.label')}
+						onChange={q => void setParams({ q })}
+						placeholder={t('notes.search.placeholder')}
+						value={params.q}
+					/>
+					<span aria-hidden className='hidden h-6 w-px shrink-0 self-center bg-border lg:block' />
+					<NoteFilters
+						count={list.data?.meta.total}
+						filtered={filtered}
+						onClear={clearFilters}
+						onProjectChange={project => void setParams({ page: 1, project })}
+						onTagChange={tag => void setParams({ page: 1, tag })}
+						onTaskChange={task => void setParams({ page: 1, task })}
+						project={params.project}
+						projects={projectOptions}
+						tag={params.tag}
+						tags={tagOptions}
+						task={params.task}
+					/>
 				</div>
 				{inline ? (
 					<div className='grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(20rem,26rem)_minmax(0,1fr)]'>

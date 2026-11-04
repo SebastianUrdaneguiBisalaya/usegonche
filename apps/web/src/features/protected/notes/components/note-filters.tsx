@@ -4,6 +4,9 @@ import { FilterChip } from '../../shared/filter-chip';
 import { IdSelect } from '../../shared/id-select';
 import { TaskFilter } from './task-combobox';
 
+/** A filter's slot: it grows to share the line, never below a readable width or above a calm one. */
+const FIELD = 'min-w-0 flex-1 basis-40 lg:max-w-56';
+
 interface Option {
 	id: string;
 	name: string;
@@ -28,20 +31,27 @@ interface NoteFiltersProps {
 export function NoteFilters({ count, filtered, onClear, onProjectChange, onTagChange, onTaskChange, project, projects, tag, tags, task }: NoteFiltersProps) {
 	const t = useTranslate();
 
+	// One row from `lg` up (search | All, Project, Tag, Task); below it the filters wrap, two or three per line.
 	return (
-		<div className='flex flex-wrap items-center gap-3'>
-			<FilterChip active={!filtered} count={count} hasCount={!filtered} label={t('notes.filters.all')} onClick={onClear} />
-			<IdSelect
-				allLabel={t('notes.filters.project.all')}
-				className='min-w-36'
-				icon={FolderKanban}
-				label={t('notes.filters.project.label')}
-				onChange={onProjectChange}
-				options={projects}
-				value={project}
-			/>
-			<IdSelect allLabel={t('notes.filters.tag.all')} className='min-w-36' icon={Tag} label={t('notes.filters.tag.label')} onChange={onTagChange} options={tags} value={tag} />
-			<TaskFilter onChange={onTaskChange} value={task} />
+		<div className='flex min-w-0 flex-1 flex-wrap items-center gap-3 lg:flex-nowrap lg:justify-between'>
+			<FilterChip active={!filtered} className='h-[2.625rem] shrink-0 rounded-xl' count={count} hasCount={!filtered} label={t('notes.filters.all')} onClick={onClear} />
+			<div className={FIELD}>
+				<IdSelect
+					allLabel={t('notes.filters.project.all')}
+					className='min-w-0'
+					icon={FolderKanban}
+					label={t('notes.filters.project.label')}
+					onChange={onProjectChange}
+					options={projects}
+					value={project}
+				/>
+			</div>
+			<div className={FIELD}>
+				<IdSelect allLabel={t('notes.filters.tag.all')} className='min-w-0' icon={Tag} label={t('notes.filters.tag.label')} onChange={onTagChange} options={tags} value={tag} />
+			</div>
+			<div className={FIELD}>
+				<TaskFilter onChange={onTaskChange} value={task} />
+			</div>
 		</div>
 	);
 }
