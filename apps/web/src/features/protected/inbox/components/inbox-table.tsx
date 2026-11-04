@@ -87,13 +87,13 @@ export function InboxTable({
 						</Layout.HStack>
 					);
 				},
-				header: t('inbox.title'),
+				header: t('inbox.columns.content'),
 				id: 'content',
 				size: 420,
 			},
 			{
 				cell: ({ row }) => <Typography.Span className='whitespace-nowrap text-xs text-muted-foreground'>{formatRelative(row.original.at, locale)}</Typography.Span>,
-				header: '',
+				header: t('inbox.columns.time'),
 				id: 'time',
 				size: 100,
 			},
@@ -157,7 +157,7 @@ export function InboxTable({
 						</Layout.HStack>
 					);
 				},
-				header: '',
+				header: () => <span className='sr-only'>{t('inbox.columns.actions')}</span>,
 				id: 'actions',
 				size: 160,
 			},
@@ -187,7 +187,6 @@ export function InboxTable({
 			containerClassName={listStyles.card}
 			data={rows}
 			emptyState={empty}
-			hideHeader
 			isLoading={isLoading}
 			pagination={{ onPageChange, page, pageCount, pageSize, total }}
 			rowClassName='border-border/60'

@@ -307,6 +307,11 @@
       "converted": "Converted",
       "label": "Inbox status"
     },
+    "columns": {
+      "actions": "Actions",
+      "content": "Item",
+      "time": "Captured"
+    },
     "source": {
       "quick": "quick",
       "braindump": "braindump"

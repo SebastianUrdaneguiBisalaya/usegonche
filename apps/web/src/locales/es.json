@@ -307,6 +307,11 @@
       "converted": "Convertidos",
       "label": "Estado de la bandeja"
     },
+    "columns": {
+      "actions": "Acciones",
+      "content": "Elemento",
+      "time": "Capturado"
+    },
     "source": {
       "quick": "rápida",
       "braindump": "braindump"
