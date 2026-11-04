@@ -23,7 +23,7 @@ export interface IdSelectProps {
 export function IdSelect({ allLabel, className = 'min-w-40', extra, icon, label, onChange, options, value }: IdSelectProps) {
 	return (
 		<Select.Root onChange={next => onChange(next === ALL ? '' : next)} value={value || ALL}>
-			<Select.Trigger aria-label={label} className={cn(listStyles.pillTrigger, className)}>
+			<Select.Trigger aria-label={label} className={cn(listStyles.pillTrigger, 'h-auto', className)}>
 				<span className='flex min-w-0 items-center gap-2'>
 					<Icon aria-hidden className='text-muted-foreground' icon={icon} size='sm' />
 					<Select.Value />
