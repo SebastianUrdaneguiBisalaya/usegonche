@@ -122,7 +122,7 @@ export default function CalendarRoute() {
 							<Calendar.Description className='px-2 text-base font-medium text-foreground' />
 						</Calendar.Toolbar>
 					</Calendar.Header>
-					<Calendar.Grid aria-busy={events.isPending}>
+					<Calendar.Grid aria-busy={events.isPending} className={listStyles.card}>
 						<Calendar.DayHeader className={HEADER_HEIGHT}>
 							{(day, { isToday }) => (
 								<div className='flex w-full flex-col items-center leading-tight'>
