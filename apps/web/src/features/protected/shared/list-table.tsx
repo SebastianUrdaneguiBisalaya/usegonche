@@ -3,9 +3,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { DataTable, type DataTableFeatures, type TablePagination, type TableSelection } from '~/components/ui/data-display/data-table/data-table';
 import { Pagination } from '~/components/ui/data-display/pagination/pagination';
-import { Icon } from '~/components/ui/foundations/icon/icon';
-import { Typography } from '~/components/ui/foundations/typography/typography';
-import { Layout } from '~/components/ui/layout/layout/layout';
+import { ApplicationState } from '~/components/ui/overlays-feedback/application-state/application-state';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { listStyles } from './styles';
 
@@ -20,25 +18,22 @@ interface ListEmptyProps {
 	title?: string;
 }
 
-/** What a list shows when it has no rows: the retry action after an error, or an icon with a title and a hint. */
+/** What a list shows when it has no rows: the retry action after an error, or an icon with a title and a hint. Built on `ApplicationState`. */
 export function ListEmpty({ description, error, errorTitle, icon, onRetry, retryLabel, title }: ListEmptyProps) {
 	if (error) {
 		return (
-			<Layout.Stack align='center' className='px-4 py-16 text-center' gap='sm'>
-				<Typography.Span className='text-sm text-muted-foreground'>{errorTitle}</Typography.Span>
-				<Button onClick={onRetry} variant='secondary'>
-					<Button.Text>{retryLabel}</Button.Text>
-				</Button>
-			</Layout.Stack>
+			<ApplicationState.ErrorState
+				actions={
+					<Button onClick={onRetry} variant='secondary'>
+						<Button.Text>{retryLabel}</Button.Text>
+					</Button>
+				}
+				description={null}
+				title={errorTitle}
+			/>
 		);
 	}
-	return (
-		<Layout.Stack align='center' className='px-4 py-16 text-center' gap='sm'>
-			<Icon aria-hidden className='text-muted-foreground' icon={icon} size='xl' />
-			{title && <Typography.Span className='text-sm font-medium'>{title}</Typography.Span>}
-			{description && <Typography.Span className={title ? 'text-xs text-muted-foreground' : 'text-sm text-muted-foreground'}>{description}</Typography.Span>}
-		</Layout.Stack>
-	);
+	return <ApplicationState.EmptyState description={description} icon={icon} title={title} />;
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: same bound as `DataTable`, which interface-typed rows satisfy

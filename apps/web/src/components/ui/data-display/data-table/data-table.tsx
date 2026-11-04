@@ -55,7 +55,7 @@ export interface DataTableProps<TData extends Record<string, any>> {
   readonly emptyMessage?: string;
   /** Custom content shown when `data` is empty, instead of `emptyMessage`. */
   readonly emptyState?: React.ReactNode;
-  /** Hides the column header row (a list-style table whose columns need no titles). The select-all checkbox lives in the header, so own it elsewhere when hiding it. */
+  /** Hides the column header row (a list-style table whose columns need no titles). It is always hidden while the table is empty, so only the empty state shows. The select-all checkbox lives in the header, so own it elsewhere when hiding it. */
   readonly hideHeader?: boolean;
   /** Extra classes on every body row (e.g. to change its hover tint or border). */
   readonly rowClassName?: string;
@@ -207,16 +207,18 @@ export function DataTable<TData extends Record<string, any>>({
       <div
         className={cn(
           "w-full min-h-0 flex-1 overflow-auto rounded-xl border border-border bg-background",
+          // Nothing to scroll: the empty state takes the whole width, however wide the columns are.
+          isEmpty && "overflow-x-hidden",
           containerClassName,
         )}
       >
         <table
           className={cn("w-full text-sm", isEmpty && "h-full")}
           style={{
-            minWidth: table.getTotalSize(),
+            minWidth: isEmpty ? undefined : table.getTotalSize(),
           }}
         >
-          <thead className={hideHeader ? "sr-only" : undefined}>
+          <thead className={hideHeader || isEmpty ? "sr-only" : undefined}>
             {table.getHeaderGroups().map((hg) => (
               <tr
                 // `bg-background` (opaque), not `bg-muted` — `--muted` is a
