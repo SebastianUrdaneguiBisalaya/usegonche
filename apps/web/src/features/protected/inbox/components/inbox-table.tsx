@@ -184,7 +184,7 @@ export function InboxTable({
 			cellClassName='px-5 py-3.5'
 			className='h-full min-h-64'
 			columns={columns}
-			containerClassName={`${listStyles.card} bg-transparent`}
+			containerClassName={listStyles.card}
 			data={rows}
 			emptyState={empty}
 			hideHeader
