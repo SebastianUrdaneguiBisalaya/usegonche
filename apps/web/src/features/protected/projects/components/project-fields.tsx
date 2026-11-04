@@ -3,7 +3,9 @@ import { Form } from '~/components/ui/forms-inputs/form/form';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Layout } from '~/components/ui/layout/layout/layout';
+import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
+import { MarkdownField } from '../../shared/markdown-field';
 import { listStyles } from '../../shared/styles';
 import { useCreateTag, useTagOptions } from '../../shared/tags';
 import { useGoals } from '../api';
@@ -32,10 +34,13 @@ export function ProjectFields({ withStatus }: { withStatus?: boolean }) {
 			</Form.Field>
 			<Form.Field name='description'>
 				{field => (
-					<Input className={listStyles.field} errorMessage={field.error}>
-						<Input.Label>{t('projects.form.description.label')}</Input.Label>
-						<Input.Textarea placeholder={t('projects.form.description.placeholder')} rows={6} {...field.inputProps} />
-					</Input>
+					<MarkdownField
+						error={field.error}
+						label={t('projects.form.description.label')}
+						onChange={field.onChange}
+						placeholder={t('projects.form.description.placeholder')}
+						value={field.value as string}
+					/>
 				)}
 			</Form.Field>
 			<Form.Field name='goalId'>
@@ -67,7 +72,7 @@ export function ProjectFields({ withStatus }: { withStatus?: boolean }) {
 						value={field.value as string[]}
 					>
 						<Combobox.Label>{t('projects.form.tags.label')}</Combobox.Label>
-						<Combobox.Input containerClassName={listStyles.field} placeholder={t('projects.form.tags.placeholder')} />
+						<Combobox.Input containerClassName={cn(listStyles.pillInput, 'min-h-[2.625rem] px-4')} placeholder={t('projects.form.tags.placeholder')} />
 						<Combobox.Content createLabel={name => t('projects.form.tags.create', { name })} emptyMessage={t('projects.form.tags.empty')}>
 							{(tags.data ?? []).map(tag => (
 								<Combobox.Item key={tag.id} label={tag.name} value={tag.id}>

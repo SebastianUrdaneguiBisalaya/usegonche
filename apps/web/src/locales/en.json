@@ -473,7 +473,7 @@
       },
       "description": {
         "label": "Description",
-        "placeholder": "Goal, scope, notes... (Markdown)"
+        "placeholder": "Goal, scope, notes..."
       },
       "goal": {
         "label": "Goal",
@@ -630,7 +630,7 @@
       },
       "description": {
         "label": "Description",
-        "placeholder": "Why it matters, how you will know it is done... (Markdown)"
+        "placeholder": "Why it matters, how you will know it is done..."
       },
       "targetDate": {
         "label": "Target date",

@@ -473,7 +473,7 @@
       },
       "description": {
         "label": "Descripción",
-        "placeholder": "Objetivo, alcance, notas... (Markdown)"
+        "placeholder": "Objetivo, alcance, notas..."
       },
       "goal": {
         "label": "Meta",
@@ -630,7 +630,7 @@
       },
       "description": {
         "label": "Descripción",
-        "placeholder": "Por qué importa, cómo sabrás que está lista... (Markdown)"
+        "placeholder": "Por qué importa, cómo sabrás que está lista..."
       },
       "targetDate": {
         "label": "Fecha objetivo",

@@ -8,6 +8,7 @@ import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { fromDateOnly, toDateOnly } from '../../shared/dates';
+import { MarkdownField } from '../../shared/markdown-field';
 import { listStyles } from '../../shared/styles';
 import { TITLE_MAX } from '../schemas';
 import { goalStatuses } from '../search-params';
@@ -48,10 +49,13 @@ export function GoalFields({ withStatus }: { withStatus?: boolean }) {
 			</Form.Field>
 			<Form.Field name='description'>
 				{field => (
-					<Input className={listStyles.field} errorMessage={field.error}>
-						<Input.Label>{t('goals.form.description.label')}</Input.Label>
-						<Input.Textarea placeholder={t('goals.form.description.placeholder')} rows={6} {...field.inputProps} />
-					</Input>
+					<MarkdownField
+						error={field.error}
+						label={t('goals.form.description.label')}
+						onChange={field.onChange}
+						placeholder={t('goals.form.description.placeholder')}
+						value={field.value as string}
+					/>
 				)}
 			</Form.Field>
 			<Form.Field name='targetDate'>
