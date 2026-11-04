@@ -6,6 +6,8 @@ import { cn } from '~/components/ui/utils/tailwind/cn';
 import { listStyles } from './styles';
 
 interface ListSearchProps {
+	/** Extra classes on the box (e.g. to change its width). */
+	className?: string;
 	/** Accessible name of the "clear" button. */
 	clearLabel: string;
 	/** Accessible name of the field. */
@@ -17,7 +19,7 @@ interface ListSearchProps {
 }
 
 /** Search box of a list page. Typing is debounced into the URL; `/` focuses it. */
-export function ListSearch({ clearLabel, label, onChange, placeholder, value }: ListSearchProps) {
+export function ListSearch({ className, clearLabel, label, onChange, placeholder, value }: ListSearchProps) {
 	const ref = useRef<HTMLInputElement>(null);
 	const [text, setText] = useState(value);
 	const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -45,7 +47,7 @@ export function ListSearch({ clearLabel, label, onChange, placeholder, value }: 
 	}, []);
 
 	return (
-		<Input className={cn(listStyles.pillInput, 'w-full sm:w-72')}>
+		<Input className={cn(listStyles.pillInput, 'w-full sm:w-72', className)}>
 			<Input.Icon icon={Search} />
 			<Input.Field aria-label={label} autoComplete='off' onChange={event => type(event.target.value)} placeholder={placeholder} ref={ref} value={text} />
 			{text ? (

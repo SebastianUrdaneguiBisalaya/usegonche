@@ -3,6 +3,7 @@ import { cn } from '~/components/ui/utils/tailwind/cn';
 
 interface FilterChipProps {
 	active: boolean;
+	className?: string;
 	/** Counter next to the label (a pulsing placeholder until it arrives); leave it out for a chip without one. */
 	count?: number | undefined;
 	hasCount?: boolean;
@@ -13,14 +14,15 @@ interface FilterChipProps {
 }
 
 /** A toggle chip of a list page with its optional counter. */
-export function FilterChip({ active, count, hasCount = true, icon, label, onClick, tone }: FilterChipProps) {
+export function FilterChip({ active, className, count, hasCount = true, icon, label, onClick, tone }: FilterChipProps) {
 	return (
 		<button
 			aria-pressed={active}
 			className={cn(
 				'flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors',
 				active ? 'border-border-strong bg-foreground/6' : 'border-border hover:bg-foreground/4',
-				tone === 'danger' && active ? 'text-destructive' : ''
+				tone === 'danger' && active ? 'text-destructive' : '',
+				className
 			)}
 			onClick={onClick}
 			type='button'
