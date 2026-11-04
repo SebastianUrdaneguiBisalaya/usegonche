@@ -425,6 +425,8 @@ function Root<TSchema extends FormSchema>({
   return (
     <FormProvider {...form}>
       <form
+        // A native submit before hydration (or if JS fails) would default to GET and put every field, passwords included, in the URL.
+        method="post"
         noValidate
         {...props}
         onSubmit={(event) => {
