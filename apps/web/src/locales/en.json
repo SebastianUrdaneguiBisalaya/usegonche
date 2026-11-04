@@ -144,6 +144,9 @@
     "menu": {
       "open": "Open menu"
     },
+    "quickAdd": {
+      "close": "Close"
+    },
     "command": {
       "placeholder": "Search or jump to...",
       "empty": "No results",

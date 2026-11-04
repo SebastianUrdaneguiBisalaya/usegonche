@@ -2,6 +2,7 @@ import { ArrowRight, type LucideIcon } from 'lucide-react';
 import { type ReactNode, type Ref, useState } from 'react';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Input } from '~/components/ui/forms-inputs/input/input';
+import { useCloseQuickAdd } from './quick-add-dialog';
 import { listStyles } from './styles';
 
 interface QuickAddProps {
@@ -27,10 +28,11 @@ interface QuickAddProps {
 	submitLabel: string;
 }
 
-/** One-line add bar of a list page: Enter or the round button submits the text. The field is cleared once `onSubmit` resolves. */
+/** One-line add bar, shown inside a `QuickAddDialog`: Enter or the round button submits the text. The field is cleared once `onSubmit` resolves. */
 export function QuickAdd({ extra, hint, icon, inputRef, label, maxLength, onSubmit, onTextChange, pending, placeholder, submitIcon = ArrowRight, submitLabel }: QuickAddProps) {
 	const [value, setValue] = useState('');
 	const text = value.trim();
+	const close = useCloseQuickAdd();
 
 	const submit = async () => {
 		if (!text || pending) return;
@@ -38,6 +40,7 @@ export function QuickAdd({ extra, hint, icon, inputRef, label, maxLength, onSubm
 			await onSubmit(text);
 			setValue('');
 			onTextChange?.('');
+			close?.();
 		} catch {
 			// The page reports the error (toast); the text stays so it can be fixed and sent again.
 		}
@@ -55,6 +58,7 @@ export function QuickAdd({ extra, hint, icon, inputRef, label, maxLength, onSubm
 				<Input.Icon className='text-foreground' icon={icon} />
 				<Input.Field
 					aria-label={label}
+					autoFocus
 					autoComplete='off'
 					maxLength={maxLength}
 					onChange={event => {
