@@ -211,7 +211,7 @@ export function DataTable<TData extends Record<string, any>>({
         )}
       >
         <table
-          className="w-full text-sm"
+          className={cn("w-full text-sm", isEmpty && "h-full")}
           style={{
             minWidth: table.getTotalSize(),
           }}
@@ -269,8 +269,11 @@ export function DataTable<TData extends Record<string, any>>({
               />
             )}
             {isEmpty && (
-              <tr>
-                <td colSpan={colCount}>
+              <tr className="h-full">
+                <td
+                  className="align-middle"
+                  colSpan={colCount}
+                >
                   {emptyState ?? (
                     <p className="px-4 py-14 text-center text-sm font-primary text-muted-foreground">
                       {emptyMessage}
