@@ -76,7 +76,7 @@ export default function TodayRoute() {
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
 				<MiniCalendar
-					className='max-w-full self-start overflow-x-auto'
+					className='max-w-full shrink-0 self-start overflow-x-auto'
 					days={STRIP_DAYS}
 					defaultStartDate={startDate}
 					lang={{ nextDays: t('today.strip.next'), previousDays: t('today.strip.previous') }}
