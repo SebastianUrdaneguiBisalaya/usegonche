@@ -807,6 +807,7 @@ function CalendarToday({
   return (
     <Button
       variant="secondary"
+	  className={"size-9 px-8"}
       {...props}
       onClick={(event) => {
         onClick?.(event);
@@ -1177,7 +1178,7 @@ function CalendarTimeColumn({
         {preview ? (
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0.5 z-[2] rounded-md border border-dashed border-border-strong bg-hover"
+            className="pointer-events-none absolute inset-x-0.5 z-2 rounded-md border border-dashed border-border-strong bg-hover"
             style={preview}
           />
         ) : null}
