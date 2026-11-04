@@ -98,7 +98,7 @@ function BlockForm({ onClose, state }: { onClose: () => void; state: BlockModalS
 						</>
 					)}
 					{planned ? (
-						<Layout.Grid cols={{ base: 2 }} gap='md'>
+						<Layout.Grid cols={{ base: 1, md: 2 }} gap='md'>
 							<Input className={listStyles.field}>
 								<Input.Label>{t('today.block.start')}</Input.Label>
 								<Input.Field onChange={event => setTime(event.target.value)} type='time' value={time} />
