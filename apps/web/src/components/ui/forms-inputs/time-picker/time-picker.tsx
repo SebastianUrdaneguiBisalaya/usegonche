@@ -629,7 +629,7 @@ function Root(props: TimePickerRootProps) {
   return (
     <TimePickerContext.Provider value={contextValue}>
       <div
-        className={cn("relative inline-block w-full", className)}
+        className={cn("relative flex w-full flex-col gap-1.5", className)}
         ref={rootRef}
       >
         {children}
