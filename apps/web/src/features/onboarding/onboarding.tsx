@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router';
 import { toast } from 'sonner';
-import authBg from '~/assets/bg-auth.webp';
+import bgDark from '~/assets/bg-usegonche-dark.png'
 import icon from '~/assets/usegonche-icon.png';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Stepper } from '~/components/ui/data-display/stepper/stepper';
@@ -22,6 +22,7 @@ import { useFlags } from '../protected/settings/general-panel';
 import { countryForTimezone, timezoneForCountry } from '../protected/settings/timezone';
 import { usePreferences } from '../protected/settings/use-preferences';
 import { ThemeChoice } from './theme-choice';
+import { listStyles } from '../protected/shared/styles';
 
 const STEPS = ['appearance', 'region', 'finish'] as const;
 const themes = ['dark', 'light', 'system'] as const;
@@ -56,7 +57,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 	return (
 		<div className='auth-dark relative isolate flex min-h-screen w-full items-center justify-center overflow-y-auto bg-[#050505] px-4 py-10'>
 			<Image className='pointer-events-none absolute inset-0 -z-10 size-full opacity-60'>
-				<Image.Img alt='' className='size-full object-cover' src={authBg} />
+				<Image.Img alt='' className='size-full object-cover' src={bgDark} />
 				<Image.Fallback>
 					<div className='size-full bg-black' />
 				</Image.Fallback>
@@ -140,7 +141,7 @@ function Wizard({ initialCountry, initialTimezone }: { initialCountry: string | 
 					<div className='mx-auto flex w-full max-w-md flex-col gap-4'>
 						<Select.Root onChange={setLanguage} value={language}>
 							<Select.Label>{t('onboarding.region.language')}</Select.Label>
-							<Select.Trigger className={authStyles.input}>
+							<Select.Trigger className={listStyles.pillTrigger}>
 								<Select.Value />
 							</Select.Trigger>
 							<Select.Content>
@@ -154,10 +155,10 @@ function Wizard({ initialCountry, initialTimezone }: { initialCountry: string | 
 							</Select.Content>
 						</Select.Root>
 						<CountrySelect.Root flags={flags} locale={locale} onChange={changeCountry} value={country}>
-							<CountrySelect.Trigger aria-label={t('onboarding.region.country')} className={authStyles.input} />
+							<CountrySelect.Trigger aria-label={t('onboarding.region.country')} className={listStyles.pillTrigger} />
 							<CountrySelect.Content width={400} />
 						</CountrySelect.Root>
-						<div className='flex flex-col gap-1 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3'>
+						<div className='flex flex-col gap-1 rounded-2xl border border-white/10 bg-white/3 px-4 py-3'>
 							<span className='text-xs text-foreground-secondary'>{t('onboarding.region.timezone')}</span>
 							<span className='text-sm'>{timezone}</span>
 							<span className='text-xs text-foreground-tertiary'>{t('onboarding.region.timezoneHint')}</span>
@@ -166,7 +167,7 @@ function Wizard({ initialCountry, initialTimezone }: { initialCountry: string | 
 				)}
 
 				{step === 2 && (
-					<dl className='mx-auto flex w-full max-w-md flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm'>
+					<dl className='mx-auto flex w-full max-w-md flex-col gap-3 rounded-2xl border border-white/10 bg-white/3 p-5 text-sm'>
 						<Row label={t('onboarding.finish.theme')} value={t(`onboarding.appearance.${theme}.label`)} />
 						<Row label={t('onboarding.finish.language')} value={t(`protected.settings.general.language.options.${language}`)} />
 						<Row label={t('onboarding.finish.country')} value={country ? (new Intl.DisplayNames([locale], { type: 'region' }).of(country) ?? country) : '-'} />
