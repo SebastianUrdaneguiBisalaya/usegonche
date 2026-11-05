@@ -17,12 +17,25 @@ export function useUserSettings() {
 	return useQuery({ meta: { silent: true }, queryFn: () => unwrap(api.profile.settings.$get()), queryKey: settingsKey, retry: false });
 }
 
-/** Country and time zone are saved together (`PATCH /profile/settings`); the answer replaces the cached settings. */
+const updateSettingsKey = [...settingsKey, 'update'] as const;
+
+/**
+ * Country and time zone are saved together (`PATCH /profile/settings`); the answer replaces the cached settings.
+ * Saves can pile up (the theme toggled quickly): they share a scope, so they reach the API one after the other in order, and only the last
+ * one writes the cache. An earlier answer would bring back a value already replaced (dark -> light -> dark flashing light again).
+ */
 export function useUpdateSettings() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (json: UpdateSettingsBody) => unwrap(api.profile.settings.$patch({ json })),
-		onSuccess: settings => queryClient.setQueryData(settingsKey, settings),
+		mutationKey: updateSettingsKey,
+		onSettled: (settings, error) => {
+			// This save still counts as in flight here: 1 means no newer one is waiting.
+			if (queryClient.isMutating({ mutationKey: updateSettingsKey }) > 1) return;
+			if (settings) queryClient.setQueryData(settingsKey, settings);
+			else if (error) void queryClient.invalidateQueries({ queryKey: settingsKey });
+		},
+		scope: { id: 'profile-settings' },
 	});
 }
 
