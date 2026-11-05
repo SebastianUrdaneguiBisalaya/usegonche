@@ -94,6 +94,10 @@ Closing keywords only work in the PR description (or in a commit message that re
 
 **The agent only opens the PR; it NEVER merges it** (no `gh pr merge`, no merge via UI/API, no pushing directly to `main`). Merging is always done by the user.
 
+## UI testing (every app)
+
+The user tests the UI manually. The agent never installs or downloads anything to test UI itself (no Playwright, Puppeteer, browsers or similar tools) in any app.
+
 ## Shared packages (`packages/*`)
 
 TypeScript-source packages (no build step; `exports` point to `src/`). Import them as `@usegonche/<name>`.
@@ -230,3 +234,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+
+## apps/mobile (React Native + Expo)
+
+### This is NOT the Expo you know
+
+- The app uses **Expo SDK 58**, which has breaking changes versus your training data. For every Expo / React Native task, first load the matching Expo skills in `.claude/skills/` (start with `expo-overview`, which routes to the rest) instead of relying on memory.
+- Styles: use `StyleSheet.create`, declared at the bottom of each component file.
+- Run the app with local development builds (`npx expo run:ios` with Xcode and the iOS Simulator on the Mac), not Expo Go.
