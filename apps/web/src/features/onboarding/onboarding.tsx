@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router';
 import { toast } from 'sonner';
-import bgDark from '~/assets/bg-usegonche-dark.png'
+import bgDark from '~/assets/bg-usegonche-dark.png';
 import icon from '~/assets/usegonche-icon.png';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Stepper } from '~/components/ui/data-display/stepper/stepper';
