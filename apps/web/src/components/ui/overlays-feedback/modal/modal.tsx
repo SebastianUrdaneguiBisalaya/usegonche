@@ -111,11 +111,6 @@ export function useDialogTransition(
     if (open) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setAnimate(true);
-        });
-      });
     } else {
       setAnimate(false);
       const timeout = setTimeout(() => {
@@ -126,6 +121,24 @@ export function useDialogTransition(
   }, [
     open,
     exitDurationMs,
+  ]);
+
+  // The entrance starts only once the closed state has been committed (`visible`) and painted: two frames after that.
+  // Starting the frames when `open` flips instead lets a slow first render (a heavy form) outlast them, so the panel
+  // mounts already animated and pops in with no transition.
+  useEffect(() => {
+    if (!open || !visible) return;
+    let second = 0;
+    const first = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() => setAnimate(true));
+    });
+    return () => {
+      cancelAnimationFrame(first);
+      cancelAnimationFrame(second);
+    };
+  }, [
+    open,
+    visible,
   ]);
 
   useEscapeKey(open, onClose);
