@@ -19,8 +19,8 @@ import { CommandPalette } from './shared/command-palette';
  * `/onboarding`, both as redirects, so the signed-in layout never flashes before them. What it resolves seeds the client cache (no second request).
  * Child loaders must still authenticate on their own: a parent loader does not protect them.
  */
-export async function loader({ request }: LoaderFunctionArgs) {
-	const { headers, session, settings } = await requireSignedIn(request);
+export async function loader({ context, request }: LoaderFunctionArgs) {
+	const { headers, session, settings } = await requireSignedIn(request, context);
 	// Mandatory onboarding: until it is completed, every signed-in page sends the user back to it.
 	if (!settings.onboardingCompletedAt) throw redirect('/onboarding', { headers });
 	return data({ session, settings }, { headers });

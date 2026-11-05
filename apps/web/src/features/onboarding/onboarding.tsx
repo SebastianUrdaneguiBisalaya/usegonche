@@ -33,8 +33,8 @@ const languages = ['system', 'en', 'es'] as const;
  * Who is signed in and how far the onboarding went are resolved on the server, so the wizard is the first paint: signed out goes to sign-in
  * and a finished onboarding to `/`, both as redirects. What it resolves seeds the client cache (no second request).
  */
-export async function loader({ request }: LoaderFunctionArgs) {
-	const { headers, session, settings } = await requireSignedIn(request);
+export async function loader({ context, request }: LoaderFunctionArgs) {
+	const { headers, session, settings } = await requireSignedIn(request, context);
 	if (settings.onboardingCompletedAt) throw redirect('/', { headers });
 	return data({ session, settings }, { headers });
 }

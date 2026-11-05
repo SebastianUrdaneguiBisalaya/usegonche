@@ -23,8 +23,8 @@ export const meta: Route.MetaFunction = ({ loaderData }) => {
  * Decides language and theme on the server so the first paint is already right. The signed-in account's saved settings come first (they are the
  * source of truth), then the stored cookies, then the system theme / `Accept-Language`.
  */
-export async function loader({ request }: Route.LoaderArgs) {
-	const account = await accountPreferences(request);
+export async function loader({ context, request }: Route.LoaderArgs) {
+	const account = await accountPreferences(request, context);
 	const languagePreference = account.language ?? readLanguagePreference(request.headers.get('cookie'));
 	return {
 		languagePreference,
