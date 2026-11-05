@@ -29,7 +29,6 @@ interface LoaderData {
 
 /**
  * Loads the first page on the server from the URL's params (the request cookie is forwarded: a parent loader does not protect this one).
- * Without the cookie the client-side query takes over behind skeleton rows.
  */
 export async function loader({ request }: LoaderFunctionArgs): Promise<LoaderData | null> {
 	const cookie = request.headers.get('cookie');
@@ -44,6 +43,12 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<LoaderDat
 	if (!res?.ok) return null;
 	return { data: (await res.json()) as TagsPage, params };
 }
+
+/**
+ * Client navigations (and filter or page changes) skip the server: the page paints at once and react-query serves its cache, or loads behind
+ * skeleton rows. The server `loader` only runs for the document request, so a reload still arrives with the data.
+ */
+export const clientLoader = (): null => null;
 
 const emptyIds: ReadonlySet<string> = new Set();
 
