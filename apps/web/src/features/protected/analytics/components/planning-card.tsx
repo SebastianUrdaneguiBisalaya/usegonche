@@ -2,24 +2,24 @@ import { Target } from 'lucide-react';
 import { Chart } from '~/components/ui/data-display/charts/charts';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { usePlanning, useSummary } from '../api';
+import { type DateRange, usePlanning, useSummary } from '../api';
 import { dayLabel } from '../format';
-import { formatRate, pointsChange, type RangePreset } from '../range';
+import { formatRate, pointsChange } from '../range';
 import { Delta } from './delta';
 import { Headline, MetricCard, QueryBody } from './metric-card';
 import { LINE_COLOR } from './tones';
 
 /** Share of each daily plan that ended up done: how often the plan was met. */
-export function PlanningCard({ base }: { base: RangePreset }) {
+export function PlanningCard({ range }: { range: DateRange }) {
 	const t = useTranslate();
 	return (
-		<MetricCard base={base} icon={Target} subtitle={t('analytics.planning.subtitle')} title={t('analytics.planning.title')}>
-			{range => <PlanningBody range={range} />}
+		<MetricCard icon={Target} subtitle={t('analytics.planning.subtitle')} title={t('analytics.planning.title')}>
+			<PlanningBody range={range} />
 		</MetricCard>
 	);
 }
 
-function PlanningBody({ range }: { range: { from: string; to: string } }) {
+function PlanningBody({ range }: { range: DateRange }) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
 	const query = usePlanning(range);

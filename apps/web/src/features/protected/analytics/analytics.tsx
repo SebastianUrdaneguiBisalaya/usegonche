@@ -34,16 +34,19 @@ export default function AnalyticsRoute() {
 					</RangeSelect>
 				</Page.Actions>
 			</Page.Header>
-			{/* Changing the page's range remounts the cards, so a card's own range goes back to it. */}
-			<Page.Body className='min-h-0 flex-1 gap-4' key={param}>
+			<Page.Body className='min-h-0 flex-1 gap-4'>
 				<SummaryStrip range={range} />
 				<Layout.Grid cols={{ base: 1, xl: 2 }} gap='md'>
-					<ThroughputCard base={param} />
-					<FocusCard base={param} />
-					<PlanningCard base={param} />
-					<BlockersCard base={param} />
-					<RhythmCard base={param} />
-					<InsightsCard range={range} />
+					<ThroughputCard range={range} />
+					<FocusCard range={range} />
+					<PlanningCard range={range} />
+					<BlockersCard range={range} />
+					<div className='xl:col-span-2'>
+						<RhythmCard range={range} />
+					</div>
+					<div className='xl:col-span-2'>
+						<InsightsCard range={range} />
+					</div>
 				</Layout.Grid>
 			</Page.Body>
 		</Fragment>

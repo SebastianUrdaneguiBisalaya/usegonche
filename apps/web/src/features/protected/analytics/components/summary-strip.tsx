@@ -12,13 +12,13 @@ import { Delta } from './delta';
 
 function Tile({ delta, icon: Icon, label, value }: { delta: ReactNode; icon: LucideIcon; label: string; value: string }) {
 	return (
-		<div className='flex items-center gap-4 px-6 py-5'>
+		<div className='grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-0.5 px-6 py-5'>
 			<Icon aria-hidden className='size-9 shrink-0 text-muted-foreground' strokeWidth={1.5} />
 			<div className='flex flex-col gap-0.5'>
 				<span className='text-3xl font-medium leading-none tabular-nums'>{value}</span>
 				<Typography.Span className='text-sm text-muted-foreground'>{label}</Typography.Span>
-				<span className='min-h-5'>{delta}</span>
 			</div>
+			<span className='col-start-2 min-h-5'>{delta}</span>
 		</div>
 	);
 }

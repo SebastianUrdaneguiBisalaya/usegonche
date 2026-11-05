@@ -3,25 +3,29 @@ import { ActivityCalendar } from '~/components/ui/data-display/activity-calendar
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { useRhythm, useThroughput } from '../api';
+import { useDateTime } from '../../shared/use-datetime';
+import { type DateRange, useRhythm, useThroughput } from '../api';
 import { hourName, weekdayName } from '../format';
-import type { RangePreset } from '../range';
 import { MetricCard, QueryBody } from './metric-card';
 import { LINE_COLOR } from './tones';
 
-/** Tasks completed on each day of the period as a grid of squares, and the weekday and hour with the most completions. */
-export function RhythmCard({ base }: { base: RangePreset }) {
+/** Days the grid reaches back, so it fills the card whatever the page's range: only the days of that range carry data, the rest stay empty. */
+const GRID_DAYS = 365;
+
+/** Tasks completed on each day of the period as a grid of squares (the period's days coloured, the rest empty), and the weekday and hour with the most completions. */
+export function RhythmCard({ range }: { range: DateRange }) {
 	const t = useTranslate();
 	return (
-		<MetricCard base={base} icon={Activity} subtitle={t('analytics.rhythm.subtitle')} title={t('analytics.rhythm.title')}>
-			{range => <RhythmBody range={range} />}
+		<MetricCard icon={Activity} subtitle={t('analytics.rhythm.subtitle')} title={t('analytics.rhythm.title')}>
+			<RhythmBody range={range} />
 		</MetricCard>
 	);
 }
 
-function RhythmBody({ range }: { range: { from: string; to: string } }) {
+function RhythmBody({ range }: { range: DateRange }) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
+	const { today } = useDateTime();
 	const days = useThroughput(range);
 	const rhythm = useRhythm(range);
 	const peak = rhythm.data?.peak;
@@ -37,12 +41,12 @@ function RhythmBody({ range }: { range: { from: string; to: string } }) {
 						data={series.map(point => ({ count: point.completed, date: point.date }))}
 						endDate={range.to}
 						locale={locale}
-						startDate={range.from}
+						startDate={today(1 - GRID_DAYS)}
 						unit={t('analytics.rhythm.unit')}
 						unitPlural={t('analytics.rhythm.unitPlural')}
 						weekStartsOn={0}
 					>
-						<ActivityCalendar.Grid />
+						<ActivityCalendar.Grid className='[&>table]:mx-auto' />
 						<ActivityCalendar.Legend lessLabel={t('analytics.rhythm.low')} moreLabel={t('analytics.rhythm.high')} />
 					</ActivityCalendar>
 					{peak && (

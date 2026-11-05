@@ -12,7 +12,7 @@ interface RangeSelectProps {
 	value: RangePreset;
 }
 
-/** "Last 30 days": the date-range control every card of the dashboard carries. */
+/** "Last 30 days": the dashboard's date-range control, in the page header. */
 export function RangeSelect({ children, className = '', label, onChange, value }: RangeSelectProps) {
 	const t = useTranslate();
 	return (

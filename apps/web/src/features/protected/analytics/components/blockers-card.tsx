@@ -2,24 +2,23 @@ import { TriangleAlert } from 'lucide-react';
 import { Chart } from '~/components/ui/data-display/charts/charts';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { useTranslate } from '~/hooks/use-translate';
-import { useBlockers } from '../api';
-import type { RangePreset } from '../range';
+import { type DateRange, useBlockers } from '../api';
 import { Headline, MetricCard, QueryBody } from './metric-card';
 import { BAR_COLOR } from './tones';
 
 const MAX_REASONS = 6;
 
 /** Blockers started in the period, grouped by the reason written for them (most frequent first). */
-export function BlockersCard({ base }: { base: RangePreset }) {
+export function BlockersCard({ range }: { range: DateRange }) {
 	const t = useTranslate();
 	return (
-		<MetricCard base={base} icon={TriangleAlert} iconClassName='text-destructive' subtitle={t('analytics.blockers.subtitle')} title={t('analytics.blockers.title')}>
-			{range => <BlockersBody range={range} />}
+		<MetricCard icon={TriangleAlert} iconClassName='text-destructive' subtitle={t('analytics.blockers.subtitle')} title={t('analytics.blockers.title')}>
+			<BlockersBody range={range} />
 		</MetricCard>
 	);
 }
 
-function BlockersBody({ range }: { range: { from: string; to: string } }) {
+function BlockersBody({ range }: { range: DateRange }) {
 	const t = useTranslate();
 	const query = useBlockers(range);
 

@@ -2,24 +2,24 @@ import { TrendingUp } from 'lucide-react';
 import { Chart } from '~/components/ui/data-display/charts/charts';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { useSummary, useThroughput } from '../api';
+import { type DateRange, useSummary, useThroughput } from '../api';
 import { dayLabel } from '../format';
-import { percentChange, type RangePreset } from '../range';
+import { percentChange } from '../range';
 import { Delta } from './delta';
 import { Headline, MetricCard, QueryBody } from './metric-card';
 import { BAR_COLOR } from './tones';
 
 /** Tasks completed per day over the period, with the total and its change against the previous period. */
-export function ThroughputCard({ base }: { base: RangePreset }) {
+export function ThroughputCard({ range }: { range: DateRange }) {
 	const t = useTranslate();
 	return (
-		<MetricCard base={base} icon={TrendingUp} subtitle={t('analytics.throughput.subtitle')} title={t('analytics.throughput.title')}>
-			{range => <ThroughputBody range={range} />}
+		<MetricCard icon={TrendingUp} subtitle={t('analytics.throughput.subtitle')} title={t('analytics.throughput.title')}>
+			<ThroughputBody range={range} />
 		</MetricCard>
 	);
 }
 
-function ThroughputBody({ range }: { range: { from: string; to: string } }) {
+function ThroughputBody({ range }: { range: DateRange }) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
 	const query = useThroughput(range);
