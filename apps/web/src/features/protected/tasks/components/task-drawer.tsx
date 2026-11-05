@@ -93,7 +93,7 @@ function Body({ onClose, onOpenTask, onSetStatus, task }: Omit<TaskDrawerProps, 
 
 	const change = (changes: UpdateTaskBody) => {
 		if (changes.status) return onSetStatus(task, changes.status);
-		update.mutate({ changes, id: task.id }, { onError: error => toast.error(getApiErrorMessage(error)) });
+		update.mutate({ changes, id: task.id }, { onError: error => toast.error(getApiErrorMessage(error)), onSuccess: () => toast.success(t('tasks.toast.updated')) });
 	};
 
 	useHotkeys(COMPLETE_COMBO, () => onSetStatus(task, finished ? 'todo' : 'done'), { group: 'tasks', ignoreInputs: false, label: t('tasks.drawer.completeShortcut') });

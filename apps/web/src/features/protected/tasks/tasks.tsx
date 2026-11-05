@@ -131,8 +131,14 @@ export default function TasksRoute() {
 		[fail, t, update]
 	);
 
-	const onSetPriority = useCallback((task: Task, priority: TaskPriority) => update.mutate({ changes: { priority }, id: task.id }, { onError: fail }), [fail, update]);
-	const onSetDue = useCallback((task: Task, dueDate: string | null) => update.mutate({ changes: { dueDate }, id: task.id }, { onError: fail }), [fail, update]);
+	const onSetPriority = useCallback(
+		(task: Task, priority: TaskPriority) => update.mutate({ changes: { priority }, id: task.id }, { onError: fail, onSuccess: () => toast.success(t('tasks.toast.updated')) }),
+		[fail, t, update]
+	);
+	const onSetDue = useCallback(
+		(task: Task, dueDate: string | null) => update.mutate({ changes: { dueDate }, id: task.id }, { onError: fail, onSuccess: () => toast.success(t('tasks.toast.updated')) }),
+		[fail, t, update]
+	);
 
 	const onBulkApply = useCallback(
 		(changes: BulkChanges) => {

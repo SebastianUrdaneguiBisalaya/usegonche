@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { useTranslate } from '~/hooks/use-translate';
 import { api, type Body } from '~/lib/api';
 import { unwrap } from '~/lib/api-error';
 
@@ -12,8 +14,12 @@ export function useTagOptions() {
 /** Creates a tag (from the Tags page or a tag picker) and refreshes every tag list before resolving. A tag has no color until the user sets one. */
 export function useCreateTag() {
 	const queryClient = useQueryClient();
+	const t = useTranslate();
 	return useMutation({
 		mutationFn: (json: CreateTagBody) => unwrap(api.tags.$post({ json })),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tags'] }),
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({ queryKey: ['tags'] });
+			toast.success(t('tags.toast.created'));
+		},
 	});
 }

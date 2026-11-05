@@ -30,6 +30,7 @@ export function SubtasksSection({ onOpen, task }: { onOpen: (id: string) => void
 		try {
 			await create.mutateAsync({ parentId: task.id, title: text });
 			setTitle('');
+			toast.success(t('tasks.toast.subtaskAdded'));
 		} catch (error) {
 			toast.error(getApiErrorMessage(error));
 		}
@@ -59,7 +60,15 @@ export function SubtasksSection({ onOpen, task }: { onOpen: (id: string) => void
 				<ul className='flex flex-col gap-1'>
 					{items.map(item => (
 						<li className='flex items-center gap-3 rounded-lg px-1 py-1.5' key={item.id}>
-							<Checkbox checked={item.status === 'done'} onCheckedChange={checked => update.mutate({ changes: { status: checked ? 'done' : 'todo' }, id: item.id })}>
+							<Checkbox
+								checked={item.status === 'done'}
+								onCheckedChange={checked =>
+									update.mutate(
+										{ changes: { status: checked ? 'done' : 'todo' }, id: item.id },
+										{ onSuccess: () => toast.success(checked ? t('tasks.toast.completed') : t('tasks.toast.statusChanged')) }
+									)
+								}
+							>
 								<Checkbox.Toggle />
 								<Checkbox.Label className='sr-only'>{t('tasks.subtasks.toggle', { title: item.title })}</Checkbox.Label>
 							</Checkbox>

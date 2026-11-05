@@ -39,7 +39,10 @@ export function GeneralPanel() {
 	const country = update.isPending ? (update.variables.country ?? null) : (settings?.country ?? null);
 
 	const changeCountry = (code: string) => {
-		update.mutate({ country: code, timezone: timezoneForCountry(code) }, { onError: error => toast.error(getApiErrorMessage(error)) });
+		update.mutate(
+			{ country: code, timezone: timezoneForCountry(code) },
+			{ onError: error => toast.error(getApiErrorMessage(error)), onSuccess: () => toast.success(t('protected.settings.general.saved')) }
+		);
 	};
 
 	return (

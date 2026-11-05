@@ -50,7 +50,7 @@ export default function TodayRoute() {
 	const items = day.data?.items ?? [];
 
 	const fail = (error: unknown) => toast.error(getApiErrorMessage(error));
-	const save = (taskIds: string[]) => setItems.mutate(taskIds, { onError: fail });
+	const save = (taskIds: string[]) => setItems.mutate(taskIds, { onError: fail, onSuccess: () => toast.success(t('today.toast.planUpdated')) });
 	const taskIds = items.map(item => item.task.id);
 
 	const label = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', weekday: 'short', year: 'numeric' }).format(selected);
@@ -105,7 +105,12 @@ export default function TodayRoute() {
 							onAdd={id => save([...taskIds, id])}
 							onRemove={id => save(taskIds.filter(current => current !== id))}
 							onRetry={() => void day.refetch()}
-							onToggleDone={(id, done) => update.mutate({ changes: { status: done ? 'done' : 'todo' }, id }, { onError: fail, onSettled: () => void day.refetch() })}
+							onToggleDone={(id, done) =>
+								update.mutate(
+									{ changes: { status: done ? 'done' : 'todo' }, id },
+									{ onError: fail, onSettled: () => void day.refetch(), onSuccess: () => toast.success(done ? t('tasks.toast.completed') : t('tasks.toast.statusChanged')) }
+								)
+							}
 							pending={setItems.isPending || update.isPending}
 						/>
 					</div>

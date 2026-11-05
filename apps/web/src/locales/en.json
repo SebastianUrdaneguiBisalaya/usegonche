@@ -189,7 +189,8 @@
           "label": "Country",
           "description": "Time zone: {{timezone}}",
           "hint": "Sets your time zone for plans and reminders."
-        }
+        },
+        "saved": "Settings saved"
       },
       "account": {
         "nav": "Account",
@@ -344,7 +345,8 @@
       "convertedTask": "Converted to a task",
       "convertedProject": "Converted to a project",
       "convertedNote": "Converted to a note",
-      "bulk": "{{count}} items updated"
+      "bulk": "{{count}} items updated",
+      "captured": "Captured"
     },
     "empty": {
       "pending": {
@@ -937,7 +939,12 @@
       "statusChanged": "Status updated",
       "undo": "Undo",
       "bulk": "{{count}} tasks updated",
-      "deleted": "Task deleted"
+      "deleted": "Task deleted",
+      "updated": "Task updated",
+      "blockerAdded": "Blocker added",
+      "blockerResolved": "Blocker resolved",
+      "dependencyRemoved": "Dependency removed",
+      "subtaskAdded": "Subtask added"
     },
     "quickAdd": {
       "label": "Add a task",
@@ -1718,6 +1725,14 @@
       "due": "Due date changed",
       "project": "Project changed",
       "moved": "Moved"
+    },
+    "toast": {
+      "planUpdated": "Plan updated",
+      "blockCreated": "Time block created",
+      "blockUpdated": "Time block updated",
+      "blockDone": "Time block marked as done",
+      "blockMissed": "Time block marked as missed",
+      "blockDeleted": "Time block deleted"
     }
   },
   "calendar": {
@@ -1764,7 +1779,9 @@
       "confirm": "Delete"
     },
     "toast": {
-      "deleted": "Event deleted"
+      "deleted": "Event deleted",
+      "created": "Event created",
+      "updated": "Event updated"
     }
   },
   "analytics": {

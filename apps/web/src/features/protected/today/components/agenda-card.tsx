@@ -82,7 +82,10 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 			if (!moved) return setModal({ block, date, kind: 'edit', title: titleOf(block) });
 			if (minute === startMinute) return;
 			const length = endMinute - startMinute;
-			move.mutate({ id: block.id, plannedEnd: toApi(date, minute + length), plannedStart: toApi(date, minute) }, { onError: error => toast.error(getApiErrorMessage(error)) });
+			move.mutate(
+				{ id: block.id, plannedEnd: toApi(date, minute + length), plannedStart: toApi(date, minute) },
+				{ onError: error => toast.error(getApiErrorMessage(error)), onSuccess: () => toast.success(t('today.toast.blockUpdated')) }
+			);
 		};
 		window.addEventListener('pointermove', onMove);
 		window.addEventListener('pointerup', onUp);

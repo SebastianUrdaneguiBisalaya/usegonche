@@ -56,12 +56,13 @@ export default function CalendarRoute() {
 	const byId = useMemo(() => new Map(list.map(event => [event.id, event])), [list]);
 
 	const onError = (error: unknown) => toast.error(getApiErrorMessage(error));
+	const moved = { onError, onSuccess: () => toast.success(t('calendar.toast.updated')) };
 	const timeRange = (start: Date, end: Date) => ({ endsAt: fromWall(end, timeZone), startsAt: fromWall(start, timeZone) });
 	const onMove = ({ end, id, start }: CalendarEventMove) => {
-		if (start && end && byId.has(id)) update.mutate({ allDay: false, id, ...timeRange(start, end) }, { onError });
+		if (start && end && byId.has(id)) update.mutate({ allDay: false, id, ...timeRange(start, end) }, moved);
 	};
 	const onResize = ({ end, id, start }: CalendarEventResize) => {
-		if (byId.has(id)) update.mutate({ allDay: false, id, ...timeRange(start, end) }, { onError });
+		if (byId.has(id)) update.mutate({ allDay: false, id, ...timeRange(start, end) }, moved);
 	};
 
 	const planAt = (event: MouseEvent<HTMLDivElement>, day: Date) => {

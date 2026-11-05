@@ -151,7 +151,7 @@ export function DependenciesSection({ onOpen, task }: { onOpen: (id: string) => 
 									aria-label={t('tasks.dependencies.remove', { title: dependency.title })}
 									className='size-7 shrink-0 rounded-full p-0 text-muted-foreground'
 									loading={remove.isPending && remove.variables?.dependsOnId === dependency.id}
-									onClick={() => remove.mutate({ dependsOnId: dependency.id, id: task.id })}
+									onClick={() => remove.mutate({ dependsOnId: dependency.id, id: task.id }, { onSuccess: () => toast.success(t('tasks.toast.dependencyRemoved')) })}
 									size='icon'
 									variant='ghost'
 								>

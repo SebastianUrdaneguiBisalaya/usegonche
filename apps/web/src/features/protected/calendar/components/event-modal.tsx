@@ -106,9 +106,15 @@ function EventForm({ onClose, onDelete, state }: { onClose: () => void; onDelete
 		const input: EventInput = allDay
 			? { allDay: true, endDate, kind, startDate, title: title.trim() }
 			: { allDay: false, endsAt: endsAt ?? '', kind, startsAt: startsAt ?? '', title: title.trim() };
-		const options = { onError: (error: unknown) => toast.error(getApiErrorMessage(error)), onSuccess: onClose };
-		if (state.kind === 'edit') update.mutate({ id: state.event.id, ...input }, options);
-		else create.mutate(input, options);
+		const done = (key: 'calendar.toast.created' | 'calendar.toast.updated') => ({
+			onError: (error: unknown) => toast.error(getApiErrorMessage(error)),
+			onSuccess: () => {
+				toast.success(t(key));
+				onClose();
+			},
+		});
+		if (state.kind === 'edit') update.mutate({ id: state.event.id, ...input }, done('calendar.toast.updated'));
+		else create.mutate(input, done('calendar.toast.created'));
 	};
 
 	return (
