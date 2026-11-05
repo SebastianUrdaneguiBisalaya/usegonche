@@ -115,11 +115,13 @@ export interface UserProfileItemProps
   extends Omit<React.ComponentProps<typeof Dropdown.Item>, "children"> {
   /** Lucide icon rendered before the label (e.g. `Settings`, `User`, `LogOut`). */
   icon?: LucideIcon;
+  /** Keyboard shortcut hint (e.g. a `Kbd.Group`) pushed to the right edge of the row. */
+  shortcut?: React.ReactNode;
   children: React.ReactNode;
 }
 
 /** One action in the popover (e.g. "Settings", "My profile", "Log out") — `Dropdown.Item` plus an optional leading icon. */
-function UserProfileItem({ icon, children, ...props }: UserProfileItemProps) {
+function UserProfileItem({ icon, shortcut, children, ...props }: UserProfileItemProps) {
   return (
     <Dropdown.Item {...props}>
       {icon && (
@@ -131,6 +133,7 @@ function UserProfileItem({ icon, children, ...props }: UserProfileItemProps) {
         />
       )}
       <span className="truncate">{children}</span>
+      {shortcut && <span className="ml-auto shrink-0 pl-4">{shortcut}</span>}
     </Dropdown.Item>
   );
 }
