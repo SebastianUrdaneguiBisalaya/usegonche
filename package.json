@@ -17,7 +17,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit && pnpm --filter \"./packages/*\" typecheck"
+    "typecheck": "tsc --noEmit && pnpm --filter \"./packages/*\" typecheck && pnpm --filter @usegonche/api-client build && pnpm --filter \"./apps/*\" typecheck"
   },
   "dependencies": {
     "@hono/node-server": "2.1.3",
