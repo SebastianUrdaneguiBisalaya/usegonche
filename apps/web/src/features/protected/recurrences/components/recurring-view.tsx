@@ -122,7 +122,7 @@ export function RecurringView({ creating, onCreatingChange }: RecurringViewProps
 					</Button>
 				</div>
 			) : items.length === 0 ? (
-				<div className={cn(listStyles.card, 'flex flex-col items-center gap-3 px-4 py-16 text-center')}>
+				<div className={cn(listStyles.card, 'flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-4 py-16 text-center')}>
 					<Repeat aria-hidden className='size-8 text-muted-foreground' />
 					<Typography.Span className='text-base font-medium'>{t('recurrences.empty.title')}</Typography.Span>
 					<Typography.Span className='max-w-sm text-sm text-muted-foreground'>{t('recurrences.empty.description')}</Typography.Span>

@@ -107,7 +107,7 @@ function BoardSkeleton({ columns }: { columns: number }) {
 	return (
 		<div className='flex min-h-0 flex-1 gap-4 overflow-x-auto pb-2'>
 			{taskStatuses.slice(0, columns).map(column => (
-				<Skeleton className={cn(listStyles.card, 'w-80 shrink-0 gap-3 p-4')} key={column}>
+				<Skeleton className={cn(listStyles.card, 'min-w-72 flex-1 basis-72 gap-3 p-4')} key={column}>
 					<Skeleton.Item className='h-5 w-32' />
 					{[0, 1, 2].map(card => (
 						<Skeleton.Item className='h-24 w-full rounded-2xl' key={card} />
@@ -166,7 +166,7 @@ export function TaskBoard({ error, hidden, isLoading, listHref, onAdd, onMove, o
 								</Button>
 							}
 							cardClassName={cardSurface}
-							className={cn(listStyles.card, 'w-80 shrink-0 border-l! p-4 first:pl-4 last:pr-4')}
+							className={cn(listStyles.card, 'min-w-72 flex-1 basis-72 border-l! p-4 first:pl-4 last:pr-4')}
 							icon={<span aria-hidden className={cn('size-2.5 rounded-full', statusDot[status], statusColor[status])} />}
 							id={status}
 							key={status}
