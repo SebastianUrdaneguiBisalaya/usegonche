@@ -10,6 +10,7 @@ import { Layout } from '~/components/ui/layout/layout/layout';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
+import { useRetained } from '~/hooks/use-retained';
 import { useTranslate } from '~/hooks/use-translate';
 import { minuteInZone, todayInZone } from '~/lib/datetime';
 import { fromDateOnly, toDateOnly } from '../../shared/dates';
@@ -32,10 +33,13 @@ const KINDS: EventKind[] = ['event', 'out_of_office'];
 
 /** Creates a calendar event, or edits one: title, kind, all-day or timed, start and end. */
 export function EventModal({ onClose, onDelete, state }: EventModalProps) {
+	// Keeps the last state while the dialog fades out, so it does not collapse into an empty box mid-animation.
+	const shown = useRetained(state);
+
 	return (
 		<Modal.Root onOpenChange={open => !open && onClose()} open={state !== undefined}>
 			<Modal.Content aria-labelledby='event-modal-title' className='max-w-md rounded-2xl p-0'>
-				{state && <EventForm key={state.kind === 'edit' ? state.event.id : `new-${state.date}-${state.startMinute}`} onClose={onClose} onDelete={onDelete} state={state} />}
+				{shown && <EventForm key={shown.kind === 'edit' ? shown.event.id : `new-${shown.date}-${shown.startMinute}`} onClose={onClose} onDelete={onDelete} state={shown} />}
 			</Modal.Content>
 		</Modal.Root>
 	);

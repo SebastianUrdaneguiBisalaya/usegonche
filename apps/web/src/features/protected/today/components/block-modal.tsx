@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Combobox } from '~/components/ui/forms-inputs/combobox/combobox';
 import { Input } from '~/components/ui/forms-inputs/input/input';
 import { Select } from '~/components/ui/forms-inputs/select/select';
+import { minutesToTime, TimePicker, type TimePickerLang, toTimeString } from '~/components/ui/forms-inputs/time-picker/time-picker';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
+import { cn } from '~/components/ui/utils/tailwind/cn';
+import { useRetained } from '~/hooks/use-retained';
 import { useTranslate } from '~/hooks/use-translate';
 import { listStyles } from '../../shared/styles';
 import { useDateTime } from '../../shared/use-datetime';
@@ -21,10 +24,13 @@ interface BlockModalProps {
 
 /** Creates a block (a task and/or a title, a start and a duration) or edits one that is still planned: new time, done, missed, delete. */
 export function BlockModal({ onClose, state }: BlockModalProps) {
+	// Keeps the last state while the dialog fades out, so it does not collapse into an empty box mid-animation.
+	const shown = useRetained(state);
+
 	return (
 		<Modal.Root onOpenChange={open => !open && onClose()} open={state !== undefined}>
 			<Modal.Content aria-labelledby='block-modal-title' className='max-w-md rounded-2xl p-0'>
-				{state && <BlockForm key={state.kind === 'edit' ? state.block.id : `new-${state.startMinute}`} onClose={onClose} state={state} />}
+				{shown && <BlockForm key={shown.kind === 'edit' ? shown.block.id : `new-${shown.startMinute}`} onClose={onClose} state={shown} />}
 			</Modal.Content>
 		</Modal.Root>
 	);
@@ -44,6 +50,10 @@ function BlockForm({ onClose, state }: { onClose: () => void; state: BlockModalS
 	const [title, setTitle] = useState('');
 	const [taskId, setTaskId] = useState<string | null>(null);
 	const [query, setQuery] = useState('');
+	const timeLang = useMemo<Partial<TimePickerLang>>(
+		() => ({ apply: t('tasks.picker.apply'), clear: t('tasks.picker.clear'), hour: t('notes.reminder.picker.hour'), minute: t('notes.reminder.picker.minute') }),
+		[t]
+	);
 
 	const open = useOpenTasks();
 	const create = useCreateBlock();
@@ -102,10 +112,16 @@ function BlockForm({ onClose, state }: { onClose: () => void; state: BlockModalS
 					)}
 					{planned ? (
 						<Layout.Grid cols={{ base: 1, md: 2 }} gap='md'>
-							<Input className={listStyles.field}>
-								<Input.Label>{t('today.block.start')}</Input.Label>
-								<Input.Field onChange={event => setTime(event.target.value)} type='time' value={time} />
-							</Input>
+							<TimePicker.Root
+								lang={{ ...timeLang, picker: t('today.block.start') }}
+								minuteStep={5}
+								onChange={next => next && setTime(toTimeString(next))}
+								value={start === null ? null : minutesToTime(start)}
+							>
+								<TimePicker.Label>{t('today.block.start')}</TimePicker.Label>
+								<TimePicker.Trigger className={cn(listStyles.pillTrigger, 'h-auto')} />
+								<TimePicker.Content />
+							</TimePicker.Root>
 							<Select.Root onChange={next => setDuration(Number(next))} value={String(duration)}>
 								<Select.Label>{t('today.block.duration')}</Select.Label>
 								<Select.Trigger className={listStyles.pillTrigger}>
