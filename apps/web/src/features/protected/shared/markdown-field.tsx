@@ -44,8 +44,8 @@ export function MarkdownField({ error, label, onChange, placeholder, value }: Ma
 			<span className='text-sm font-medium font-primary text-foreground'>{label}</span>
 			<RichTextEditor lang={lang} markdown={value} onMarkdownChange={onChange} placeholder={placeholder}>
 				<RichTextEditor.BubbleMenu />
-				<RichTextEditor.Toolbar className={cn('rounded-t-xl border border-border bg-foreground/[0.03]', error && 'border-destructive')} />
-				<RichTextEditor.Content className={cn('min-h-56 rounded-b-xl bg-foreground/[0.03] focus-within:border-border-strong', error && 'border-destructive')} />
+				<RichTextEditor.Toolbar className={cn('rounded-t-xl border border-border bg-foreground/3', error && 'border-destructive')} />
+				<RichTextEditor.Content className={cn('min-h-56 rounded-b-xl bg-foreground/3 focus-within:border-border-strong', error && 'border-destructive')} />
 			</RichTextEditor>
 			{error && <p className='text-xs text-destructive'>{error}</p>}
 		</div>
