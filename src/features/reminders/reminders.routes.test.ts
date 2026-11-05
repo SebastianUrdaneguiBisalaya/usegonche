@@ -45,13 +45,27 @@ describe('GET /reminders', () => {
 		vi.mocked(prisma.reminder.count).mockResolvedValue(1);
 		const res = await app.request(`/reminders?status=pending&taskId=${TARGET_ID}`);
 		expect(res.status).toBe(200);
-		expect(await res.json()).toMatchObject({ data: [{ id: ID }], meta: { page: 1, pageCount: 1, pageSize: 50, total: 1 } });
+		expect(await res.json()).toMatchObject({ data: [{ id: ID }], meta: { counts: { all: 3, dismissed: 1, snoozed: 1, upcoming: 1 }, page: 1, pageCount: 1, pageSize: 50, total: 1 } });
 		expect(prisma.reminder.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({ where: { calendarEventId: undefined, noteId: undefined, ownerId: TEST_USER_ID, status: 'pending', taskId: TARGET_ID } })
 		);
 	});
 
-	it.each(['status=nope', 'taskId=x', 'page=0', 'pageSize=0'])('answers 422 for ?%s', async query => {
+	it('narrows by tab and search text', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.reminder.findMany).mockResolvedValue([]);
+		vi.mocked(prisma.reminder.count).mockResolvedValue(0);
+		const res = await app.request('/reminders?tab=snoozed&q=%20pay%20&page=2&pageSize=10');
+		expect(res.status).toBe(200);
+		expect(vi.mocked(prisma.reminder.findMany).mock.calls[0]?.[0]).toMatchObject({
+			skip: 10,
+			take: 10,
+			where: { AND: [{ snoozeCount: { gt: 0 }, status: 'pending' }, { OR: expect.any(Array) }], ownerId: TEST_USER_ID },
+		});
+		expect(JSON.stringify(vi.mocked(prisma.reminder.findMany).mock.calls[0]?.[0]?.where)).toContain('"contains":"pay"');
+	});
+
+	it.each(['status=nope', 'taskId=x', 'page=0', 'pageSize=0', 'tab=nope', 'q='])('answers 422 for ?%s', async query => {
 		expect((await setup().app.request(`/reminders?${query}`)).status).toBe(422);
 	});
 });

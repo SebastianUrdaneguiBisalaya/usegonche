@@ -2,7 +2,7 @@ import type { Prisma, PrismaClient, Reminder } from '@usegonche/database';
 import { AppError } from '../../lib/errors.js';
 import { scoped } from '../../lib/owner.js';
 import { type Paged, type PageParams, pageArgs, pageOrder } from '../../lib/pagination.js';
-import type { CreateReminderInput, ListRemindersQuery, SnoozeReminderInput, UpdateReminderInput } from './reminders.schemas.js';
+import { type CreateReminderInput, type ListRemindersQuery, REMINDER_TABS, type ReminderTab, type SnoozeReminderInput, type UpdateReminderInput } from './reminders.schemas.js';
 
 /** Reminders claimed per processor run; a backlog drains over the following runs (the job runs every minute). */
 export const PROCESS_BATCH_SIZE = 100;
@@ -24,10 +24,33 @@ const assertTarget = async (prisma: PrismaClient, ownerId: string, input: Create
 	return { noteId: input.noteId };
 };
 
+/** What each tab of the page shows. "Snoozed" is a pending reminder that was postponed; "upcoming" is everything open that is not snoozed. */
+const tabWhere: Record<ReminderTab, Prisma.ReminderWhereInput> = {
+	dismissed: { status: 'dismissed' },
+	snoozed: { snoozeCount: { gt: 0 }, status: 'pending' },
+	upcoming: { OR: [{ status: 'sent' }, { snoozeCount: 0, status: 'pending' }] },
+};
+
+/** The title of the task, event or note a reminder points at contains `q`. */
+const targetTitleMatches = (q: string): Prisma.ReminderWhereInput => {
+	const title = { contains: q, mode: 'insensitive' as const };
+	return { OR: [{ task: { title } }, { calendarEvent: { title } }, { note: { title } }] };
+};
+
 export const listReminders = async (prisma: PrismaClient, ownerId: string, query: Omit<ListRemindersQuery, 'page' | 'pageSize'>, page: PageParams): Promise<Paged<Reminder>> => {
-	const where = scoped(ownerId, { calendarEventId: query.eventId, noteId: query.noteId, status: query.status, taskId: query.taskId });
+	// `tab` and `q` each bring their own `OR`, so they are combined with `AND` (only when present).
+	const narrowing = [query.tab && tabWhere[query.tab], query.q && targetTitleMatches(query.q)].filter((part): part is Prisma.ReminderWhereInput => Boolean(part));
+	const where = scoped(ownerId, { calendarEventId: query.eventId, noteId: query.noteId, status: query.status, taskId: query.taskId, ...(narrowing.length > 0 && { AND: narrowing }) });
 	const [items, total] = await Promise.all([prisma.reminder.findMany({ orderBy: pageOrder('remindAt'), ...pageArgs(page), where }), prisma.reminder.count({ where })]);
 	return { items, total };
+};
+
+export type ReminderCounts = Record<ReminderTab | 'all', number>;
+
+/** How many reminders the user has in each tab, whatever the page, tab or search of the list. */
+export const reminderCounts = async (prisma: PrismaClient, ownerId: string): Promise<ReminderCounts> => {
+	const [upcoming, snoozed, dismissed] = await Promise.all(REMINDER_TABS.map(tab => prisma.reminder.count({ where: scoped(ownerId, tabWhere[tab]) })));
+	return { all: (upcoming ?? 0) + (snoozed ?? 0) + (dismissed ?? 0), dismissed: dismissed ?? 0, snoozed: snoozed ?? 0, upcoming: upcoming ?? 0 };
 };
 
 export const getReminder = async (prisma: PrismaClient, ownerId: string, id: string): Promise<Reminder> => {

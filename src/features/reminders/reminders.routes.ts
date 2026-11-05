@@ -6,15 +6,15 @@ import { pageMeta } from '../../lib/pagination.js';
 import { validationHook } from '../../lib/validator.js';
 import { requireUser } from '../../middleware/auth.js';
 import { createReminderSchema, listRemindersQuerySchema, reminderParamSchema, snoozeReminderSchema, updateReminderSchema } from './reminders.schemas.js';
-import { createReminder, deleteReminder, dismissReminder, getReminder, listReminders, snoozeReminder, updateReminder } from './reminders.service.js';
+import { createReminder, deleteReminder, dismissReminder, getReminder, listReminders, reminderCounts, snoozeReminder, updateReminder } from './reminders.service.js';
 
 // The owner always comes from the verified claims, never from the body.
 export default new Hono<AppEnv>()
 	.use(requireUser())
 	.get('/', zValidator('query', listRemindersQuerySchema, validationHook), async c => {
 		const { page, pageSize, ...filters } = c.req.valid('query');
-		const { items, total } = await listReminders(c.get('prisma'), c.get('claims').sub, filters, { page, pageSize });
-		return okWithMeta(c, items, pageMeta({ page, pageSize }, total), 200);
+		const [{ items, total }, counts] = await Promise.all([listReminders(c.get('prisma'), c.get('claims').sub, filters, { page, pageSize }), reminderCounts(c.get('prisma'), c.get('claims').sub)]);
+		return okWithMeta(c, items, { ...pageMeta({ page, pageSize }, total), counts }, 200);
 	})
 	.post('/', zValidator('json', createReminderSchema, validationHook), async c => ok(c, await createReminder(c.get('prisma'), c.get('claims').sub, c.req.valid('json')), 201))
 	.get('/:id', zValidator('param', reminderParamSchema, validationHook), async c => ok(c, await getReminder(c.get('prisma'), c.get('claims').sub, c.req.valid('param').id), 200))

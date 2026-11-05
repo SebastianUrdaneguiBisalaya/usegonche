@@ -9,6 +9,7 @@ import {
 	getReminder,
 	listReminders,
 	processDueReminders,
+	reminderCounts,
 	snoozeReminder,
 	updateReminder,
 } from './reminders.service.js';
@@ -72,6 +73,41 @@ describe('listReminders', () => {
 		vi.mocked(prisma.reminder.findMany).mockResolvedValue([]);
 		await listReminders(prisma, TEST_USER_ID, {}, { page: 2, pageSize: 10 });
 		expect(vi.mocked(prisma.reminder.findMany).mock.calls[0]?.[0]).toMatchObject({ skip: 10, take: 10 });
+	});
+
+	it.each([
+		['dismissed', { status: 'dismissed' }],
+		['snoozed', { snoozeCount: { gt: 0 }, status: 'pending' }],
+		['upcoming', { OR: [{ status: 'sent' }, { snoozeCount: 0, status: 'pending' }] }],
+	] as const)('narrows to the %s tab, still scoped by owner', async (tab, expected) => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.reminder.findMany).mockResolvedValue([]);
+		await listReminders(prisma, TEST_USER_ID, { tab }, { page: 1, pageSize: 20 });
+		expect(vi.mocked(prisma.reminder.findMany).mock.calls[0]?.[0]?.where).toMatchObject({ AND: [expected], ownerId: TEST_USER_ID });
+	});
+
+	it('searches the title of the task, event or note, together with the tab', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.reminder.findMany).mockResolvedValue([]);
+		await listReminders(prisma, TEST_USER_ID, { q: 'pay', tab: 'dismissed' }, { page: 1, pageSize: 20 });
+		const title = { contains: 'pay', mode: 'insensitive' };
+		expect(vi.mocked(prisma.reminder.findMany).mock.calls[0]?.[0]?.where).toMatchObject({
+			AND: [{ status: 'dismissed' }, { OR: [{ task: { title } }, { calendarEvent: { title } }, { note: { title } }] }],
+			ownerId: TEST_USER_ID,
+		});
+	});
+});
+
+describe('reminderCounts', () => {
+	it('counts each tab for the owner and adds them up', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.reminder.count).mockResolvedValueOnce(3).mockResolvedValueOnce(2).mockResolvedValueOnce(1);
+		expect(await reminderCounts(prisma, TEST_USER_ID)).toEqual({ all: 6, dismissed: 1, snoozed: 2, upcoming: 3 });
+		expect(vi.mocked(prisma.reminder.count).mock.calls.map(([args]) => args?.where)).toEqual([
+			{ OR: [{ status: 'sent' }, { snoozeCount: 0, status: 'pending' }], ownerId: TEST_USER_ID },
+			{ ownerId: TEST_USER_ID, snoozeCount: { gt: 0 }, status: 'pending' },
+			{ ownerId: TEST_USER_ID, status: 'dismissed' },
+		]);
 	});
 });
 
