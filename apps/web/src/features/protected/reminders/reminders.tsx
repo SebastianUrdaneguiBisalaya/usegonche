@@ -45,7 +45,12 @@ export default function RemindersRoute() {
 
 	const onPage = reminders.find(reminder => reminder.id === openId);
 	const linked = useReminder(openId, list.data !== undefined && !onPage);
-	const opened = onPage ?? linked.data;
+	// A reminder that is gone (deleted, or a wrong id in the link) closes the panel instead of showing the last copy it had.
+	const gone = linked.isError;
+	const opened = onPage ?? (gone ? undefined : linked.data);
+	useEffect(() => {
+		if (gone) void setOpenId(null);
+	}, [gone, setOpenId]);
 	const targets = useTargets(onPage || !linked.data ? reminders : [...reminders, linked.data]);
 	const sent = sentList.data?.data ?? [];
 	// With a selection "Mark as read" applies to it; otherwise to every reminder that already fired.
