@@ -8,7 +8,6 @@ import { Layout } from '~/components/ui/layout/layout/layout';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { initialsOf } from '../shared/initials';
 import { uploadAvatar, useUpdateProfile } from './api';
 
@@ -37,7 +36,6 @@ export function AvatarEditor({ avatarUrl, name }: AvatarEditorProps) {
 		update.mutate(
 			{ avatarUrl: uploaded },
 			{
-				onError: error => toast.error(getApiErrorMessage(error)),
 				onSuccess: () => {
 					toast.success(t('protected.settings.account.avatar.saved'));
 					close();

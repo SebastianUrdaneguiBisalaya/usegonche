@@ -10,7 +10,6 @@ import { Page } from '~/components/ui/layout/page/page';
 import { ApplicationState } from '~/components/ui/overlays-feedback/application-state/application-state';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { ListSearch } from '../shared/list-search';
 import { PAGE_SIZE } from '../shared/paged';
 import { StatusTabs } from '../shared/status-tabs';
@@ -36,7 +35,6 @@ export default function RemindersRoute() {
 	const remove = useDeleteReminder();
 	const reminders = list.data?.data ?? [];
 	const meta = list.data?.meta;
-	const fail = (error: unknown) => toast.error(getApiErrorMessage(error));
 
 	// Deleting or dismissing the last row of the last page leaves it empty: go back to the last one that has rows.
 	useEffect(() => {
@@ -58,7 +56,6 @@ export default function RemindersRoute() {
 
 	const markRead = () =>
 		dismiss.mutate(toRead, {
-			onError: fail,
 			onSuccess: () => {
 				setChecked(new Set());
 				toast.success(t('reminders.toast.dismissed'));
@@ -137,8 +134,8 @@ export default function RemindersRoute() {
 											info={targets.get(targetId(reminder))}
 											key={reminder.id}
 											onCheckedChange={on => toggle(reminder.id, on)}
-											onDelete={() => remove.mutate(reminder.id, { onError: fail, onSuccess: () => toast.success(t('reminders.toast.deleted')) })}
-											onDismiss={() => dismiss.mutate([reminder.id], { onError: fail, onSuccess: () => toast.success(t('reminders.toast.dismissed')) })}
+											onDelete={() => remove.mutate(reminder.id, { onSuccess: () => toast.success(t('reminders.toast.deleted')) })}
+											onDismiss={() => dismiss.mutate([reminder.id], { onSuccess: () => toast.success(t('reminders.toast.dismissed')) })}
 											onOpen={() => void setOpenId(reminder.id)}
 											reminder={reminder}
 											selected={reminder.id === openId}

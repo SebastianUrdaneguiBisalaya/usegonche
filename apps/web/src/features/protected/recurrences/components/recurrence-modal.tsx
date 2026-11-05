@@ -13,7 +13,6 @@ import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { apiDateOnly, fromDateOnly, toDateOnly } from '../../shared/dates';
 import { useProjectOptions } from '../../shared/projects';
 import { listStyles } from '../../shared/styles';
@@ -153,8 +152,8 @@ export function RecurrenceModal({ onOpenChange, open, prefill, recurrence }: Rec
 								toast.success(t('recurrences.toast.created'));
 							}
 							onOpenChange(false);
-						} catch (error) {
-							toast.error(getApiErrorMessage(error));
+						} catch {
+							// The global mutation handler already toasted the error.
 						}
 					}}
 					schema={schema}

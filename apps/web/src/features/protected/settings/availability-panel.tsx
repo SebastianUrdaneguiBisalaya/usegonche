@@ -9,7 +9,6 @@ import { SettingsDialog } from '~/components/ui/overlays-feedback/settings-dialo
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { listStyles } from '../shared/styles';
 import { type AvailabilityWindow, useAvailability, useSetAvailability } from './api';
 import { DAY_END, type Draft, findErrors, formatTotal, fromTimeValue, sameWindows, toPayload, toTimeValue, WEEKDAYS } from './availability';
@@ -129,7 +128,6 @@ function AvailabilityForm({ saved }: { saved: AvailabilityWindow[] }) {
 					disabled={!changed || errors.size > 0 || save.isPending}
 					onClick={() =>
 						save.mutate(payload, {
-							onError: error => toast.error(getApiErrorMessage(error)),
 							onSuccess: () => toast.success(t('protected.settings.availability.saved')),
 						})
 					}

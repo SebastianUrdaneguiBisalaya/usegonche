@@ -5,7 +5,6 @@ import type { ThemePreference } from '~/components/ui/actions-controls/switch-th
 import { useLanguage } from '~/hooks/use-language';
 import { useTheme } from '~/hooks/use-theme';
 import { type LanguagePreference, languagePreferenceOf } from '~/i18n';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { useLanguageStore } from '~/store/language-store';
 import { useThemeStore } from '~/store/theme-store';
 import { settingsKey, type UpdateSettingsBody, type UserSettings, useUpdateSettings, useUserSettings } from './api';
@@ -47,7 +46,7 @@ export function usePreferences() {
 
 	const save = (changes: Pick<UpdateSettingsBody, 'language' | 'theme'>) => {
 		queryClient.setQueryData<UserSettings>(settingsKey, current => current && { ...current, ...changes });
-		update.mutate(changes, { onError: error => toast.error(getApiErrorMessage(error)) });
+		update.mutate(changes);
 	};
 
 	return {

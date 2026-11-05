@@ -8,7 +8,6 @@ import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { listStyles } from '../../shared/styles';
 import { useOpenTasks, useRecordFocus } from '../api';
 import { FOCUS_PRESETS, MIN_RECORDED_MS, remainingMs, useFocusSession, workedMs } from '../focus-session';
@@ -64,7 +63,6 @@ export function FocusCard() {
 				...(chosen ? { taskId: chosen } : { title: t('today.focus.session') }),
 			},
 			{
-				onError: error => toast.error(getApiErrorMessage(error)),
 				onSettled: () => {
 					settled.current = false;
 				},

@@ -10,7 +10,6 @@ import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useDebouncedValue } from '~/hooks/use-debounced-value';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { fromDateOnly, toDateOnly } from '../shared/dates';
 import { listStyles } from '../shared/styles';
 import { useDateTime } from '../shared/use-datetime';
@@ -39,8 +38,6 @@ function Workspace({ review }: { review: Review }) {
 	const [savedFocusState, setSavedFocusState] = useState(review.nextFocus ?? '');
 	const debounced = useDebouncedValue(reflection, AUTOSAVE_MS);
 
-	const fail = (error: unknown) => toast.error(getApiErrorMessage(error));
-
 	// Autosave of the reflection: only when it differs from what the API has.
 	// biome-ignore lint/correctness/useExhaustiveDependencies: `update` changes on every render; only the debounced text should trigger a save.
 	useEffect(() => {
@@ -55,7 +52,6 @@ function Workspace({ review }: { review: Review }) {
 		update.mutate(
 			{ nextFocus: text().nextFocus },
 			{
-				onError: fail,
 				onSuccess: () => {
 					savedFocus.current = focus;
 					setSavedFocusState(focus);
@@ -65,7 +61,6 @@ function Workspace({ review }: { review: Review }) {
 		);
 	const saveDraft = () =>
 		update.mutate(text(), {
-			onError: fail,
 			onSuccess: () => {
 				savedReflection.current = reflection;
 				savedFocus.current = focus;
@@ -88,7 +83,7 @@ function Workspace({ review }: { review: Review }) {
 					<ActionsCard
 						closed={!open}
 						closing={close.isPending}
-						onClose={() => close.mutate(text(), { onError: fail, onSuccess: () => toast.success(t('reflect.actions.closeDone')) })}
+						onClose={() => close.mutate(text(), { onSuccess: () => toast.success(t('reflect.actions.closeDone')) })}
 						onDraft={saveDraft}
 						saving={update.isPending}
 					/>

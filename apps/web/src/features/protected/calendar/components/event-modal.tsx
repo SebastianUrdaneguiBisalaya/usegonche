@@ -11,7 +11,6 @@ import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { minuteInZone, todayInZone } from '~/lib/datetime';
 import { fromDateOnly, toDateOnly } from '../../shared/dates';
 import { listStyles } from '../../shared/styles';
@@ -107,7 +106,6 @@ function EventForm({ onClose, onDelete, state }: { onClose: () => void; onDelete
 			? { allDay: true, endDate, kind, startDate, title: title.trim() }
 			: { allDay: false, endsAt: endsAt ?? '', kind, startsAt: startsAt ?? '', title: title.trim() };
 		const done = (key: 'calendar.toast.created' | 'calendar.toast.updated') => ({
-			onError: (error: unknown) => toast.error(getApiErrorMessage(error)),
 			onSuccess: () => {
 				toast.success(t(key));
 				onClose();

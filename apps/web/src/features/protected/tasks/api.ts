@@ -171,6 +171,7 @@ export const BULK_MAX = 50;
 export function useAddDependency() {
 	const refresh = useRefreshTasks();
 	return useMutation({
+		meta: { silent: true },
 		mutationFn: ({ dependsOnId, id }: { dependsOnId: string; id: string }) => unwrap(api.tasks[':id'].dependencies.$post({ json: { dependsOnId }, param: { id } })),
 		onSuccess: refresh,
 	});

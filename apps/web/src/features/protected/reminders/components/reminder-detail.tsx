@@ -6,7 +6,6 @@ import { Typography } from '~/components/ui/foundations/typography/typography';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { listStyles } from '../../shared/styles';
 import { type Reminder, reminderType, type TargetInfo, targetId, useDismiss, useSnooze } from '../api';
 import { formatDay, formatTime } from '../format';
@@ -32,7 +31,6 @@ export function ReminderDetail({ info, onClose, reminder }: { info: TargetInfo |
 	const remindAt = new Date(reminder.remindAt);
 	const dismissed = reminder.status === 'dismissed';
 	const when = `${formatDay(remindAt, locale)} ${t('reminders.row.at')} ${formatTime(remindAt, locale)}`;
-	const fail = (error: unknown) => toast.error(getApiErrorMessage(error));
 
 	return (
 		<aside className={cn(listStyles.card, 'relative flex flex-col gap-5 p-5')}>
@@ -66,13 +64,13 @@ export function ReminderDetail({ info, onClose, reminder }: { info: TargetInfo |
 					<SnoozeMenu
 						disabled={dismissed}
 						loading={snooze.isPending}
-						onSnooze={date => snooze.mutate({ id: reminder.id, remindAt: date }, { onError: fail, onSuccess: () => toast.success(t('reminders.toast.snoozed')) })}
+						onSnooze={date => snooze.mutate({ id: reminder.id, remindAt: date }, { onSuccess: () => toast.success(t('reminders.toast.snoozed')) })}
 					/>
 					<Button
 						className='w-full justify-center rounded-full py-3'
 						disabled={dismissed}
 						loading={dismiss.isPending}
-						onClick={() => dismiss.mutate([reminder.id], { onError: fail, onSuccess: () => toast.success(t('reminders.toast.dismissed')) })}
+						onClick={() => dismiss.mutate([reminder.id], { onSuccess: () => toast.success(t('reminders.toast.dismissed')) })}
 						variant='secondary'
 					>
 						<Button.Icon icon={CircleCheck} />

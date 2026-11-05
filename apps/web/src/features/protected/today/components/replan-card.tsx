@@ -7,7 +7,6 @@ import { Typography } from '~/components/ui/foundations/typography/typography';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { listStyles } from '../../shared/styles';
 import { useTasksByIds } from '../../shared/task-lookup';
 import { useDateTime } from '../../shared/use-datetime';
@@ -72,7 +71,7 @@ export function ReplanCard({ date }: { date: string }) {
 										proposal.suggestedEnd &&
 										move.mutate(
 											{ id: proposal.blockId, plannedEnd: new Date(proposal.suggestedEnd).toISOString(), plannedStart: new Date(proposal.suggestedStart).toISOString() },
-											{ onError: error => toast.error(getApiErrorMessage(error)), onSuccess: () => toast.success(t('today.replan.accepted')) }
+											{ onSuccess: () => toast.success(t('today.replan.accepted')) }
 										)
 									}
 									variant='secondary'

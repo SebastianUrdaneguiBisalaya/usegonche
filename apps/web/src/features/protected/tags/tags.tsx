@@ -4,7 +4,6 @@ import { ArrowDownUp, Plus, Tag as TagIcon } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router';
-import { toast } from 'sonner';
 import { Page } from '~/components/ui/layout/page/page';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';

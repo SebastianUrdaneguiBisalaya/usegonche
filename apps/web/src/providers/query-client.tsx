@@ -6,13 +6,15 @@ import { getApiErrorMessage, isNotFound, isSessionExpired } from '~/lib/api-erro
 /**
  * Every failed request ends up here. A 401 on a protected endpoint means the session is over
  * (the API refreshes it through its cookies), so: back to sign-in.
- * Anything else is shown as a toast, so screens never handle API errors themselves.
+ * Anything else is shown as a toast, so screens never handle API errors themselves. A mutation with `meta: { silent: true }` shows its own
+ * message instead (e.g. the dependency cycle), so the generic one is skipped.
  */
-function handleError(error: Error, id?: string) {
+function handleError(error: Error, id?: string, silent?: boolean) {
 	if (isSessionExpired(error)) {
 		window.location.assign('/auth/sign-in');
 		return;
 	}
+	if (silent) return;
 	toast.error(getApiErrorMessage(error), {
 		id,
 	});
@@ -35,7 +37,7 @@ function makeQueryClient() {
 			},
 		},
 		mutationCache: new MutationCache({
-			onError: error => handleError(error),
+			onError: (error, _variables, _result, mutation) => handleError(error, undefined, Boolean(mutation.meta?.silent)),
 		}),
 		// One toast per failing resource. A query with `meta: { optional: true }` reads something that may not exist yet, so its 404 is an answer, not a failure.
 		queryCache: new QueryCache({
