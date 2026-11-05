@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Menu } from 'lucide-react';
-import { type CSSProperties, useState } from 'react';
-import { data, type LoaderFunctionArgs, Navigate, Outlet, redirect, type ShouldRevalidateFunctionArgs, useLoaderData } from 'react-router';
+import { type CSSProperties, useLayoutEffect, useRef, useState } from 'react';
+import { data, type LoaderFunctionArgs, Navigate, Outlet, redirect, type ShouldRevalidateFunctionArgs, useLoaderData, useLocation } from 'react-router';
 import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Page } from '~/components/ui/layout/page/page';
 import { sessionKey, useSession } from '~/features/auth/api';
@@ -46,6 +46,14 @@ export default function ProtectedLayout() {
 	const { isError } = useSession();
 	const [mobileOpen, setMobileOpen] = useState(false);
 	const [commandOpen, setCommandOpen] = useState(false);
+	// The page scrolls inside `<main>`, not the window, so the router's scroll restoration does not reach it: every new page starts at the top.
+	// Only the path counts: changing filters or the page of a list (search params) keeps the scroll.
+	const { pathname } = useLocation();
+	const main = useRef<HTMLElement>(null);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: `pathname` is the trigger, not a value read inside.
+	useLayoutEffect(() => {
+		main.current?.scrollTo({ top: 0 });
+	}, [pathname]);
 	useSyncPreferences();
 
 	// The session ended while the page was open (signed out in another tab, expired): back to sign-in.
@@ -70,7 +78,7 @@ export default function ProtectedLayout() {
 						<Icon aria-hidden icon={Menu} size='md' />
 					</button>
 				</div>
-				<main className='flex min-h-0 flex-1 flex-col overflow-y-auto'>
+				<main className='flex min-h-0 flex-1 flex-col overflow-y-auto' ref={main}>
 					<Page.Root className='flex-1 py-4 sm:py-4 lg:py-4' size='full'>
 						<Outlet />
 					</Page.Root>

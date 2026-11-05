@@ -29,12 +29,13 @@ const tone: Record<string, string> = {
 
 interface AgendaCardProps {
 	blocks: DayBlock[];
+	className?: string;
 	date: string;
 	isToday: boolean;
 }
 
 /** The day as a vertical hour grid of time blocks: click an empty slot to plan one, click a block to edit it, drag a planned block to move it. */
-export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
+export function AgendaCard({ blocks, className, date, isToday }: AgendaCardProps) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
 	const { timeZone, toApi } = useDateTime();
@@ -88,7 +89,7 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 	};
 
 	return (
-		<section className={cn(listStyles.card, 'flex flex-col gap-3 p-5')}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-3 p-5', className)}>
 			<div className='flex items-center justify-between gap-3'>
 				<Typography.H3 className='text-lg font-semibold'>{t('today.agenda.title')}</Typography.H3>
 				<Button className={listStyles.pillTrigger} onClick={() => setModal({ date, kind: 'create', startMinute: isToday ? Math.ceil(nowMinute / 15) * 15 : 9 * 60 })} variant='secondary'>
@@ -96,7 +97,8 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 					<Button.Text>{t('today.agenda.new')}</Button.Text>
 				</Button>
 			</div>
-			<div className='max-h-[32rem] overflow-y-auto' ref={scroller}>
+			{/* Stacked (one column) the hours scroll inside a fixed height; side by side they fill the column's height. */}
+			<div className='max-h-[32rem] overflow-y-auto lg:max-h-none lg:min-h-0 lg:flex-1 lg:basis-0' ref={scroller}>
 				<div className='relative ml-14' style={{ height: px(MINUTES_PER_DAY) }}>
 					{HOURS.map(hour => (
 						<button

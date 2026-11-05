@@ -89,7 +89,7 @@ export default function TodayRoute() {
 							<MiniCalendar.Days>{d => <MiniCalendar.Day date={d} key={d.toISOString()} />}</MiniCalendar.Days>
 							<MiniCalendar.Navigation direction='next' />
 						</MiniCalendar>
-						<AgendaCard blocks={day.data?.blocks ?? []} date={date} isToday={isToday} />
+						<AgendaCard blocks={day.data?.blocks ?? []} className='lg:min-h-0 lg:flex-1' date={date} isToday={isToday} />
 					</div>
 					<div className='flex flex-col gap-4'>
 						<ReplanCard date={date} />
