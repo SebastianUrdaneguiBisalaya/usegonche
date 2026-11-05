@@ -16,7 +16,7 @@ interface OptionSelectProps<T extends string> {
 export function OptionSelect<T extends string>({ icon, label, onChange, options, value }: OptionSelectProps<T>) {
 	return (
 		<Select.Root onChange={next => onChange(next as T)} value={value}>
-			<Select.Trigger aria-label={label} className={cn(listStyles.pillTrigger, 'h-auto min-w-40')}>
+			<Select.Trigger aria-label={label} className={cn(listStyles.control, 'min-w-40')}>
 				<span className='flex min-w-0 items-center gap-2'>
 					{icon && <Icon aria-hidden className='text-muted-foreground' icon={icon} size='sm' />}
 					<Select.Value />

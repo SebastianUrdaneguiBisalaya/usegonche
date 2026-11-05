@@ -103,7 +103,7 @@ export function DueFilter({ onChange, value }: { onChange: (due: TaskDue) => voi
 	const t = useTranslate();
 	return (
 		<Select.Root onChange={next => onChange(next as TaskDue)} value={value}>
-			<Select.Trigger aria-label={t('tasks.filters.due.label')} className={cn(listStyles.pillTrigger, 'min-w-40')}>
+			<Select.Trigger aria-label={t('tasks.filters.due.label')} className={cn(listStyles.control, 'min-w-40')}>
 				<span className='flex min-w-0 items-center gap-2'>
 					<Icon aria-hidden className='text-muted-foreground' icon={CalendarDays} size='sm' />
 					<Select.Value />

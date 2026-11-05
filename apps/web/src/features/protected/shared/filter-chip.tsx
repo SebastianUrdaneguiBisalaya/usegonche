@@ -19,7 +19,7 @@ export function FilterChip({ active, className, count, hasCount = true, icon, la
 		<button
 			aria-pressed={active}
 			className={cn(
-				'flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+				'flex cursor-pointer items-center gap-2 h-9 rounded-full border px-3.5 text-sm font-medium transition-colors',
 				active ? 'border-border-strong bg-foreground/6' : 'border-border hover:bg-foreground/4',
 				tone === 'danger' && active ? 'text-destructive' : '',
 				className

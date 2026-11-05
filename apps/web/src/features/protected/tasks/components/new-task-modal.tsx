@@ -165,7 +165,7 @@ export function NewTaskModal({ onOpenChange, open, status }: NewTaskModalProps) 
 										value={field.value as string[]}
 									>
 										<Combobox.Label>{t('tasks.form.tags.label')}</Combobox.Label>
-										<Combobox.Input containerClassName={listStyles.field} placeholder={t('tasks.form.tags.placeholder')} />
+										<Combobox.Input containerClassName={cn(listStyles.pillInput, 'min-h-[2.625rem] px-4')} placeholder={t('tasks.form.tags.placeholder')} />
 										<Combobox.Content createLabel={name => t('tasks.form.tags.create', { name })} emptyMessage={t('tasks.form.tags.empty')}>
 											{(tags.data ?? []).map(tag => (
 												<Combobox.Item key={tag.id} label={tag.name} value={tag.id}>

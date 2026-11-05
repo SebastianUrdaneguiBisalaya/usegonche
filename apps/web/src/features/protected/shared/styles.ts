@@ -8,6 +8,8 @@ export const listStyles = {
 	iconButton: 'size-9 rounded-full p-0 text-muted-foreground hover:text-foreground',
 	/** Pill input: icon + field inside a rounded-xl outlined container. */
 	pillInput: 'rounded-xl border-border bg-foreground/[0.03] focus-within:border-border-strong',
+	/** Compact control of a list toolbar (filter, sort, range select): 36px, so it lines up with the chips and tabs next to it. */
+	control: 'h-9 rounded-xl border-border bg-foreground/[0.03] px-3 py-0',
 	/** Pill trigger / button. */
 	pillTrigger: 'rounded-xl h-full border-border bg-foreground/[0.03] px-4 py-2.5',
 } as const;

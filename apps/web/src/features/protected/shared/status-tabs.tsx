@@ -29,7 +29,7 @@ export function StatusTabs<T extends string>({ ariaLabel, counts, onChange, tabs
 			<Tabs.List aria-label={ariaLabel} className='gap-2 bg-transparent p-0'>
 				{tabs.map(tab => (
 					<Tabs.Trigger
-						className={cn('rounded-full border px-4 py-2', tab.value === value ? 'border-border-strong bg-foreground/[0.06] shadow-none' : 'border-border')}
+						className={cn('h-9 rounded-full border px-3.5 py-0', tab.value === value ? 'border-border-strong bg-foreground/[0.06] shadow-none' : 'border-border')}
 						key={tab.value}
 						value={tab.value}
 					>

@@ -15,7 +15,7 @@ export function RangeSelect({ onChange, value }: RangeSelectProps) {
 
 	return (
 		<Select.Root onChange={next => onChange(next as InboxRange)} value={value}>
-			<Select.Trigger aria-label={t('inbox.range.label')} className={cn(listStyles.pillTrigger, 'min-w-40')}>
+			<Select.Trigger aria-label={t('inbox.range.label')} className={cn(listStyles.control, 'min-w-40')}>
 				<Select.Value />
 			</Select.Trigger>
 			<Select.Content>
