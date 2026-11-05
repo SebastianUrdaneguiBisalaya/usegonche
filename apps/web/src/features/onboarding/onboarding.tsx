@@ -1,6 +1,7 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { data, type LoaderFunctionArgs, redirect, useLoaderData, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import bgDark from '~/assets/bg-usegonche-dark.png';
 import icon from '~/assets/usegonche-icon.png';
@@ -9,24 +10,34 @@ import { Stepper } from '~/components/ui/data-display/stepper/stepper';
 import { CountrySelect } from '~/components/ui/forms-inputs/country-select/country-select';
 import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Logo } from '~/components/ui/foundations/logo/logo';
-import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Image } from '~/components/ui/media-files/image/image';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
-import { useSession } from '../auth/api';
+import { requireSignedIn } from '~/lib/session.server';
+import { sessionKey } from '../auth/api';
 import { authStyles } from '../auth/styles';
-import { useUpdateSettings, useUserSettings } from '../protected/settings/api';
+import { settingsKey, useUpdateSettings } from '../protected/settings/api';
 import { useFlags } from '../protected/settings/general-panel';
 import { countryForTimezone, timezoneForCountry } from '../protected/settings/timezone';
 import { usePreferences } from '../protected/settings/use-preferences';
-import { ThemeChoice } from './theme-choice';
 import { listStyles } from '../protected/shared/styles';
+import { ThemeChoice } from './theme-choice';
 
 const STEPS = ['appearance', 'region', 'finish'] as const;
 const themes = ['dark', 'light', 'system'] as const;
 const languages = ['system', 'en', 'es'] as const;
+
+/**
+ * Who is signed in and how far the onboarding went are resolved on the server, so the wizard is the first paint: signed out goes to sign-in
+ * and a finished onboarding to `/`, both as redirects. What it resolves seeds the client cache (no second request).
+ */
+export async function loader({ context, request }: LoaderFunctionArgs) {
+	const { headers, session, settings } = await requireSignedIn(request, context);
+	if (settings.onboardingCompletedAt) throw redirect('/', { headers });
+	return data({ session, settings }, { headers });
+}
 
 /**
  * Mandatory onboarding, shown after sign-up and on every sign-in until it is completed: theme, language, country and time zone.
@@ -34,22 +45,11 @@ const languages = ['system', 'en', 'es'] as const;
  * It cannot be skipped: the signed-in layout sends the user back here while `onboardingCompletedAt` is empty.
  */
 export default function OnboardingRoute() {
-	const t = useTranslate();
-	const session = useSession();
-	const settings = useUserSettings();
-
-	if (session.isPending || (session.data && settings.isPending)) {
-		return (
-			<Shell>
-				<Skeleton className='gap-4' label={t('onboarding.progress')}>
-					<Skeleton.Item className='h-64 w-full rounded-2xl' />
-				</Skeleton>
-			</Shell>
-		);
-	}
-	if (!session.data) return <Navigate replace to='/auth/sign-in' />;
-	if (settings.data?.onboardingCompletedAt) return <Navigate replace to='/' />;
-	return <Wizard initialCountry={settings.data?.country ?? null} initialTimezone={settings.data?.timezone ?? null} />;
+	const { session, settings } = useLoaderData<typeof loader>();
+	const queryClient = useQueryClient();
+	if (queryClient.getQueryData(sessionKey) === undefined) queryClient.setQueryData(sessionKey, session);
+	if (queryClient.getQueryData(settingsKey) === undefined) queryClient.setQueryData(settingsKey, settings);
+	return <Wizard initialCountry={settings.country ?? null} initialTimezone={settings.timezone ?? null} />;
 }
 
 /** Dark-only full-screen backdrop with the glass card, like the auth screens. */

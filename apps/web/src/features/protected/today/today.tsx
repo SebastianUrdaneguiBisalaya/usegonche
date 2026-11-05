@@ -93,7 +93,7 @@ export default function TodayRoute() {
 					</div>
 					<div className='flex flex-col gap-4'>
 						<ReplanCard date={date} />
-						{day.data && <CapacityCard capacity={day.data.capacity} />}
+						<CapacityCard capacity={day.data?.capacity} />
 						<PlanCard
 							className='min-h-0 flex-1'
 							error={day.isError}

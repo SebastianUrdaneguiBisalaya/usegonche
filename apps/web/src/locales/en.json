@@ -1628,7 +1628,8 @@
     "blocked": {
       "title": "Blocked",
       "count_one": "{{count}} task",
-      "count_other": "{{count}} tasks"
+      "count_other": "{{count}} tasks",
+      "empty": "Nothing is blocked."
     },
     "inbox": {
       "title": "Inbox",
@@ -1684,6 +1685,7 @@
     "replan": {
       "title": "Replan",
       "subtitle": "Missed or interrupted blocks. Nothing changes until you accept.",
+      "empty": "No blocks to replan.",
       "reason": {
         "missed": "Missed",
         "interrupted": "Interrupted"

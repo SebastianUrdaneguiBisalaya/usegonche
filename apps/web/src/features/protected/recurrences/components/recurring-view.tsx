@@ -30,7 +30,9 @@ function Upcoming({ recurrenceId }: { recurrenceId: string }) {
 	const day = useDay();
 	const occurrences = useOccurrences(recurrenceId);
 	const items = occurrences.data ?? [];
-	if (occurrences.isPending || occurrences.isError) return null;
+	// The line keeps its place while it loads, so the card does not grow afterwards.
+	if (occurrences.isPending) return <Skeleton className='h-6 w-48' />;
+	if (occurrences.isError) return null;
 	return (
 		<div className='flex flex-wrap items-center gap-2 text-xs text-muted-foreground'>
 			<CalendarClock aria-hidden className='size-4' />

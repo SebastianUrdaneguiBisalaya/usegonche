@@ -39,6 +39,12 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<LoaderDat
 	return { data: (await res.json()) as InboxPage, params };
 }
 
+/**
+ * Client navigations (and filter or page changes) skip the server: the page paints at once and react-query serves its cache, or loads behind
+ * skeleton rows. The server `loader` only runs for the document request, so a reload still arrives with the data.
+ */
+export const clientLoader = (): null => null;
+
 const emptyIds: ReadonlySet<string> = new Set();
 
 export default function InboxPage() {
