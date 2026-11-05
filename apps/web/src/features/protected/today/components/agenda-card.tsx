@@ -6,7 +6,6 @@ import { Typography } from '~/components/ui/foundations/typography/typography';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { minuteInZone } from '~/lib/datetime';
 import { listStyles } from '../../shared/styles';
 import { useTasksByIds } from '../../shared/task-lookup';
@@ -82,10 +81,7 @@ export function AgendaCard({ blocks, date, isToday }: AgendaCardProps) {
 			if (!moved) return setModal({ block, date, kind: 'edit', title: titleOf(block) });
 			if (minute === startMinute) return;
 			const length = endMinute - startMinute;
-			move.mutate(
-				{ id: block.id, plannedEnd: toApi(date, minute + length), plannedStart: toApi(date, minute) },
-				{ onError: error => toast.error(getApiErrorMessage(error)), onSuccess: () => toast.success(t('today.toast.blockUpdated')) }
-			);
+			move.mutate({ id: block.id, plannedEnd: toApi(date, minute + length), plannedStart: toApi(date, minute) }, { onSuccess: () => toast.success(t('today.toast.blockUpdated')) });
 		};
 		window.addEventListener('pointermove', onMove);
 		window.addEventListener('pointerup', onUp);

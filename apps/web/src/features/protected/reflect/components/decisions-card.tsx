@@ -9,7 +9,6 @@ import { Typography } from '~/components/ui/foundations/typography/typography';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { apiDateOnly, fromDateOnly, toDateOnly } from '../../shared/dates';
 import { listStyles } from '../../shared/styles';
 import { useTasksByIds } from '../../shared/task-lookup';
@@ -57,7 +56,6 @@ export function DecisionsCard({ review }: { review: Review }) {
 		apply.mutate(
 			selected.map(([taskId, choice]) => ({ action: choice.action, taskId, ...(needsDate(choice.action) && { date: choice.date }) })),
 			{
-				onError: error => toast.error(getApiErrorMessage(error)),
 				onSuccess: () => {
 					setChoices(new Map());
 					toast.success(t('reflect.decisions.applied'));

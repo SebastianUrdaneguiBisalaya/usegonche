@@ -9,7 +9,6 @@ import { Page } from '~/components/ui/layout/page/page';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { QuickCapture } from '../inbox/components/quick-capture';
 import { useMaterializeRecurrences } from '../recurrences/api';
 import { fromDateOnly, toDateOnly } from '../shared/dates';
@@ -49,8 +48,7 @@ export default function TodayRoute() {
 	const update = useUpdateTask();
 	const items = day.data?.items ?? [];
 
-	const fail = (error: unknown) => toast.error(getApiErrorMessage(error));
-	const save = (taskIds: string[]) => setItems.mutate(taskIds, { onError: fail, onSuccess: () => toast.success(t('today.toast.planUpdated')) });
+	const save = (taskIds: string[]) => setItems.mutate(taskIds, { onSuccess: () => toast.success(t('today.toast.planUpdated')) });
 	const taskIds = items.map(item => item.task.id);
 
 	const label = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', weekday: 'short', year: 'numeric' }).format(selected);
@@ -108,7 +106,7 @@ export default function TodayRoute() {
 							onToggleDone={(id, done) =>
 								update.mutate(
 									{ changes: { status: done ? 'done' : 'todo' }, id },
-									{ onError: fail, onSettled: () => void day.refetch(), onSuccess: () => toast.success(done ? t('tasks.toast.completed') : t('tasks.toast.statusChanged')) }
+									{ onSettled: () => void day.refetch(), onSuccess: () => toast.success(done ? t('tasks.toast.completed') : t('tasks.toast.statusChanged')) }
 								)
 							}
 							pending={setItems.isPending || update.isPending}

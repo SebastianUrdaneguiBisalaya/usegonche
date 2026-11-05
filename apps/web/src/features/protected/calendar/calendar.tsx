@@ -8,7 +8,6 @@ import { Page } from '~/components/ui/layout/page/page';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { fromDateOnly, toDateOnly } from '../shared/dates';
 import { listStyles } from '../shared/styles';
 import { useDateTime } from '../shared/use-datetime';
@@ -55,8 +54,7 @@ export default function CalendarRoute() {
 	const list = events.data ?? [];
 	const byId = useMemo(() => new Map(list.map(event => [event.id, event])), [list]);
 
-	const onError = (error: unknown) => toast.error(getApiErrorMessage(error));
-	const moved = { onError, onSuccess: () => toast.success(t('calendar.toast.updated')) };
+	const moved = { onSuccess: () => toast.success(t('calendar.toast.updated')) };
 	const timeRange = (start: Date, end: Date) => ({ endsAt: fromWall(end, timeZone), startsAt: fromWall(start, timeZone) });
 	const onMove = ({ end, id, start }: CalendarEventMove) => {
 		if (start && end && byId.has(id)) update.mutate({ allDay: false, id, ...timeRange(start, end) }, moved);

@@ -6,7 +6,6 @@ import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { SettingsDialog } from '~/components/ui/overlays-feedback/settings-dialog/settings-dialog';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { listStyles } from '../shared/styles';
 import { useUpdateSettings, useUserSettings } from './api';
 import { timezoneForCountry } from './timezone';
@@ -39,10 +38,7 @@ export function GeneralPanel() {
 	const country = update.isPending ? (update.variables.country ?? null) : (settings?.country ?? null);
 
 	const changeCountry = (code: string) => {
-		update.mutate(
-			{ country: code, timezone: timezoneForCountry(code) },
-			{ onError: error => toast.error(getApiErrorMessage(error)), onSuccess: () => toast.success(t('protected.settings.general.saved')) }
-		);
+		update.mutate({ country: code, timezone: timezoneForCountry(code) }, { onSuccess: () => toast.success(t('protected.settings.general.saved')) });
 	};
 
 	return (

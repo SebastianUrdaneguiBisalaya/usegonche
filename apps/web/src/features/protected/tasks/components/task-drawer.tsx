@@ -12,7 +12,6 @@ import { ConfirmDialog } from '~/components/ui/overlays-feedback/confirm-dialog/
 import { Drawer } from '~/components/ui/overlays-feedback/drawer/drawer';
 import { useRetained } from '~/hooks/use-retained';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { TargetReminder } from '../../reminders/components/target-reminder';
 import { shortcutKeys } from '../../shared/shortcut-keys';
 import { useDateTime } from '../../shared/use-datetime';
@@ -93,7 +92,7 @@ function Body({ onClose, onOpenTask, onSetStatus, task }: Omit<TaskDrawerProps, 
 
 	const change = (changes: UpdateTaskBody) => {
 		if (changes.status) return onSetStatus(task, changes.status);
-		update.mutate({ changes, id: task.id }, { onError: error => toast.error(getApiErrorMessage(error)), onSuccess: () => toast.success(t('tasks.toast.updated')) });
+		update.mutate({ changes, id: task.id }, { onSuccess: () => toast.success(t('tasks.toast.updated')) });
 	};
 
 	useHotkeys(COMPLETE_COMBO, () => onSetStatus(task, finished ? 'todo' : 'done'), { group: 'tasks', ignoreInputs: false, label: t('tasks.drawer.completeShortcut') });

@@ -8,7 +8,6 @@ import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { type Task, useCreateTask, useSubtasks, useUpdateTask } from '../api';
 
 /** The subtasks of a task as a checklist (one level only) with its progress bar, and a field to add another. A subtask has none of its own. */
@@ -31,8 +30,8 @@ export function SubtasksSection({ onOpen, task }: { onOpen: (id: string) => void
 			await create.mutateAsync({ parentId: task.id, title: text });
 			setTitle('');
 			toast.success(t('tasks.toast.subtaskAdded'));
-		} catch (error) {
-			toast.error(getApiErrorMessage(error));
+		} catch {
+			// The global mutation handler already toasted the error.
 		}
 	};
 

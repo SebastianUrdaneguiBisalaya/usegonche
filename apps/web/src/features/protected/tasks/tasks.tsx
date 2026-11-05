@@ -12,7 +12,7 @@ import { ConfirmDialog } from '~/components/ui/overlays-feedback/confirm-dialog/
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { api } from '~/lib/api';
-import { getApiErrorMessage, unwrap } from '~/lib/api-error';
+import { unwrap } from '~/lib/api-error';
 import { RecurringView } from '../recurrences/components/recurring-view';
 import { OptionSelect } from '../shared/option-select';
 import { PAGE_SIZE } from '../shared/paged';
@@ -110,8 +110,6 @@ export default function TasksRoute() {
 	const remove = useDeleteTask();
 	const bulk = useBulkUpdate();
 
-	const fail = useCallback((error: unknown) => toast.error(getApiErrorMessage(error)), []);
-
 	/** Every status change (drag, inline, drawer, shortcut) goes through here, so each one can be undone from the toast. */
 	const onSetStatus = useCallback(
 		(task: Task, status: TaskStatus) => {
@@ -120,24 +118,23 @@ export default function TasksRoute() {
 			update.mutate(
 				{ changes: { status }, id: task.id },
 				{
-					onError: fail,
 					onSuccess: () =>
 						toast.success(status === 'done' ? t('tasks.toast.completed') : t('tasks.toast.statusChanged'), {
-							action: { label: t('tasks.toast.undo'), onClick: () => update.mutate({ changes: { status: previous }, id: task.id }, { onError: fail }) },
+							action: { label: t('tasks.toast.undo'), onClick: () => update.mutate({ changes: { status: previous }, id: task.id }) },
 						}),
 				}
 			);
 		},
-		[fail, t, update]
+		[t, update]
 	);
 
 	const onSetPriority = useCallback(
-		(task: Task, priority: TaskPriority) => update.mutate({ changes: { priority }, id: task.id }, { onError: fail, onSuccess: () => toast.success(t('tasks.toast.updated')) }),
-		[fail, t, update]
+		(task: Task, priority: TaskPriority) => update.mutate({ changes: { priority }, id: task.id }, { onSuccess: () => toast.success(t('tasks.toast.updated')) }),
+		[t, update]
 	);
 	const onSetDue = useCallback(
-		(task: Task, dueDate: string | null) => update.mutate({ changes: { dueDate }, id: task.id }, { onError: fail, onSuccess: () => toast.success(t('tasks.toast.updated')) }),
-		[fail, t, update]
+		(task: Task, dueDate: string | null) => update.mutate({ changes: { dueDate }, id: task.id }, { onSuccess: () => toast.success(t('tasks.toast.updated')) }),
+		[t, update]
 	);
 
 	const onBulkApply = useCallback(
@@ -145,7 +142,6 @@ export default function TasksRoute() {
 			bulk.mutate(
 				{ changes, ids: [...selectedIds] },
 				{
-					onError: fail,
 					onSuccess: items => {
 						setSelectedIds(emptyIds);
 						toast.success(t('tasks.toast.bulk', { count: items.length }));
@@ -153,7 +149,7 @@ export default function TasksRoute() {
 				}
 			);
 		},
-		[bulk, fail, selectedIds, t]
+		[bulk, selectedIds, t]
 	);
 
 	useHotkeys('n', () => setCreating('todo'), { group: 'tasks', label: t('tasks.new') });

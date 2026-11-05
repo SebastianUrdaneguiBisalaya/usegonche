@@ -8,7 +8,6 @@ import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { formatRelative } from '../../shared/relative-time';
 import { type Task, useBlockers, useCreateBlocker, useResolveBlocker } from '../api';
 
@@ -41,8 +40,8 @@ export function BlockersSection({ task }: { task: Task }) {
 			await create.mutateAsync({ id: task.id, reason: text });
 			setReason('');
 			toast.success(t('tasks.toast.blockerAdded'));
-		} catch (error) {
-			toast.error(getApiErrorMessage(error));
+		} catch {
+			// The global mutation handler already toasted the error.
 		}
 	};
 

@@ -101,6 +101,7 @@ export function useRevision(noteId: string, revisionId: string | undefined) {
 export function useRestoreRevision() {
 	const queryClient = useQueryClient();
 	return useMutation({
+		meta: { silent: true },
 		mutationFn: ({ id, revisionId }: { id: string; revisionId: string }) => unwrap(api.notes[':id'].revisions[':revisionId'].restore.$post({ param: { id, revisionId } })),
 		onSuccess: note => {
 			queryClient.setQueryData(['notes', 'one', note.id], note);
@@ -131,6 +132,7 @@ export async function uploadNoteFile(noteId: string, file: File, onProgress: (pe
 export function useDeleteNoteFile(noteId: string) {
 	const queryClient = useQueryClient();
 	return useMutation({
+		meta: { silent: true },
 		mutationFn: (id: string) => unwrap(api.attachments[':id'].$delete({ param: { id } })),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notes', 'files', noteId] }),
 	});
@@ -159,6 +161,7 @@ export function useNoteReminder(noteId: string, enabled = true) {
 export function useSetNoteReminder(noteId: string) {
 	const queryClient = useQueryClient();
 	return useMutation({
+		meta: { silent: true },
 		mutationFn: ({ id, remindAt }: { id?: string; remindAt: Date }) =>
 			id
 				? unwrap(api.reminders[':id'].$patch({ json: { remindAt: remindAt.toISOString() }, param: { id } }))
@@ -170,6 +173,7 @@ export function useSetNoteReminder(noteId: string) {
 export function useRemoveNoteReminder(noteId: string) {
 	const queryClient = useQueryClient();
 	return useMutation({
+		meta: { silent: true },
 		mutationFn: (id: string) => unwrap(api.reminders[':id'].$delete({ param: { id } })),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: reminderKey(noteId) }),
 	});

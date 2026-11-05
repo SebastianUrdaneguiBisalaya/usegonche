@@ -11,7 +11,6 @@ import { Drawer } from '~/components/ui/overlays-feedback/drawer/drawer';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useMediaQuery } from '~/hooks/use-media-query';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { ListSearch } from '../shared/list-search';
 import { PAGE_SIZE } from '../shared/paged';
 import { useProjectOptions } from '../shared/projects';
@@ -185,8 +184,8 @@ export default function NotesRoute() {
 					if (!deleting) return;
 					try {
 						await remove.mutateAsync(deleting.id);
-					} catch (error) {
-						toast.error(getApiErrorMessage(error));
+					} catch {
+						// The global mutation handler already toasted the error.
 						return;
 					}
 					toast.success(t('notes.toast.deleted'));

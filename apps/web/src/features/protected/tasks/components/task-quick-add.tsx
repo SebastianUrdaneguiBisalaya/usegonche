@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Pill } from '~/components/ui/data-display/pill/pill';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { fromDateOnly } from '../../shared/dates';
 import { QuickAdd } from '../../shared/quick-add';
 import { QuickAddDialog } from '../../shared/quick-add-dialog';
@@ -53,19 +52,14 @@ export function TaskQuickAdd({ projects }: TaskQuickAddProps) {
 			throw new Error('empty_title');
 		}
 		const matched = matchProject(projects, task.projectName);
-		try {
-			const created = await create.mutateAsync({
-				title: task.title.slice(0, TITLE_MAX),
-				...(matched && { projectId: matched.id }),
-				...(task.priority && { priority: task.priority }),
-				...(task.dueDate && { dueDate: task.dueDate }),
-				...(task.estimatedMinutes && { estimatedMinutes: task.estimatedMinutes }),
-			});
-			toast.success(t('tasks.toast.created'), { action: { label: t('tasks.toast.undo'), onClick: () => remove.mutate(created.id) } });
-		} catch (error) {
-			toast.error(getApiErrorMessage(error));
-			throw error;
-		}
+		const created = await create.mutateAsync({
+			title: task.title.slice(0, TITLE_MAX),
+			...(matched && { projectId: matched.id }),
+			...(task.priority && { priority: task.priority }),
+			...(task.dueDate && { dueDate: task.dueDate }),
+			...(task.estimatedMinutes && { estimatedMinutes: task.estimatedMinutes }),
+		});
+		toast.success(t('tasks.toast.created'), { action: { label: t('tasks.toast.undo'), onClick: () => remove.mutate(created.id) } });
 	};
 
 	return (

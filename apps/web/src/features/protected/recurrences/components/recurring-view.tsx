@@ -9,7 +9,6 @@ import { ConfirmDialog } from '~/components/ui/overlays-feedback/confirm-dialog/
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { apiDateOnly, fromDateOnly } from '../../shared/dates';
 import { listStyles } from '../../shared/styles';
 import { priorityClass } from '../../tasks/display';
@@ -146,8 +145,8 @@ export function RecurringView({ creating, onCreatingChange }: RecurringViewProps
 					try {
 						await remove.mutateAsync(deleting.id);
 						toast.success(t('recurrences.toast.deleted'));
-					} catch (error) {
-						toast.error(getApiErrorMessage(error));
+					} catch {
+						// The global mutation handler already toasted the error.
 					}
 					setDeleting(undefined);
 				}}

@@ -7,7 +7,6 @@ import { Select } from '~/components/ui/forms-inputs/select/select';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { listStyles } from '../../shared/styles';
 import { useDateTime } from '../../shared/use-datetime';
 import { type DayBlock, useCloseBlock, useCreateBlock, useDeleteBlock, useMoveBlock, useOpenTasks } from '../api';
@@ -52,7 +51,6 @@ function BlockForm({ onClose, state }: { onClose: () => void; state: BlockModalS
 	const close = useCloseBlock();
 	const remove = useDeleteBlock();
 	const pending = create.isPending || move.isPending || close.isPending || remove.isPending;
-	const fail = (error: unknown) => toast.error(getApiErrorMessage(error));
 
 	const needle = query.trim().toLowerCase();
 	const options = (open.data ?? []).filter(task => task.title.toLowerCase().includes(needle)).slice(0, 8);
@@ -70,9 +68,9 @@ function BlockForm({ onClose, state }: { onClose: () => void; state: BlockModalS
 		if (block) {
 			const unchanged = start === initialStart && duration === initialDuration;
 			if (unchanged) return onClose();
-			return move.mutate({ id: block.id, ...range() }, { onError: fail, onSuccess: () => done('today.toast.blockUpdated') });
+			return move.mutate({ id: block.id, ...range() }, { onSuccess: () => done('today.toast.blockUpdated') });
 		}
-		create.mutate({ ...range(), ...(taskId && { taskId }), ...(title.trim() && { title: title.trim() }) }, { onError: fail, onSuccess: () => done('today.toast.blockCreated') });
+		create.mutate({ ...range(), ...(taskId && { taskId }), ...(title.trim() && { title: title.trim() }) }, { onSuccess: () => done('today.toast.blockCreated') });
 	};
 
 	return (
@@ -143,7 +141,7 @@ function BlockForm({ onClose, state }: { onClose: () => void; state: BlockModalS
 							<>
 								<Button
 									disabled={pending}
-									onClick={() => close.mutate({ id: block.id, status: 'done' }, { onError: fail, onSuccess: () => done('today.toast.blockDone') })}
+									onClick={() => close.mutate({ id: block.id, status: 'done' }, { onSuccess: () => done('today.toast.blockDone') })}
 									type='button'
 									variant='secondary'
 								>
@@ -151,18 +149,13 @@ function BlockForm({ onClose, state }: { onClose: () => void; state: BlockModalS
 								</Button>
 								<Button
 									disabled={pending}
-									onClick={() => close.mutate({ id: block.id, status: 'missed' }, { onError: fail, onSuccess: () => done('today.toast.blockMissed') })}
+									onClick={() => close.mutate({ id: block.id, status: 'missed' }, { onSuccess: () => done('today.toast.blockMissed') })}
 									type='button'
 									variant='ghost'
 								>
 									<Button.Text>{t('today.block.markMissed')}</Button.Text>
 								</Button>
-								<Button
-									disabled={pending}
-									onClick={() => remove.mutate(block.id, { onError: fail, onSuccess: () => done('today.toast.blockDeleted') })}
-									type='button'
-									variant='destructive'
-								>
+								<Button disabled={pending} onClick={() => remove.mutate(block.id, { onSuccess: () => done('today.toast.blockDeleted') })} type='button' variant='destructive'>
 									<Button.Text>{t('today.block.delete')}</Button.Text>
 								</Button>
 							</>

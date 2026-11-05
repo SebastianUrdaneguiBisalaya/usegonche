@@ -2,7 +2,6 @@ import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '~/components/ui/overlays-feedback/confirm-dialog/confirm-dialog';
 import { useTranslate } from '~/hooks/use-translate';
-import { getApiErrorMessage } from '~/lib/api-error';
 import { type CalendarEventItem, useDeleteEvent } from '../api';
 
 interface DeleteEventDialogProps {
@@ -24,8 +23,8 @@ export function DeleteEventDialog({ event, onClose }: DeleteEventDialogProps) {
 					await remove.mutateAsync(event.id);
 					toast.success(t('calendar.toast.deleted'));
 					onClose();
-				} catch (error) {
-					toast.error(getApiErrorMessage(error));
+				} catch {
+					// The global mutation handler already toasted the error.
 				}
 			}}
 			onOpenChange={open => !open && onClose()}
