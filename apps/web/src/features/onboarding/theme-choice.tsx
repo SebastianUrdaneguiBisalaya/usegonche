@@ -1,3 +1,5 @@
+import bgDark from '~/assets/bg-usegonche-dark.png';
+import bgLight from '~/assets/bg-usegonche-light.png';
 import type { ThemePreference } from '~/components/ui/actions-controls/switch-theme/switch-theme';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 
@@ -9,27 +11,32 @@ interface ThemeChoiceProps {
 	value: ThemePreference;
 }
 
-const dots = (
+/** White dots on the dark artwork (also the dark half of "system"), dark dots on the light one. */
+const Dots = ({ light }: { light: boolean }) => (
 	<span aria-hidden className='absolute top-2 left-2 flex gap-1'>
-		<span className='size-1 rounded-full bg-white/60' />
-		<span className='size-1 rounded-full bg-white/40' />
-		<span className='size-1 rounded-full bg-white/30' />
+		<span className={cn('size-1 rounded-full', light ? 'bg-black/60' : 'bg-white/60')} />
+		<span className={cn('size-1 rounded-full', light ? 'bg-black/40' : 'bg-white/40')} />
+		<span className={cn('size-1 rounded-full', light ? 'bg-black/30' : 'bg-white/30')} />
 	</span>
 );
 
-/** Plain placeholder previews (no artwork yet): a dark box, a light box, and one split in two for "system". Swap the contents for images when they exist. */
+/** Previews with the app artwork: the dark image, the light image, and both split in half for "system". */
 function Preview({ value }: { value: ThemePreference }) {
 	return (
 		<span aria-hidden className='relative flex h-24 w-full max-w-44 overflow-hidden rounded-xl border border-white/10'>
 			{value === 'system' ? (
 				<>
-					<span className='w-1/2 bg-black' />
-					<span className='w-1/2 bg-neutral-200' />
+					<span className='relative w-1/2 overflow-hidden'>
+						<img alt='' className='absolute inset-0 h-full w-[200%] max-w-none object-cover' src={bgDark} />
+					</span>
+					<span className='relative w-1/2 overflow-hidden'>
+						<img alt='' className='absolute inset-0 left-auto right-0 h-full w-[200%] max-w-none object-cover' src={bgLight} />
+					</span>
 				</>
 			) : (
-				<span className={cn('size-full', value === 'dark' ? 'bg-black' : 'bg-neutral-100')} />
+				<img alt='' className='size-full object-cover' src={value === 'dark' ? bgDark : bgLight} />
 			)}
-			{dots}
+			<Dots light={value === 'light'} />
 		</span>
 	);
 }
