@@ -24,7 +24,7 @@ export function AvailabilityPanel() {
 	return (
 		<SettingsDialog.Section title={t('protected.settings.availability.title')}>
 			{availability.isPending ? (
-				<Skeleton className='h-40 w-full' />
+				<AvailabilitySkeleton />
 			) : availability.isError ? (
 				<div className='flex flex-col items-start gap-3 py-4'>
 					<p className='text-sm text-muted-foreground'>{t('protected.settings.availability.error')}</p>
@@ -40,6 +40,43 @@ export function AvailabilityPanel() {
 	);
 }
 
+/** Weekday name in the user's language. 2024-01-01 is a Monday, so weekday 1..7 maps to Mon..Sun. */
+function useDayName(locale: string) {
+	return useMemo(() => {
+		const format = new Intl.DateTimeFormat(locale, { weekday: 'long' });
+		return (weekday: number) => format.format(new Date(2024, 0, weekday));
+	}, [locale]);
+}
+
+/** The form's layout while the template loads: the texts and weekdays are known, only the time windows and the total wait. */
+function AvailabilitySkeleton() {
+	const t = useTranslate();
+	const { locale } = useLanguage();
+	const dayName = useDayName(locale);
+	return (
+		<div aria-busy className='flex flex-col gap-4 py-4'>
+			<p className='text-sm text-muted-foreground'>{t('protected.settings.availability.description')}</p>
+			<ul className='flex flex-col divide-y divide-border'>
+				{WEEKDAYS.map(weekday => (
+					<li className='flex flex-col gap-2 py-3 sm:flex-row sm:items-start sm:justify-between' key={weekday}>
+						<span className='w-32 pt-2 text-sm font-medium capitalize'>{dayName(weekday)}</span>
+						<div className='flex flex-1 flex-col gap-2'>
+							<Skeleton className='h-9 w-80 max-w-full rounded-full' />
+							<Skeleton className='h-9 w-28 rounded-full' />
+						</div>
+					</li>
+				))}
+			</ul>
+			<Layout.HStack align='center' justify='between'>
+				<Skeleton className='h-5 w-40' />
+				<Button disabled>
+					<Button.Text>{t('protected.settings.availability.save')}</Button.Text>
+				</Button>
+			</Layout.HStack>
+		</div>
+	);
+}
+
 function AvailabilityForm({ saved }: { saved: AvailabilityWindow[] }) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
@@ -49,12 +86,7 @@ function AvailabilityForm({ saved }: { saved: AvailabilityWindow[] }) {
 	);
 	const save = useSetAvailability();
 	const [drafts, setDrafts] = useState<Draft[]>(() => withKeys(saved));
-
-	// 2024-01-01 is a Monday, so weekday 1..7 maps to Mon..Sun.
-	const dayName = useMemo(() => {
-		const format = new Intl.DateTimeFormat(locale, { weekday: 'long' });
-		return (weekday: number) => format.format(new Date(2024, 0, weekday));
-	}, [locale]);
+	const dayName = useDayName(locale);
 
 	const errors = findErrors(drafts);
 	const payload = toPayload(drafts);
