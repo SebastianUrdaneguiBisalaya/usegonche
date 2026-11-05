@@ -397,10 +397,7 @@
         "label": "Filtrar por etiqueta",
         "all": "Todas las etiquetas"
       },
-      "page": {
-        "label": "Página",
-        "value": "Página: {{page}}"
-      }
+      "clear": "Limpiar filtros"
     },
     "columns": {
       "title": "Título",
@@ -548,10 +545,6 @@
         "all": "Cualquier fecha objetivo",
         "overdue": "Vencidas",
         "soon": "Vencen en 14 días"
-      },
-      "page": {
-        "label": "Página",
-        "value": "Página: {{page}}"
       }
     },
     "sort": {
@@ -696,12 +689,6 @@
       "tasks": "Más tareas",
       "projects": "Más proyectos",
       "notes": "Más notas"
-    },
-    "filters": {
-      "page": {
-        "label": "Página",
-        "value": "Página: {{page}}"
-      }
     },
     "columns": {
       "tag": "Etiqueta",
@@ -850,10 +837,7 @@
         "overdue": "Vencidas",
         "none": "Sin fecha"
       },
-      "page": {
-        "label": "Página",
-        "value": "Página: {{page}}"
-      }
+      "clear": "Limpiar filtros"
     },
     "sort": {
       "label": "Ordenar tareas",

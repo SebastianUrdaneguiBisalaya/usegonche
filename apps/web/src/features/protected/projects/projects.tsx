@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@usegonche/api-client';
-import { ArrowDownUp, Plus } from 'lucide-react';
+import { ArrowDownUp, Plus, X } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router';
@@ -11,7 +11,6 @@ import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
 import { OptionSelect } from '../shared/option-select';
-import { PageSelect } from '../shared/page-select';
 import { PAGE_SIZE } from '../shared/paged';
 import { type StatusTab, StatusTabs } from '../shared/status-tabs';
 import { listStyles } from '../shared/styles';
@@ -177,23 +176,22 @@ export default function ProjectsRoute() {
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
-				<div className={cn(listStyles.card, 'overflow-x-auto p-3')}>
-					<StatusTabs ariaLabel={t('projects.tabs.label')} counts={counts} onChange={status => void setParams({ page: 1, status })} tabs={tabs} value={params.status} />
-				</div>
-				<div className={cn(listStyles.card, 'flex flex-wrap items-center justify-between gap-3 p-3')}>
-					<div className='flex flex-wrap items-center gap-3'>
-						<GoalFilter onChange={goal => void setParams({ goal, page: 1 })} options={goalOptions} value={params.goal} />
-						<TagFilter onChange={tag => void setParams({ page: 1, tag })} options={tagOptions} value={params.tag} />
+				<div className={cn(listStyles.card, 'flex flex-col divide-y divide-border')}>
+					<div className='overflow-x-auto p-3'>
+						<StatusTabs ariaLabel={t('projects.tabs.label')} counts={counts} onChange={status => void setParams({ page: 1, status })} tabs={tabs} value={params.status} />
 					</div>
-					<div className='flex flex-wrap items-center gap-3'>
+					<div className='flex flex-wrap items-center justify-between gap-3 p-3'>
+						<div className='flex flex-wrap items-center gap-2'>
+							<GoalFilter onChange={goal => void setParams({ goal, page: 1 })} options={goalOptions} value={params.goal} />
+							<TagFilter onChange={tag => void setParams({ page: 1, tag })} options={tagOptions} value={params.tag} />
+							{(params.goal !== '' || params.tag !== '') && (
+								<Button onClick={() => void setParams({ goal: '', page: 1, tag: '' })} variant='ghost'>
+									<Button.Icon icon={X} />
+									<Button.Text>{t('projects.filters.clear')}</Button.Text>
+								</Button>
+							)}
+						</div>
 						<OptionSelect icon={ArrowDownUp} label={t('projects.sort.label')} onChange={sort => void setParams({ page: 1, sort })} options={sortOptions} value={params.sort} />
-						<PageSelect
-							label={t('projects.filters.page.label')}
-							onChange={next => void setParams({ page: next })}
-							page={meta?.page ?? page}
-							pageCount={pageCount}
-							valueLabel={t('projects.filters.page.value', { page: meta?.page ?? page })}
-						/>
 					</div>
 				</div>
 				<ProjectsTable

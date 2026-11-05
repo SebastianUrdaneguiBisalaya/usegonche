@@ -10,7 +10,6 @@ import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
 import { ListSearch } from '../shared/list-search';
 import { OptionSelect } from '../shared/option-select';
-import { PageSelect } from '../shared/page-select';
 import { PAGE_SIZE } from '../shared/paged';
 import { QuickAdd } from '../shared/quick-add';
 import { QuickAddDialog } from '../shared/quick-add-dialog';
@@ -115,13 +114,6 @@ export default function TagsRoute() {
 			<Page.Body className='min-h-0 flex-1 gap-4'>
 				<div className='flex flex-wrap items-center justify-end gap-3'>
 					<OptionSelect icon={ArrowDownUp} label={t('tags.sort.label')} onChange={(sort: TagSort) => void setParams({ page: 1, sort })} options={sortOptions} value={params.sort} />
-					<PageSelect
-						label={t('tags.filters.page.label')}
-						onChange={next => void setParams({ page: next })}
-						page={meta?.page ?? page}
-						pageCount={pageCount}
-						valueLabel={t('tags.filters.page.value', { page: meta?.page ?? page })}
-					/>
 				</div>
 				<TagsTable
 					error={list.isError}

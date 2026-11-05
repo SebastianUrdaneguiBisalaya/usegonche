@@ -11,7 +11,6 @@ import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { API_BASE } from '~/lib/api';
 import { OptionSelect } from '../shared/option-select';
-import { PageSelect } from '../shared/page-select';
 import { PAGE_SIZE } from '../shared/paged';
 import { StatusTabs } from '../shared/status-tabs';
 import { listStyles } from '../shared/styles';
@@ -171,13 +170,6 @@ export default function GoalsRoute() {
 					<div className='flex flex-wrap items-center gap-3'>
 						<OptionSelect icon={CalendarClock} label={t('goals.filters.due.label')} onChange={(due: GoalDue) => void setParams({ due, page: 1 })} options={dueOptions} value={params.due} />
 						<OptionSelect icon={ArrowDownUp} label={t('goals.sort.label')} onChange={(sort: GoalSort) => void setParams({ page: 1, sort })} options={sortOptions} value={params.sort} />
-						<PageSelect
-							label={t('goals.filters.page.label')}
-							onChange={next => void setParams({ page: next })}
-							page={meta?.page ?? page}
-							pageCount={pageCount}
-							valueLabel={t('goals.filters.page.value', { page: meta?.page ?? page })}
-						/>
 					</div>
 				</div>
 				<GoalsTable

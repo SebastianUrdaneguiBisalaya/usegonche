@@ -397,10 +397,7 @@
         "label": "Filter by tag",
         "all": "All tags"
       },
-      "page": {
-        "label": "Page",
-        "value": "Page: {{page}}"
-      }
+      "clear": "Clear filters"
     },
     "columns": {
       "title": "Title",
@@ -548,10 +545,6 @@
         "all": "Any target date",
         "overdue": "Overdue",
         "soon": "Due in 14 days"
-      },
-      "page": {
-        "label": "Page",
-        "value": "Page: {{page}}"
       }
     },
     "sort": {
@@ -696,12 +689,6 @@
       "tasks": "Most tasks",
       "projects": "Most projects",
       "notes": "Most notes"
-    },
-    "filters": {
-      "page": {
-        "label": "Page",
-        "value": "Page: {{page}}"
-      }
     },
     "columns": {
       "tag": "Tag",
@@ -850,10 +837,7 @@
         "overdue": "Overdue",
         "none": "No date"
       },
-      "page": {
-        "label": "Page",
-        "value": "Page: {{page}}"
-      }
+      "clear": "Clear filters"
     },
     "sort": {
       "label": "Sort tasks",

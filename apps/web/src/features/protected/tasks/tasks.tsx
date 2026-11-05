@@ -1,6 +1,6 @@
 import { useQueries } from '@tanstack/react-query';
 import { useHotkeys } from '@usehotkeys/react';
-import { ArrowDownUp, KanbanSquare, Layers, List, Plus, Repeat, Trash2 } from 'lucide-react';
+import { ArrowDownUp, KanbanSquare, Layers, List, Plus, Repeat, Trash2, X } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -15,7 +15,6 @@ import { api } from '~/lib/api';
 import { getApiErrorMessage, unwrap } from '~/lib/api-error';
 import { RecurringView } from '../recurrences/components/recurring-view';
 import { OptionSelect } from '../shared/option-select';
-import { PageSelect } from '../shared/page-select';
 import { PAGE_SIZE } from '../shared/paged';
 import { useProjectOptions } from '../shared/projects';
 import { listStyles } from '../shared/styles';
@@ -160,9 +159,27 @@ export default function TasksRoute() {
 	return (
 		<Fragment>
 			<Page.Header>
-				<div>
-					<Page.Title>{t('tasks.title')}</Page.Title>
-					<Page.Description>{t('tasks.subtitle')}</Page.Description>
+				<div className='flex flex-col gap-4'>
+					<div>
+						<Page.Title>{t('tasks.title')}</Page.Title>
+						<Page.Description>{t('tasks.subtitle')}</Page.Description>
+					</div>
+					<Tabs onValueChange={next => void setParams({ view: next as 'board' | 'list' | 'recurring', page: 1 })} value={view} defaultValue={view}>
+						<Tabs.List aria-label={t('tasks.views.label')} className='gap-1'>
+							<Tabs.Trigger value='board'>
+								<Tabs.TriggerIcon icon={KanbanSquare} />
+								<Tabs.TriggerTitle>{t('tasks.views.board')}</Tabs.TriggerTitle>
+							</Tabs.Trigger>
+							<Tabs.Trigger value='list'>
+								<Tabs.TriggerIcon icon={List} />
+								<Tabs.TriggerTitle>{t('tasks.views.list')}</Tabs.TriggerTitle>
+							</Tabs.Trigger>
+							<Tabs.Trigger value='recurring'>
+								<Tabs.TriggerIcon icon={Repeat} />
+								<Tabs.TriggerTitle>{t('tasks.views.recurring')}</Tabs.TriggerTitle>
+							</Tabs.Trigger>
+						</Tabs.List>
+					</Tabs>
 				</div>
 				<Page.Actions className='w-full sm:w-auto'>
 					{!recurring && <TaskQuickAdd projects={projectList} />}
@@ -174,62 +191,43 @@ export default function TasksRoute() {
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
 				{!recurring && (
-					<div className={cn(listStyles.card, 'flex flex-col gap-3 overflow-x-auto p-3')}>
-						<TaskChips
-							blocked={params.blocked}
-							counts={counts}
-							due={params.due}
-							focus={params.focus}
-							onBlockedChange={blocked => void setParams({ blocked, page: 1 })}
-							onDueChange={due => void setParams({ due, page: 1 })}
-							onFocusChange={focus => void setParams({ focus, page: 1 })}
-							showFocus={view === 'list'}
-							onStatusChange={status => void setParams({ page: 1, status })}
-							status={params.status}
-						/>
+					<div className={cn(listStyles.card, 'flex flex-col divide-y divide-border')}>
+						<div className='overflow-x-auto p-3'>
+							<TaskChips
+								blocked={params.blocked}
+								counts={counts}
+								due={params.due}
+								focus={params.focus}
+								onBlockedChange={blocked => void setParams({ blocked, page: 1 })}
+								onDueChange={due => void setParams({ due, page: 1 })}
+								onFocusChange={focus => void setParams({ focus, page: 1 })}
+								onStatusChange={status => void setParams({ page: 1, status })}
+								showFocus={view === 'list'}
+								status={params.status}
+							/>
+						</div>
+						<div className='flex flex-wrap items-center justify-between gap-3 p-3'>
+							<div className='flex flex-wrap items-center gap-2'>
+								<ProjectFilter onChange={project => void setParams({ page: 1, project })} options={projectOptions} value={params.project} />
+								<GoalFilter onChange={goal => void setParams({ goal, page: 1 })} options={goalOptions} value={params.goal} />
+								<TagFilter onChange={tag => void setParams({ page: 1, tag })} options={tagOptions} value={params.tag} />
+								<DueFilter onChange={due => void setParams({ due, page: 1 })} value={params.due} />
+								{filtered && (
+									<Button onClick={() => void setParams({ blocked: false, due: 'any', focus: false, goal: '', page: 1, project: '', tag: '' })} variant='ghost'>
+										<Button.Icon icon={X} />
+										<Button.Text>{t('tasks.filters.clear')}</Button.Text>
+									</Button>
+								)}
+							</div>
+							<div className='flex flex-wrap items-center gap-2'>
+								<OptionSelect icon={ArrowDownUp} label={t('tasks.sort.label')} onChange={sort => void setParams({ page: 1, sort })} options={sortOptions} value={params.sort} />
+								{view === 'list' && (
+									<OptionSelect icon={Layers} label={t('tasks.groupBy.label')} onChange={group => void setParams({ group })} options={groupOptions} value={params.group} />
+								)}
+							</div>
+						</div>
 					</div>
 				)}
-				<div className={cn(listStyles.card, 'flex flex-wrap items-center justify-between gap-3 p-3')}>
-					{!recurring ? (
-						<div className='flex flex-wrap items-center gap-3'>
-							<ProjectFilter onChange={project => void setParams({ page: 1, project })} options={projectOptions} value={params.project} />
-							<GoalFilter onChange={goal => void setParams({ goal, page: 1 })} options={goalOptions} value={params.goal} />
-							<TagFilter onChange={tag => void setParams({ page: 1, tag })} options={tagOptions} value={params.tag} />
-							<DueFilter onChange={due => void setParams({ due, page: 1 })} value={params.due} />
-						</div>
-					) : (
-						<span />
-					)}
-					<div className='flex flex-wrap items-center gap-3'>
-						{!recurring && <OptionSelect icon={ArrowDownUp} label={t('tasks.sort.label')} onChange={sort => void setParams({ page: 1, sort })} options={sortOptions} value={params.sort} />}
-						{view === 'list' && <OptionSelect icon={Layers} label={t('tasks.groupBy.label')} onChange={group => void setParams({ group })} options={groupOptions} value={params.group} />}
-						{view === 'list' && (
-							<PageSelect
-								label={t('tasks.filters.page.label')}
-								onChange={next => void setParams({ page: next })}
-								page={meta?.page ?? page}
-								pageCount={pageCount}
-								valueLabel={t('tasks.filters.page.value', { page: meta?.page ?? page })}
-							/>
-						)}
-						<Tabs onValueChange={next => void setParams({ view: next as 'board' | 'list' | 'recurring', page: 1 })} value={view} defaultValue={view}>
-							<Tabs.List aria-label={t('tasks.views.label')} className='gap-1'>
-								<Tabs.Trigger value='board'>
-									<Tabs.TriggerIcon icon={KanbanSquare} />
-									<Tabs.TriggerTitle>{t('tasks.views.board')}</Tabs.TriggerTitle>
-								</Tabs.Trigger>
-								<Tabs.Trigger value='list'>
-									<Tabs.TriggerIcon icon={List} />
-									<Tabs.TriggerTitle>{t('tasks.views.list')}</Tabs.TriggerTitle>
-								</Tabs.Trigger>
-								<Tabs.Trigger value='recurring'>
-									<Tabs.TriggerIcon icon={Repeat} />
-									<Tabs.TriggerTitle>{t('tasks.views.recurring')}</Tabs.TriggerTitle>
-								</Tabs.Trigger>
-							</Tabs.List>
-						</Tabs>
-					</div>
-				</div>
 				{recurring ? (
 					<RecurringView creating={creatingRule} onCreatingChange={setCreatingRule} />
 				) : view === 'board' ? (
