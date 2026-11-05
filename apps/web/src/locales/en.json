@@ -1397,7 +1397,10 @@
     "markSelected": "Mark as read ({{count}})",
     "loadError": "Reminders could not be loaded.",
     "retry": "Try again",
-    "empty": "No reminders yet. Add one from a task or a note.",
+    "empty": {
+      "title": "No reminders yet",
+      "description": "Add one from a task or a note."
+    },
     "noResults": "No reminders match.",
     "tabs": {
       "label": "Reminder status",

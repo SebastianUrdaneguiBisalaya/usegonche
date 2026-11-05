@@ -6,6 +6,7 @@ import { Button } from '~/components/ui/actions-controls/button/button';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Page } from '~/components/ui/layout/page/page';
+import { ApplicationState } from '~/components/ui/overlays-feedback/application-state/application-state';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
@@ -99,41 +100,48 @@ export default function RemindersRoute() {
 						value={q}
 					/>
 				</div>
-				<div className={cn('grid items-start gap-4', opened ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]' : '')}>
-					<div className='flex flex-col gap-3'>
-						{list.isPending ? (
-							<Skeleton className='gap-3' label={t('reminders.title')}>
-								{[0, 1, 2, 3].map(index => (
-									<Skeleton.Item className='h-16 w-full rounded-2xl' key={index} />
-								))}
-							</Skeleton>
-						) : list.isError ? (
-							<div className='flex flex-col items-center gap-3 p-10 text-center'>
-								<p className='text-sm text-muted-foreground'>{t('reminders.loadError')}</p>
-								<Button onClick={() => void list.refetch()} variant='secondary'>
-									<Button.Text>{t('reminders.retry')}</Button.Text>
-								</Button>
-							</div>
-						) : visible.length === 0 ? (
-							<p className='p-10 text-center text-sm text-muted-foreground'>{t(reminders.length === 0 ? 'reminders.empty' : 'reminders.noResults')}</p>
-						) : (
-							<ul className='flex flex-col gap-3'>
-								{visible.map(reminder => (
-									<ReminderRow
-										checked={checked.has(reminder.id)}
-										info={targets.get(targetId(reminder))}
-										key={reminder.id}
-										onCheckedChange={on => toggle(reminder.id, on)}
-										onDelete={() => remove.mutate(reminder.id, { onError: fail, onSuccess: () => toast.success(t('reminders.toast.deleted')) })}
-										onDismiss={() => dismiss.mutate([reminder.id], { onError: fail, onSuccess: () => toast.success(t('reminders.toast.dismissed')) })}
-										onOpen={() => void setOpenId(reminder.id)}
-										reminder={reminder}
-										selected={reminder.id === openId}
-									/>
-								))}
-							</ul>
-						)}
-						{list.data && sent.length === 0 && (
+				<div className={cn('grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] gap-4', opened ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]' : '')}>
+					<div className='flex min-h-0 flex-col gap-3'>
+						<div className='min-h-0 flex-1 overflow-y-auto'>
+							{list.isPending ? (
+								<Skeleton className='gap-3' label={t('reminders.title')}>
+									{[0, 1, 2, 3].map(index => (
+										<Skeleton.Item className='h-16 w-full rounded-2xl' key={index} />
+									))}
+								</Skeleton>
+							) : list.isError ? (
+								<div className='flex flex-col items-center gap-3 p-10 text-center'>
+									<p className='text-sm text-muted-foreground'>{t('reminders.loadError')}</p>
+									<Button onClick={() => void list.refetch()} variant='secondary'>
+										<Button.Text>{t('reminders.retry')}</Button.Text>
+									</Button>
+								</div>
+							) : visible.length === 0 ? (
+								<ApplicationState.EmptyState
+									className={cn(listStyles.card, 'h-full')}
+									description={reminders.length === 0 ? t('reminders.empty.description') : null}
+									icon={Bell}
+									title={reminders.length === 0 ? t('reminders.empty.title') : t('reminders.noResults')}
+								/>
+							) : (
+								<ul className='flex flex-col gap-3'>
+									{visible.map(reminder => (
+										<ReminderRow
+											checked={checked.has(reminder.id)}
+											info={targets.get(targetId(reminder))}
+											key={reminder.id}
+											onCheckedChange={on => toggle(reminder.id, on)}
+											onDelete={() => remove.mutate(reminder.id, { onError: fail, onSuccess: () => toast.success(t('reminders.toast.deleted')) })}
+											onDismiss={() => dismiss.mutate([reminder.id], { onError: fail, onSuccess: () => toast.success(t('reminders.toast.dismissed')) })}
+											onOpen={() => void setOpenId(reminder.id)}
+											reminder={reminder}
+											selected={reminder.id === openId}
+										/>
+									))}
+								</ul>
+							)}
+						</div>
+						{list.data && reminders.length > 0 && sent.length === 0 && (
 							<div className={cn(listStyles.card, 'flex items-center gap-3 px-4 py-3')}>
 								<span className='flex size-10 items-center justify-center rounded-full border border-success text-success'>
 									<Check aria-hidden className='size-5' />

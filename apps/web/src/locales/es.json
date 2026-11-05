@@ -1397,7 +1397,10 @@
     "markSelected": "Marcar como leídos ({{count}})",
     "loadError": "No se pudieron cargar los recordatorios.",
     "retry": "Reintentar",
-    "empty": "Aún no hay recordatorios. Añade uno desde una tarea o una nota.",
+    "empty": {
+      "title": "Aún no hay recordatorios",
+      "description": "Añade uno desde una tarea o una nota."
+    },
     "noResults": "Ningún recordatorio coincide.",
     "tabs": {
       "label": "Estado del recordatorio",
