@@ -1,4 +1,5 @@
 import { Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 import { Kbd } from '~/components/ui/foundations/kbd/kbd';
 import { useTranslate } from '~/hooks/use-translate';
 import { QuickAdd } from '../../shared/quick-add';
@@ -26,7 +27,10 @@ export function QuickCapture() {
 				icon={Sparkles}
 				label={t('inbox.capture.label')}
 				maxLength={CONTENT_MAX}
-				onSubmit={text => capture.mutateAsync(text)}
+				onSubmit={async text => {
+					await capture.mutateAsync(text);
+					toast.success(t('inbox.toast.captured'));
+				}}
 				pending={capture.isPending}
 				placeholder={t('inbox.capture.placeholder')}
 				submitLabel={t('inbox.capture.submit')}

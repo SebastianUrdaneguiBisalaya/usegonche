@@ -40,6 +40,7 @@ export function BlockersSection({ task }: { task: Task }) {
 		try {
 			await create.mutateAsync({ id: task.id, reason: text });
 			setReason('');
+			toast.success(t('tasks.toast.blockerAdded'));
 		} catch (error) {
 			toast.error(getApiErrorMessage(error));
 		}
@@ -75,7 +76,7 @@ export function BlockersSection({ task }: { task: Task }) {
 							<Button
 								className='shrink-0 rounded-full'
 								loading={resolve.isPending && resolve.variables?.blockerId === blocker.id}
-								onClick={() => resolve.mutate({ blockerId: blocker.id, id: task.id })}
+								onClick={() => resolve.mutate({ blockerId: blocker.id, id: task.id }, { onSuccess: () => toast.success(t('tasks.toast.blockerResolved')) })}
 								variant='secondary'
 							>
 								<Button.Text>{t('tasks.blockers.resolve')}</Button.Text>

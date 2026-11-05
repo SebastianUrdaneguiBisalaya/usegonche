@@ -60,14 +60,19 @@ function BlockForm({ onClose, state }: { onClose: () => void; state: BlockModalS
 	const valid = start !== null && start + duration <= MINUTES_PER_DAY && (editing || taskId !== null || title.trim() !== '');
 	const range = () => ({ plannedEnd: toApi(state.date, (start ?? 0) + duration), plannedStart: toApi(state.date, start ?? 0) });
 
+	const done = (key: 'today.toast.blockCreated' | 'today.toast.blockDeleted' | 'today.toast.blockDone' | 'today.toast.blockMissed' | 'today.toast.blockUpdated') => {
+		toast.success(t(key));
+		onClose();
+	};
+
 	const submit = () => {
 		if (!valid) return;
 		if (block) {
 			const unchanged = start === initialStart && duration === initialDuration;
 			if (unchanged) return onClose();
-			return move.mutate({ id: block.id, ...range() }, { onError: fail, onSuccess: onClose });
+			return move.mutate({ id: block.id, ...range() }, { onError: fail, onSuccess: () => done('today.toast.blockUpdated') });
 		}
-		create.mutate({ ...range(), ...(taskId && { taskId }), ...(title.trim() && { title: title.trim() }) }, { onError: fail, onSuccess: onClose });
+		create.mutate({ ...range(), ...(taskId && { taskId }), ...(title.trim() && { title: title.trim() }) }, { onError: fail, onSuccess: () => done('today.toast.blockCreated') });
 	};
 
 	return (
@@ -136,13 +141,28 @@ function BlockForm({ onClose, state }: { onClose: () => void; state: BlockModalS
 					<Layout.HStack gap='sm'>
 						{block && planned && (
 							<>
-								<Button disabled={pending} onClick={() => close.mutate({ id: block.id, status: 'done' }, { onError: fail, onSuccess: onClose })} type='button' variant='secondary'>
+								<Button
+									disabled={pending}
+									onClick={() => close.mutate({ id: block.id, status: 'done' }, { onError: fail, onSuccess: () => done('today.toast.blockDone') })}
+									type='button'
+									variant='secondary'
+								>
 									<Button.Text>{t('today.block.markDone')}</Button.Text>
 								</Button>
-								<Button disabled={pending} onClick={() => close.mutate({ id: block.id, status: 'missed' }, { onError: fail, onSuccess: onClose })} type='button' variant='ghost'>
+								<Button
+									disabled={pending}
+									onClick={() => close.mutate({ id: block.id, status: 'missed' }, { onError: fail, onSuccess: () => done('today.toast.blockMissed') })}
+									type='button'
+									variant='ghost'
+								>
 									<Button.Text>{t('today.block.markMissed')}</Button.Text>
 								</Button>
-								<Button disabled={pending} onClick={() => remove.mutate(block.id, { onError: fail, onSuccess: onClose })} type='button' variant='destructive'>
+								<Button
+									disabled={pending}
+									onClick={() => remove.mutate(block.id, { onError: fail, onSuccess: () => done('today.toast.blockDeleted') })}
+									type='button'
+									variant='destructive'
+								>
 									<Button.Text>{t('today.block.delete')}</Button.Text>
 								</Button>
 							</>

@@ -189,7 +189,8 @@
           "label": "País",
           "description": "Zona horaria: {{timezone}}",
           "hint": "Define tu zona horaria para planes y recordatorios."
-        }
+        },
+        "saved": "Configuración guardada"
       },
       "account": {
         "nav": "Cuenta",
@@ -344,7 +345,8 @@
       "convertedTask": "Convertido en tarea",
       "convertedProject": "Convertido en proyecto",
       "convertedNote": "Convertido en nota",
-      "bulk": "{{count}} ítems actualizados"
+      "bulk": "{{count}} ítems actualizados",
+      "captured": "Capturado"
     },
     "empty": {
       "pending": {
@@ -937,7 +939,12 @@
       "statusChanged": "Estado actualizado",
       "undo": "Deshacer",
       "bulk": "{{count}} tareas actualizadas",
-      "deleted": "Tarea eliminada"
+      "deleted": "Tarea eliminada",
+      "updated": "Tarea actualizada",
+      "blockerAdded": "Bloqueo añadido",
+      "blockerResolved": "Bloqueo resuelto",
+      "dependencyRemoved": "Dependencia eliminada",
+      "subtaskAdded": "Subtarea añadida"
     },
     "quickAdd": {
       "label": "Añadir una tarea",
@@ -1718,6 +1725,14 @@
       "due": "Fecha límite cambiada",
       "project": "Proyecto cambiado",
       "moved": "Movida"
+    },
+    "toast": {
+      "planUpdated": "Plan actualizado",
+      "blockCreated": "Bloque de tiempo creado",
+      "blockUpdated": "Bloque de tiempo actualizado",
+      "blockDone": "Bloque de tiempo marcado como hecho",
+      "blockMissed": "Bloque de tiempo marcado como perdido",
+      "blockDeleted": "Bloque de tiempo eliminado"
     }
   },
   "calendar": {
@@ -1764,7 +1779,9 @@
       "confirm": "Eliminar"
     },
     "toast": {
-      "deleted": "Evento eliminado"
+      "deleted": "Evento eliminado",
+      "created": "Evento creado",
+      "updated": "Evento actualizado"
     }
   },
   "analytics": {

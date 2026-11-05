@@ -101,7 +101,6 @@ export default function TagsRoute() {
 							onSubmit={async name => {
 								await create.mutateAsync({ ...(newColor && { color: newColor }), name });
 								setNewColor('');
-								toast.success(t('tags.toast.created'));
 							}}
 							pending={create.isPending}
 							placeholder={t('tags.add.placeholder')}
