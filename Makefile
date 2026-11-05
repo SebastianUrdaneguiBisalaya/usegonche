@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install api-dev api-dev-worker api-build api-start api-deploy-worker api-client-build web-dev web-build web-start desktop-dev desktop-build desktop-dist-mac desktop-dist-win desktop-dist-linux www-dev www-build www-start db-generate db-studio lint format typecheck test test-watch test-coverage check docker-dev docker-prod
+.PHONY: help install api-dev api-dev-worker api-build api-start api-deploy-worker api-client-build web-dev web-build web-start desktop-dev desktop-build desktop-dist-mac desktop-dist-win desktop-dist-linux mobile-dev mobile-android mobile-ios mobile-web www-dev www-build www-start db-generate db-studio lint format typecheck test test-watch test-coverage check docker-dev docker-prod
 
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2} /^## / {printf "\n%s\n", substr($$0, 4)}' $(MAKEFILE_LIST)
@@ -58,6 +58,20 @@ desktop-dist-win: ## Package the Windows app
 desktop-dist-linux: ## Package the Linux app
 	pnpm --filter desktop dist:linux
 
+## Mobile (Expo)
+
+mobile-dev: ## Start the Expo dev server (scan the QR with Expo Go or a dev build)
+	pnpm --filter mobile start
+
+mobile-android: ## Run the app on an Android emulator or device
+	pnpm --filter mobile android
+
+mobile-ios: ## Run the app on the iOS simulator
+	pnpm --filter mobile ios
+
+mobile-web: ## Run the mobile app in the browser
+	pnpm --filter mobile web
+
 ## Landing (Next.js)
 
 www-dev: ## Run the landing page with hot reload
@@ -86,7 +100,7 @@ format: ## Format the whole repo with Biome
 	pnpm format
 
 typecheck: ## Typecheck the API, the packages and the apps (rebuilds the API client first)
-	pnpm typecheck && $(MAKE) api-client-build && pnpm --filter "./apps/*" typecheck
+	pnpm typecheck
 
 test: ## Run the Vitest suite once
 	pnpm test
