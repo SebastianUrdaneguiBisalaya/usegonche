@@ -20,7 +20,7 @@ function Row({ icon, label, value }: { icon: React.ReactNode; label: string; val
 }
 
 /** On track / overdue counts and the blocker reasons that keep coming back (shown while the review is open). */
-export function SummaryCard({ review }: { review: Review }) {
+export function SummaryCard({ className, review }: { className?: string; review: Review }) {
 	const t = useTranslate();
 	const { prefill } = review;
 	if (!prefill) return null;
@@ -31,7 +31,7 @@ export function SummaryCard({ review }: { review: Review }) {
 	const blockers = prefill.recurringBlockers;
 
 	return (
-		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5')}>
+		<section className={cn(listStyles.card, 'flex flex-col gap-4 p-5', className)}>
 			<Typography.H3 className='text-base font-semibold'>{t('reflect.summary.title')}</Typography.H3>
 			<ul className='flex flex-col gap-3'>
 				<Row icon={<CircleCheck aria-hidden className='size-5 text-success' />} label={t('reflect.summary.onTrack')} value={`${Math.min(completedTasks, plannedTasks)} / ${plannedTasks}`} />

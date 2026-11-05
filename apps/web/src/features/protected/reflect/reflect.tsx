@@ -77,14 +77,14 @@ function Workspace({ review }: { review: Review }) {
 	return (
 		<>
 			<PeriodBar review={review} />
-			<div className='grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]'>
+			<div className='grid flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]'>
 				<div className='flex flex-col gap-4'>
 					<ReflectionCard markdown={reflection} onChange={setReflection} readOnly={!open} status={status} />
 					<DecisionsCard review={review} />
 					<NextFocusCard onChange={setFocus} onSave={saveFocus} pending={update.isPending} readOnly={!open} saved={savedFocusState} value={focus} />
 				</div>
 				<div className='flex flex-col gap-4'>
-					<SummaryCard review={review} />
+					<SummaryCard className='flex-1' review={review} />
 					<ActionsCard
 						closed={!open}
 						closing={close.isPending}
@@ -115,7 +115,11 @@ export default function ReflectRoute() {
 					<Page.Title>{t('reflect.title')}</Page.Title>
 					<Page.Description>{t('reflect.subtitle')}</Page.Description>
 				</div>
-				<Page.Actions className='w-full sm:w-auto'>
+				<Page.Actions className='w-full justify-end sm:w-auto'>
+					<DatePicker.Root className='w-auto' lang={pickerLang} locale={locale} onChange={next => void setParam(next ? toDateOnly(next) : null)} value={fromDateOnly(date)}>
+						<DatePicker.Trigger aria-label={t('reflect.date')} className={cn(listStyles.pillTrigger, 'h-auto')} placeholder={t('reflect.date')} />
+						<DatePicker.Content />
+					</DatePicker.Root>
 					<ToggleGroup className={cn(listStyles.pillTrigger, 'flex gap-1 p-1')} onValueChange={next => next && void setKind(next as ReviewKind)} type='single' value={kind}>
 						{kinds.map(value => (
 							<ToggleGroup.Item className='rounded-full' key={value} value={value}>
@@ -123,10 +127,6 @@ export default function ReflectRoute() {
 							</ToggleGroup.Item>
 						))}
 					</ToggleGroup>
-					<DatePicker.Root lang={pickerLang} locale={locale} onChange={next => void setParam(next ? toDateOnly(next) : null)} value={fromDateOnly(date)}>
-						<DatePicker.Trigger aria-label={t('reflect.date')} className={cn(listStyles.pillTrigger, 'h-auto')} placeholder={t('reflect.date')} />
-						<DatePicker.Content />
-					</DatePicker.Root>
 				</Page.Actions>
 			</Page.Header>
 			<Page.Body className='min-h-0 flex-1 gap-4'>
