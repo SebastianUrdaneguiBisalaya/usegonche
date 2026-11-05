@@ -1,9 +1,11 @@
+import { useHotkeys } from '@usehotkeys/react';
 import { ChevronRight, LogOut, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import icon from '~/assets/usegonche-icon.png';
 import { Avatar } from '~/components/ui/data-display/avatar/avatar';
 import { Icon } from '~/components/ui/foundations/icon/icon';
+import { Kbd } from '~/components/ui/foundations/kbd/kbd';
 import { Logo } from '~/components/ui/foundations/logo/logo';
 import { Separator } from '~/components/ui/foundations/separator/separator';
 import { Image } from '~/components/ui/media-files/image/image';
@@ -23,6 +25,8 @@ interface AppSidebarProps {
 	onMobileOpenChange: (open: boolean) => void;
 	onOpenCommand: () => void;
 }
+
+const SETTINGS_HOTKEY = 'mod+,';
 
 const avatarInitialsClassName = 'flex items-center justify-center bg-muted text-xs font-semibold text-muted-foreground';
 
@@ -68,6 +72,8 @@ export function AppSidebar({ mobileOpen, onMobileOpenChange, onOpenCommand }: Ap
 	const logout = useLogout();
 	const [collapsed, setCollapsed] = useState(false);
 	const [settingsOpen, setSettingsOpen] = useState(false);
+
+	useHotkeys(SETTINGS_HOTKEY, () => setSettingsOpen(true), { group: 'general', ignoreInputs: false, label: t('protected.settings.open') });
 
 	const name = session?.profile?.displayName ?? '';
 	const avatarUrl = session?.profile?.avatarUrl || undefined;
@@ -156,7 +162,17 @@ export function AppSidebar({ mobileOpen, onMobileOpenChange, onOpenCommand }: Ap
 							}
 						/>
 						<UserProfile.Content align='start'>
-							<UserProfile.Item icon={Settings} onSelect={() => setSettingsOpen(true)}>
+							<UserProfile.Item
+								icon={Settings}
+								onSelect={() => setSettingsOpen(true)}
+								shortcut={
+									<Kbd.Group>
+										{shortcutKeys(SETTINGS_HOTKEY).map(key => (
+											<Kbd key={key}>{key}</Kbd>
+										))}
+									</Kbd.Group>
+								}
+							>
 								{t('protected.settings.title')}
 							</UserProfile.Item>
 							<UserProfile.Item icon={LogOut} onSelect={() => logout.mutate(undefined, { onSettled: () => window.location.assign('/auth/sign-in') })}>

@@ -161,6 +161,7 @@
     "settings": {
       "title": "Configuración",
       "group": "Configuración",
+      "open": "Abrir configuración",
       "close": "Cerrar",
       "logout": "Cerrar sesión",
       "search": "Buscar en configuración",

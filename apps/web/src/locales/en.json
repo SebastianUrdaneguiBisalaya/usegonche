@@ -161,6 +161,7 @@
     "settings": {
       "title": "Settings",
       "group": "Settings",
+      "open": "Open settings",
       "close": "Close",
       "logout": "Log out",
       "search": "Search settings",
