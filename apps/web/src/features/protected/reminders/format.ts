@@ -3,9 +3,6 @@ import type { Reminder } from './api';
 export type ReminderTab = 'all' | 'dismissed' | 'snoozed' | 'upcoming';
 
 /** Upcoming = waiting to fire or already fired and not handled; Snoozed = postponed at least once and waiting; Dismissed = handled. */
-export const tabOf = (reminder: Reminder): Exclude<ReminderTab, 'all'> =>
-	reminder.status === 'dismissed' ? 'dismissed' : reminder.status === 'pending' && reminder.snoozeCount > 0 ? 'snoozed' : 'upcoming';
-
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
 /** The calendar day of a date, as "Today", "Tomorrow" or "Nov 6, 2025". */
