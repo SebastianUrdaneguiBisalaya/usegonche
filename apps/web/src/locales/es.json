@@ -1628,7 +1628,8 @@
     "blocked": {
       "title": "Bloqueadas",
       "count_one": "{{count}} tarea",
-      "count_other": "{{count}} tareas"
+      "count_other": "{{count}} tareas",
+      "empty": "No hay tareas bloqueadas."
     },
     "inbox": {
       "title": "Bandeja",
@@ -1684,6 +1685,7 @@
     "replan": {
       "title": "Replanificar",
       "subtitle": "Bloques perdidos o interrumpidos. Nada cambia hasta que aceptes.",
+      "empty": "No hay bloques por replanificar.",
       "reason": {
         "missed": "Perdido",
         "interrupted": "Interrumpido"
