@@ -241,5 +241,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ### This is NOT the Expo you know
 
 - The app uses **Expo SDK 58**, which has breaking changes versus your training data. For every Expo / React Native task, first load the matching Expo skills in `.claude/skills/` (start with `expo-overview`, which routes to the rest) instead of relying on memory.
+- Targets **iOS and Android only**, never web (the web is `apps/web`). The phone covers capturing, executing and closing the day; organizing stays on desktop, so do not port every web view.
 - Styles: use `StyleSheet.create`, declared at the bottom of each component file.
 - Run the app with local development builds (`npx expo run:ios` with Xcode and the iOS Simulator on the Mac), not Expo Go.
