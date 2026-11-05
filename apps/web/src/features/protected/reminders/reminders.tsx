@@ -1,8 +1,9 @@
 import { Bell, Check } from 'lucide-react';
-import { parseAsString, parseAsStringLiteral, useQueryState } from 'nuqs';
-import { Fragment, useMemo, useState } from 'react';
+import { parseAsInteger, parseAsString, parseAsStringLiteral, useQueryState, useQueryStates } from 'nuqs';
+import { Fragment, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
+import { Pagination } from '~/components/ui/data-display/pagination/pagination';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Typography } from '~/components/ui/foundations/typography/typography';
 import { Page } from '~/components/ui/layout/page/page';
@@ -11,42 +12,47 @@ import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useTranslate } from '~/hooks/use-translate';
 import { getApiErrorMessage } from '~/lib/api-error';
 import { ListSearch } from '../shared/list-search';
+import { PAGE_SIZE } from '../shared/paged';
 import { StatusTabs } from '../shared/status-tabs';
 import { listStyles } from '../shared/styles';
-import { targetId, useDeleteReminder, useDismiss, useReminders, useTargets } from './api';
+import { targetId, useDeleteReminder, useDismiss, useReminder, useReminders, useSentReminders, useTargets } from './api';
 import { ReminderDetail } from './components/reminder-detail';
 import { ReminderRow } from './components/reminder-row';
-import { type ReminderTab, tabOf } from './format';
 
 const tabs = ['all', 'upcoming', 'snoozed', 'dismissed'] as const;
 
 export default function RemindersRoute() {
 	const t = useTranslate();
-	const [tab, setTab] = useQueryState('tab', parseAsStringLiteral(tabs).withDefault('all'));
-	const [q, setQ] = useQueryState('q', parseAsString.withDefault(''));
+	const [{ page, q, tab }, setParams] = useQueryStates(
+		{ page: parseAsInteger.withDefault(1), q: parseAsString.withDefault(''), tab: parseAsStringLiteral(tabs).withDefault('all') },
+		{ clearOnDefault: true }
+	);
 	const [openId, setOpenId] = useQueryState('reminder', parseAsString.withDefault(''));
 	const [checked, setChecked] = useState<ReadonlySet<string>>(new Set());
 
-	const list = useReminders();
+	const list = useReminders({ page, q, tab });
+	const sentList = useSentReminders();
 	const dismiss = useDismiss();
 	const remove = useDeleteReminder();
 	const reminders = list.data?.data ?? [];
-	const targets = useTargets(reminders);
+	const meta = list.data?.meta;
 	const fail = (error: unknown) => toast.error(getApiErrorMessage(error));
 
-	const counts = useMemo(() => {
-		const result: Record<ReminderTab, number> = { all: reminders.length, dismissed: 0, snoozed: 0, upcoming: 0 };
-		for (const reminder of reminders) result[tabOf(reminder)] += 1;
-		return result;
-	}, [reminders]);
+	// Deleting or dismissing the last row of the last page leaves it empty: go back to the last one that has rows.
+	useEffect(() => {
+		if (meta && page > meta.pageCount) void setParams({ page: meta.pageCount });
+	}, [meta, page, setParams]);
 
-	const visible = useMemo(() => {
-		const needle = q.toLowerCase();
-		return reminders.filter(reminder => (tab === 'all' || tabOf(reminder) === tab) && (needle === '' || (targets.get(targetId(reminder))?.title ?? '').toLowerCase().includes(needle)));
-	}, [reminders, tab, q, targets]);
-
-	const opened = reminders.find(reminder => reminder.id === openId);
-	const sent = reminders.filter(reminder => reminder.status === 'sent');
+	const onPage = reminders.find(reminder => reminder.id === openId);
+	const linked = useReminder(openId, list.data !== undefined && !onPage);
+	// A reminder that is gone (deleted, or a wrong id in the link) closes the panel instead of showing the last copy it had.
+	const gone = linked.isError;
+	const opened = onPage ?? (gone ? undefined : linked.data);
+	useEffect(() => {
+		if (gone) void setOpenId(null);
+	}, [gone, setOpenId]);
+	const targets = useTargets(onPage || !linked.data ? reminders : [...reminders, linked.data]);
+	const sent = sentList.data?.data ?? [];
 	// With a selection "Mark as read" applies to it; otherwise to every reminder that already fired.
 	const toRead = checked.size > 0 ? [...checked].filter(id => reminders.some(reminder => reminder.id === id && reminder.status !== 'dismissed')) : sent.map(reminder => reminder.id);
 
@@ -87,15 +93,15 @@ export default function RemindersRoute() {
 				<div className={cn(listStyles.card, 'flex flex-wrap items-center justify-between gap-3 p-2')}>
 					<StatusTabs
 						ariaLabel={t('reminders.tabs.label')}
-						counts={list.data ? counts : undefined}
-						onChange={next => void setTab(next)}
+						counts={meta?.counts}
+						onChange={next => void setParams({ page: 1, tab: next })}
 						tabs={tabs.map(value => ({ label: t(`reminders.tabs.${value}`), value }))}
 						value={tab}
 					/>
 					<ListSearch
 						clearLabel={t('reminders.search.clear')}
 						label={t('reminders.search.label')}
-						onChange={value => void setQ(value)}
+						onChange={value => void setParams({ page: 1, q: value })}
 						placeholder={t('reminders.search.placeholder')}
 						value={q}
 					/>
@@ -116,16 +122,16 @@ export default function RemindersRoute() {
 										<Button.Text>{t('reminders.retry')}</Button.Text>
 									</Button>
 								</div>
-							) : visible.length === 0 ? (
+							) : reminders.length === 0 ? (
 								<ApplicationState.EmptyState
 									className={cn(listStyles.card, 'h-full')}
-									description={reminders.length === 0 ? t('reminders.empty.description') : null}
+									description={meta?.counts.all === 0 ? t('reminders.empty.description') : null}
 									icon={Bell}
-									title={reminders.length === 0 ? t('reminders.empty.title') : t('reminders.noResults')}
+									title={meta?.counts.all === 0 ? t('reminders.empty.title') : t('reminders.noResults')}
 								/>
 							) : (
 								<ul className='flex flex-col gap-3'>
-									{visible.map(reminder => (
+									{reminders.map(reminder => (
 										<ReminderRow
 											checked={checked.has(reminder.id)}
 											info={targets.get(targetId(reminder))}
@@ -141,7 +147,19 @@ export default function RemindersRoute() {
 								</ul>
 							)}
 						</div>
-						{list.data && reminders.length > 0 && sent.length === 0 && (
+						{meta && meta.pageCount > 1 && (
+							<Pagination
+								className='mx-auto shrink-0'
+								onPageChange={next => void setParams({ page: next })}
+								page={meta.page}
+								pageCount={meta.pageCount}
+								pageSize={PAGE_SIZE}
+								showEdges={false}
+								showSummary={false}
+								total={meta.total}
+							/>
+						)}
+						{list.data && sentList.data && list.data.meta.counts.all > 0 && sent.length === 0 && (
 							<div className={cn(listStyles.card, 'flex items-center gap-3 px-4 py-3')}>
 								<span className='flex size-10 items-center justify-center rounded-full border border-success text-success'>
 									<Check aria-hidden className='size-5' />

@@ -1,8 +1,9 @@
-import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '~/lib/api';
 import { unwrap } from '~/lib/api-error';
-import { type OkBody, unwrapPage } from '../shared/paged';
+import { type OkBody, PAGE_SIZE, unwrapPage } from '../shared/paged';
 import { useTasksByIds } from '../shared/task-lookup';
+import type { ReminderTab } from './format';
 
 type RemindersResponse = Awaited<ReturnType<typeof api.reminders.$get>>;
 export type Reminder = OkBody<RemindersResponse>['data'][number];
@@ -14,9 +15,23 @@ export const targetId = (reminder: Reminder): string => reminder.taskId ?? remin
 
 export const remindersKey = ['reminders'] as const;
 
-/** `GET /reminders` (the API caps a page at 100): the page filters and counts them by tab on the client. */
-export function useReminders() {
-	return useQuery({ queryFn: () => unwrapPage(api.reminders.$get({ query: { page: '1', pageSize: '100' } })), queryKey: [...remindersKey, 'all'] });
+/** `GET /reminders`: one page of the tab (and search text) chosen; `meta.counts` has the size of every tab. */
+export function useReminders({ page, q, tab }: { page: number; q: string; tab: ReminderTab }) {
+	return useQuery({
+		placeholderData: keepPreviousData,
+		queryFn: () => unwrapPage(api.reminders.$get({ query: { page: String(page), pageSize: String(PAGE_SIZE), ...(tab !== 'all' && { tab }), ...(q !== '' && { q }) } })),
+		queryKey: [...remindersKey, 'list', tab, q, page],
+	});
+}
+
+/** `GET /reminders/:id`: the reminder of a `?reminder=` link that is not on the loaded page. A missing one just stays closed. */
+export function useReminder(id: string, enabled: boolean) {
+	return useQuery({ enabled: enabled && id !== '', queryFn: () => unwrap(api.reminders[':id'].$get({ param: { id } })), queryKey: [...remindersKey, 'one', id], retry: false });
+}
+
+/** The reminders that already fired and have not been dismissed (the API caps a page at 100): what the bell dot and "Mark all as read" act on. */
+export function useSentReminders() {
+	return useQuery({ queryFn: () => unwrapPage(api.reminders.$get({ query: { page: '1', pageSize: '100', status: 'sent' } })), queryKey: [...remindersKey, 'sent'] });
 }
 
 function useRefresh() {
