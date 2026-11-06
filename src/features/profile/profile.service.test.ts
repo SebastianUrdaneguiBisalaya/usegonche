@@ -49,11 +49,10 @@ describe('getSettings', () => {
 		vi.mocked(prisma.userSettings.upsert).mockResolvedValue(settings);
 
 		expect(await getSettings(prisma, user)).toBe(settings);
-		expect(prisma.userSettings.upsert).toHaveBeenCalledWith({
-			create: { ...DEFAULT_SETTINGS, owner: { connectOrCreate: { create: { email: user.email, id: TEST_USER_ID }, where: { id: TEST_USER_ID } } } },
-			update: {},
-			where: { ownerId: TEST_USER_ID },
-		});
+		expect(prisma.profile.upsert).toHaveBeenCalledWith({ create: { email: user.email, id: TEST_USER_ID }, update: {}, where: { id: TEST_USER_ID } });
+		// No nested writes, so Prisma runs it as a native `INSERT ... ON CONFLICT` (safe when several first requests race).
+		expect(prisma.userSettings.upsert).toHaveBeenCalledWith({ create: { ...DEFAULT_SETTINGS, ownerId: TEST_USER_ID }, update: {}, where: { ownerId: TEST_USER_ID } });
+		expect(vi.mocked(prisma.profile.upsert).mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(prisma.userSettings.upsert).mock.invocationCallOrder[0] ?? 0);
 	});
 });
 

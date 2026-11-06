@@ -20,13 +20,16 @@ export const updateProfile = async (prisma: PrismaClient, user: Identity, input:
 	return hasChanges(changed) ? prisma.profile.update({ data: changed, where: { id: user.id } }) : current;
 };
 
-/** Returns the settings, creating them with defaults on first access (and the profile if it is still missing). */
-export const getSettings = (prisma: PrismaClient, user: Identity): Promise<UserSettings> =>
-	prisma.userSettings.upsert({
-		create: { ...DEFAULT_SETTINGS, owner: { connectOrCreate: { create: { email: user.email, id: user.id }, where: { id: user.id } } } },
-		update: {},
-		where: { ownerId: user.id },
-	});
+/**
+ * Returns the settings, creating them with defaults on first access (and the profile if it is still missing).
+ * Both upserts have no nested writes, so Prisma runs them as a single `INSERT ... ON CONFLICT`: a new account fires several requests at once
+ * (root loader, layout, onboarding), and an upsert with a nested `connectOrCreate` is emulated as find-then-create, so the losing request
+ * failed with P2014 trying to link the profile to a second settings row.
+ */
+export const getSettings = async (prisma: PrismaClient, user: Identity): Promise<UserSettings> => {
+	await getProfile(prisma, user);
+	return prisma.userSettings.upsert({ create: { ...DEFAULT_SETTINGS, ownerId: user.id }, update: {}, where: { ownerId: user.id } });
+};
 
 /** Writes only what changed; an update that changes nothing answers with the current settings and writes nothing. */
 export const updateSettings = async (prisma: PrismaClient, user: Identity, { onboardingCompleted, ...input }: UpdateSettingsInput): Promise<UserSettings> => {
