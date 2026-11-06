@@ -43,7 +43,12 @@ export default function HowItWorks() {
 						</li>
 					))}
 				</ol>
-				<Typography.Muted className='text-center text-foreground/75'>Nothing is mandatory. Use the full cycle or just the parts you need.</Typography.Muted>
+				<Layout.Stack align='center' gap='md'>
+					<Typography.Muted className='text-center text-foreground/75'>Nothing is mandatory. Use the full cycle or just the parts you need.</Typography.Muted>
+					<a className={cn(glass.pill, 'px-5 py-2.5 text-sm font-medium')} href='/method'>
+						Read the method
+					</a>
+				</Layout.Stack>
 			</Layout.Container>
 		</section>
 	);
