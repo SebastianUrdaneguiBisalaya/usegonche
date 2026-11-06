@@ -20,8 +20,6 @@
       "!**/build",
       "!**/.next",
       "!**/.react-router",
-      "!**/.expo",
-      "!**/expo-env.d.ts",
       "!**/release",
       "!**/pnpm-lock.yaml",
       "!**/pnpm-workspace.yaml",
@@ -29,9 +27,6 @@
       "!**/generated",
       "!**/.agents",
       "!**/.claude",
-      "!apps/mobile/android",
-      "!apps/mobile/assets/expo.icon",
-      "!apps/mobile/ios",
       "!apps/web/src/components/ui",
       "!apps/web/ui.json",
       "!apps/www/src/components/ui",
@@ -201,16 +196,6 @@
             "noVar": "error",
             "noWith": "off",
             "useGetterReturn": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["apps/mobile/**"],
-      "linter": {
-        "rules": {
-          "style": {
-            "noCommonJs": "off"
           }
         }
       }
