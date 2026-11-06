@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AppError } from '../../lib/errors.js';
 import { createMockPrisma } from '../../test/helpers.js';
-import { displayNameOf, exchangeGoogleCode, syncProfile } from './auth.service.js';
+import { avatarUrlOf, displayNameOf, exchangeGoogleCode, syncProfile } from './auth.service.js';
 
 const config = { GOOGLE_CLIENT_ID: 'web-id', GOOGLE_CLIENT_SECRET: 'web-secret', GOOGLE_DESKTOP_CLIENT_ID: 'desk-id', GOOGLE_DESKTOP_CLIENT_SECRET: 'desk-secret' };
 const answer = (body: unknown, ok = true) => vi.fn(async () => ({ json: async () => body, ok }) as Response);
@@ -57,15 +57,45 @@ describe('displayNameOf', () => {
 	});
 });
 
+describe('avatarUrlOf', () => {
+	it('prefers avatar_url, then picture', () => {
+		expect(avatarUrlOf({ id: 'u', user_metadata: { avatar_url: 'https://a.co/1.png', picture: 'https://a.co/2.png' } })).toBe('https://a.co/1.png');
+		expect(avatarUrlOf({ id: 'u', user_metadata: { picture: ' https://a.co/2.png ' } })).toBe('https://a.co/2.png');
+	});
+
+	it('is null without an http(s) URL', () => {
+		expect(avatarUrlOf({ id: 'u' })).toBeNull();
+		expect(avatarUrlOf({ id: 'u', user_metadata: { avatar_url: 'javascript:alert(1)', picture: 3 } })).toBeNull();
+	});
+});
+
 describe('syncProfile', () => {
 	it('creates the profile with the display name and only refreshes the email afterwards', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.profile.upsert).mockResolvedValue({} as never);
 		await syncProfile(prisma, { email: 'a@b.co', id: 'u1', user_metadata: { display_name: 'Ana Paz' } });
 		expect(prisma.profile.upsert).toHaveBeenCalledWith({
-			create: { displayName: 'Ana Paz', email: 'a@b.co', id: 'u1' },
+			create: { avatarUrl: null, displayName: 'Ana Paz', email: 'a@b.co', id: 'u1' },
 			update: { email: 'a@b.co' },
 			where: { id: 'u1' },
 		});
+		expect(prisma.profile.update).not.toHaveBeenCalled();
+	});
+
+	it('fills an empty avatar with the Google picture', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.profile.upsert).mockResolvedValue({ avatarUrl: null } as never);
+		vi.mocked(prisma.profile.update).mockResolvedValue({ avatarUrl: 'https://g.co/p.png' } as never);
+		const user = { email: 'a@b.co', id: 'u1', user_metadata: { picture: 'https://g.co/p.png' } };
+		expect(await syncProfile(prisma, user)).toEqual({ avatarUrl: 'https://g.co/p.png' });
+		expect(prisma.profile.upsert).toHaveBeenCalledWith(expect.objectContaining({ create: expect.objectContaining({ avatarUrl: 'https://g.co/p.png' }) }));
+		expect(prisma.profile.update).toHaveBeenCalledWith({ data: { avatarUrl: 'https://g.co/p.png' }, where: { id: 'u1' } });
+	});
+
+	it('never replaces an avatar the user already has', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.profile.upsert).mockResolvedValue({ avatarUrl: 'https://cdn/mine.png' } as never);
+		await syncProfile(prisma, { id: 'u1', user_metadata: { picture: 'https://g.co/p.png' } });
+		expect(prisma.profile.update).not.toHaveBeenCalled();
 	});
 });

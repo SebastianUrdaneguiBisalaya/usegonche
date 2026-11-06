@@ -14,15 +14,32 @@ export const displayNameOf = (user: AuthUser): string | null => {
 	return null;
 };
 
+/** Profile picture the provider sent (Google: `avatar_url` / `picture`); `null` when there is none or it is not an http(s) URL. */
+export const avatarUrlOf = (user: AuthUser): string | null => {
+	const meta = user.user_metadata ?? {};
+	for (const key of ['avatar_url', 'picture']) {
+		const value = meta[key];
+		if (typeof value === 'string' && /^https?:\/\//.test(value.trim())) return value.trim();
+	}
+	return null;
+};
+
 export const publicUser = (user: AuthUser) => ({ email: user.email, id: user.id });
 
-/** Keeps the app profile in sync after every sign-in (also creates it on the first Google sign-in). */
-export const syncProfile = (prisma: PrismaClient, user: AuthUser): Promise<Profile> =>
-	prisma.profile.upsert({
-		create: { displayName: displayNameOf(user), email: user.email, id: user.id },
+/**
+ * Keeps the app profile in sync after every sign-in (also creates it on the first Google sign-in). The provider's picture only fills an
+ * empty avatar (the sign-up trigger may have created the profile without one): an avatar the user uploaded is never replaced.
+ */
+export const syncProfile = async (prisma: PrismaClient, user: AuthUser): Promise<Profile> => {
+	const avatarUrl = avatarUrlOf(user);
+	const profile = await prisma.profile.upsert({
+		create: { avatarUrl, displayName: displayNameOf(user), email: user.email, id: user.id },
 		update: { email: user.email },
 		where: { id: user.id },
 	});
+	if (!avatarUrl || profile.avatarUrl) return profile;
+	return prisma.profile.update({ data: { avatarUrl }, where: { id: user.id } });
+};
 
 export type GoogleConfig = {
 	GOOGLE_CLIENT_ID?: string;
