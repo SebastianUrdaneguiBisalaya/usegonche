@@ -16,6 +16,7 @@ import { glass } from '@/styles/glass';
 const sections = [
 	{ href: '#features', label: 'Features' },
 	{ href: '#how-it-works', label: 'How it works' },
+	{ href: '/method', label: 'Method' },
 	{ href: '#desktop', label: 'Desktop' },
 	{ href: '#faq', label: 'FAQ' },
 ] as const;
@@ -41,8 +42,8 @@ export default function LandingNavbar() {
 				tone='default'
 				variant='floating'
 			>
-				<Navbar.Bar className='px-5 md:grid md:grid-cols-[1fr_auto_1fr]'>
-					<Navbar.Brand aria-label='gonche, home' className='justify-self-start' href='/'>
+				<Navbar.Bar className='px-5'>
+					<Navbar.Brand aria-label='gonche, home' href='/'>
 						<Logo size='lg'>
 							<Image className='-my-6 size-14 overflow-visible'>
 								<Image.Img alt='' className='mix-blend-screen' src='/usegonche-icon.png' />
@@ -50,14 +51,14 @@ export default function LandingNavbar() {
 							<Logo.Text className='-ml-4 font-medium'>gonche</Logo.Text>
 						</Logo>
 					</Navbar.Brand>
-					<Navbar.Nav className='gap-8'>
+					<Navbar.Nav className='min-w-0 flex-1 justify-center gap-8 whitespace-nowrap'>
 						{sections.map(section => (
 							<Navbar.Link className={linkClass} href={section.href} key={section.href}>
 								{section.label}
 							</Navbar.Link>
 						))}
 					</Navbar.Nav>
-					<Navbar.Actions className='justify-self-end gap-6'>
+					<Navbar.Actions className='shrink-0 gap-6 whitespace-nowrap'>
 						<Navbar.Link className={linkClass} href={SIGN_IN_URL}>
 							Sign in
 						</Navbar.Link>
