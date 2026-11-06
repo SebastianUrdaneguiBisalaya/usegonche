@@ -25,4 +25,5 @@ export default [
 			route('reset-password', '../features/auth/reset-password.tsx'),
 		])
 	),
+	route('*', '../features/error-page/not-found-route.tsx'),
 ] satisfies RouteConfig;

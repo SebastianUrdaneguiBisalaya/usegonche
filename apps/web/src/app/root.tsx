@@ -2,6 +2,7 @@ import { NuqsAdapter } from 'nuqs/adapters/react-router/v8';
 import { I18nextProvider } from 'react-i18next';
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteLoaderData } from 'react-router';
 import { Layout as L } from '~/components/ui/layout/layout/layout';
+import { ErrorPage } from '~/features/error-page/error-page';
 import { defaultLocale, getI18n, localeFromPreference, readLanguagePreference } from '~/i18n';
 import { accountPreferences } from '~/lib/account-preferences.server';
 import { themeFromRequest } from '~/lib/theme';
@@ -9,9 +10,10 @@ import { HotkeysClientProvider } from '~/providers/hotkeys-client';
 import { QueryProvider } from '~/providers/query-client';
 import { ToasterProvider } from '~/providers/toast-client';
 import type { Route } from './+types/root';
-import './app.css';
+import stylesheet from './app.css?url';
 
-export const links: Route.LinksFunction = () => [];
+/** Linked (not a side-effect import) so the CSS is in the server HTML on every response, error pages included: no unstyled flash. */
+export const links: Route.LinksFunction = () => [{ rel: 'stylesheet', href: stylesheet }];
 
 /** Default tab title and description, used by every route that does not export its own `meta` (see `features/auth/layout.tsx`). */
 export const meta: Route.MetaFunction = ({ loaderData }) => {
@@ -66,28 +68,9 @@ export default function App() {
 	return <Outlet />;
 }
 
+/** Every error lands here (404s from the catch-all route included) and renders the shared error page. */
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-	let message = 'Oops!';
-	let details = 'An unexpected error occurred.';
-	let stack: string | undefined;
-
-	if (isRouteErrorResponse(error)) {
-		message = error.status === 404 ? '404' : 'Error';
-		details = error.status === 404 ? 'The requested page could not be found.' : error.statusText || details;
-	} else if (import.meta.env.DEV && error && error instanceof Error) {
-		details = error.message;
-		stack = error.stack;
-	}
-
-	return (
-		<main className='pt-16 p-4 container mx-auto'>
-			<h1>{message}</h1>
-			<p>{details}</p>
-			{stack && (
-				<pre className='w-full p-4 overflow-x-auto'>
-					<code>{stack}</code>
-				</pre>
-			)}
-		</main>
-	);
+	if (isRouteErrorResponse(error) && error.status === 404) return <ErrorPage kind='notFound' />;
+	const stack = import.meta.env.DEV && error instanceof Error ? error.stack : undefined;
+	return <ErrorPage kind='error' stack={stack} />;
 }

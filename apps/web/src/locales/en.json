@@ -1844,5 +1844,19 @@
       "overdue": "{{count}} open tasks are overdue.",
       "streak": "You are on a {{count}}-day completion streak."
     }
+  },
+  "errorPage": {
+    "notFound": {
+      "titleLine1": "This page is",
+      "titleLine2": "off the map.",
+      "description": "The link may be broken or the page may have moved. Head back to the start and keep going."
+    },
+    "error": {
+      "titleLine1": "Something",
+      "titleLine2": "went wrong.",
+      "description": "An unexpected error interrupted this page. Try again in a moment or head back to the start."
+    },
+    "backHome": "Back to home",
+    "signIn": "Sign in"
   }
 }

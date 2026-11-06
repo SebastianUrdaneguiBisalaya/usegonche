@@ -1844,5 +1844,19 @@
       "overdue": "{{count}} tareas abiertas están vencidas.",
       "streak": "Llevas una racha de {{count}} días completando tareas."
     }
+  },
+  "errorPage": {
+    "notFound": {
+      "titleLine1": "Esta página está",
+      "titleLine2": "fuera del mapa.",
+      "description": "Puede que el enlace esté roto o que la página se haya movido. Vuelve al inicio y sigue avanzando."
+    },
+    "error": {
+      "titleLine1": "Algo",
+      "titleLine2": "salió mal.",
+      "description": "Un error inesperado interrumpió esta página. Inténtalo de nuevo en un momento o vuelve al inicio."
+    },
+    "backHome": "Volver al inicio",
+    "signIn": "Iniciar sesión"
   }
 }
