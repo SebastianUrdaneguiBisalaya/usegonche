@@ -5,6 +5,16 @@ import bgGranito from "../../assets/bg-granito.jpg";
 import { Layout } from "../../layout/layout/layout";
 import { cn } from "../../utils/tailwind/cn";
 
+/**
+ * Bundlers disagree on what an image import is: Vite gives the URL string,
+ * Next.js gives a `StaticImageData` object (`{ src, width, height }`).
+ * Interpolating the object would produce `url([object Object])`.
+ */
+const bgGranitoUrl: string =
+  typeof bgGranito === "string"
+    ? bgGranito
+    : (bgGranito as { src: string }).src;
+
 export interface FooterLink {
   /** Destination URL. Opens in a new tab (`target="_blank"`) whenever it's an absolute `http(s)` URL. */
   href: string;
@@ -69,7 +79,7 @@ export function SiteFooter({
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.07] mix-blend-multiply grayscale mask-[linear-gradient(to_bottom,transparent,black_180px)] dark:opacity-[0.10] dark:mix-blend-screen"
         style={{
-          backgroundImage: `url(${bgGranito})`,
+          backgroundImage: `url(${bgGranitoUrl})`,
         }}
       />
 

@@ -7,8 +7,8 @@ import { cn } from "../../utils/tailwind/cn";
 type ImageStatus = "loading" | "loaded" | "error";
 
 interface ImageContextValue {
-  status: ImageStatus;
   setStatus: React.Dispatch<React.SetStateAction<ImageStatus>>;
+  status: ImageStatus;
 }
 
 const ImageContext = React.createContext<ImageContextValue | null>(null);
@@ -40,17 +40,12 @@ function ImageRoot({ className, children, ...props }: ImageRootProps) {
       setStatus,
       status,
     }),
-    [
-      status,
-    ],
+    [status],
   );
 
   return (
     <ImageContext.Provider value={value}>
-      <div
-        className={cn("relative overflow-hidden", className)}
-        {...props}
-      >
+      <div className={cn("relative overflow-hidden", className)} {...props}>
         {children}
       </div>
     </ImageContext.Provider>
@@ -79,6 +74,18 @@ function ImageImg({
   ...props
 }: ImageImgProps) {
   const { status, setStatus } = useImageContext();
+  const imgRef = React.useRef<HTMLImageElement>(null);
+
+  // A server-rendered (or cached) image can finish loading before React
+  // hydrates and attaches `onLoad`, so that event never reaches us and the
+  // image would stay at `opacity-0`. Read the element's real state on mount
+  // and whenever `src` changes instead of relying only on the event.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-check only when the source changes.
+  React.useLayoutEffect(() => {
+    const img = imgRef.current;
+    if (!img?.complete) return;
+    setStatus(img.naturalWidth > 0 ? "loaded" : "error");
+  }, [props.src]);
 
   return (
     // biome-ignore lint/performance/noImgElement: this library isn't Next.js-only; `next/image` can't be assumed. Fill/lazy-loading are handled with plain CSS/HTML instead.
@@ -89,14 +96,15 @@ function ImageImg({
         status === "loaded" ? "opacity-100" : "opacity-0",
         className,
       )}
-      onError={(event) => {
+      onError={event => {
         setStatus("error");
         onError?.(event);
       }}
-      onLoad={(event) => {
+      onLoad={event => {
         setStatus("loaded");
         onLoad?.(event);
       }}
+      ref={imgRef}
       {...props}
     />
   );
