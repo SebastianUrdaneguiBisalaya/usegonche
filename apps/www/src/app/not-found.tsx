@@ -29,15 +29,16 @@ export default function NotFound() {
 						The link may be broken or the page may have moved. Head back to the start and keep going.
 					</Typography.Lead>
 				</Layout.Stack>
-				<Layout.HStack className='flex-wrap justify-center' gap='md'>
-					<a className={cn(buttonVariants.root({ variant: 'primary' }), 'rounded-full px-6 py-3')} href='/'>
+				{/* Equal-width columns: both buttons take the width of the wider one. */}
+				<div className='grid auto-cols-fr grid-flow-col gap-4'>
+					<a className={cn(buttonVariants.root({ variant: 'primary' }), 'w-full rounded-full px-6 py-3')} href='/'>
 						<Icon aria-hidden='true' className='text-background' icon={ArrowLeft} size='sm' />
 						<Typography.Small className='text-background'>Back to home</Typography.Small>
 					</a>
-					<a className={cn(buttonVariants.root({ variant: 'secondary' }), glass.pill, 'px-6 py-3')} href={SIGN_IN_URL}>
+					<a className={cn(buttonVariants.root({ variant: 'secondary' }), glass.pill, 'w-full px-6 py-3')} href={SIGN_IN_URL}>
 						<Typography.Small>Sign in</Typography.Small>
 					</a>
-				</Layout.HStack>
+				</div>
 			</Layout.Container>
 		</section>
 	);
