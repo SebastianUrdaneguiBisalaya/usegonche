@@ -1,4 +1,5 @@
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v8';
+import { useSyncExternalStore } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteLoaderData } from 'react-router';
 import { Layout as L } from '~/components/ui/layout/layout/layout';
@@ -38,8 +39,18 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 export function Layout({ children }: { children: React.ReactNode }) {
 	const data = useRouteLoaderData<typeof loader>('root');
 	const i18n = getI18n(data?.locale ?? defaultLocale);
+	// Re-render on a language switch so `<Meta />` runs the `meta` functions again: they read the live i18n instance, but React Router
+	// only calls them on render, and a switch does not reload the root data. Without this the tab title stays in the old language.
+	const language = useSyncExternalStore(
+		onChange => {
+			i18n.on('languageChanged', onChange);
+			return () => i18n.off('languageChanged', onChange);
+		},
+		() => i18n.language,
+		() => i18n.language
+	);
 	return (
-		<html data-theme={data?.theme === 'light' || data?.theme === 'dark' ? data.theme : undefined} lang={data?.locale ?? defaultLocale} suppressHydrationWarning>
+		<html data-theme={data?.theme === 'light' || data?.theme === 'dark' ? data.theme : undefined} lang={language} suppressHydrationWarning>
 			<head>
 				<meta charSet='utf-8' />
 				<meta name='viewport' content='width=device-width, initial-scale=1' />
