@@ -1,5 +1,5 @@
 import { type FooterGroup, SiteFooter } from '@/components/ui/navigation/footer/footer';
-import { SIGN_IN_URL, SIGN_UP_URL } from '@/lib/links';
+import { MACOS_DOWNLOAD_URL, SIGN_IN_URL, SIGN_UP_URL, WINDOWS_DOWNLOAD_URL } from '@/lib/links';
 
 const groups: FooterGroup[] = [
 	{
@@ -9,6 +9,13 @@ const groups: FooterGroup[] = [
 			{ href: '#how-it-works', label: 'How it works' },
 			{ href: '#desktop', label: 'Desktop' },
 			{ href: '#faq', label: 'FAQ' },
+		],
+	},
+	{
+		heading: 'Download',
+		links: [
+			{ href: MACOS_DOWNLOAD_URL, label: 'macOS' },
+			{ href: WINDOWS_DOWNLOAD_URL, label: 'Windows' },
 		],
 	},
 	{

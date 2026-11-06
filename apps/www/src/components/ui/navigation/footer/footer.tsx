@@ -99,7 +99,8 @@ export function SiteFooter({
                 </span>
                 <ul className="flex flex-col gap-3">
                   {group.links.map((link) => (
-                    <li key={link.href}>
+                    // Keyed by label: two links can share an href (e.g. placeholders pointing to the same anchor).
+                    <li key={link.label}>
                       <a
                         className="font-primary text-sm text-muted-foreground transition-colors duration-150 ease-in-out hover:text-foreground"
                         href={link.href}
