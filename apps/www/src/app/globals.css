@@ -92,6 +92,15 @@
   --inverse-border: rgb(255 255 255 / 14%);
   --inverse-hover: rgb(255 255 255 / 10%);
 
+  /* macOS window controls (WindowFrame) — close/minimize/zoom are a
+	recognizable legend of the window chrome, not decoration, the same
+	exemption as --json-key and the chart palette. Decorative only (never
+	carry text or meaning), and macOS draws them identically in light and
+	dark appearance, so they don't flip with the theme. */
+	--window-close: #ff5f57;
+	--window-minimize: #febc2e;
+	--window-zoom: #28c840;
+
   /* Chart categorical palette — pastel, so series read as color without
      competing with the neutral chrome. Light enough that --black ink stays
      legible on top of them (treemap labels) in both themes. */
@@ -237,6 +246,10 @@
 
   --font-primary: var(--font-primary);
   --font-secondary: var(--font-secondary);
+
+  --color-window-close: var(--window-close);
+  --color-window-minimize: var(--window-minimize);
+  --color-window-zoom: var(--window-zoom);
 
   --animate-fade-scale-in: fade-scale-in 150ms ease-out;
   --animate-fade-in: fade-in 300ms ease-out forwards;
