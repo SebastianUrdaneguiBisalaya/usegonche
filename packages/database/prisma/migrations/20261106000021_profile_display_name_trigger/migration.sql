@@ -1,4 +1,4 @@
--- Manual SQL (applied by the user on Supabase, never by the agent).
+-- Applied by the user on Supabase (never by the agent). Idempotent: safe if it was already applied by hand.
 -- Replaces the `handle_new_auth_user` function so the profile is created with its display name:
 -- `display_name` (sent by the web sign-up form), or `full_name` / `name` (Google).
 CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
