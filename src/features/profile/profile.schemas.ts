@@ -29,7 +29,18 @@ export const updateProfileSchema = z
 		displayName: optionalText(100),
 		industry: optionalText(100),
 		jobTitle: optionalText(100),
-		phoneNumber: optionalText(100),
+		// E.164 (`+51987654321`): what the web phone field sends. The per-country length check lives in the client.
+		phoneNumber: z
+			.string()
+			.trim()
+			.transform(v => (v === '' ? null : v))
+			.pipe(
+				z
+					.string()
+					.regex(/^\+[1-9]\d{6,14}$/)
+					.nullable()
+			)
+			.nullable(),
 		websiteUrl: z.url().max(255).nullable(),
 	})
 	.partial()

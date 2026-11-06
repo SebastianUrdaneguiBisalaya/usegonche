@@ -220,3 +220,27 @@ describe('Google account avatar', () => {
 		expect(prisma.profile.update).toHaveBeenCalled();
 	});
 });
+
+describe('PATCH /profile phoneNumber', () => {
+	it.each(['987654321', '+0123456789', '+51 987 654 321', '+12', 'abc'])('rejects %j (not E.164)', async phoneNumber => {
+		const { app, prisma } = setup();
+		const res = await app.request('/profile', jsonRequest('PATCH', { phoneNumber }));
+		expect(res.status).toBe(422);
+		expect(await res.json()).toMatchObject({ error: { code: 'validation_error', details: [expect.objectContaining({ field: 'phoneNumber' })] } });
+		expect(prisma.profile.update).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		['+51987654321', '+51987654321'],
+		['', null],
+		[null, null],
+	])('saves %j as %j', async (phoneNumber, saved) => {
+		const { app, prisma } = setup();
+		// A different saved number, so every case is a change.
+		vi.mocked(prisma.profile.upsert).mockResolvedValue({ ...profile, phoneNumber: '+14155550123' });
+		vi.mocked(prisma.profile.update).mockResolvedValue({ ...profile, phoneNumber: saved });
+		const res = await app.request('/profile', jsonRequest('PATCH', { phoneNumber }));
+		expect(res.status).toBe(200);
+		expect(prisma.profile.update).toHaveBeenCalledWith(expect.objectContaining({ data: { phoneNumber: saved } }));
+	});
+});
