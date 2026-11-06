@@ -190,3 +190,33 @@ describe('POST /profile/avatar/upload-url', () => {
 		expect(storage.uploadUrl).toHaveBeenCalledWith('public', expect.stringMatching(new RegExp(`^${TEST_USER_ID}/avatar/[0-9a-f-]{36}\\.png$`)));
 	});
 });
+
+describe('Google account avatar', () => {
+	it('answers 403 on POST /profile/avatar/upload-url (its avatar is the Google picture)', async () => {
+		const storage = createMockStorage();
+		const app = createTestApp(routes, { path: '/profile', providers: ['google'], storage });
+		const res = await app.request('/profile/avatar/upload-url', jsonRequest('POST', { mimeType: 'image/png', sizeBytes: 10 }));
+		expect(res.status).toBe(403);
+		expect(await res.json()).toMatchObject({ error: { code: 'forbidden' } });
+		expect(storage.uploadUrl).not.toHaveBeenCalled();
+	});
+
+	it.each([[{ avatarUrl: 'https://cdn/x.png' }], [{ avatarUrl: null }]])('answers 403 on PATCH /profile changing or removing the avatar %j', async body => {
+		const prisma = createMockPrisma();
+		const app = createTestApp(routes, { path: '/profile', prisma, providers: ['google'] });
+		const res = await app.request('/profile', jsonRequest('PATCH', body));
+		expect(res.status).toBe(403);
+		expect(await res.json()).toMatchObject({ error: { code: 'forbidden' } });
+		expect(prisma.profile.update).not.toHaveBeenCalled();
+	});
+
+	it('still lets PATCH /profile update the other fields', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.profile.upsert).mockResolvedValue(profile);
+		vi.mocked(prisma.profile.update).mockResolvedValue({ ...profile, displayName: 'Eva' });
+		const app = createTestApp(routes, { path: '/profile', prisma, providers: ['google'] });
+		const res = await app.request('/profile', jsonRequest('PATCH', { displayName: 'Eva' }));
+		expect(res.status).toBe(200);
+		expect(prisma.profile.update).toHaveBeenCalled();
+	});
+});

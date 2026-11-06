@@ -92,10 +92,19 @@ describe('syncProfile', () => {
 		expect(prisma.profile.update).toHaveBeenCalledWith({ data: { avatarUrl: 'https://g.co/p.png' }, where: { id: 'u1' } });
 	});
 
-	it('never replaces an avatar the user already has', async () => {
+	it('replaces an outdated avatar with the current Google picture', async () => {
 		const prisma = createMockPrisma();
-		vi.mocked(prisma.profile.upsert).mockResolvedValue({ avatarUrl: 'https://cdn/mine.png' } as never);
+		vi.mocked(prisma.profile.upsert).mockResolvedValue({ avatarUrl: 'https://g.co/old.png' } as never);
 		await syncProfile(prisma, { id: 'u1', user_metadata: { picture: 'https://g.co/p.png' } });
+		expect(prisma.profile.update).toHaveBeenCalledWith({ data: { avatarUrl: 'https://g.co/p.png' }, where: { id: 'u1' } });
+	});
+
+	it('writes nothing when the avatar already matches, or without a provider picture', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.profile.upsert).mockResolvedValue({ avatarUrl: 'https://g.co/p.png' } as never);
+		await syncProfile(prisma, { id: 'u1', user_metadata: { picture: 'https://g.co/p.png' } });
+		vi.mocked(prisma.profile.upsert).mockResolvedValue({ avatarUrl: 'https://cdn/mine.png' } as never);
+		await syncProfile(prisma, { id: 'u1', user_metadata: {} });
 		expect(prisma.profile.update).not.toHaveBeenCalled();
 	});
 });

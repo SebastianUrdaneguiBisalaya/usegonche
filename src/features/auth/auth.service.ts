@@ -27,8 +27,8 @@ export const avatarUrlOf = (user: AuthUser): string | null => {
 export const publicUser = (user: AuthUser) => ({ email: user.email, id: user.id });
 
 /**
- * Keeps the app profile in sync after every sign-in (also creates it on the first Google sign-in). The provider's picture only fills an
- * empty avatar (the sign-up trigger may have created the profile without one): an avatar the user uploaded is never replaced.
+ * Keeps the app profile in sync after every sign-in (also creates it on the first Google sign-in). A Google account cannot change its
+ * avatar in the app (`lib/avatar.ts`), so it always mirrors the current Google picture. Email accounts send no picture: theirs is untouched.
  */
 export const syncProfile = async (prisma: PrismaClient, user: AuthUser): Promise<Profile> => {
 	const avatarUrl = avatarUrlOf(user);
@@ -37,7 +37,7 @@ export const syncProfile = async (prisma: PrismaClient, user: AuthUser): Promise
 		update: { email: user.email },
 		where: { id: user.id },
 	});
-	if (!avatarUrl || profile.avatarUrl) return profile;
+	if (!avatarUrl || profile.avatarUrl === avatarUrl) return profile;
 	return prisma.profile.update({ data: { avatarUrl }, where: { id: user.id } });
 };
 

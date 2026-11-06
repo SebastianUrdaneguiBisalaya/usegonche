@@ -55,6 +55,8 @@ type TestAppOptions = {
 	/** Mount point of the router under test. Defaults to `/`. */
 	path?: string;
 	prisma?: PrismaClient;
+	/** Sign-in methods linked to the user (`user.identities[].provider`). Defaults to `['email']`. */
+	providers?: string[];
 	storage?: Storage;
 };
 
@@ -72,14 +74,14 @@ export const createMockStorage = (): Storage => ({ list: vi.fn(), readUrl: vi.fn
  */
 export const createTestApp = (
 	router: Hono<AppEnv>,
-	{ claims = { sub: TEST_USER_ID }, emailConfirmed = true, path = '/', prisma = createMockPrisma(), storage = createMockStorage() }: TestAppOptions = {}
+	{ claims = { sub: TEST_USER_ID }, emailConfirmed = true, path = '/', prisma = createMockPrisma(), providers = ['email'], storage = createMockStorage() }: TestAppOptions = {}
 ) => {
 	const supabase = {
 		auth: {
 			getClaims: async () => (claims ? { data: { claims }, error: null } : { data: null, error: new Error('unauthenticated') }),
 			getUser: async () =>
 				claims
-					? { data: { user: { email_confirmed_at: emailConfirmed ? '2026-01-01T00:00:00Z' : null, id: claims.sub } }, error: null }
+					? { data: { user: { email_confirmed_at: emailConfirmed ? '2026-01-01T00:00:00Z' : null, id: claims.sub, identities: providers.map(provider => ({ provider })) } }, error: null }
 					: { data: { user: null }, error: new Error('unauthenticated') },
 		},
 	} as unknown as SupabaseClient;
