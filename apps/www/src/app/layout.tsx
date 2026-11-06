@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Manrope, IBM_Plex_Sans } from 'next/font/google';
+import { IBM_Plex_Sans, Manrope } from 'next/font/google';
 import './globals.css';
 
 const manrope = Manrope({
