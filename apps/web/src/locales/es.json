@@ -210,7 +210,9 @@
         },
         "phoneNumber": {
           "label": "Teléfono",
-          "placeholder": "+51 999 999 999"
+          "placeholder": "999 999 999",
+          "invalid": "Ingresa un número de teléfono válido para el país elegido.",
+          "searchCountry": "Buscar país"
         },
         "websiteUrl": {
           "label": "Sitio web"

@@ -2,14 +2,18 @@ import { useMemo } from 'react';
 import { toast } from 'sonner';
 import { Form } from '~/components/ui/forms-inputs/form/form';
 import { Input } from '~/components/ui/forms-inputs/input/input';
+import { PhoneInput } from '~/components/ui/forms-inputs/phone-input/phone-input';
 import { Layout } from '~/components/ui/layout/layout/layout';
 import { SettingsDialog } from '~/components/ui/overlays-feedback/settings-dialog/settings-dialog';
 import { useSession } from '~/features/auth/api';
+import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { diffPayload } from '~/utils/diff-payload';
 import { listStyles } from '../shared/styles';
-import { type UpdateProfileBody, useUpdateProfile } from './api';
+import { type UpdateProfileBody, useUpdateProfile, useUserSettings } from './api';
 import { AvatarEditor } from './avatar-editor';
+import { useFlags } from './general-panel';
+import { phoneLabels, toPhoneCountry } from './phone';
 import { type AccountValues, BIO_MAX, createAccountSchema, NAME_MAX, URL_MAX } from './schemas';
 
 /** An empty field clears the value on the profile. */
@@ -22,6 +26,10 @@ export function AccountPanel() {
 	const update = useUpdateProfile();
 	const schema = useMemo(() => createAccountSchema(t), [t]);
 	const profile = session?.profile;
+	const { locale } = useLanguage();
+	const flags = useFlags();
+	// The country chosen in onboarding preselects the calling code while the number is empty.
+	const defaultCountry = toPhoneCountry(useUserSettings().data?.country);
 
 	if (!profile) return null;
 
@@ -81,10 +89,21 @@ export function AccountPanel() {
 					</Form.Field>
 					<Form.Field name='phoneNumber'>
 						{field => (
-							<Input className={listStyles.field} errorMessage={field.error} maxLength={NAME_MAX}>
-								<Input.Label>{t('protected.settings.account.phoneNumber.label')}</Input.Label>
-								<Input.Field autoComplete='tel' placeholder={t('protected.settings.account.phoneNumber.placeholder')} type='tel' {...field.inputProps} />
-							</Input>
+							<PhoneInput
+								className={listStyles.field}
+								defaultCountry={defaultCountry}
+								errorMessage={field.error}
+								flags={flags}
+								labels={phoneLabels[locale]}
+								name={field.name}
+								onBlur={field.onBlur}
+								onChange={value => field.onChange(value ?? '')}
+								placeholder={t('protected.settings.account.phoneNumber.placeholder')}
+								searchPlaceholder={t('protected.settings.account.phoneNumber.searchCountry')}
+								value={field.value}
+							>
+								<PhoneInput.Label>{t('protected.settings.account.phoneNumber.label')}</PhoneInput.Label>
+							</PhoneInput>
 						)}
 					</Form.Field>
 					<Form.Field name='websiteUrl'>

@@ -1,3 +1,4 @@
+import { isValidPhoneNumber } from 'react-phone-number-input';
 import { z } from 'zod';
 import type { Translate } from '~/i18n';
 
@@ -24,7 +25,8 @@ export const createAccountSchema = (t: Translate) => {
 		displayName: text(NAME_MAX),
 		industry: text(NAME_MAX),
 		jobTitle: text(NAME_MAX),
-		phoneNumber: text(NAME_MAX),
+		// E.164 from `PhoneInput` (`+51987654321`); validated per country so a too-short or too-long number is caught here.
+		phoneNumber: z.string().refine(value => value === '' || isValidPhoneNumber(value), t('protected.settings.account.phoneNumber.invalid')),
 		websiteUrl: z
 			.string()
 			.trim()
