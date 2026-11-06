@@ -38,7 +38,7 @@ const hours = ['08:00', '10:00', '12:00', '14:00'] as const;
 
 function ProjectsCard() {
 	return (
-		<div className={cn(glass.floating, 'absolute top-[170px] left-5 flex w-[240px] flex-col gap-4 rounded-2xl p-4')}>
+		<div className={cn(glass.floating, 'absolute top-[170px] left-5 flex w-[240px] flex-col gap-4 rounded-2xl p-4')} data-motion='surface'>
 			<CardHeader title='Projects' />
 			<div className='flex flex-col gap-3'>
 				{projects.map(project => (
@@ -55,7 +55,7 @@ function ProjectsCard() {
 
 function NotesCard() {
 	return (
-		<div className={cn(glass.floating, 'absolute top-[390px] left-5 flex w-[240px] flex-col gap-4 rounded-2xl p-4')}>
+		<div className={cn(glass.floating, 'absolute top-[390px] left-5 flex w-[240px] flex-col gap-4 rounded-2xl p-4')} data-motion='surface'>
 			<CardHeader title='Notes' />
 			<div className='flex flex-col gap-3'>
 				{notes.map(note => (
@@ -78,7 +78,7 @@ const blocks: readonly { className: string; icon?: LucideIcon; label: string; me
 
 function AgendaCard() {
 	return (
-		<div className={cn(glass.floating, 'absolute top-[290px] right-0 flex h-[250px] w-[480px] flex-col gap-3 rounded-2xl p-4')}>
+		<div className={cn(glass.floating, 'absolute top-[290px] right-0 flex h-[250px] w-[480px] flex-col gap-3 rounded-2xl p-4')} data-motion='surface'>
 			<div className='flex items-center justify-between'>
 				<Typography.Small className='text-xs'>Day agenda</Typography.Small>
 				{/* The web app's calendar has a day and a week view. */}
@@ -132,15 +132,17 @@ function AgendaCard() {
 export default function HeroMockup({ className }: { className?: string }) {
 	return (
 		<ScaledCanvas className={className} frameClassName='xl:mr-0' height={CANVAS.height} width={CANVAS.width} xlReservedHeight={XL_RESERVED_HEIGHT}>
-			<AppWindow className={cn(glass.floating, 'absolute top-0 right-0 h-[340px] w-[570px]')}>
-				<div className='flex flex-1 gap-3'>
-					<div className={cn(glass.card, 'flex min-w-0 flex-1 flex-col gap-4 p-3')}>
-						<CardHeader meta='1 of 3 tasks' title='Plan for today' />
-						<TaskList />
+			<div className='absolute top-0 right-0 h-[340px] w-[570px]' data-motion='surface'>
+				<AppWindow className={cn(glass.floating, 'h-full w-full')}>
+					<div className='flex flex-1 gap-3'>
+						<div className={cn(glass.card, 'flex min-w-0 flex-1 flex-col gap-4 p-3')}>
+							<CardHeader meta='1 of 3 tasks' title='Plan for today' />
+							<TaskList />
+						</div>
+						<MiniMonth />
 					</div>
-					<MiniMonth />
-				</div>
-			</AppWindow>
+				</AppWindow>
+			</div>
 			<ProjectsCard />
 			<NotesCard />
 			<AgendaCard />

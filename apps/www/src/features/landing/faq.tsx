@@ -1,10 +1,12 @@
 'use client';
 
+import { useRef } from 'react';
 import { Accordion } from '@/components/ui/data-display/accordion/accordion';
 import { Pill } from '@/components/ui/data-display/pill/pill';
 import { Layout } from '@/components/ui/layout/layout/layout';
 import { cn } from '@/components/ui/utils/tailwind/cn';
 import { LANDING_WIDTH } from '@/lib/layout';
+import { useSectionMotion } from '@/lib/motion/use-section-motion';
 import { glass } from '@/styles/glass';
 
 interface Question {
@@ -63,11 +65,14 @@ const columns: readonly (readonly Question[])[] = [
 
 /** FAQ: a label on the left and two accordion columns, placed right before the footer. */
 export default function Faq() {
+	const ref = useRef<HTMLElement>(null);
+	useSectionMotion(ref);
+
 	return (
-		<section aria-labelledby='faq-label' className='w-full scroll-mt-24 py-12 md:py-16' id='faq'>
-			<Layout.Container className='flex flex-col gap-8 lg:flex-row lg:gap-16' size={LANDING_WIDTH}>
+		<section aria-labelledby='faq-label' className='w-full scroll-mt-24 py-12 md:py-16' id='faq' ref={ref}>
+			<Layout.Container className='flex flex-col gap-8 lg:flex-row lg:gap-16' data-motion-release size={LANDING_WIDTH}>
 				<div className='shrink-0 lg:w-24'>
-					<Pill className={cn(glass.surface, 'px-4 py-1.5')} variant='outline'>
+					<Pill className={cn(glass.surface, 'px-4 py-1.5')} data-motion='item' variant='outline'>
 						<Pill.Text className='text-[11px] uppercase tracking-[0.2em]' id='faq-label'>
 							FAQ
 						</Pill.Text>
@@ -82,7 +87,7 @@ export default function Faq() {
 							type='single'
 						>
 							{questions.map(item => (
-								<Accordion.Item className='border-white/10 last:border-b' key={item.value} value={item.value}>
+								<Accordion.Item className='border-white/10 last:border-b' data-motion='item' key={item.value} value={item.value}>
 									<Accordion.Trigger className='rounded-none py-3 pr-3 font-normal text-foreground/80 hover:text-foreground' headingLevel={3}>
 										{item.question}
 									</Accordion.Trigger>

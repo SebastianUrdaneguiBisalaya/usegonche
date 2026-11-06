@@ -1,8 +1,21 @@
 'use client';
 
+import { type ReactNode, useRef } from 'react';
 import { Typography } from '@/components/ui/foundations/typography/typography';
 import { Layout } from '@/components/ui/layout/layout/layout';
 import { LANDING_WIDTH } from '@/lib/layout';
+import { type SectionMotionOptions, useSectionMotion } from '@/lib/motion/use-section-motion';
+
+/** One block of the article (the header or a section). Each block has its own motion, so it enters when it reaches the viewport. */
+function ArticleBlock({ as: Tag, children, className, trigger }: { as: 'header' | 'section'; children: ReactNode; className: string } & SectionMotionOptions) {
+	const ref = useRef<HTMLElement>(null);
+	useSectionMotion(ref, { trigger });
+	return (
+		<Tag className={className} data-motion-release ref={ref}>
+			{children}
+		</Tag>
+	);
+}
 
 interface Section {
 	paragraphs: readonly string[];
@@ -49,21 +62,25 @@ export default function MethodPage() {
 		<main className='w-full flex-1 shrink-0'>
 			<Layout.Container className='pt-32 pb-24 md:pt-36' size={LANDING_WIDTH}>
 				<article className='mx-auto flex max-w-2xl flex-col gap-12'>
-					<header className='flex flex-col gap-6'>
-						<Typography.H1 className='border-none pb-0 font-normal text-4xl leading-[1.1] tracking-tight md:text-5xl'>The method</Typography.H1>
-						<Typography.Lead className='text-base text-foreground/70 leading-relaxed'>
+					<ArticleBlock as='header' className='flex flex-col gap-6' trigger='load'>
+						<Typography.H1 className='border-none pb-0 font-normal text-4xl leading-[1.1] tracking-tight md:text-5xl' data-motion='heading'>
+							The method
+						</Typography.H1>
+						<Typography.Lead className='text-base text-foreground/70 leading-relaxed' data-motion='text'>
 							The Flow Cycle turns messy work into concrete progress. It has four visible stages, and you can use the whole cycle or only the parts you need.
 						</Typography.Lead>
-					</header>
+					</ArticleBlock>
 					{sections.map(section => (
-						<section className='flex flex-col gap-4' key={section.title}>
-							<Typography.H2 className='border-none pb-0 font-normal text-2xl tracking-tight'>{section.title}</Typography.H2>
+						<ArticleBlock as='section' className='flex flex-col gap-4' key={section.title}>
+							<Typography.H2 className='border-none pb-0 font-normal text-2xl tracking-tight' data-motion='heading'>
+								{section.title}
+							</Typography.H2>
 							{section.paragraphs.map(paragraph => (
-								<Typography.P className='text-foreground/70 leading-relaxed' key={paragraph}>
+								<Typography.P className='text-foreground/70 leading-relaxed' data-motion='text' key={paragraph}>
 									{paragraph}
 								</Typography.P>
 							))}
-						</section>
+						</ArticleBlock>
 					))}
 				</article>
 			</Layout.Container>
