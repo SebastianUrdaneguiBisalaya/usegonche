@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
 	return (
-		<html lang='en' className={`${manrope.variable} ${ibmPlexSans.variable} h-full antialiased`}>
+		<html lang='en' data-theme='dark' className={`${manrope.variable} ${ibmPlexSans.variable} h-full antialiased`}>
 			<body>{children}</body>
 		</html>
 	);
