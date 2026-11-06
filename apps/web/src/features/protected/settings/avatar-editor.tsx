@@ -13,6 +13,8 @@ import { uploadAvatar, useUpdateProfile } from './api';
 
 interface AvatarEditorProps {
 	avatarUrl: string | null;
+	/** `false` for Google accounts: the photo is the Google one, so there is no pencil and no dialog. */
+	editable: boolean;
 	name: string;
 }
 
@@ -20,7 +22,7 @@ const initialsClassName = 'flex items-center justify-center bg-muted text-lg fon
 const MAX_BYTES = 5 * 1024 * 1024;
 
 /** The profile picture with a pencil at its top right: it opens a dialog to upload a new one to Storage, and saving puts its URL on the profile. */
-export function AvatarEditor({ avatarUrl, name }: AvatarEditorProps) {
+export function AvatarEditor({ avatarUrl, editable, name }: AvatarEditorProps) {
 	const t = useTranslate();
 	const update = useUpdateProfile();
 	const [open, setOpen] = useState(false);
@@ -58,16 +60,18 @@ export function AvatarEditor({ avatarUrl, name }: AvatarEditorProps) {
 						<span className={cn('absolute inset-0', initialsClassName)}>{initialsOf(name)}</span>
 					)}
 				</Avatar>
-				<Button
-					aria-label={t('protected.settings.account.avatar.edit')}
-					className='absolute -top-1 -right-1 size-8 rounded-full border border-border bg-background p-0'
-					onClick={() => setOpen(true)}
-					size='icon'
-					type='button'
-					variant='secondary'
-				>
-					<Button.Icon icon={Pencil} />
-				</Button>
+				{editable && (
+					<Button
+						aria-label={t('protected.settings.account.avatar.edit')}
+						className='absolute -top-1 -right-1 size-8 rounded-full border border-border bg-background p-0'
+						onClick={() => setOpen(true)}
+						size='icon'
+						type='button'
+						variant='secondary'
+					>
+						<Button.Icon icon={Pencil} />
+					</Button>
+				)}
 			</div>
 
 			<Modal.Root onOpenChange={next => !next && close()} open={open}>

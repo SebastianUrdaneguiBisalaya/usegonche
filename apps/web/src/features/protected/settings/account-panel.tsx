@@ -54,10 +54,12 @@ export function AccountPanel() {
 			<SettingsDialog.Section title={t('protected.settings.account.title')}>
 				<div className='flex flex-col gap-6 py-4'>
 					<Layout.HStack align='center' gap='md'>
-						<AvatarEditor avatarUrl={profile.avatarUrl ?? null} name={profile.displayName ?? profile.email ?? ''} />
+						<AvatarEditor avatarUrl={profile.avatarUrl ?? null} editable={session.avatarEditable} name={profile.displayName ?? profile.email ?? ''} />
 						<Layout.Stack gap='xs'>
 							<span className='font-primary text-sm font-medium text-foreground'>{profile.displayName || profile.email}</span>
-							<span className='font-primary text-sm text-muted-foreground'>{t('protected.settings.account.avatar.hint')}</span>
+							<span className='font-primary text-sm text-muted-foreground'>
+								{t(session.avatarEditable ? 'protected.settings.account.avatar.hint' : 'protected.settings.account.avatar.providerHint')}
+							</span>
 						</Layout.Stack>
 					</Layout.HStack>
 

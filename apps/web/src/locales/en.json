@@ -243,7 +243,8 @@
           "tooLarge": "The photo can't exceed {{limit}}.",
           "uploaded": "Uploaded",
           "uploading": "Uploading photo",
-          "saved": "Photo updated"
+          "saved": "Photo updated",
+          "providerHint": "Your photo comes from your Google account."
         }
       },
       "shortcuts": {
