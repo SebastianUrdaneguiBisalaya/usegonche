@@ -385,6 +385,7 @@ body {
 	flex-direction: column;
 	align-items: center;
 	background: var(--background);
+	scroll-behavior: smooth;
 }
 
 .spinner {

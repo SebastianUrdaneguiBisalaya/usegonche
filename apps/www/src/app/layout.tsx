@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { IBM_Plex_Sans, Manrope } from 'next/font/google';
+import { NavbarScrollScript } from '@/components/ui/navigation/navbar/navbar-scroll-script';
+import { LenisProvider } from '@/providers/lenis';
 import './globals.css';
 
 const manrope = Manrope({
@@ -19,8 +21,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
 	return (
-		<html lang='en' data-theme='dark' className={`${manrope.variable} ${ibmPlexSans.variable} h-full antialiased`}>
-			<body>{children}</body>
+		// `suppressHydrationWarning`: `NavbarScrollScript` sets `data-navbar-scrolled` on <html> before React hydrates.
+		<html lang='en' data-theme='dark' className={`${manrope.variable} ${ibmPlexSans.variable} h-full antialiased`} suppressHydrationWarning>
+			<head>
+				<NavbarScrollScript />
+			</head>
+			<body>
+				<LenisProvider>{children}</LenisProvider>
+			</body>
 		</html>
 	);
 }

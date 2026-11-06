@@ -35,7 +35,12 @@ function GetStartedLink({ className }: { className?: string }) {
 export default function LandingNavbar() {
 	return (
 		<Layout.Container className='pointer-events-none fixed inset-x-0 top-4 z-40' size={LANDING_WIDTH}>
-			<Navbar.Root className={cn('pointer-events-auto w-full max-w-full rounded-[28px] data-[scrolled=true]:max-w-4xl', glass.surface)} sticky={false} tone='default' variant='floating'>
+			<Navbar.Root
+				className={cn('pointer-events-auto w-full max-w-full rounded-[28px] data-[scrolled=true]:max-w-4xl [html[data-navbar-scrolled=true]_&]:max-w-4xl', glass.surface)}
+				sticky={false}
+				tone='default'
+				variant='floating'
+			>
 				<Navbar.Bar className='px-5 md:grid md:grid-cols-[1fr_auto_1fr]'>
 					<Navbar.Brand aria-label='gonche, home' className='justify-self-start' href='/'>
 						<Logo size='lg'>

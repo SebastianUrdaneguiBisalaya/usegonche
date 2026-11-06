@@ -4,6 +4,7 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import * as React from "react";
 import { Icon } from "../../foundations/icon/icon";
 import { useClickOutside } from "../../hooks/useClickOutside";
+import { useIsomorphicLayoutEffect } from "../../hooks/useIsomorphicLayoutEffect";
 import { Layout } from "../../layout/layout/layout";
 import { useEscapeKey } from "../../overlays-feedback/modal/modal";
 import { cn } from "../../utils/tailwind/cn";
@@ -148,6 +149,10 @@ function NavbarRoot({
 }: NavbarRootProps) {
   const [open, setOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
+  // False until the user first interacts (wheel, touch, key, pointer). The width transition stays off until
+  // then: on reload the browser restores the scroll at an unpredictable moment (sometimes after hydration),
+  // and that jump must snap to the narrow pill, never animate from full width.
+  const [scrollSynced, setScrollSynced] = React.useState(false);
   const panelId = React.useId();
   const floating = variant === "floating";
   const resolvedLang = {
@@ -172,18 +177,43 @@ function NavbarRoot({
   );
 
   // Only the floating pill reacts to scroll. The listener is passive and only
-  // sets state when the boolean flips, so scrolling doesn't re-render.
-  React.useEffect(() => {
+  // sets state when the boolean flips, so scrolling doesn't re-render. A layout
+  // effect reads the initial scroll before the hydrated frame is painted.
+  useIsomorphicLayoutEffect(() => {
     if (!floating || !shrinkOnScroll) {
       setScrolled(false);
       return;
     }
     const update = () => setScrolled(window.scrollY > scrollThreshold);
     update();
+    // Scroll restoration is not user input, so only a real interaction turns
+    // the transition on (a timer would race with the restoration).
+    const interactions = [
+      "wheel",
+      "touchstart",
+      "keydown",
+      "pointerdown",
+    ] as const;
+    const enableTransition = () => {
+      setScrollSynced(true);
+      for (const type of interactions) {
+        window.removeEventListener(type, enableTransition);
+      }
+    };
+    for (const type of interactions) {
+      window.addEventListener(type, enableTransition, {
+        passive: true,
+      });
+    }
     window.addEventListener("scroll", update, {
       passive: true,
     });
-    return () => window.removeEventListener("scroll", update);
+    return () => {
+      for (const type of interactions) {
+        window.removeEventListener(type, enableTransition);
+      }
+      window.removeEventListener("scroll", update);
+    };
   }, [
     floating,
     shrinkOnScroll,
@@ -210,8 +240,12 @@ function NavbarRoot({
           floating
             ? [
                 "mx-auto w-[calc(100%-2rem)] rounded-2xl border border-border bg-background text-foreground",
-                "transition-[max-width,box-shadow] duration-300 ease-in-out motion-reduce:transition-none",
-                scrolled ? "max-w-3xl shadow-xl" : "max-w-6xl shadow-lg",
+                scrollSynced &&
+                  "transition-[max-width,box-shadow] duration-300 ease-in-out motion-reduce:transition-none",
+                scrolled
+                  ? "max-w-3xl shadow-xl"
+                  : // Before hydration, `NavbarScrollScript` already flags a restored scroll on <html>.
+                    "max-w-6xl shadow-lg [html[data-navbar-scrolled=true]_&]:max-w-3xl [html[data-navbar-scrolled=true]_&]:shadow-xl",
                 tone === "inverted" && invertedTokens,
                 sticky && "sticky top-4",
               ]
