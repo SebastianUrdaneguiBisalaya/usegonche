@@ -33,7 +33,9 @@
       "!apps/mobile/assets/expo.icon",
       "!apps/mobile/ios",
       "!apps/web/src/components/ui",
-      "!apps/web/ui.json"
+      "!apps/web/ui.json",
+      "!apps/www/src/components/ui",
+      "!apps/www/ui.json"
     ]
   },
   "formatter": {
