@@ -1,0 +1,1848 @@
+{
+  "meta": {
+    "title": "useGonche",
+    "description": "Turn messy work into concrete progress.",
+    "auth": {
+      "signIn": {
+        "title": "Sign in | useGonche",
+        "description": "Access your useGonche account."
+      },
+      "signUp": {
+        "title": "Create account | useGonche",
+        "description": "Create your useGonche account."
+      },
+      "verifyEmail": {
+        "title": "Confirm your email | useGonche",
+        "description": "Confirm your email to activate your account."
+      },
+      "forgotPassword": {
+        "title": "Forgot password | useGonche",
+        "description": "Get a code to reset your password."
+      },
+      "resetPassword": {
+        "title": "Reset password | useGonche",
+        "description": "Choose a new password."
+      }
+    }
+  },
+  "home": {
+    "welcome": "Hi, {{email}}",
+    "signOut": "Sign out"
+  },
+  "auth": {
+    "common": {
+      "or": "or",
+      "backToSignIn": "Back to sign in",
+      "email": {
+        "label": "Email",
+        "placeholder": "you@domain.com",
+        "invalid": "Enter a valid email"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Your password",
+        "show": "Show password",
+        "hide": "Hide password",
+        "required": "Enter your password",
+        "tooShort": "At least {{min}} characters",
+        "tooLong": "At most {{max}} characters"
+      },
+      "displayName": {
+        "label": "Name",
+        "placeholder": "Your name",
+        "required": "Enter your name",
+        "tooLong": "At most {{max}} characters"
+      }
+    },
+    "signIn": {
+      "title": "Welcome back",
+      "description": "Sign in to continue to your workspace.",
+      "submit": "Continue",
+      "submitting": "Signing in...",
+      "google": "Continue with Google",
+      "forgotPassword": "Forgot your password?",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign up"
+    },
+    "signUp": {
+      "title": "Create account",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "google": "Sign up with Google",
+      "haveAccount": "Already have an account?",
+      "signInLink": "Sign in"
+    },
+    "verifyEmail": {
+      "title": "Check your email",
+      "description": "We sent a confirmation link to {{email}}. Open it to activate your account, then sign in."
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "description": "We'll email you a code.",
+      "submit": "Send code",
+      "submitting": "Sending..."
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "description": "Enter the code we sent to {{email}} and your new password.",
+      "submit": "Reset password",
+      "submitting": "Resetting...",
+      "success": "Password updated",
+      "code": {
+        "label": "Code",
+        "invalid": "Enter the full code"
+      },
+      "newPassword": {
+        "label": "New password",
+        "placeholder": "Your new password"
+      },
+      "confirmPassword": {
+        "label": "Confirm password",
+        "placeholder": "Repeat the password",
+        "mismatch": "Passwords do not match"
+      }
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "already_exists": "A resource with this name already exists.",
+    "bad_request": "The request could not be processed.",
+    "dependency_cycle": "This dependency would create a cycle.",
+    "email_not_confirmed": "Confirm your email to continue.",
+    "forbidden": "You do not have access to this resource.",
+    "internal_error": "Something went wrong. Please try again later.",
+    "invalid_credentials": "Incorrect email or password.",
+    "invalid_email": "Enter a valid email address.",
+    "invalid_or_expired_code": "The code is invalid or has expired.",
+    "invalid_password": "The password must be 8-72 characters long.",
+    "invalid_state": "The resource is not in a state that allows this action.",
+    "not_found": "Resource not found.",
+    "oauth_failed": "Could not start sign-in with Google.",
+    "provider_conflict": "This email is already linked to another sign-in method.",
+    "rate_limited": "Too many requests. Please try again later.",
+    "reset_failed": "Could not reset the password.",
+    "signup_failed": "Could not create the account.",
+    "unauthorized": "You must sign in to continue.",
+    "validation_error": "The request data is invalid.",
+    "weak_password": "The password is too weak.",
+    "auth_failed": "Could not complete sign-in."
+  },
+  "protected": {
+    "nav": {
+      "inbox": "Inbox",
+      "today": "Today",
+      "projects": "Projects",
+      "goals": "Goals",
+      "tasks": "Tasks",
+      "notes": "Notes",
+      "reflect": "Reflect",
+      "tags": "Tags",
+      "analytics": "Analytics",
+      "calendar": "Calendar",
+      "reminders": "Reminders"
+    },
+    "menu": {
+      "open": "Open menu"
+    },
+    "quickAdd": {
+      "close": "Close"
+    },
+    "command": {
+      "placeholder": "Search or jump to...",
+      "empty": "No results",
+      "navigate": "Navigate",
+      "toggle": "Open command palette",
+      "close": "Close"
+    },
+    "progress": {
+      "title": "Daily progress",
+      "summary": "{{done}} of {{total}} tasks"
+    },
+    "settings": {
+      "title": "Settings",
+      "group": "Settings",
+      "open": "Open settings",
+      "close": "Close",
+      "logout": "Log out",
+      "search": "Search settings",
+      "noResults": "No results",
+      "general": {
+        "nav": "General",
+        "title": "General",
+        "theme": {
+          "label": "Theme",
+          "description": "Choose how useGonche looks on this device.",
+          "system": "System",
+          "light": "Light",
+          "dark": "Dark"
+        },
+        "language": {
+          "label": "Language",
+          "description": "The language of the interface.",
+          "options": {
+            "system": "System",
+            "en": "English",
+            "es": "Español"
+          }
+        },
+        "country": {
+          "label": "Country",
+          "description": "Time zone: {{timezone}}",
+          "hint": "Sets your time zone for plans and reminders."
+        },
+        "saved": "Settings saved"
+      },
+      "account": {
+        "nav": "Account",
+        "title": "Account",
+        "save": "Save changes",
+        "cancel": "Cancel",
+        "saved": "Account updated",
+        "tooLong": "At most {{max}} characters",
+        "invalidUrl": "Enter a valid URL, like https://example.com",
+        "email": {
+          "label": "Email",
+          "hint": "Your email can't be changed."
+        },
+        "displayName": {
+          "label": "Name",
+          "placeholder": "How should we call you?"
+        },
+        "phoneNumber": {
+          "label": "Phone",
+          "placeholder": "+51 999 999 999"
+        },
+        "websiteUrl": {
+          "label": "Website"
+        },
+        "jobTitle": {
+          "label": "Job title",
+          "placeholder": "Product designer"
+        },
+        "company": {
+          "label": "Company",
+          "placeholder": "Acme"
+        },
+        "industry": {
+          "label": "Industry",
+          "placeholder": "Software"
+        },
+        "bio": {
+          "label": "Bio",
+          "placeholder": "A few words about you"
+        },
+        "avatar": {
+          "edit": "Change photo",
+          "title": "Profile photo",
+          "description": "Upload a square image that shows well as a small circle.",
+          "hint": "PNG, JPG or WEBP, up to 5 MB.",
+          "dragOrClick": "Drag a photo or click to upload",
+          "dropHere": "Drop here",
+          "invalidType": "The photo must be a PNG, JPG or WEBP image.",
+          "maxSize": "max. {{limit}}",
+          "tooLarge": "The photo can't exceed {{limit}}.",
+          "uploaded": "Uploaded",
+          "uploading": "Uploading photo",
+          "saved": "Photo updated"
+        }
+      },
+      "shortcuts": {
+        "nav": "Shortcuts",
+        "description": "These are the keyboard shortcuts available in useGonche. They can't be changed.",
+        "empty": "No shortcuts available.",
+        "groups": {
+          "general": "General",
+          "navigation": "Navigation",
+          "other": "Other"
+        }
+      },
+      "availability": {
+        "nav": "Availability",
+        "title": "Availability",
+        "description": "Your weekly working hours. Today uses them to tell how much time you really have.",
+        "dayOff": "Day off",
+        "add": "Add window",
+        "remove": "Remove window",
+        "start": "{{day}}: start",
+        "end": "{{day}}: end",
+        "total": "Weekly total: {{total}}",
+        "save": "Save",
+        "saved": "Availability saved.",
+        "error": "Availability could not be loaded.",
+        "retry": "Retry",
+        "error_end_before_start": "The end must be after the start.",
+        "error_overlapping": "This window overlaps another one of the same day."
+      }
+    }
+  },
+  "inbox": {
+    "title": "Inbox",
+    "subtitle": "Capture anything, organize later.",
+    "range": {
+      "label": "Time range",
+      "all": "All time",
+      "24h": "Last 24 hours",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days"
+    },
+    "capture": {
+      "placeholder": "Quick capture... (tasks, ideas, notes, reminders)",
+      "label": "Quick capture",
+      "submit": "Capture"
+    },
+    "brainDump": {
+      "title": "Brain Dump",
+      "description": "Paste multiple ideas, one per line. Max {{max}} items.",
+      "open": "Open Brain Dump",
+      "placeholder": "One idea per line...",
+      "count_one": "{{count}} item",
+      "count_other": "{{count}} items",
+      "tooMany": "Max {{max}} items per dump.",
+      "submit": "Add to inbox",
+      "cancel": "Cancel",
+      "added": "{{count}} items captured"
+    },
+    "tabs": {
+      "pending": "Pending",
+      "archived": "Archived",
+      "discarded": "Discarded",
+      "converted": "Converted",
+      "label": "Inbox status"
+    },
+    "columns": {
+      "actions": "Actions",
+      "content": "Item",
+      "time": "Captured"
+    },
+    "source": {
+      "quick": "quick",
+      "braindump": "braindump"
+    },
+    "selection": {
+      "all": "Select all",
+      "count": "{{count}} selected",
+      "row": "Select item"
+    },
+    "actions": {
+      "convert": "Convert",
+      "toTask": "To task",
+      "toProject": "To project",
+      "toNote": "To note",
+      "archive": "Archive",
+      "discard": "Discard",
+      "restore": "Restore",
+      "more": "More actions",
+      "archiveSelected": "Archive selected",
+      "discardSelected": "Discard selected",
+      "restoreSelected": "Restore selected",
+      "clearSelection": "Clear selection"
+    },
+    "toast": {
+      "archived": "Moved to archived",
+      "discarded": "Discarded",
+      "restored": "Restored to pending",
+      "undo": "Undo",
+      "convertedTask": "Converted to a task",
+      "convertedProject": "Converted to a project",
+      "convertedNote": "Converted to a note",
+      "bulk": "{{count}} items updated",
+      "captured": "Captured"
+    },
+    "empty": {
+      "pending": {
+        "title": "Inbox zero",
+        "description": "Everything is processed. Capture something new above."
+      },
+      "archived": {
+        "title": "Nothing archived",
+        "description": "Archive what you want to keep for later."
+      },
+      "discarded": {
+        "title": "Nothing discarded",
+        "description": "Discarded items show up here."
+      },
+      "converted": {
+        "title": "Nothing converted yet",
+        "description": "Items turned into tasks, projects or notes show up here."
+      },
+      "range": "No items in this time range."
+    },
+    "error": {
+      "title": "Could not load your inbox",
+      "retry": "Try again"
+    },
+    "readOnly": "Converted items are read-only"
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Plan, organize and track your projects.",
+    "new": "New project",
+    "tabs": {
+      "label": "Project status",
+      "active": "Active",
+      "on_hold": "On hold",
+      "completed": "Completed",
+      "archived": "Archived"
+    },
+    "status": {
+      "active": "Active",
+      "on_hold": "On hold",
+      "completed": "Completed",
+      "archived": "Archived",
+      "change": "Change status"
+    },
+    "filters": {
+      "goal": {
+        "label": "Filter by goal",
+        "all": "All goals"
+      },
+      "tag": {
+        "label": "Filter by tag",
+        "all": "All tags"
+      },
+      "clear": "Clear filters"
+    },
+    "columns": {
+      "title": "Title",
+      "description": "Description",
+      "goal": "Goal",
+      "tags": "Tags",
+      "status": "Status",
+      "updated": "Updated"
+    },
+    "cell": {
+      "noGoal": "No goal",
+      "progress": "{{done}} of {{total}} tasks done",
+      "noTasks": "No tasks yet"
+    },
+    "selection": {
+      "count": "{{count}} selected",
+      "total_one": "{{count}} project",
+      "total_other": "{{count}} projects"
+    },
+    "actions": {
+      "open": "Open details",
+      "setActive": "Set active",
+      "setOnHold": "Set on hold",
+      "setCompleted": "Set completed",
+      "archive": "Archive",
+      "restore": "Restore",
+      "more": "More actions",
+      "rowMenu": "Project actions",
+      "clearSelection": "Clear selection"
+    },
+    "toast": {
+      "created": "Project created",
+      "saved": "Changes saved",
+      "archived": "Project archived",
+      "restored": "Project restored",
+      "statusChanged": "Status updated",
+      "bulk": "{{count}} projects updated",
+      "undo": "Undo",
+      "tagCreated": "Tag created"
+    },
+    "empty": {
+      "active": {
+        "title": "No active projects",
+        "description": "Create a project or convert an inbox item to start one."
+      },
+      "on_hold": {
+        "title": "Nothing on hold",
+        "description": "Projects you pause show up here."
+      },
+      "completed": {
+        "title": "Nothing completed yet",
+        "description": "Finished projects show up here."
+      },
+      "archived": {
+        "title": "Nothing archived",
+        "description": "Archive the projects you no longer work on."
+      },
+      "filtered": "No projects match these filters."
+    },
+    "error": {
+      "title": "Could not load your projects",
+      "retry": "Retry"
+    },
+    "form": {
+      "title": {
+        "label": "Title",
+        "placeholder": "What is this project about?",
+        "required": "Give the project a title.",
+        "tooLong": "Use at most {{max}} characters."
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Goal, scope, notes..."
+      },
+      "goal": {
+        "label": "Goal",
+        "none": "No goal",
+        "placeholder": "Pick a goal"
+      },
+      "tags": {
+        "label": "Tags",
+        "placeholder": "Search or create tags...",
+        "empty": "No tags yet. Type to create one.",
+        "create": "Create “{{name}}”"
+      },
+      "status": {
+        "label": "Status"
+      },
+      "cancel": "Cancel",
+      "create": "Create project",
+      "save": "Save changes"
+    },
+    "modal": {
+      "title": "New project",
+      "description": "A project groups the tasks needed to reach a goal."
+    },
+    "drawer": {
+      "close": "Close",
+      "tabsLabel": "Project sections",
+      "details": "Details",
+      "tasks": "Tasks",
+      "notes": "Notes",
+      "files": "Files",
+      "created": "Created {{date}}",
+      "progress": "{{done}} of {{total}} tasks done",
+      "tasksEmpty": "This project has no tasks yet.",
+      "notesEmpty": "This project has no notes yet.",
+      "filesEmpty": "This project has no files yet.",
+      "loadError": "Could not load this section.",
+      "retry": "Retry",
+      "taskStatus": {
+        "todo": "To do",
+        "in_progress": "In progress",
+        "done": "Done",
+        "cancelled": "Cancelled"
+      },
+      "due": "Due {{date}}"
+    },
+    "sort": {
+      "label": "Sort by",
+      "updated": "Recently updated",
+      "created": "Newest first",
+      "title": "Title (A–Z)"
+    }
+  },
+  "goals": {
+    "title": "Goals",
+    "subtitle": "Set and track your goals.",
+    "new": "New goal",
+    "tabs": {
+      "label": "Goal status",
+      "active": "Active",
+      "achieved": "Achieved",
+      "archived": "Archived"
+    },
+    "status": {
+      "active": "Active",
+      "achieved": "Achieved",
+      "archived": "Archived",
+      "change": "Change status"
+    },
+    "filters": {
+      "due": {
+        "label": "Filter by target date",
+        "all": "Any target date",
+        "overdue": "Overdue",
+        "soon": "Due in 14 days"
+      }
+    },
+    "sort": {
+      "label": "Sort by",
+      "updated": "Recently updated",
+      "created": "Newest first",
+      "targetDate": "Target date",
+      "title": "Title (A–Z)"
+    },
+    "columns": {
+      "title": "Title",
+      "description": "Description",
+      "targetDate": "Target date",
+      "progress": "Progress",
+      "projects": "Projects",
+      "status": "Status",
+      "updated": "Updated"
+    },
+    "cell": {
+      "noDate": "No target date",
+      "overdue": "Overdue",
+      "progress": "{{done}} of {{total}} tasks done",
+      "noTasks": "No tasks yet",
+      "projects_one": "{{count}} project",
+      "projects_other": "{{count}} projects"
+    },
+    "selection": {
+      "count": "{{count}} selected",
+      "total_one": "{{count}} goal",
+      "total_other": "{{count}} goals"
+    },
+    "actions": {
+      "open": "Open details",
+      "setActive": "Set active",
+      "setAchieved": "Mark achieved",
+      "archive": "Archive",
+      "restore": "Restore",
+      "more": "More actions",
+      "rowMenu": "Goal actions",
+      "clearSelection": "Clear selection"
+    },
+    "toast": {
+      "created": "Goal created",
+      "saved": "Changes saved",
+      "archived": "Goal archived",
+      "restored": "Goal restored",
+      "statusChanged": "Status updated",
+      "bulk": "{{count}} goals updated",
+      "undo": "Undo"
+    },
+    "empty": {
+      "active": {
+        "title": "No active goals",
+        "description": "Set a goal to give your projects a direction."
+      },
+      "achieved": {
+        "title": "Nothing achieved yet",
+        "description": "Goals you reach show up here."
+      },
+      "archived": {
+        "title": "Nothing archived",
+        "description": "Archive the goals you no longer pursue."
+      },
+      "filtered": "No goals match this filter."
+    },
+    "error": {
+      "title": "Could not load your goals",
+      "retry": "Retry"
+    },
+    "form": {
+      "title": {
+        "label": "Title",
+        "placeholder": "What do you want to achieve?",
+        "required": "Give the goal a title.",
+        "tooLong": "Use at most {{max}} characters."
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Why it matters, how you will know it is done..."
+      },
+      "targetDate": {
+        "label": "Target date",
+        "placeholder": "No target date",
+        "picker": {
+          "calendar": "Calendar",
+          "previousMonth": "Previous month",
+          "nextMonth": "Next month",
+          "clear": "Remove date",
+          "apply": "Apply",
+          "mo": "Mo",
+          "tu": "Tu",
+          "we": "We",
+          "th": "Th",
+          "fr": "Fr",
+          "sa": "Sa",
+          "su": "Su"
+        }
+      },
+      "status": {
+        "label": "Status"
+      },
+      "cancel": "Cancel",
+      "create": "Create goal",
+      "save": "Save changes"
+    },
+    "modal": {
+      "title": "New goal",
+      "description": "A goal is an outcome you want to reach. Projects group the work to get there."
+    },
+    "drawer": {
+      "close": "Close",
+      "tabsLabel": "Goal sections",
+      "details": "Details",
+      "projects": "Projects",
+      "created": "Created {{date}}",
+      "progress": "{{done}} of {{total}} tasks done",
+      "projectsEmpty": "No projects are linked to this goal yet.",
+      "loadError": "Could not load this section.",
+      "retry": "Retry"
+    }
+  },
+  "tags": {
+    "title": "Tags",
+    "subtitle": "Organize your content with tags.",
+    "new": "New tag",
+    "search": {
+      "placeholder": "Search tags...",
+      "label": "Search tags",
+      "clear": "Clear search",
+      "empty": "No tag matches your search."
+    },
+    "add": {
+      "placeholder": "Add a tag name...",
+      "label": "New tag name",
+      "submit": "Add tag"
+    },
+    "sort": {
+      "label": "Sort by",
+      "name": "Name (A–Z)",
+      "updated": "Recently updated",
+      "created": "Newest first",
+      "tasks": "Most tasks",
+      "projects": "Most projects",
+      "notes": "Most notes"
+    },
+    "columns": {
+      "tag": "Tag",
+      "usedIn": "Used in",
+      "created": "Created",
+      "updated": "Updated"
+    },
+    "usage": {
+      "tasks_one": "{{count}} task",
+      "tasks_other": "{{count}} tasks",
+      "projects_one": "{{count}} project",
+      "projects_other": "{{count}} projects",
+      "notes_one": "{{count}} note",
+      "notes_other": "{{count}} notes",
+      "openProjects": "Show projects with this tag"
+    },
+    "selection": {
+      "count": "{{count}} selected",
+      "total_one": "{{count}} tag",
+      "total_other": "{{count}} tags"
+    },
+    "actions": {
+      "delete": "Delete",
+      "deleteSelected": "Delete selected",
+      "more": "More actions",
+      "clearSelection": "Clear selection",
+      "edit": "Edit"
+    },
+    "toast": {
+      "created": "Tag created",
+      "updated": "Tag updated successfully",
+      "deleted_one": "Tag deleted",
+      "deleted_other": "{{count}} tags deleted"
+    },
+    "empty": {
+      "title": "No tags yet",
+      "description": "Add your first tag above to start organizing."
+    },
+    "error": {
+      "title": "Could not load your tags",
+      "retry": "Retry"
+    },
+    "delete": {
+      "title_one": "Delete this tag?",
+      "title_other": "Delete {{count}} tags?",
+      "unused": "No item uses it. This can't be undone.",
+      "used_one": "It will be removed from {{count}} item; the items stay. This can't be undone.",
+      "used_other": "It will be removed from {{count}} items; the items stay. This can't be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "edit": {
+      "title": "Edit tag",
+      "description": "Change the name or the color of the tag. It updates everywhere the tag is used.",
+      "label": "Name",
+      "placeholder": "Tag name",
+      "required": "Give the tag a name.",
+      "tooLong": "Use at most {{max}} characters.",
+      "exists": "You already have a tag with this name.",
+      "save": "Save name",
+      "cancel": "Cancel"
+    },
+    "color": {
+      "label": "Color",
+      "set": "Set color",
+      "remove": "Remove color",
+      "choose": "Choose a color",
+      "picker": "Color picker",
+      "hex": "Hex color value",
+      "eyedropper": "Pick color from screen"
+    }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "subtitle": "Plan, organize and get things done.",
+    "new": "New task",
+    "views": {
+      "label": "View",
+      "board": "Board",
+      "list": "List",
+      "recurring": "Recurring"
+    },
+    "status": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "done": "Done",
+      "cancelled": "Cancelled",
+      "change": "Change status"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent",
+      "change": "Change priority"
+    },
+    "columns": {
+      "title": "Task",
+      "project": "Project",
+      "due": "Due date",
+      "priority": "Priority",
+      "status": "Status",
+      "tags": "Tags"
+    },
+    "properties": {
+      "start": "Start date",
+      "noStart": "No start date",
+      "estimate": "Estimate",
+      "minutes": "Minutes",
+      "goal": "Goal"
+    },
+    "due": {
+      "change": "Change due date",
+      "none": "No date"
+    },
+    "blocked": {
+      "tag": "Blocked",
+      "byBlockers": "{{count}} open blocker(s)",
+      "byDependencies": "Waiting for another task"
+    },
+    "chips": {
+      "label": "Quick filters",
+      "overdue": "Overdue",
+      "blocked": "Blocked",
+      "focus": "Working set"
+    },
+    "filters": {
+      "project": {
+        "label": "Filter by project",
+        "all": "All projects",
+        "none": "No project"
+      },
+      "goal": {
+        "label": "Filter by goal",
+        "all": "All goals"
+      },
+      "tag": {
+        "label": "Filter by tag",
+        "all": "All tags"
+      },
+      "due": {
+        "label": "Filter by date",
+        "any": "Any date",
+        "today": "Due today",
+        "week": "Next 7 days",
+        "overdue": "Overdue",
+        "none": "No date"
+      },
+      "clear": "Clear filters"
+    },
+    "sort": {
+      "label": "Sort tasks",
+      "created": "Newest first",
+      "due": "Due soonest",
+      "priority": "Most urgent",
+      "title": "Title (A-Z)",
+      "updated": "Recently updated"
+    },
+    "groupBy": {
+      "label": "Group tasks",
+      "none": "No grouping",
+      "project": "By project",
+      "goal": "By goal",
+      "due": "By due date",
+      "priority": "By priority"
+    },
+    "group": {
+      "noProject": "No project",
+      "noGoal": "No goal",
+      "due": {
+        "overdue": "Overdue",
+        "today": "Today",
+        "week": "Next 7 days",
+        "later": "Later",
+        "none": "No date"
+      }
+    },
+    "picker": {
+      "apply": "Apply",
+      "calendar": "Calendar",
+      "clear": "Clear",
+      "nextMonth": "Next month",
+      "previousMonth": "Previous month",
+      "mo": "Mo",
+      "tu": "Tu",
+      "we": "We",
+      "th": "Th",
+      "fr": "Fr",
+      "sa": "Sa",
+      "su": "Su"
+    },
+    "actions": {
+      "rowMenu": "Task actions",
+      "open": "Open details",
+      "delete": "Delete",
+      "setPriority": "Set priority: {{priority}}",
+      "clearSelection": "Clear selection"
+    },
+    "selection": {
+      "count": "{{count}} selected",
+      "total_one": "{{count}} task",
+      "total_other": "{{count}} tasks"
+    },
+    "bulk": {
+      "status": "Status",
+      "priority": "Priority",
+      "project": "Project",
+      "noProject": "No project",
+      "moveDates": "Move dates",
+      "shift": {
+        "dayBack": "1 day earlier",
+        "dayForward": "1 day later",
+        "weekForward": "1 week later",
+        "clear": "Clear due date"
+      }
+    },
+    "card": {
+      "subtasks": "{{done}} of {{total}} subtasks done"
+    },
+    "board": {
+      "instructions": "Press space to pick up the card, the arrow keys to move it and space to drop it.",
+      "card": "Draggable task",
+      "empty": "No tasks.",
+      "add": "Add task to {{status}}",
+      "addTask": "Add task...",
+      "more_one": "{{count}} more task in list view",
+      "more_other": "{{count}} more tasks in list view"
+    },
+    "list": {
+      "collapse": "Hide subtasks",
+      "expand": "Show subtasks"
+    },
+    "empty": {
+      "title": "No tasks here",
+      "description": "Add one above, or convert an inbox item into a task.",
+      "filtered": "No tasks match these filters."
+    },
+    "error": {
+      "title": "Could not load your tasks",
+      "retry": "Retry"
+    },
+    "toast": {
+      "created": "Task created",
+      "completed": "Task completed",
+      "statusChanged": "Status updated",
+      "undo": "Undo",
+      "bulk": "{{count}} tasks updated",
+      "deleted": "Task deleted",
+      "updated": "Task updated",
+      "blockerAdded": "Blocker added",
+      "blockerResolved": "Blocker resolved",
+      "dependencyRemoved": "Dependency removed",
+      "subtaskAdded": "Subtask added"
+    },
+    "quickAdd": {
+      "label": "Add a task",
+      "placeholder": "Add a task... (e.g. \"Review contract #project !high tomorrow\")",
+      "submit": "Add task",
+      "needsTitle": "Write what the task is about.",
+      "understood": "Understood:",
+      "projectNotFound": "No project \"{{name}}\"",
+      "estimate": "~{{minutes}} min"
+    },
+    "modal": {
+      "title": "New task",
+      "description": "Capture what needs to be done. You can refine it later."
+    },
+    "form": {
+      "title": {
+        "label": "Title",
+        "placeholder": "What needs to be done?",
+        "required": "Give the task a title.",
+        "tooLong": "Use at most {{max}} characters."
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Add details (optional)"
+      },
+      "priority": {
+        "label": "Priority"
+      },
+      "dueDate": {
+        "label": "Due date",
+        "placeholder": "No date"
+      },
+      "project": {
+        "label": "Project",
+        "none": "No project"
+      },
+      "goal": {
+        "label": "Goal",
+        "none": "No goal"
+      },
+      "tags": {
+        "label": "Tags",
+        "placeholder": "Add tags",
+        "create": "Create \"{{name}}\"",
+        "empty": "No tags yet."
+      },
+      "cancel": "Cancel",
+      "create": "Create task"
+    },
+    "editor": {
+      "bold": "Bold",
+      "bulletList": "Bulleted list",
+      "checklist": "Checklist",
+      "heading1": "Heading 1",
+      "heading2": "Heading 2",
+      "heading3": "Heading 3",
+      "highlight": "Highlight",
+      "italic": "Italic",
+      "link": "Link",
+      "linkPrompt": "URL",
+      "numberedList": "Numbered list",
+      "quote": "Quote",
+      "save": "Save",
+      "strikethrough": "Strikethrough",
+      "underline": "Underline",
+      "placeholder": "Describe the task... (Markdown)",
+      "status": {
+        "error": "Couldn't save",
+        "saved": "Saved",
+        "saving": "Saving...",
+        "unsaved": "Unsaved changes"
+      }
+    },
+    "subtasks": {
+      "title": "Subtasks ({{done}} / {{total}})",
+      "toggle": "Mark \"{{title}}\" as done",
+      "add": "Add a subtask"
+    },
+    "dependencies": {
+      "title": "Dependencies",
+      "added": "Dependency added",
+      "cycle": "That would create a dependency cycle.",
+      "confirm": "\"{{title}}\" will wait for \"{{candidate}}\".",
+      "cyclePreview": "This would create a cycle and cannot be added:",
+      "confirmAction": "Add dependency",
+      "search": "Search a task to wait for...",
+      "noResults": "No tasks found.",
+      "waitsFor_one": "Waits for {{count}} task",
+      "waitsFor_other": "Waits for {{count}} tasks",
+      "blocks_one": "Blocks {{count}} task",
+      "blocks_other": "Blocks {{count}} tasks",
+      "remove": "Stop waiting for \"{{title}}\""
+    },
+    "blockers": {
+      "title_one": "Blockers ({{count}} open)",
+      "title_other": "Blockers ({{count}} open)",
+      "none": "Nothing is blocking this task.",
+      "openFor": "Open {{time}}",
+      "recurring": "Recurring ×{{count}}",
+      "resolve": "Resolve",
+      "resolved_one": "{{count}} resolved blocker",
+      "resolved_other": "{{count}} resolved blockers",
+      "add": "Add a blocker (the reason)"
+    },
+    "drawer": {
+      "close": "Close",
+      "tabsLabel": "Task sections",
+      "history": "History",
+      "notes": "Notes",
+      "files": "Files",
+      "time": "Time",
+      "notesEmpty": "This task has no notes yet.",
+      "filesEmpty": "This task has no files yet.",
+      "loadError": "Could not load this section.",
+      "retry": "Retry",
+      "estimate": "Estimated: {{minutes}} min",
+      "noEstimate": "No estimate yet.",
+      "blocksEmpty": "No time blocks planned for this task.",
+      "blockStatus": {
+        "planned": "Planned",
+        "done": "Done",
+        "missed": "Missed",
+        "interrupted": "Interrupted",
+        "rescheduled": "Rescheduled"
+      },
+      "created": "Created {{date}}",
+      "completeShortcut": "Complete task",
+      "reopen": "Reopen",
+      "complete": "Complete",
+      "cancel": "Cancel task"
+    },
+    "history": {
+      "none": "none",
+      "status": "Status: {{from}} → {{to}}",
+      "priority": "Priority: {{from}} → {{to}}",
+      "due": "Due date: {{from}} → {{to}}",
+      "project": "Project: {{from}} → {{to}}",
+      "rescheduled": "Rescheduled: {{from}} → {{to}}",
+      "created": "Task created",
+      "shown": "Showing {{shown}} of {{total}} events",
+      "more": "Load older events"
+    },
+    "delete": {
+      "cancel": "Keep it",
+      "confirm": "Delete task",
+      "title": "Delete this task?",
+      "description": "\"{{title}}\" and its subtasks, blockers and files will be deleted. This cannot be undone."
+    }
+  },
+  "notes": {
+    "title": "Notes",
+    "subtitle": "Capture ideas, write and keep your thoughts.",
+    "new": "New note",
+    "filters": {
+      "all": "All",
+      "project": {
+        "label": "Filter by project",
+        "all": "Project"
+      },
+      "tag": {
+        "label": "Filter by tag",
+        "all": "Tag"
+      },
+      "task": {
+        "label": "Filter by linked task",
+        "all": "Task"
+      }
+    },
+    "card": {
+      "noExcerpt": "No content yet",
+      "more": "More actions for {{title}}",
+      "project": "Project"
+    },
+    "actions": {
+      "open": "Open",
+      "copyLink": "Copy link",
+      "delete": "Delete"
+    },
+    "empty": {
+      "title": "No notes here",
+      "description": "Create a note, or convert an inbox item into one.",
+      "filtered": "No notes match these filters."
+    },
+    "error": {
+      "title": "Could not load your notes",
+      "retry": "Retry"
+    },
+    "modal": {
+      "title": "New note",
+      "description": "Give it a title; you write the rest in the editor."
+    },
+    "form": {
+      "title": {
+        "label": "Title",
+        "placeholder": "Note title",
+        "required": "Give the note a title.",
+        "tooLong": "Use at most {{max}} characters."
+      },
+      "cancel": "Cancel",
+      "create": "Create note"
+    },
+    "toast": {
+      "created": "Note created",
+      "saved": "Note saved",
+      "deleted": "Note deleted",
+      "linkCopied": "Link copied",
+      "markdownCopied": "Markdown copied",
+      "restored": "Version restored",
+      "fileRemoved": "File removed",
+      "filesAdded": "Files added"
+    },
+    "delete": {
+      "cancel": "Keep it",
+      "confirm": "Delete note",
+      "title": "Delete this note?",
+      "description": "\"{{title}}\" and its attachments will be deleted. This cannot be undone."
+    },
+    "discard": {
+      "title": "Discard your changes?",
+      "description": "This note has changes you have not saved.",
+      "cancel": "Keep editing",
+      "confirm": "Discard changes"
+    },
+    "editor": {
+      "back": "Back",
+      "close": "Close",
+      "save": "Save",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Untitled note",
+      "placeholder": "Write your note... (Markdown)",
+      "copyLink": "Copy link",
+      "copyMarkdown": "Copy Markdown",
+      "delete": "Delete note",
+      "loadError": "Could not load this note.",
+      "retry": "Retry",
+      "panel": "Note editor",
+      "status": {
+        "idle": "",
+        "saved": "Saved",
+        "saving": "Saving...",
+        "unsaved": "Unsaved changes",
+        "error": "Couldn't save"
+      },
+      "bold": "Bold",
+      "italic": "Italic",
+      "link": "Link",
+      "linkPrompt": "URL",
+      "bulletList": "Bulleted list",
+      "numberedList": "Numbered list",
+      "checklist": "Checklist",
+      "quote": "Quote",
+      "divider": "Divider",
+      "code": "Code",
+      "more": "More",
+      "heading1": "Heading 1",
+      "heading2": "Heading 2",
+      "heading3": "Heading 3",
+      "highlight": "Highlight",
+      "strikethrough": "Strikethrough",
+      "underline": "Underline",
+      "undo": "Undo",
+      "redo": "Redo",
+      "placeholderEmpty": "Select a note to read or edit it.",
+      "placeholderEmptyHint": "Or create a new one with the button above.",
+      "saveShortcut": "Save note"
+    },
+    "meta": {
+      "project": {
+        "label": "Project",
+        "none": "No project"
+      },
+      "tags": {
+        "label": "Tags",
+        "placeholder": "Add tag",
+        "create": "Create \"{{name}}\"",
+        "empty": "No tags yet."
+      },
+      "tasks": {
+        "label": "Linked tasks",
+        "add": "Link task",
+        "search": "Search tasks...",
+        "empty": "No task matches.",
+        "none": "No linked tasks",
+        "remove": "Unlink {{title}}",
+        "count": "{{count}} linked"
+      }
+    },
+    "reminder": {
+      "title": "Reminder",
+      "description": "Get reminded about this note.",
+      "none": "Set a reminder",
+      "pending": "Reminds you {{when}}",
+      "change": "Change the reminder",
+      "remove": "Remove the reminder",
+      "toast": {
+        "set": "Reminder set",
+        "updated": "Reminder updated",
+        "removed": "Reminder removed"
+      },
+      "error": "Could not save the reminder.",
+      "loadError": "Could not load the reminder.",
+      "retry": "Retry",
+      "picker": {
+        "hour": "Hour",
+        "minute": "Minute"
+      }
+    },
+    "files": {
+      "title": "Attachments ({{count}})",
+      "loading": "Loading attachments",
+      "empty": "No files attached yet.",
+      "add": "Add files",
+      "viewAll": "View all",
+      "viewLess": "Show less",
+      "download": "Download {{name}}",
+      "remove": "Remove {{name}}",
+      "more": "More actions for {{name}}",
+      "uploadTitle": "Add files",
+      "uploadDescription": "They are uploaded straight to storage and attached to this note.",
+      "limits": "Up to {{max}} files, {{size}} in total ({{used}} used).",
+      "full": "This note already has the maximum number of files.",
+      "totalExceeded": "Adding this file would exceed {{size}} in total.",
+      "sessionLimit": "You can only add {{max}} more files right now.",
+      "done": "Done",
+      "loadError": "Could not load the attachments.",
+      "retry": "Retry",
+      "removeError": "Could not remove the file.",
+      "downloadError": "Could not open the file.",
+      "dropzone": {
+        "dragOrClick": "Drag files or click to upload",
+        "dropHere": "Drop here",
+        "invalidType": "This file isn't a supported type.",
+        "tooLarge": "The file can't exceed {{limit}}.",
+        "uploading": "Uploading...",
+        "uploaded": "Uploaded",
+        "uploadFailed": "Error uploading the file.",
+        "cancelled": "Upload cancelled."
+      }
+    },
+    "history": {
+      "title": "Revision history",
+      "description": "View and restore previous versions.",
+      "view": "View history",
+      "drawerTitle": "Revision history",
+      "drawerDescription": "Each time you change the title or the text, the previous version is kept here.",
+      "empty": "No previous versions yet.",
+      "emptyHint": "They appear when you change the title or the text.",
+      "loadError": "Could not load the history.",
+      "retry": "Retry",
+      "versionOf": "Version of {{date}}",
+      "untitled": "Untitled",
+      "preview": "Preview",
+      "back": "All versions",
+      "restore": "Restore this version",
+      "restoring": "Restoring...",
+      "close": "Close",
+      "previewEmpty": "This version has no text.",
+      "restoreHint": "The current version is saved as a new revision."
+    },
+    "search": {
+      "label": "Search notes",
+      "placeholder": "Search notes...",
+      "clear": "Clear search"
+    }
+  },
+  "reflect": {
+    "title": "Reflect",
+    "subtitle": "Review your progress. Make decisions. Set what's next.",
+    "date": "Pick a date",
+    "loadError": "The review could not be loaded.",
+    "retry": "Try again",
+    "kind": {
+      "daily": "Daily",
+      "weekly": "Weekly"
+    },
+    "period": {
+      "title": "This period",
+      "planned": "Planned",
+      "completed": "Completed",
+      "pending": "Pending",
+      "rate": "Completion rate"
+    },
+    "reflection": {
+      "title": "Your reflection",
+      "subtitle": "What went well? What could be better? What's your focus for next period?",
+      "placeholder": "Write your thoughts here...",
+      "status": {
+        "saved": "Saved",
+        "saving": "Saving...",
+        "unsaved": "Unsaved changes",
+        "error": "Could not save"
+      }
+    },
+    "decisions": {
+      "title": "Decisions",
+      "subtitle": "Review your pending tasks and decide what to do.",
+      "selected": "Selected: {{count}}",
+      "keepAll": "Keep all",
+      "apply": "Apply decisions ({{count}})",
+      "applied": "Decisions applied.",
+      "empty": "Nothing pending: every planned task is done.",
+      "noneTaken": "No decisions were taken in this review.",
+      "select": "Select {{title}}",
+      "date": "Date",
+      "action": {
+        "carry_over": "Carry over",
+        "reschedule": "Reschedule",
+        "drop": "Drop",
+        "keep": "Keep"
+      }
+    },
+    "focus": {
+      "title": "Next focus",
+      "subtitle": "What do you want to focus on next period?",
+      "placeholder": "Ship v2.0 and improve onboarding experience...",
+      "save": "Save focus",
+      "saved": "Focus saved."
+    },
+    "summary": {
+      "title": "Review summary",
+      "onTrack": "On track",
+      "overdue": "Overdue",
+      "recurring": "Recurring blockers",
+      "noBlockers": "No recurring blockers.",
+      "details": "See details"
+    },
+    "actions": {
+      "title": "Actions",
+      "close": "Close review",
+      "or": "or",
+      "draft": "Save as draft",
+      "draftSaved": "Draft saved.",
+      "closeDone": "Review closed.",
+      "closed": "This review is closed."
+    }
+  },
+  "reminders": {
+    "title": "Reminders",
+    "subtitle": "Never miss what matters.",
+    "unread": "Unread reminders",
+    "markAll": "Mark all as read",
+    "markSelected": "Mark as read ({{count}})",
+    "loadError": "Reminders could not be loaded.",
+    "retry": "Try again",
+    "empty": {
+      "title": "No reminders yet",
+      "description": "Add one from a task or a note."
+    },
+    "noResults": "No reminders match.",
+    "tabs": {
+      "label": "Reminder status",
+      "all": "All",
+      "upcoming": "Upcoming",
+      "snoozed": "Snoozed",
+      "dismissed": "Dismissed"
+    },
+    "search": {
+      "label": "Search reminders",
+      "placeholder": "Search reminders...",
+      "clear": "Clear search"
+    },
+    "type": {
+      "event": "Event",
+      "task": "Task",
+      "note": "Note"
+    },
+    "row": {
+      "at": "at",
+      "snoozedUntil": "Snoozed until {{date}}",
+      "dismissed": "Dismissed",
+      "priority": "{{priority}} priority",
+      "select": "Select {{title}}",
+      "menu": "Reminder options"
+    },
+    "actions": {
+      "title": "Actions",
+      "snooze": "Snooze",
+      "dismiss": "Dismiss",
+      "delete": "Delete"
+    },
+    "snooze": {
+      "hour": "In 1 hour ({{when}})",
+      "tomorrow": "Tomorrow ({{when}})",
+      "week": "Next week ({{when}})"
+    },
+    "detail": {
+      "close": "Close details",
+      "title": "Details",
+      "type": "Type",
+      "date": "Date",
+      "time": "Time",
+      "created": "Created",
+      "viewNote": "View note"
+    },
+    "caughtUp": {
+      "title": "All caught up!",
+      "subtitle": "No more reminders for now."
+    },
+    "toast": {
+      "snoozed": "Reminder snoozed.",
+      "dismissed": "Reminder dismissed.",
+      "deleted": "Reminder deleted."
+    },
+    "target": {
+      "title": "Reminder",
+      "description": "Get reminded about this later.",
+      "pending": "Reminds you {{when}}",
+      "none": "Set a reminder",
+      "change": "Change reminder",
+      "remove": "Remove reminder",
+      "set": "Reminder set.",
+      "updated": "Reminder updated.",
+      "removed": "Reminder removed."
+    }
+  },
+  "recurrences": {
+    "title": "Recurring",
+    "new": "New recurrence",
+    "empty": {
+      "title": "Nothing repeats yet",
+      "description": "Create a rule for work that comes back, like a weekly review or a daily stand-up."
+    },
+    "error": {
+      "title": "Recurrences could not be loaded.",
+      "retry": "Try again"
+    },
+    "rule": {
+      "daily_one": "Every day",
+      "daily_other": "Every {{count}} days",
+      "weekly_one": "Every week",
+      "weekly_other": "Every {{count}} weeks",
+      "monthly_one": "Every month",
+      "monthly_other": "Every {{count}} months",
+      "yearly_one": "Every year",
+      "yearly_other": "Every {{count}} years",
+      "on": "on {{days}}"
+    },
+    "card": {
+      "edit": "Edit recurrence",
+      "delete": "Delete recurrence",
+      "upcoming": "Next:",
+      "noUpcoming": "No upcoming occurrences",
+      "minutes": "{{count}} min"
+    },
+    "modal": {
+      "title": "New recurrence",
+      "description": "Repeat a task on a schedule. Each occurrence is a regular task.",
+      "editTitle": "Edit recurrence",
+      "editDescription": "Changes apply to future occurrences that are still untouched."
+    },
+    "form": {
+      "create": "Create recurrence",
+      "save": "Save changes",
+      "title": {
+        "label": "Title",
+        "placeholder": "What repeats?",
+        "required": "Title is required",
+        "tooLong": "Title can have up to {{max}} characters"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Optional details"
+      },
+      "freq": {
+        "label": "Repeats",
+        "DAILY": "Daily",
+        "WEEKLY": "Weekly",
+        "MONTHLY": "Monthly",
+        "YEARLY": "Yearly"
+      },
+      "interval": {
+        "label": "Every",
+        "invalid": "Use a number from 1 to 999"
+      },
+      "byDay": {
+        "label": "On these days"
+      },
+      "startDate": {
+        "label": "Starts",
+        "placeholder": "Pick a date",
+        "required": "Pick a start date"
+      },
+      "time": {
+        "label": "Time (optional)",
+        "needsDuration": "Add the duration of the time block, or clear the time"
+      },
+      "duration": {
+        "label": "Duration (min)",
+        "placeholder": "Minutes",
+        "invalid": "Use a duration from 1 to 1440 minutes"
+      },
+      "estimate": {
+        "label": "Estimate"
+      }
+    },
+    "delete": {
+      "title": "Delete this recurrence?",
+      "description": "“{{title}}” and its future untouched occurrences will be deleted. Past and started tasks stay.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "drawer": {
+      "label": "Repeat",
+      "make": "Make recurring",
+      "loading": "Loading..."
+    },
+    "toast": {
+      "created": "Recurrence created.",
+      "updated": "Recurrence updated.",
+      "deleted": "Recurrence deleted."
+    }
+  },
+  "onboarding": {
+    "progress": "Onboarding progress",
+    "back": "Back",
+    "continue": "Continue",
+    "steps": {
+      "appearance": "Appearance",
+      "region": "Region",
+      "finish": "Finish"
+    },
+    "appearance": {
+      "title": "What theme do you prefer?",
+      "subtitle": "Choose how you'd like gonche to look.",
+      "dark": {
+        "label": "Dark",
+        "description": "A focused dark experience."
+      },
+      "light": {
+        "label": "Light",
+        "description": "A clean, minimal look."
+      },
+      "system": {
+        "label": "System",
+        "description": "Follows your OS preference."
+      }
+    },
+    "region": {
+      "title": "Where are you based?",
+      "subtitle": "Language, country and time zone set how dates and times show up.",
+      "language": "Language",
+      "country": "Country",
+      "timezone": "Time zone",
+      "timezoneHint": "Detected from your device. It follows the country you pick."
+    },
+    "finish": {
+      "title": "You're all set",
+      "subtitle": "You can change any of this later in Settings.",
+      "theme": "Theme",
+      "language": "Language",
+      "country": "Country",
+      "timezone": "Time zone",
+      "start": "Get started"
+    }
+  },
+  "today": {
+    "title": "Today",
+    "subtitle": "Focus on what moves you forward.",
+    "backToToday": "Back to today",
+    "strip": {
+      "previous": "Previous days",
+      "next": "Next days"
+    },
+    "plan": {
+      "title": "Plan for this day",
+      "titleToday": "Plan for today",
+      "count": "{{done}} of {{total}} tasks",
+      "progress": "Day progress",
+      "add": "Add task…",
+      "addEmpty": "No task matches.",
+      "remove": "Remove “{{title}}” from the plan"
+    },
+    "empty": {
+      "title": "Nothing planned",
+      "description": "Add the tasks you want to work on this day."
+    },
+    "error": {
+      "title": "The plan could not be loaded.",
+      "retry": "Retry"
+    },
+    "blocked": {
+      "title": "Blocked",
+      "count_one": "{{count}} task",
+      "count_other": "{{count}} tasks",
+      "empty": "Nothing is blocked."
+    },
+    "inbox": {
+      "title": "Inbox",
+      "viewAll": "View all",
+      "empty": "Your inbox is empty."
+    },
+    "agenda": {
+      "title": "Day agenda",
+      "new": "New block",
+      "empty": "No time blocks yet. Click a time slot to plan one.",
+      "planAt": "Plan a block at {{time}}",
+      "untitled": "Untitled block",
+      "conflict": "This block has a scheduling conflict"
+    },
+    "block": {
+      "newTitle": "New time block",
+      "editTitle": "Time block",
+      "description": "Reserve time for a task. It never changes the task itself.",
+      "task": "Task",
+      "taskPlaceholder": "Search your open tasks…",
+      "titleLabel": "Title (optional with a task)",
+      "titlePlaceholder": "What will you work on?",
+      "start": "Start",
+      "duration": "Duration",
+      "minutes": "{{count}} min",
+      "create": "Create",
+      "save": "Save",
+      "cancel": "Cancel",
+      "markDone": "Done",
+      "markMissed": "Missed",
+      "delete": "Delete",
+      "status": {
+        "done": "This block was completed.",
+        "missed": "This block was missed.",
+        "interrupted": "This block was interrupted.",
+        "rescheduled": "This block was moved."
+      },
+      "warning": {
+        "outside_availability": "Outside your working hours.",
+        "overlaps_block": "Overlaps another block.",
+        "overlaps_event": "Overlaps a calendar event."
+      }
+    },
+    "capacity": {
+      "title": "Capacity",
+      "summary": "{{planned}} planned of {{available}} available",
+      "remaining": "{{time}} left",
+      "over": "Overcommitted by {{time}}",
+      "noHours": "Set your working hours in Settings > Availability to see your capacity.",
+      "unestimated_one": "{{count}} open task without an estimate counts as 0.",
+      "unestimated_other": "{{count}} open tasks without an estimate count as 0."
+    },
+    "replan": {
+      "title": "Replan",
+      "subtitle": "Missed or interrupted blocks. Nothing changes until you accept.",
+      "empty": "No blocks to replan.",
+      "reason": {
+        "missed": "Missed",
+        "interrupted": "Interrupted"
+      },
+      "suggestion": "{{duration}} left · proposed: {{time}}",
+      "noSlot": "{{duration}} left · no free slot in the next 7 days",
+      "accept": "Accept",
+      "reject": "Dismiss",
+      "accepted": "Block rescheduled."
+    },
+    "events": {
+      "title": "Events",
+      "new": "New event",
+      "empty": "No events on this day."
+    },
+    "focus": {
+      "title": "Quick focus",
+      "duration": "Session length",
+      "task": "Focus on a task (optional)...",
+      "start": "Start",
+      "pause": "Pause",
+      "resume": "Resume",
+      "stop": "Stop",
+      "session": "Focus session",
+      "saved": "Focus session saved.",
+      "savedStopped": "Session stopped and saved.",
+      "tooShort": "Under a minute: nothing was saved."
+    },
+    "activity": {
+      "title": "Recent activity",
+      "empty": "Nothing has happened to your tasks yet.",
+      "error": "Could not load your recent activity.",
+      "retry": "Try again",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "started": "Started",
+      "reopened": "Reopened",
+      "priority": "Priority changed",
+      "due": "Due date changed",
+      "project": "Project changed",
+      "moved": "Moved"
+    },
+    "toast": {
+      "planUpdated": "Plan updated",
+      "blockCreated": "Time block created",
+      "blockUpdated": "Time block updated",
+      "blockDone": "Time block marked as done",
+      "blockMissed": "Time block marked as missed",
+      "blockDeleted": "Time block deleted"
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "subtitle": "Plan your time. Make it count.",
+    "new": "New event",
+    "allDay": "All day",
+    "grid": "Calendar",
+    "next": "Next",
+    "previous": "Previous",
+    "today": "Today",
+    "toolbar": "Calendar navigation",
+    "view": {
+      "label": "View",
+      "day": "Day",
+      "week": "Week"
+    },
+    "kind": {
+      "event": "Event",
+      "out_of_office": "Out of office"
+    },
+    "event": {
+      "newTitle": "New event",
+      "editTitle": "Edit event",
+      "description": "Events block time on your day: they reduce the capacity Today plans against.",
+      "titleLabel": "Title",
+      "titlePlaceholder": "What is it?",
+      "kind": "Type",
+      "allDay": "All day",
+      "startDate": "Start date",
+      "startTime": "Start",
+      "endDate": "End date",
+      "endTime": "End",
+      "endBeforeStart": "The end must be after the start.",
+      "create": "Create",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "delete": {
+      "title": "Delete event?",
+      "description": "\"{{title}}\" will be removed from your calendar. This cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "toast": {
+      "deleted": "Event deleted",
+      "created": "Event created",
+      "updated": "Event updated"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "Understand your productivity. Make data-driven decisions.",
+    "error": "This metric could not be loaded.",
+    "retry": "Try again",
+    "range": {
+      "label": "Date range of {{title}}",
+      "page": "Date range",
+      "last": "Last {{count}} days"
+    },
+    "summary": {
+      "completed": "Completed",
+      "focus": "Focus time",
+      "planning": "Planning reliability"
+    },
+    "throughput": {
+      "title": "Throughput",
+      "subtitle": "Tasks completed over time",
+      "series": "Completed"
+    },
+    "focus": {
+      "title": "Focus time",
+      "subtitle": "Time spent on focused work",
+      "series": "Hours worked"
+    },
+    "planning": {
+      "title": "Planning reliability",
+      "subtitle": "How often you meet your plan",
+      "series": "Plan met"
+    },
+    "blockers": {
+      "title": "Blockers",
+      "subtitle": "Why tasks got blocked",
+      "series": "Blockers",
+      "split": "{{open}} open · {{resolved}} resolved",
+      "empty": "No blockers in this period."
+    },
+    "rhythm": {
+      "title": "Rhythm",
+      "subtitle": "Your productivity rhythm",
+      "unit": "task",
+      "unitPlural": "tasks",
+      "low": "Low",
+      "high": "High",
+      "peak": "You get the most done on {{weekday}}s, around {{hour}}."
+    },
+    "insights": {
+      "title": "Key insights",
+      "tasksUp": "You completed {{percent}}% more tasks than the previous period.",
+      "tasksDown": "You completed {{percent}}% fewer tasks than the previous period.",
+      "tasksSame": "You completed {{count}} tasks in this period.",
+      "focusUp": "Your focus time increased by {{percent}}%. Great momentum!",
+      "focusDown": "Your focus time decreased by {{percent}}%.",
+      "focusSame": "You focused for {{time}} in this period.",
+      "planning": "Planning reliability is at {{rate}}.",
+      "overdue": "{{count}} open tasks are overdue.",
+      "streak": "You are on a {{count}}-day completion streak."
+    }
+  }
+}
