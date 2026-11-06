@@ -18,3 +18,23 @@ describe('requireAuth email confirmation', () => {
 		expect(res.status).toBe(200);
 	});
 });
+
+describe('requireAuth with a bearer token (native clients)', () => {
+	it('verifies the Authorization bearer token instead of cookies', async () => {
+		const { requireAuth } = await import('@usegonche/auth/hono');
+		const { Hono } = await import('hono');
+		const getClaims = vi.fn((_token?: string) => Promise.resolve({ data: { claims: { sub: 'u1' } }, error: null }));
+		const getUser = vi.fn((_token?: string) => Promise.resolve({ data: { user: { email_confirmed_at: '2026-01-01T00:00:00Z', id: 'u1' } }, error: null }));
+		const app = new Hono()
+			.use(async (c, next) => {
+				c.set('supabase', { auth: { getClaims, getUser } } as never);
+				await next();
+			})
+			.get('/me', requireAuth(), c => c.json({ sub: c.get('claims').sub }));
+		const res = await app.request('/me', { headers: { Authorization: 'Bearer access-token' } });
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ sub: 'u1' });
+		expect(getClaims).toHaveBeenCalledWith('access-token');
+		expect(getUser).toHaveBeenCalledWith('access-token');
+	});
+});
