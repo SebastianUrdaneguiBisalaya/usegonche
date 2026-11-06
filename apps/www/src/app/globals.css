@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Motion targets start hidden in the server HTML, so they never flash fully visible before the motion hydrates. GSAP reveals each
+   one with its entrance. Reduced motion skips this rule, so the content stays visible without animation. */
+@media (prefers-reduced-motion: no-preference) {
+	[data-motion] {
+		opacity: 0;
+	}
+}
+
 :root {
 	/* Scandinavian neutral foundation: pure black/white ink over canvas,
      built with alpha-black (light) / alpha-white (dark) rather than a
