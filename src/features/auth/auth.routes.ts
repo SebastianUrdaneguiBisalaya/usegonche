@@ -6,6 +6,7 @@ import { env } from 'hono/adapter';
 import type { AppEnv } from '../../env.js';
 import { fail, ok } from '../../lib/http.js';
 import { validationHook } from '../../lib/validator.js';
+import native from './auth.native.routes.js';
 import { callbackQuerySchema, forgotPasswordSchema, googleLoginSchema, loginSchema, resetPasswordSchema, signupSchema } from './auth.schemas.js';
 import { type AuthUser, exchangeGoogleCode, type GoogleConfig, publicUser, syncProfile } from './auth.service.js';
 
@@ -37,6 +38,8 @@ const signedIn = (c: Context<AppEnv>, user: AuthUser) => syncProfile(c.get('pris
  * passwords are changed only through a one-time code sent to the email (forgot password).
  */
 export default new Hono<AppEnv>()
+	// Native clients (mobile): tokens in the body instead of cookies.
+	.route('/native', native)
 	.post(
 		'/signup',
 		zValidator('json', signupSchema, (result, c) => {

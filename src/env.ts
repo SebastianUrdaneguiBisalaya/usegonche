@@ -7,6 +7,8 @@ export type RateLimitBinding = { limit: (options: { key: string }) => Promise<{ 
 export type Bindings = {
 	/** Where the browser lands after Google sign-in / email confirmation; its origin is also allowed by CORS. */
 	AUTH_REDIRECT_URL?: string;
+	/** Mobile app redirect after Google sign-in (`/auth/native/google`). Default `usegonche://auth/callback`; must be allowed in Supabase. */
+	NATIVE_AUTH_REDIRECT_URL?: string;
 	/** Extra browser origins allowed by CORS, comma separated (e.g. a staging web app). */
 	CORS_ORIGINS?: string;
 	DATABASE_URL: string;

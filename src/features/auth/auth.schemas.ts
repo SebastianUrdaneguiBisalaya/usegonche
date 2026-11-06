@@ -28,3 +28,20 @@ export const googleLoginSchema = z.strictObject({
 	redirect_uri: z.url().max(2048).optional(),
 });
 export type GoogleLoginInput = z.infer<typeof googleLoginSchema>;
+
+// Native clients (mobile): tokens travel in the body, never in cookies. Every input is strict and bounded.
+
+/** PKCE S256 challenge: base64url(SHA-256(verifier)), always 43 chars. */
+export const nativeGoogleUrlQuerySchema = z.strictObject({ code_challenge: z.string().regex(/^[A-Za-z0-9_-]{43}$/) });
+/** Supabase auth code from the app-scheme redirect + the verifier generated on the device (RFC 7636: 43-128 unreserved chars). */
+export const nativeGoogleLoginSchema = z.strictObject({
+	code: z.string().min(1).max(512),
+	code_verifier: z.string().regex(/^[A-Za-z0-9._~-]{43,128}$/),
+});
+export const nativeLoginSchema = z.strictObject({ email, password: z.string().min(1).max(PASSWORD_MAX) });
+export const nativeSignupSchema = z.strictObject({ displayName, email, password: newPassword });
+/** Email confirmation by the code of the "Confirm signup" email (the template must render {{ .Token }}). */
+export const nativeVerifyEmailSchema = z.strictObject({ email, token: otpCode });
+export const nativeRefreshSchema = z.strictObject({ refreshToken: z.string().min(1).max(512) });
+export const nativeForgotPasswordSchema = z.strictObject({ email });
+export const nativeResetPasswordSchema = z.strictObject({ email, password: newPassword, token: otpCode });
