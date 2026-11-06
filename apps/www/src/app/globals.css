@@ -31,7 +31,7 @@
 }
 
 :root {
-	/* Semantic tokens — light theme (default) */
+	/* Semantic tokens: the dark values below (in the second :root block) apply to every visitor */
 	--background: var(--white);
 	--foreground: var(--black);
 
@@ -118,7 +118,7 @@
 	-moz-osx-font-smoothing: grayscale;
 	color: var(--foreground);
 
-	color-scheme: light dark;
+	color-scheme: dark;
 	background: var(--background);
 
 	@media (max-width: 1024px) {
@@ -126,48 +126,8 @@
 	}
 }
 
-/* Follows the OS preference by default... */
-@media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) {
-		--background: var(--black);
-		--foreground: var(--white);
-
-		--foreground-secondary: rgb(255 255 255 / 56%);
-		--foreground-tertiary: rgb(255 255 255 / 36%);
-
-		--border: rgb(255 255 255 / 10%);
-		--border-strong: rgb(255 255 255 / 18%);
-
-		--hover: rgb(255 255 255 / 9%);
-		--pressed: rgb(255 255 255 / 14%);
-
-		--destructive: var(--red-400);
-		--destructive-hover: var(--red-500);
-
-		--success: var(--green-400);
-		--warning: var(--amber-400);
-
-		--json-key: var(--orange-400);
-		--json-value: var(--green-400);
-		--code-tag: var(--blue-400);
-
-		--inverse-background: var(--white);
-		--inverse-foreground: var(--black);
-		--inverse-foreground-secondary: rgb(0 0 0 / 64%);
-		--inverse-border: rgb(0 0 0 / 14%);
-		--inverse-hover: rgb(0 0 0 / 8%);
-
-		--chart-1: #7fa2ee;
-		--chart-2: #e5b06a;
-		--chart-3: #7ccb8f;
-		--chart-4: #e88fac;
-		--chart-5: #a996ea;
-		--chart-6: #6fc7c2;
-	}
-}
-
-/* ...but an explicit data-theme attribute on <html> always wins. */
-:root[data-theme="dark"] {
+/* Always dark: the same tokens regardless of OS or browser preference. */
+:root {
 	--background: var(--black);
 	--foreground: var(--white);
 
