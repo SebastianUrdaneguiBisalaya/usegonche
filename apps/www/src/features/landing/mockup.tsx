@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useLayoutEffect, useRef, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Pill } from '@/components/ui/data-display/pill/pill';
 import { Progress } from '@/components/ui/data-display/progress/progress';
 import { Typography } from '@/components/ui/foundations/typography/typography';
@@ -41,39 +41,34 @@ interface ScaledCanvasProps {
 	xlReservedHeight?: number;
 }
 
+/** Smallest scale of a canvas; below it the frame overflows its column instead of shrinking further. */
+const MIN_SCALE = 0.3;
+
 /**
  * A static, non-functional (`inert`) app preview: its cards are laid out on a fixed canvas and scaled down to fit the column, so the
- * composition stays the same on every screen. It is hidden until the first measure, so it never flashes at the wrong size.
+ * composition stays the same on every screen.
+ *
+ * Pure CSS, no JS: the server-rendered HTML is already final, so the preview neither starts empty nor pops in after hydration.
+ * - The frame's size is a clamped width plus `aspect-ratio`.
+ * - The frame is a size container and the cards scale by `frame width / design width`. CSS can't divide two lengths into a number
+ *   directly, so the ratio is computed as `tan(atan2(100cqw, <width>px))` (atan2 takes two lengths, tan returns a plain number).
  */
 export function ScaledCanvas({ children, className, frameClassName, height, width, xlReservedHeight }: ScaledCanvasProps) {
-	const ref = useRef<HTMLDivElement>(null);
-	const [scale, setScale] = useState<number | null>(null);
-
-	useLayoutEffect(() => {
-		const element = ref.current;
-		if (!element) return;
-		const xl = window.matchMedia('(min-width: 1280px)');
-		const update = () => {
-			const byWidth = element.clientWidth / width;
-			const byHeight = xlReservedHeight !== undefined && xl.matches ? (window.innerHeight - xlReservedHeight) / height : Number.POSITIVE_INFINITY;
-			setScale(Math.max(0.3, Math.min(1, byWidth, byHeight)));
-		};
-		update();
-		const observer = new ResizeObserver(update);
-		observer.observe(element);
-		window.addEventListener('resize', update);
-		return () => {
-			observer.disconnect();
-			window.removeEventListener('resize', update);
-		};
-	}, [height, width, xlReservedHeight]);
-
-	const current = scale ?? 1;
+	const frameStyle = {
+		'--canvas-min': `${width * MIN_SCALE}px`,
+		'--canvas-w': `${width}px`,
+		// Width that makes the canvas fit the screen height minus `xlReservedHeight` (only applied at `xl`).
+		'--canvas-xl': xlReservedHeight === undefined ? `${width}px` : `calc((100vh - ${xlReservedHeight}px) * ${width / height})`,
+		aspectRatio: `${width} / ${height}`,
+	} as CSSProperties;
 
 	return (
-		<div className={cn('w-full select-none', className)} inert ref={ref}>
-			<div className={cn('mx-auto', frameClassName, scale === null && 'invisible')} style={{ height: height * current, width: width * current }}>
-				<div className='relative origin-top-left' style={{ height, transform: `scale(${current})`, width }}>
+		<div className={cn('w-full select-none', className)} inert>
+			<div
+				className={cn('@container mx-auto w-[max(var(--canvas-min),min(100%,var(--canvas-w)))] xl:w-[max(var(--canvas-min),min(100%,var(--canvas-w),var(--canvas-xl)))]', frameClassName)}
+				style={frameStyle}
+			>
+				<div className='relative origin-top-left' style={{ height, transform: `scale(tan(atan2(100cqw, ${width}px)))`, width }}>
 					{children}
 				</div>
 			</div>
