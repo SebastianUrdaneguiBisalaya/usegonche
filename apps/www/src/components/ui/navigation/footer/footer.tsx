@@ -2,7 +2,7 @@
 
 import type * as React from "react";
 import bgGranito from "../../assets/bg-granito.jpg";
-import { Layout } from "../../layout/layout/layout";
+import { Layout, type LayoutContainerVariantProps } from "../../layout/layout/layout";
 import { cn } from "../../utils/tailwind/cn";
 
 /**
@@ -52,6 +52,10 @@ export interface SiteFooterProps {
   copyright?: string;
   /** Large watermark wordmark rendered at the bottom of the footer. Renders no watermark when omitted. */
   brandName?: string;
+  /** Width the footer content is capped at, same scale as `Layout.Container`. Pass the page width so it lines up with the sections.
+   * @default "lg"
+   */
+  size?: LayoutContainerVariantProps;
 }
 
 /**
@@ -67,6 +71,7 @@ export function SiteFooter({
   socialLinks,
   copyright,
   brandName,
+  size = "lg",
 }: SiteFooterProps) {
   const hasBottomRow = Boolean(copyright) || Boolean(socialLinks?.length);
 
@@ -85,10 +90,10 @@ export function SiteFooter({
 
       <Layout.Container
         className="relative pt-12 sm:pt-14 @container"
-        size="lg"
+        size={size}
       >
         {groups.length > 0 && (
-          <div className="grid grid-cols-2 gap-8 border-b border-border pb-10 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-8 border-b border-border pb-10 sm:grid-cols-3 md:grid-cols-4">
             {groups.map((group) => (
               <div
                 className="flex flex-col gap-4"

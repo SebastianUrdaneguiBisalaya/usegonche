@@ -1,4 +1,5 @@
 import { type FooterGroup, SiteFooter } from '@/components/ui/navigation/footer/footer';
+import { LANDING_WIDTH } from '@/lib/layout';
 import { MACOS_DOWNLOAD_URL, SIGN_IN_URL, SIGN_UP_URL, WINDOWS_DOWNLOAD_URL } from '@/lib/links';
 
 const groups: FooterGroup[] = [
@@ -10,6 +11,10 @@ const groups: FooterGroup[] = [
 			{ href: '#desktop', label: 'Desktop' },
 			{ href: '#faq', label: 'FAQ' },
 		],
+	},
+	{
+		heading: 'Docs',
+		links: [{ href: '/method', label: 'The method' }],
 	},
 	{
 		heading: 'Download',
@@ -29,5 +34,5 @@ const groups: FooterGroup[] = [
 
 /** Landing footer: the same section links as the navbar, the account links and the gonche watermark. */
 export default function LandingFooter() {
-	return <SiteFooter brandName='gonche' copyright={`© ${new Date().getFullYear()} gonche. All rights reserved.`} groups={groups} />;
+	return <SiteFooter brandName='gonche' copyright={`© ${new Date().getFullYear()} gonche. All rights reserved.`} groups={groups} size={LANDING_WIDTH} />;
 }
