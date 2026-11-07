@@ -17,6 +17,7 @@ describe.each([
 	['GET', '/profile'],
 	['PATCH', '/profile'],
 	['GET', '/profile/settings'],
+	['GET', '/profile/getting-started'],
 	['PATCH', '/profile/settings'],
 ])('%s %s', (method, path) => {
 	it('answers 401 when unauthenticated', async () => {
@@ -116,6 +117,33 @@ describe('PATCH /profile/settings (onboarding)', () => {
 	it('rejects `false` and unknown values', async () => {
 		const { app } = setup();
 		expect((await app.request('/profile/settings', jsonRequest('PATCH', { onboardingCompleted: false }))).status).toBe(422);
+	});
+});
+
+describe('GET /profile/getting-started', () => {
+	it('returns the steps done by the user from the claims', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue({ id: 't' } as never);
+		const res = await app.request('/profile/getting-started');
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ data: { goal: false, plan: false, project: false, tag: true, task: false } });
+		expect(prisma.tag.findFirst).toHaveBeenCalledWith({ select: { id: true }, where: { ownerId: TEST_USER_ID } });
+	});
+});
+
+describe('PATCH /profile/settings (getting-started guide)', () => {
+	it('marks the tour as completed (200)', async () => {
+		const { app, prisma } = setup();
+		vi.mocked(prisma.userSettings.update).mockResolvedValue({ ...settings, tourCompletedAt: new Date() } as UserSettings);
+		const res = await app.request('/profile/settings', jsonRequest('PATCH', { tourCompleted: true }));
+		expect(res.status).toBe(200);
+		expect(prisma.userSettings.update).toHaveBeenCalledWith({ data: { tourCompletedAt: expect.any(Date) }, where: { ownerId: TEST_USER_ID } });
+	});
+
+	it('rejects `false` (422)', async () => {
+		const { app } = setup();
+		expect((await app.request('/profile/settings', jsonRequest('PATCH', { gettingStartedCompleted: false }))).status).toBe(422);
+		expect((await app.request('/profile/settings', jsonRequest('PATCH', { tourCompleted: false }))).status).toBe(422);
 	});
 });
 
