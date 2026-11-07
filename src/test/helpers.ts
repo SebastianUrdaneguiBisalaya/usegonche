@@ -61,7 +61,7 @@ type TestAppOptions = {
 };
 
 /** Storage double: every operation is a `vi.fn()` (configure with `vi.mocked(storage.readUrl).mockResolvedValue(...)`). */
-export const createMockStorage = (): Storage => ({ list: vi.fn(), readUrl: vi.fn(), remove: vi.fn(), uploadUrl: vi.fn() }) as unknown as Storage;
+export const createMockStorage = (): Storage => ({ list: vi.fn(), listAll: vi.fn(async () => []), readUrl: vi.fn(), remove: vi.fn(), uploadUrl: vi.fn() }) as unknown as Storage;
 
 /**
  * Mounts a feature router in an app that mirrors production wiring (prisma + supabase variables, `onError`, `onNotFound`)

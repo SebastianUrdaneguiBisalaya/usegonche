@@ -19,6 +19,8 @@ export type UploadUrl = {
  * The client uploads to / downloads from Supabase Storage directly using the URLs returned here.
  * Pass the request-scoped client (RLS applies) or an admin client (bypasses RLS).
  */
+const LIST_PAGE = 1000;
+
 export function createStorage(supabase: SupabaseClient, buckets: StorageBuckets) {
 	const bucket = (visibility: Visibility) => supabase.storage.from(buckets[visibility]);
 
@@ -37,6 +39,25 @@ export function createStorage(supabase: SupabaseClient, buckets: StorageBuckets)
 			const { data, error } = await bucket('private').createSignedUrl(path, expiresInSeconds);
 			if (error) throw error;
 			return data.signedUrl;
+		},
+		/** Every file path under `folder`, walking its subfolders and every page of each listing (a listing answers 100 entries by default). */
+		async listAll(visibility: Visibility, folder: string): Promise<string[]> {
+			const paths: string[] = [];
+			const walk = async (prefix: string): Promise<void> => {
+				for (let offset = 0; ; offset += LIST_PAGE) {
+					const { data, error } = await bucket(visibility).list(prefix, { limit: LIST_PAGE, offset });
+					if (error) throw error;
+					for (const entry of data) {
+						const path = `${prefix}/${entry.name}`;
+						// Folders come back without an id.
+						if (entry.id) paths.push(path);
+						else await walk(path);
+					}
+					if (data.length < LIST_PAGE) return;
+				}
+			};
+			await walk(folder);
+			return paths;
 		},
 		async remove(visibility: Visibility, paths: string[]) {
 			const { error } = await bucket(visibility).remove(paths);

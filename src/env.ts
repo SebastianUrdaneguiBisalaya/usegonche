@@ -30,6 +30,8 @@ export type Bindings = {
 	/** Shared secret of the internal endpoints called by Supabase `pg_cron` (`x-internal-secret` header). Unset = they refuse everything. */
 	INTERNAL_CRON_SECRET?: string;
 	SUPABASE_PUBLISHABLE_KEY: string;
+	/** Server-only secret key (admin client). Needed to delete accounts (`DELETE /profile`); unset = that endpoint answers 503. */
+	SUPABASE_SECRET_KEY?: string;
 	SUPABASE_URL: string;
 	/** `true` when a reverse proxy you control sets X-Forwarded-For (Node). Never enable it when clients can reach the API directly. */
 	TRUST_PROXY?: string;

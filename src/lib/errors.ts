@@ -22,6 +22,7 @@ export const ERROR_MESSAGES = {
 	provider_conflict: 'This email is already linked to another sign-in method.',
 	rate_limited: 'Too many requests. Please try again later.',
 	reset_failed: 'Could not reset the password.',
+	service_unavailable: 'This action is not available right now.',
 	signup_failed: 'Could not create the account.',
 	unauthorized: 'You must sign in to continue.',
 	validation_error: 'The request data is invalid.',

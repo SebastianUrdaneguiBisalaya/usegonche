@@ -1,5 +1,14 @@
 import type { Profile, UserSettings } from '@usegonche/database';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+const deleteUser = vi.fn(async (_id: string) => ({ error: null as Error | null }));
+vi.mock('@usegonche/auth/admin', () => ({
+	createSupabaseAdmin: () => ({
+		auth: { admin: { deleteUser: (id: string) => deleteUser(id) } },
+		storage: { from: () => ({ list: async () => ({ data: [], error: null }), remove: async () => ({ error: null }) }) },
+	}),
+}));
+
 import { createMockPrisma, createMockStorage, createTestApp, jsonRequest, TEST_USER_ID } from '../../test/helpers.js';
 import routes from './profile.routes.js';
 
@@ -270,5 +279,48 @@ describe('PATCH /profile phoneNumber', () => {
 		const res = await app.request('/profile', jsonRequest('PATCH', { phoneNumber }));
 		expect(res.status).toBe(200);
 		expect(prisma.profile.update).toHaveBeenCalledWith(expect.objectContaining({ data: { phoneNumber: saved } }));
+	});
+});
+
+describe('DELETE /profile', () => {
+	afterEach(() => {
+		vi.unstubAllEnvs();
+		deleteUser.mockClear();
+	});
+
+	it('answers 401 when unauthenticated', async () => {
+		const { app } = setup({ claims: null });
+		expect((await app.request('/profile', { method: 'DELETE' })).status).toBe(401);
+	});
+
+	it('answers 503 when the secret key is not configured and deletes nothing', async () => {
+		vi.stubEnv('SUPABASE_SECRET_KEY', '');
+		const { app, prisma } = setup();
+		const res = await app.request('/profile', { method: 'DELETE' });
+		expect(res.status).toBe(503);
+		expect(await res.json()).toMatchObject({ error: { code: 'service_unavailable' } });
+		expect(prisma.profile.deleteMany).not.toHaveBeenCalled();
+		expect(deleteUser).not.toHaveBeenCalled();
+	});
+
+	it('deletes the data and the auth user of the user from the claims (200)', async () => {
+		vi.stubEnv('SUPABASE_SECRET_KEY', 'secret');
+		vi.stubEnv('SUPABASE_URL', 'https://example.supabase.co');
+		const { app, prisma } = setup();
+		const res = await app.request('/profile', { method: 'DELETE' });
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ data: { deleted: true } });
+		expect(prisma.profile.deleteMany).toHaveBeenCalledWith({ where: { id: TEST_USER_ID } });
+		expect(deleteUser).toHaveBeenCalledWith(TEST_USER_ID);
+	});
+
+	it('answers 500 when Supabase Auth refuses the deletion', async () => {
+		vi.stubEnv('SUPABASE_SECRET_KEY', 'secret');
+		vi.stubEnv('SUPABASE_URL', 'https://example.supabase.co');
+		deleteUser.mockResolvedValueOnce({ error: new Error('nope') });
+		const { app } = setup();
+		const res = await app.request('/profile', { method: 'DELETE' });
+		expect(res.status).toBe(500);
+		expect(await res.json()).toMatchObject({ error: { code: 'internal_error' } });
 	});
 });
