@@ -11,7 +11,7 @@ import { NO_PROJECT, type TaskDue, type TaskStatus, taskDues, taskStatuses } fro
 
 interface TaskChipsProps {
 	blocked: boolean;
-	counts: (Record<TaskStatus, number> & { blocked: number; overdue: number }) | undefined;
+	counts: (Record<TaskStatus, number> & { blocked: number; focus: number; overdue: number }) | undefined;
 	due: TaskDue;
 	focus: boolean;
 	onBlockedChange: (blocked: boolean) => void;
@@ -46,7 +46,7 @@ export function TaskChips({ blocked, counts, due, focus, onBlockedChange, onDueC
 				/>
 			))}
 			<span aria-hidden className='mx-1 hidden h-6 w-px bg-border sm:block' />
-			{showFocus && <FilterChip active={focus} icon={<Icon aria-hidden icon={Focus} size='sm' />} label={t('tasks.chips.focus')} onClick={() => onFocusChange(!focus)} />}
+			{showFocus && <FilterChip active={focus} count={counts?.focus} icon={<Icon aria-hidden icon={Focus} size='sm' />} label={t('tasks.chips.focus')} onClick={() => onFocusChange(!focus)} />}
 			<FilterChip
 				active={due === 'overdue'}
 				count={counts?.overdue}
