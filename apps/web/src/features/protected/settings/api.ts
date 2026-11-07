@@ -48,6 +48,15 @@ export function useUpdateProfile() {
 	});
 }
 
+/** Deletes the account and all its data (`DELETE /profile`). The caller leaves the app afterwards: nothing cached belongs to anyone any more. */
+export function useDeleteAccount() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: () => unwrap(api.profile.$delete()),
+		onSuccess: () => queryClient.clear(),
+	});
+}
+
 /** Asks the API for a signed upload URL, uploads the avatar to Storage and resolves with its permanent public URL (not saved on the profile yet). */
 export async function uploadAvatar(file: File, onProgress: (percent: number) => void): Promise<string> {
 	const upload = await unwrap(api.profile.avatar['upload-url'].$post({ json: { mimeType: file.type as AvatarUploadBody['mimeType'], sizeBytes: file.size } }));

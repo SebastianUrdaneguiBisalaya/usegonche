@@ -1,7 +1,7 @@
 import type { Profile, UserSettings } from '@usegonche/database';
 import { describe, expect, it, vi } from 'vitest';
 import { createMockPrisma, createMockStorage, OTHER_USER_ID, TEST_USER_ID } from '../../test/helpers.js';
-import { createAvatarUploadUrl, DEFAULT_SETTINGS, getGettingStarted, getProfile, getSettings, updateProfile, updateSettings } from './profile.service.js';
+import { createAvatarUploadUrl, DEFAULT_SETTINGS, deleteAccount, getGettingStarted, getProfile, getSettings, updateProfile, updateSettings } from './profile.service.js';
 
 const user = { email: 'me@example.com', id: TEST_USER_ID };
 const profile = { email: user.email, id: TEST_USER_ID } as Profile;
@@ -173,5 +173,50 @@ describe('createAvatarUploadUrl', () => {
 		await createAvatarUploadUrl(storage, TEST_USER_ID, { mimeType: 'image/png', sizeBytes: 1 });
 		const [first, second] = vi.mocked(storage.uploadUrl).mock.calls;
 		expect(first?.[1]).not.toBe(second?.[1]);
+	});
+});
+
+describe('deleteAccount', () => {
+	it('removes every file of the owner (both buckets, in batches), then the profile, then the auth user', async () => {
+		const prisma = createMockPrisma();
+		const storage = createMockStorage();
+		const many = Array.from({ length: 1001 }, (_, index) => `${TEST_USER_ID}/f/${index}`);
+		vi.mocked(storage.listAll).mockImplementation(async visibility => (visibility === 'private' ? many : [`${TEST_USER_ID}/avatar/a.png`]));
+		const deleteAuthUser = vi.fn(async (_id: string) => undefined);
+
+		await deleteAccount(prisma, TEST_USER_ID, { deleteAuthUser, storage });
+
+		expect(storage.listAll).toHaveBeenCalledWith('private', TEST_USER_ID);
+		expect(storage.listAll).toHaveBeenCalledWith('public', TEST_USER_ID);
+		expect(storage.remove).toHaveBeenCalledWith('private', many.slice(0, 1000));
+		expect(storage.remove).toHaveBeenCalledWith('private', many.slice(1000));
+		expect(storage.remove).toHaveBeenCalledWith('public', [`${TEST_USER_ID}/avatar/a.png`]);
+		expect(prisma.profile.deleteMany).toHaveBeenCalledWith({ where: { id: TEST_USER_ID } });
+		expect(deleteAuthUser).toHaveBeenCalledWith(TEST_USER_ID);
+		const removeOrder = Math.max(...vi.mocked(storage.remove).mock.invocationCallOrder);
+		const profileOrder = vi.mocked(prisma.profile.deleteMany).mock.invocationCallOrder[0] ?? 0;
+		expect(removeOrder).toBeLessThan(profileOrder);
+		expect(profileOrder).toBeLessThan(deleteAuthUser.mock.invocationCallOrder[0] ?? 0);
+	});
+
+	it('stops before touching the data or the auth user when the files cannot be removed', async () => {
+		const prisma = createMockPrisma();
+		const storage = createMockStorage();
+		vi.mocked(storage.listAll).mockResolvedValue([`${TEST_USER_ID}/f/1`]);
+		vi.mocked(storage.remove).mockRejectedValue(new Error('storage down'));
+		const deleteAuthUser = vi.fn(async (_id: string) => undefined);
+
+		await expect(deleteAccount(prisma, TEST_USER_ID, { deleteAuthUser, storage })).rejects.toThrow('storage down');
+		expect(prisma.profile.deleteMany).not.toHaveBeenCalled();
+		expect(deleteAuthUser).not.toHaveBeenCalled();
+	});
+
+	it('never targets another user', async () => {
+		const prisma = createMockPrisma();
+		const storage = createMockStorage();
+		const deleteAuthUser = vi.fn(async (_id: string) => undefined);
+		await deleteAccount(prisma, TEST_USER_ID, { deleteAuthUser, storage });
+		const calls = JSON.stringify([vi.mocked(storage.listAll).mock.calls, vi.mocked(prisma.profile.deleteMany).mock.calls, deleteAuthUser.mock.calls]);
+		expect(calls).not.toContain(OTHER_USER_ID);
 	});
 });

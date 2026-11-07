@@ -247,6 +247,16 @@
           "uploading": "Uploading photo",
           "saved": "Photo updated",
           "providerHint": "Your photo comes from your Google account."
+        },
+        "danger": {
+          "title": "Danger zone",
+          "label": "Delete account",
+          "description": "Permanently delete your account and all your data: tasks, projects, goals, notes, files and history.",
+          "button": "Delete account",
+          "confirmTitle": "Delete your account?",
+          "confirmDescription": "This permanently deletes your account and absolutely all your data, including your files. It cannot be undone.",
+          "confirm": "Delete account",
+          "cancel": "Cancel"
         }
       },
       "shortcuts": {

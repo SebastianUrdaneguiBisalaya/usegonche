@@ -71,6 +71,28 @@ export const getGettingStarted = async (prisma: PrismaClient, ownerId: string): 
 	return { goal: Boolean(goal), plan: Boolean(plan), project: Boolean(project), tag: Boolean(tag), task: Boolean(task) };
 };
 
+/** What deleting an account needs besides the database: storage with access to every file of the user and the Supabase Auth admin. */
+export interface AccountRemoval {
+	deleteAuthUser: (id: string) => Promise<void>;
+	storage: Storage;
+}
+
+const REMOVE_BATCH = 1000;
+
+/**
+ * Deletes the account and everything in it, in an order that can be retried: first every file under the user's storage folder (both buckets),
+ * then the profile (every user-owned table cascades from it), and last the Supabase Auth user (sessions and identities go with it).
+ * If a step fails nothing after it runs, so the user is still signed in and can try again.
+ */
+export const deleteAccount = async (prisma: PrismaClient, ownerId: string, { deleteAuthUser, storage }: AccountRemoval): Promise<void> => {
+	for (const visibility of ['private', 'public'] as const) {
+		const paths = await storage.listAll(visibility, ownerId);
+		for (let start = 0; start < paths.length; start += REMOVE_BATCH) await storage.remove(visibility, paths.slice(start, start + REMOVE_BATCH));
+	}
+	await prisma.profile.deleteMany({ where: { id: ownerId } });
+	await deleteAuthUser(ownerId);
+};
+
 const AVATAR_EXTENSIONS = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' } as const;
 
 /**

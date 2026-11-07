@@ -247,6 +247,16 @@
           "uploading": "Subiendo foto",
           "saved": "Foto actualizada",
           "providerHint": "Tu foto viene de tu cuenta de Google."
+        },
+        "danger": {
+          "title": "Zona de peligro",
+          "label": "Eliminar cuenta",
+          "description": "Elimina para siempre tu cuenta y todos tus datos: tareas, proyectos, metas, notas, archivos e historial.",
+          "button": "Eliminar cuenta",
+          "confirmTitle": "¿Eliminar tu cuenta?",
+          "confirmDescription": "Esto elimina para siempre tu cuenta y absolutamente todos tus datos, incluidos tus archivos. No se puede deshacer.",
+          "confirm": "Eliminar cuenta",
+          "cancel": "Cancelar"
         }
       },
       "shortcuts": {
