@@ -37,7 +37,17 @@ export function TargetReminder({ target }: { target: Target }) {
 					{pending ? t('reminders.target.pending', { when: formatRelativeLong(pending.remindAt, locale) }) : t('reminders.target.description')}
 				</p>
 			</div>
-			<DatePicker.Root granularity='minute' lang={lang} locale={locale} minDate={new Date()} minuteStep={5} onChange={change} value={pending ? new Date(pending.remindAt) : null}>
+			{/* `w-fit shrink-0`: the picker root is `w-full` by default and squeezed the title until the button covered it. */}
+			<DatePicker.Root
+				className='w-fit shrink-0'
+				granularity='minute'
+				lang={lang}
+				locale={locale}
+				minDate={new Date()}
+				minuteStep={5}
+				onChange={change}
+				value={pending ? new Date(pending.remindAt) : null}
+			>
 				<DatePicker.Trigger
 					aria-label={t('reminders.target.change')}
 					className='w-fit rounded-full border-border bg-foreground/[0.03] px-4 py-2'

@@ -131,23 +131,26 @@ function Body({ onClose, onOpenTask, onSetStatus, task }: Omit<TaskDrawerProps, 
 			</Drawer.Body>
 			<Drawer.Footer className='flex flex-wrap items-center justify-between gap-2'>
 				<Layout.HStack gap='sm' wrap>
-					<Button className='rounded-full' onClick={() => onSetStatus(task, finished ? 'todo' : 'done')} title={t('tasks.drawer.completeShortcut')}>
+					<Button className='h-10 rounded-full' onClick={() => onSetStatus(task, finished ? 'todo' : 'done')} title={t('tasks.drawer.completeShortcut')}>
 						<Button.Icon icon={finished ? RotateCcw : Check} />
 						<Button.Text>{finished ? t('tasks.drawer.reopen') : t('tasks.drawer.complete')}</Button.Text>
 						<span aria-hidden className='ml-1 hidden items-center gap-0.5 sm:flex'>
 							{shortcutKeys(COMPLETE_COMBO).map(key => (
-								<Kbd key={key}>{key}</Kbd>
+								// Inverted colors: the primary button is `bg-foreground`, where the default muted Kbd blends in (dark and light).
+								<Kbd className='border-background/25 bg-background/15 text-background/80' key={key}>
+									{key}
+								</Kbd>
 							))}
 						</span>
 					</Button>
 					{task.status !== 'cancelled' && (
-						<Button className='rounded-full' onClick={() => onSetStatus(task, 'cancelled')} variant='secondary'>
+						<Button className='h-10 rounded-full' onClick={() => onSetStatus(task, 'cancelled')} variant='secondary'>
 							<Button.Icon icon={Ban} />
 							<Button.Text>{t('tasks.drawer.cancel')}</Button.Text>
 						</Button>
 					)}
 				</Layout.HStack>
-				<Button className='rounded-full text-destructive' onClick={() => setConfirmingDelete(true)} variant='ghost'>
+				<Button className='h-10 rounded-full text-destructive' onClick={() => setConfirmingDelete(true)} variant='ghost'>
 					<Button.Icon icon={Trash2} />
 					<Button.Text>{t('tasks.actions.delete')}</Button.Text>
 				</Button>

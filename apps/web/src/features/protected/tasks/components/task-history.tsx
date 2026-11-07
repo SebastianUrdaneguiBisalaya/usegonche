@@ -38,7 +38,8 @@ export function TaskHistory({ task }: { task: Task }) {
 
 	return (
 		<div className='flex flex-col gap-4'>
-			<Timeline>
+			{/* `ml-2`: the dots sit centered on the line, half outside it; this lines their left edge up with the tabs above. */}
+			<Timeline className='ml-2'>
 				{events.map(event => {
 					const none = t('tasks.history.none');
 					let title = '';

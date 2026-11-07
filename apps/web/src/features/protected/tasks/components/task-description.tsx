@@ -51,7 +51,8 @@ export function TaskDescription({ markdown, onSave }: TaskDescriptionProps) {
 			placeholder={t('tasks.editor.placeholder')}
 		>
 			<RichTextEditor.BubbleMenu />
-			<RichTextEditor.Content />
+			{/* The card border is on the root; the content area brings its own, which drew a second box inside it. */}
+			<RichTextEditor.Content className='rounded-none border-0' />
 			<div className='flex justify-end px-3 pb-2 text-xs text-muted-foreground'>
 				<RichTextEditor.SaveStatus />
 			</div>

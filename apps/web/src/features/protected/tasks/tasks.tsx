@@ -160,7 +160,8 @@ export default function TasksRoute() {
 
 	return (
 		<Fragment>
-			<Page.Header>
+			{/* Top-aligned: the view tabs make the left column taller, and centering put the buttons next to the description instead of the title. */}
+			<Page.Header className='sm:items-start'>
 				<div className='flex flex-col gap-4'>
 					<div>
 						<Page.Title>{t('tasks.title')}</Page.Title>
