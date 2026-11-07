@@ -30,10 +30,10 @@ export function LinkedTasks({ onChange, value }: LinkedTasksProps) {
 	const { loading, options, setQuery } = useTaskOptions(value);
 
 	return (
-		<Combobox filter={false} loading={loading} multiple onInputChange={setQuery} onValueChange={onChange} value={value}>
+		<Combobox className='h-full' filter={false} loading={loading} multiple onInputChange={setQuery} onValueChange={onChange} value={value}>
 			<Combobox.Input
 				aria-label={t('notes.meta.tasks.label')}
-				containerClassName={listStyles.pillInput}
+				containerClassName={cn(listStyles.pillInput, 'flex-1')}
 				placeholder={value.length === 0 ? t('notes.meta.tasks.add') : t('notes.meta.tasks.search')}
 			/>
 			<Combobox.Content emptyMessage={t('notes.meta.tasks.empty')}>

@@ -30,7 +30,7 @@ export function NoteMeta({ onChange, value }: NoteMetaProps) {
 	const createTag = useCreateTag();
 
 	return (
-		<div className='flex flex-wrap items-start gap-3'>
+		<div className='flex flex-wrap items-stretch gap-3'>
 			<Select.Root onChange={next => onChange({ ...value, projectId: next === NONE ? null : next })} value={value.projectId ?? NONE}>
 				<Select.Trigger aria-label={t('notes.meta.project.label')} className={cn(listStyles.pillTrigger, 'w-44')}>
 					<span className='flex min-w-0 items-center gap-2'>
@@ -49,14 +49,15 @@ export function NoteMeta({ onChange, value }: NoteMetaProps) {
 					</Select.ItemList>
 				</Select.Content>
 			</Select.Root>
-			<div className='min-w-56 flex-1'>
+			<div className='flex min-w-56 flex-1'>
 				<Combobox
+					className='h-full'
 					multiple
 					onCreate={name => createTag.mutate({ name }, { onSuccess: tag => onChange({ ...value, tagIds: [...value.tagIds, tag.id] }) })}
 					onValueChange={tagIds => onChange({ ...value, tagIds })}
 					value={value.tagIds}
 				>
-					<Combobox.Input aria-label={t('notes.meta.tags.label')} containerClassName={listStyles.pillInput} placeholder={t('notes.meta.tags.placeholder')} />
+					<Combobox.Input aria-label={t('notes.meta.tags.label')} containerClassName={cn(listStyles.pillInput, 'flex-1')} placeholder={t('notes.meta.tags.placeholder')} />
 					<Combobox.Content createLabel={name => t('notes.meta.tags.create', { name })} emptyMessage={t('notes.meta.tags.empty')}>
 						{(tags.data ?? []).map(tag => (
 							<Combobox.Item key={tag.id} label={tag.name} value={tag.id}>
@@ -66,7 +67,7 @@ export function NoteMeta({ onChange, value }: NoteMetaProps) {
 					</Combobox.Content>
 				</Combobox>
 			</div>
-			<div className='min-w-56 flex-1'>
+			<div className='flex min-w-56 flex-1'>
 				<LinkedTasks onChange={taskIds => onChange({ ...value, taskIds })} value={value.taskIds} />
 			</div>
 		</div>

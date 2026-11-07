@@ -58,7 +58,7 @@ export function RevisionHistory({ noteId, onRestored }: RevisionHistoryProps) {
 					<p className='text-sm font-medium'>{t('notes.history.title')}</p>
 					<p className='truncate text-xs text-muted-foreground'>{t('notes.history.description')}</p>
 				</div>
-				<Button className='rounded-full' onClick={() => setOpen(true)} type='button' variant='secondary'>
+				<Button onClick={() => setOpen(true)} type='button' variant='secondary'>
 					<Button.Text>{t('notes.history.view')}</Button.Text>
 					<Button.Icon icon={ArrowRight} />
 				</Button>
