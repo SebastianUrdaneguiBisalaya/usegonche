@@ -2,6 +2,7 @@ import type { PrismaClient, Profile, UserSettings } from '@usegonche/database';
 import type { Storage, UploadUrl } from '@usegonche/storage';
 import { changedFields, hasChanges } from '../../lib/diff.js';
 import { AppError } from '../../lib/errors.js';
+import { scoped } from '../../lib/owner.js';
 import { createOwnerUploadUrl } from '../../lib/upload-url.js';
 import type { AvatarUploadInput, UpdateProfileInput, UpdateSettingsInput } from './profile.schemas.js';
 
@@ -32,7 +33,7 @@ export const getSettings = async (prisma: PrismaClient, user: Identity): Promise
 };
 
 /** Writes only what changed; an update that changes nothing answers with the current settings and writes nothing. */
-export const updateSettings = async (prisma: PrismaClient, user: Identity, { onboardingCompleted, ...input }: UpdateSettingsInput): Promise<UserSettings> => {
+export const updateSettings = async (prisma: PrismaClient, user: Identity, { gettingStartedCompleted, onboardingCompleted, tourCompleted, ...input }: UpdateSettingsInput): Promise<UserSettings> => {
 	const current = await getSettings(prisma, user);
 	const changed: Partial<UserSettings> = changedFields(current, input);
 	if (onboardingCompleted && !current.onboardingCompletedAt) {
@@ -42,7 +43,32 @@ export const updateSettings = async (prisma: PrismaClient, user: Identity, { onb
 		if (missing) throw new AppError('validation_error', 422, [{ code: 'onboarding_incomplete', field: missing }]);
 		changed.onboardingCompletedAt = new Date();
 	}
+	// One-way flags of the first-run guide: the first date is kept.
+	if (tourCompleted && !current.tourCompletedAt) changed.tourCompletedAt = new Date();
+	if (gettingStartedCompleted && !current.gettingStartedCompletedAt) changed.gettingStartedCompletedAt = new Date();
 	return hasChanges(changed) ? prisma.userSettings.update({ data: changed, where: { ownerId: user.id } }) : current;
+};
+
+/** Steps of the getting-started checklist, in the order it shows them: each is done once the user has created at least one. */
+export interface GettingStartedProgress {
+	goal: boolean;
+	plan: boolean;
+	project: boolean;
+	tag: boolean;
+	task: boolean;
+}
+
+/** Which getting-started steps are done, from the user's own data (archived goals and projects still count: they were created). */
+export const getGettingStarted = async (prisma: PrismaClient, ownerId: string): Promise<GettingStartedProgress> => {
+	const select = { id: true } as const;
+	const [tag, goal, project, task, plan] = await Promise.all([
+		prisma.tag.findFirst({ select, where: scoped(ownerId) }),
+		prisma.goal.findFirst({ select, where: scoped(ownerId) }),
+		prisma.project.findFirst({ select, where: scoped(ownerId) }),
+		prisma.task.findFirst({ select, where: scoped(ownerId) }),
+		prisma.dailyPlanItem.findFirst({ select, where: scoped(ownerId) }),
+	]);
+	return { goal: Boolean(goal), plan: Boolean(plan), project: Boolean(project), tag: Boolean(tag), task: Boolean(task) };
 };
 
 const AVATAR_EXTENSIONS = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' } as const;

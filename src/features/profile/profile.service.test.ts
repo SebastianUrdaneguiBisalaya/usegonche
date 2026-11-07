@@ -1,7 +1,7 @@
 import type { Profile, UserSettings } from '@usegonche/database';
 import { describe, expect, it, vi } from 'vitest';
 import { createMockPrisma, createMockStorage, OTHER_USER_ID, TEST_USER_ID } from '../../test/helpers.js';
-import { createAvatarUploadUrl, DEFAULT_SETTINGS, getProfile, getSettings, updateProfile, updateSettings } from './profile.service.js';
+import { createAvatarUploadUrl, DEFAULT_SETTINGS, getGettingStarted, getProfile, getSettings, updateProfile, updateSettings } from './profile.service.js';
 
 const user = { email: 'me@example.com', id: TEST_USER_ID };
 const profile = { email: user.email, id: TEST_USER_ID } as Profile;
@@ -103,6 +103,48 @@ describe('updateSettings (onboarding)', () => {
 		vi.mocked(prisma.userSettings.upsert).mockResolvedValue(done);
 		expect(await updateSettings(prisma, user, { onboardingCompleted: true })).toBe(done);
 		expect(prisma.userSettings.update).not.toHaveBeenCalled();
+	});
+});
+
+describe('updateSettings (getting-started guide)', () => {
+	it('marks the tour and the checklist as completed', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.userSettings.upsert).mockResolvedValue(settings);
+		vi.mocked(prisma.userSettings.update).mockResolvedValue(settings);
+		await updateSettings(prisma, user, { gettingStartedCompleted: true, tourCompleted: true });
+		expect(prisma.userSettings.update).toHaveBeenCalledWith({
+			data: { gettingStartedCompletedAt: expect.any(Date), tourCompletedAt: expect.any(Date) },
+			where: { ownerId: TEST_USER_ID },
+		});
+	});
+
+	it('is idempotent: already completed flags keep their date and write nothing', async () => {
+		const prisma = createMockPrisma();
+		const done = { ...settings, gettingStartedCompletedAt: new Date('2026-11-01T00:00:00Z'), tourCompletedAt: new Date('2026-11-01T00:00:00Z') } as UserSettings;
+		vi.mocked(prisma.userSettings.upsert).mockResolvedValue(done);
+		expect(await updateSettings(prisma, user, { gettingStartedCompleted: true, tourCompleted: true })).toBe(done);
+		expect(prisma.userSettings.update).not.toHaveBeenCalled();
+	});
+});
+
+describe('getGettingStarted', () => {
+	it('reports each step as done when the user has at least one of it', async () => {
+		const prisma = createMockPrisma();
+		vi.mocked(prisma.tag.findFirst).mockResolvedValue({ id: 't' } as never);
+		vi.mocked(prisma.goal.findFirst).mockResolvedValue({ id: 'g' } as never);
+		vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
+		vi.mocked(prisma.task.findFirst).mockResolvedValue(null);
+		vi.mocked(prisma.dailyPlanItem.findFirst).mockResolvedValue(null);
+		expect(await getGettingStarted(prisma, TEST_USER_ID)).toEqual({ goal: true, plan: false, project: false, tag: true, task: false });
+	});
+
+	it('scopes every lookup to the owner', async () => {
+		const prisma = createMockPrisma();
+		await getGettingStarted(prisma, TEST_USER_ID);
+		for (const model of [prisma.tag, prisma.goal, prisma.project, prisma.task, prisma.dailyPlanItem]) {
+			expect(model.findFirst).toHaveBeenCalledWith({ select: { id: true }, where: { ownerId: TEST_USER_ID } });
+		}
+		expect(JSON.stringify(vi.mocked(prisma.task.findFirst).mock.calls)).not.toContain(OTHER_USER_ID);
 	});
 });
 

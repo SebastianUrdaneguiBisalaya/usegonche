@@ -9,6 +9,7 @@ import { useTranslate } from '~/hooks/use-translate';
 import { requireSignedIn } from '~/lib/session.server';
 import bgDark from '../../assets/bg-usegonche-dark.png';
 import bgLight from '../../assets/bg-usegonche-light.png';
+import { GettingStarted } from './getting-started/getting-started';
 import { settingsKey } from './settings/api';
 import { useSyncPreferences } from './settings/use-preferences';
 import { AppSidebar } from './shared/app-sidebar';
@@ -85,6 +86,7 @@ export default function ProtectedLayout() {
 				</main>
 			</div>
 			<CommandPalette onOpenChange={setCommandOpen} open={commandOpen} />
+			<GettingStarted />
 		</div>
 	);
 }

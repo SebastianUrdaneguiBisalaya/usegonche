@@ -56,6 +56,10 @@ export const updateSettingsSchema = z
 			.max(10),
 		/** Finishes the mandatory onboarding. Needs theme, language, country and time zone to be set (422 `onboarding_incomplete` otherwise); it cannot be undone. */
 		onboardingCompleted: z.literal(true),
+		/** Closes the getting-started checklist for good (all steps done or dismissed). One-way. */
+		gettingStartedCompleted: z.literal(true),
+		/** Marks the first-run product tour as seen (finished or closed). One-way. */
+		tourCompleted: z.literal(true),
 		theme: z.enum(THEMES),
 		timezone: z.string().max(64).refine(isIanaTimezone),
 	})

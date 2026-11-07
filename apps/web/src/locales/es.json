@@ -1849,5 +1849,97 @@
     },
     "backHome": "Volver al inicio",
     "signIn": "Iniciar sesión"
+  },
+  "gettingStarted": {
+    "tour": {
+      "next": "Siguiente",
+      "previous": "Atrás",
+      "done": "Entendido",
+      "progress": "{{current}} de {{total}}",
+      "welcome": {
+        "title": "Bienvenido a useGonche",
+        "description": "Un recorrido rápido por dónde está cada cosa y en qué orden configurarla. Puedes hacerlo todo a mano; nada es obligatorio."
+      },
+      "tags": {
+        "title": "1. Etiquetas",
+        "description": "Empieza aquí. Las etiquetas son como \"trabajo\" o \"personal\" y las añades a tareas, proyectos y notas para filtrarlas luego."
+      },
+      "goals": {
+        "title": "2. Metas",
+        "description": "Un resultado que quieres lograr, como \"Lanzar mi portafolio\". Proyectos y tareas pueden apuntar a una meta para ver qué la hace avanzar."
+      },
+      "projects": {
+        "title": "3. Proyectos",
+        "description": "Un trabajo con un final, ligado a una meta. Agrupa las tareas que lo hacen realidad."
+      },
+      "tasks": {
+        "title": "4. Tareas",
+        "description": "Una acción concreta que puedes hacer. Ponla en un proyecto, dale prioridad y fecha límite, y divídela en subtareas si hace falta."
+      },
+      "today": {
+        "title": "5. Hoy",
+        "description": "Elige las tareas en las que trabajarás hoy según tu capacidad real y, si quieres, resérvales tiempo con bloques en la agenda."
+      },
+      "inbox": {
+        "title": "Inbox",
+        "description": "Captura cualquier cosa rápido, sin organizarla. Luego procesa cada elemento en una tarea, un proyecto o una nota."
+      },
+      "calendar": {
+        "title": "Calendario",
+        "description": "Tus eventos y bloques de tiempo por día y semana, para que tus planes encajen con tu agenda real."
+      },
+      "notes": {
+        "title": "Notas",
+        "description": "Escribe notas y vincúlalas a las tareas de las que hablan."
+      },
+      "reflect": {
+        "title": "Reflexionar",
+        "description": "Revisión diaria y semanal: lo planificado frente a lo hecho y qué arrastrar al siguiente día."
+      },
+      "finish": {
+        "title": "Tu checklist de primeros pasos",
+        "description": "Sigue la checklist abajo a la derecha: cada paso se marca solo cuando lo creas."
+      }
+    },
+    "checklist": {
+      "title": "Primeros pasos",
+      "description": "{{done}} de {{total}} hechos",
+      "open": "Abrir la checklist de primeros pasos",
+      "minimize": "Minimizar la checklist",
+      "skip": "Saltar la guía",
+      "completed": "Todo listo. Terminaste la guía.",
+      "status": {
+        "completed": "Completado",
+        "active": "Paso actual",
+        "upcoming": "Pendiente"
+      },
+      "steps": {
+        "tag": {
+          "title": "Crea una etiqueta",
+          "description": "Como \"trabajo\" o \"personal\", para filtrar tareas, proyectos y notas.",
+          "action": "Ir a Etiquetas"
+        },
+        "goal": {
+          "title": "Define una meta",
+          "description": "El resultado que quieres lograr. Proyectos y tareas apuntarán a ella.",
+          "action": "Ir a Metas"
+        },
+        "project": {
+          "title": "Crea un proyecto",
+          "description": "Agrupa el trabajo de esa meta. Vincúlalo a la meta que acabas de crear.",
+          "action": "Ir a Proyectos"
+        },
+        "task": {
+          "title": "Añade una tarea",
+          "description": "Una próxima acción concreta. Ponla en tu proyecto y dale una prioridad.",
+          "action": "Ir a Tareas"
+        },
+        "plan": {
+          "title": "Planifica tu día",
+          "description": "En Hoy, añade la tarea al plan de hoy. Si quieres, resérvale tiempo con un bloque en la agenda.",
+          "action": "Ir a Hoy"
+        }
+      }
+    }
   }
 }

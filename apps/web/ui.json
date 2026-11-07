@@ -59,7 +59,7 @@
     "media-files/image": "main",
     "navigation/command": "command@1.1.0",
     "navigation/sidebar": "sidebar@1.1.0",
-    "navigation/tour-guide": "main",
+    "navigation/tour-guide": "tour-guide@1.0.0",
     "navigation/user-profile": "main",
     "overlays-feedback/application-state": "main",
     "overlays-feedback/confirm-dialog": "main",
@@ -69,6 +69,7 @@
     "overlays-feedback/modal": "modal@1.1.1",
     "overlays-feedback/popover": "popover@1.0.1",
     "overlays-feedback/settings-dialog": "main",
-    "overlays-feedback/tooltip": "main"
+    "overlays-feedback/tooltip": "main",
+    "views/onboarding-timeline": "onboarding-timeline@1.0.0"
   }
 }
