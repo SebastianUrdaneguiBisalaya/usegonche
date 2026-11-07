@@ -6,6 +6,8 @@ import { TaskFilter } from './task-combobox';
 
 /** A filter's slot: it grows to share the line, never below a readable width or above a calm one. */
 const FIELD = 'min-w-0 flex-1 basis-40 lg:max-w-56';
+/** Project and tag selects at the height of the "All" chip and the task combobox (42px), instead of the 36px list control. */
+const SELECT = 'h-[2.625rem] min-w-0';
 
 interface Option {
 	id: string;
@@ -38,7 +40,7 @@ export function NoteFilters({ count, filtered, onClear, onProjectChange, onTagCh
 			<div className={FIELD}>
 				<IdSelect
 					allLabel={t('notes.filters.project.all')}
-					className='min-w-0'
+					className={SELECT}
 					icon={FolderKanban}
 					label={t('notes.filters.project.label')}
 					onChange={onProjectChange}
@@ -47,7 +49,7 @@ export function NoteFilters({ count, filtered, onClear, onProjectChange, onTagCh
 				/>
 			</div>
 			<div className={FIELD}>
-				<IdSelect allLabel={t('notes.filters.tag.all')} className='min-w-0' icon={Tag} label={t('notes.filters.tag.label')} onChange={onTagChange} options={tags} value={tag} />
+				<IdSelect allLabel={t('notes.filters.tag.all')} className={SELECT} icon={Tag} label={t('notes.filters.tag.label')} onChange={onTagChange} options={tags} value={tag} />
 			</div>
 			<div className={FIELD}>
 				<TaskFilter onChange={onTaskChange} value={task} />
