@@ -23,8 +23,10 @@ export function useLanguage(): UseLanguage {
 	const storedPreference = useLanguageStore(state => state.preference);
 	const setPreference = useLanguageStore(state => state.setPreference);
 
+	// Once per page load, not once per component: rehydrating re-activates the language, which gives every `t` a new identity. With one
+	// call per mount, the date pickers of the Tasks list (one per row, remounted when `t` changes) looped into "Maximum update depth".
 	useEffect(() => {
-		void useLanguageStore.persist.rehydrate();
+		if (!useLanguageStore.persist.hasHydrated()) void useLanguageStore.persist.rehydrate();
 	}, []);
 
 	const preference = hydrated ? storedPreference : (serverPreference ?? 'system');

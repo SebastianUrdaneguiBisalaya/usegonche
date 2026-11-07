@@ -115,6 +115,8 @@ export function getI18n(locale: Locale = defaultLocale) {
 }
 
 export function activateLocale(locale: Locale) {
-	void getI18n(locale).changeLanguage(locale);
+	const i18n = getI18n(locale);
+	// `changeLanguage` to the same language still emits `languageChanged`, re-rendering every translated component for nothing.
+	if (i18n.language !== locale) void i18n.changeLanguage(locale);
 	document.documentElement.lang = locale;
 }
