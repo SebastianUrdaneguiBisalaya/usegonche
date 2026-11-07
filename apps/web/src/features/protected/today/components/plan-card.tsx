@@ -42,7 +42,7 @@ export function PlanCard({ className, error, isLoading, isToday, items, onAdd, o
 				<Progress.Indicator />
 			</Progress>
 
-			<div className={cn('flex min-h-0 flex-1 flex-col overflow-y-auto', (error || items.length === 0) && !isLoading && 'justify-center')}>
+			<div className={cn('flex min-h-64 flex-1 basis-0 flex-col overflow-y-auto', (error || items.length === 0) && !isLoading && 'justify-center')}>
 				{isLoading ? (
 					<div className='flex flex-col gap-3'>
 						{[0, 1, 2].map(row => (
