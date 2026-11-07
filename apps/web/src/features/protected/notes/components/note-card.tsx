@@ -8,7 +8,6 @@ import { useTranslate } from '~/hooks/use-translate';
 import { formatRelative } from '../../shared/relative-time';
 import { TagChip } from '../../shared/tag-chip';
 import type { NoteSummary } from '../api';
-import { noteIcon } from '../display';
 
 const TAGS_SHOWN = 2;
 
@@ -21,7 +20,7 @@ interface NoteCardProps {
 	selected: boolean;
 }
 
-/** One note of the list: icon, title, the start of its text, its tags, project and last edit. The whole card opens the note; the menu has the rest. */
+/** One note of the list: title, the start of its text, its tags, project and last edit. The whole card opens the note; the menu has the rest. */
 export function NoteCard({ note, onCopyLink, onDelete, onOpen, projectTitle, selected }: NoteCardProps) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
@@ -36,9 +35,6 @@ export function NoteCard({ note, onCopyLink, onDelete, onOpen, projectTitle, sel
 				selected ? 'border-border-strong bg-foreground/[0.08] shadow-sm' : 'border-border bg-foreground/[0.03] hover:bg-foreground/[0.05]'
 			)}
 		>
-			<span aria-hidden className='flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-foreground/[0.06] text-muted-foreground'>
-				<Icon icon={noteIcon(note.id)} size='lg' />
-			</span>
 			<div className='flex min-w-0 flex-1 flex-col gap-1.5'>
 				<button
 					className='cursor-pointer truncate pr-8 text-left text-base font-medium after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-2! focus-visible:outline-offset-2! focus-visible:outline-ring!'

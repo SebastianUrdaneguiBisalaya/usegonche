@@ -14,7 +14,7 @@ import { ListEmpty } from '../../shared/list-table';
 import { listStyles } from '../../shared/styles';
 import { useDateTime } from '../../shared/use-datetime';
 import type { Task } from '../api';
-import { daysUntil, isOpen, statusColor, statusDot, statusIcon, taskIcon } from '../display';
+import { daysUntil, isOpen, statusColor, statusDot } from '../display';
 import { type TaskPriority, type TaskStatus, taskPriorities, taskStatuses } from '../search-params';
 import { BlockedTag, PriorityPill, taskDay, useFormatDay } from './task-pills';
 
@@ -49,15 +49,6 @@ function TaskCard({ onOpen, onSetPriority, task }: { onOpen: (task: Task) => voi
 	return (
 		<div className='flex flex-col gap-3' onClick={() => onOpen(task)}>
 			<div className='flex items-start gap-3'>
-				<span
-					aria-hidden
-					className={cn(
-						'flex size-10 shrink-0 items-center justify-center rounded-xl border border-border',
-						finished ? 'bg-success/15 text-success' : 'bg-foreground/6 text-muted-foreground'
-					)}
-				>
-					<Icon icon={finished ? statusIcon.done : taskIcon(task.id)} size='md' />
-				</span>
 				<Typography.Span className={cn('min-w-0 flex-1 text-sm font-medium leading-snug', finished ? 'text-muted-foreground' : '')} title={task.title}>
 					<span className='line-clamp-2'>{task.title}</span>
 				</Typography.Span>
