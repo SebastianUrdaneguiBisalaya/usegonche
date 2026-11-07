@@ -1,8 +1,10 @@
 import { Bell, X } from 'lucide-react';
+import { useMemo } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
-import { DatePicker } from '~/components/ui/forms-inputs/date-picker/date-picker';
+import { DatePicker, type DatePickerLang } from '~/components/ui/forms-inputs/date-picker/date-picker';
 import { Icon } from '~/components/ui/foundations/icon/icon';
+import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
 import { formatRelativeLong } from '../../shared/relative-time';
@@ -11,11 +13,12 @@ import { useCreateReminder, useDeleteReminder, useRescheduleReminder, useTargetR
 
 type Target = { eventId: string } | { noteId: string } | { taskId: string };
 
-/** "Reminder" card of a detail view: when to be reminded about a task or event (one pending reminder at a time). */
+/** "Reminder" card of a detail view (task drawer, note editor): when to be reminded about its task, event or note (one pending reminder at a time). */
 export function TargetReminder({ target }: { target: Target }) {
 	const t = useTranslate();
 	const { locale } = useLanguage();
-	const lang = usePickerLang();
+	const pickerLang = usePickerLang();
+	const lang = useMemo<Partial<DatePickerLang>>(() => ({ ...pickerLang, hour: t('notes.reminder.picker.hour'), minute: t('notes.reminder.picker.minute') }), [pickerLang, t]);
 	const reminder = useTargetReminder(target);
 	const create = useCreateReminder();
 	const reschedule = useRescheduleReminder();
@@ -33,9 +36,22 @@ export function TargetReminder({ target }: { target: Target }) {
 			<Icon aria-hidden className='text-muted-foreground' icon={Bell} size='lg' />
 			<div className='flex min-w-0 flex-1 flex-col'>
 				<p className='text-sm font-medium'>{t('reminders.target.title')}</p>
-				<p className='truncate text-xs text-muted-foreground'>
-					{pending ? t('reminders.target.pending', { when: formatRelativeLong(pending.remindAt, locale) }) : t('reminders.target.description')}
-				</p>
+				{reminder.isLoading ? (
+					<Skeleton label={t('reminders.target.title')}>
+						<Skeleton.Item className='h-3 w-40' />
+					</Skeleton>
+				) : reminder.isError ? (
+					<p className='text-xs text-muted-foreground'>
+						{t('reminders.target.loadError')}{' '}
+						<button className='cursor-pointer underline' onClick={() => void reminder.refetch()} type='button'>
+							{t('reminders.target.retry')}
+						</button>
+					</p>
+				) : (
+					<p className='truncate text-xs text-muted-foreground'>
+						{pending ? t('reminders.target.pending', { when: formatRelativeLong(pending.remindAt, locale) }) : t('reminders.target.description')}
+					</p>
+				)}
 			</div>
 			{/* `w-fit shrink-0`: the picker root is `w-full` by default and squeezed the title until the button covered it. */}
 			<DatePicker.Root
@@ -63,6 +79,7 @@ export function TargetReminder({ target }: { target: Target }) {
 					loading={remove.isPending}
 					onClick={() => remove.mutate(pending.id, { onSuccess: () => toast.success(t('reminders.target.removed')) })}
 					size='icon'
+					type='button'
 					variant='ghost'
 				>
 					<Button.Icon icon={X} />

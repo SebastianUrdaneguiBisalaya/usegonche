@@ -1236,20 +1236,6 @@
       }
     },
     "reminder": {
-      "title": "Recordatorio",
-      "description": "Recibe un aviso sobre esta nota.",
-      "none": "Poner un recordatorio",
-      "pending": "Te lo recordará {{when}}",
-      "change": "Cambiar el recordatorio",
-      "remove": "Quitar el recordatorio",
-      "toast": {
-        "set": "Recordatorio creado",
-        "updated": "Recordatorio actualizado",
-        "removed": "Recordatorio quitado"
-      },
-      "error": "No se pudo guardar el recordatorio.",
-      "loadError": "No se pudo cargar el recordatorio.",
-      "retry": "Reintentar",
       "picker": {
         "hour": "Hora",
         "minute": "Minuto"
@@ -1452,6 +1438,8 @@
       "deleted": "Recordatorio eliminado."
     },
     "target": {
+      "loadError": "No se pudo cargar el recordatorio.",
+      "retry": "Reintentar",
       "title": "Recordatorio",
       "description": "Recibe un aviso sobre esto más tarde.",
       "pending": "Te avisará {{when}}",

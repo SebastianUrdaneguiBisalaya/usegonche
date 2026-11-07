@@ -9,12 +9,12 @@ import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLanguage } from '~/hooks/use-language';
 import { useTranslate } from '~/hooks/use-translate';
+import { TargetReminder } from '../../reminders/components/target-reminder';
 import { formatRelative } from '../../shared/relative-time';
 import { type Note, useNote, useUpdateNote } from '../api';
 import { TITLE_MAX } from '../schemas';
 import { AttachmentsCard } from './attachments-card';
 import { type NoteLinks, NoteMeta } from './note-meta';
-import { NoteReminder } from './note-reminder';
 import { RevisionHistory } from './revision-history';
 
 const sameSet = (a: readonly string[], b: readonly string[]) => a.length === b.length && [...a].sort().join() === [...b].sort().join();
@@ -204,7 +204,7 @@ function Draft({ note, onBack, onDelete, onDirtyChange, onRestored }: DraftProps
 				</RichTextEditor>
 				<AttachmentsCard target={{ noteId: note.id }} />
 				<RevisionHistory noteId={note.id} onRestored={onRestored} />
-				<NoteReminder noteId={note.id} />
+				<TargetReminder target={{ noteId: note.id }} />
 			</div>
 		</div>
 	);
