@@ -107,16 +107,16 @@ describe('listTasks', () => {
 		expect(vi.mocked(prisma.task.findMany).mock.calls[0]?.[0]).toMatchObject({ skip: 20, take: 10, where: { ownerId: TEST_USER_ID } });
 	});
 
-	it('counts per status (ignoring the status filter) plus blocked and overdue', async () => {
+	it('counts per status (ignoring the status filter) plus blocked, overdue and the working set', async () => {
 		const prisma = createMockPrisma();
 		vi.mocked(prisma.task.findMany).mockResolvedValue([]);
-		vi.mocked(prisma.task.count).mockResolvedValueOnce(0).mockResolvedValueOnce(4).mockResolvedValueOnce(2);
+		vi.mocked(prisma.task.count).mockResolvedValueOnce(0).mockResolvedValueOnce(4).mockResolvedValueOnce(2).mockResolvedValueOnce(6);
 		vi.mocked(prisma.task.groupBy).mockResolvedValue([
 			{ _count: { _all: 5 }, status: 'todo' },
 			{ _count: { _all: 3 }, status: 'done' },
 		] as never);
 		const page = await listTasks(prisma, TEST_USER_ID, { status: ['done'] }, { page: 1, pageSize: 10 });
-		expect(page.counts).toEqual({ blocked: 4, cancelled: 0, done: 3, in_progress: 0, overdue: 2, todo: 5 });
+		expect(page.counts).toEqual({ blocked: 4, cancelled: 0, done: 3, focus: 6, in_progress: 0, overdue: 2, todo: 5 });
 		expect(vi.mocked(prisma.task.groupBy).mock.calls[0]?.[0]).toMatchObject({ by: ['status'], where: { ownerId: TEST_USER_ID, parentId: null } });
 		expect(vi.mocked(prisma.task.groupBy).mock.calls[0]?.[0]?.where).not.toHaveProperty('status');
 	});

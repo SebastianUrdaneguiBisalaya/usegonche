@@ -57,7 +57,7 @@ describe('GET /tasks', () => {
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
 			data: [expectedView()],
-			meta: { counts: { blocked: 1, cancelled: 0, done: 0, in_progress: 0, overdue: 1, todo: 1 }, groups: null, page: 1, pageCount: 1, pageSize: 50, total: 1 },
+			meta: { counts: { blocked: 1, cancelled: 0, done: 0, focus: 1, in_progress: 0, overdue: 1, todo: 1 }, groups: null, page: 1, pageCount: 1, pageSize: 50, total: 1 },
 		});
 		expect(prisma.task.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 50, where: { ownerId: TEST_USER_ID, parentId: null } }));
 	});

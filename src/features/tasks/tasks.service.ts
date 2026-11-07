@@ -28,7 +28,8 @@ export type TaskView = Task & {
 };
 
 /** Open tasks per status plus `blocked` and `overdue` (open tasks only). Follows every filter but the status. */
-export type TaskListCounts = Record<TaskStatus | 'blocked' | 'overdue', number>;
+/** `focus` is the working set: how many tasks the working-set chip would show. */
+export type TaskListCounts = Record<TaskStatus | 'blocked' | 'focus' | 'overdue', number>;
 /** `groups` is set when the list was grouped (`groupBy`): the groups of this page, each with the size it has in the whole filtered set. */
 export type TaskPage = { counts: TaskListCounts; groups: TaskGroupPage[] | null; items: TaskView[]; total: number };
 
@@ -142,15 +143,16 @@ export const listTasks = async (prisma: PrismaClient, ownerId: string, filters: 
 	const where = { ...shared, ...(status && { status: { in: status } }) };
 	const orderBy = [NULLABLE_SORT.includes(sort) ? { [sort]: { nulls: 'last', sort: order } } : { [sort]: order }, { id: order }] as Prisma.TaskOrderByWithRelationInput[];
 	const today = taskToday(now, timeZone);
-	// The counters (and the blocked / overdue chips) follow every filter but the status, grouped or not.
+	// The counters (and the blocked / overdue / working-set chips) follow every filter but the status, grouped or not.
 	const loadChips = () =>
 		Promise.all([
 			prisma.task.groupBy({ _count: { _all: true }, by: ['status'], where: shared }),
 			prisma.task.count({ where: { AND: [shared, blockedWhere], status: { in: OPEN } } }),
 			prisma.task.count({ where: { AND: [shared, dueBucketWhere('overdue', today)] } }),
+			prisma.task.count({ where: { AND: [shared, focusWhere(now, timeZone)] } }),
 		]);
-	const toCounts = ([grouped, blockedCount, overdue]: Awaited<ReturnType<typeof loadChips>>): TaskListCounts => {
-		const counts: TaskListCounts = { blocked: blockedCount, cancelled: 0, done: 0, in_progress: 0, overdue, todo: 0 };
+	const toCounts = ([grouped, blockedCount, overdue, focusCount]: Awaited<ReturnType<typeof loadChips>>): TaskListCounts => {
+		const counts: TaskListCounts = { blocked: blockedCount, cancelled: 0, done: 0, focus: focusCount, in_progress: 0, overdue, todo: 0 };
 		for (const group of grouped) counts[group.status] = group._count._all;
 		return counts;
 	};
