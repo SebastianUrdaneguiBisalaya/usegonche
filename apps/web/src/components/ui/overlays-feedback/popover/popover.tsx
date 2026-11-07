@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { cn } from "../../utils/tailwind/cn";
-import { useEscapeKey, useFocusTrap } from "../modal/modal";
+import { useEscapeKey, useFocusTrap, useOverlayLayer } from "../modal/modal";
 
 interface PopoverContextValue {
   open: boolean;
@@ -143,6 +143,8 @@ function Content({
   });
 
   useFocusTrap(open, contentRef);
+  // A layer above every open overlay: a fixed `z-50` put the panel behind a Modal (e.g. the tag color picker).
+  const zIndex = useOverlayLayer(open);
 
   const computePosition = React.useCallback(() => {
     const trigger = triggerRef.current;
@@ -208,12 +210,12 @@ function Content({
   return createPortal(
     <div
       className={cn(
-        "z-50 min-w-48 animate-fade-scale-in rounded-md border border-border bg-background p-3 text-sm font-primary text-foreground shadow-md",
+        "min-w-48 animate-fade-scale-in rounded-md border border-border bg-background p-3 text-sm font-primary text-foreground shadow-md",
         className,
       )}
       ref={contentRef}
       role="dialog"
-      style={style}
+      style={{ ...style, zIndex }}
       tabIndex={-1}
       {...props}
     >

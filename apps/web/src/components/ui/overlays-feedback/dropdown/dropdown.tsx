@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { Separator } from "../../foundations/separator/separator";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { cn } from "../../utils/tailwind/cn";
-import { useEscapeKey } from "../modal/modal";
+import { useEscapeKey, useOverlayLayer } from "../modal/modal";
 
 interface DropdownContextValue {
   open: boolean;
@@ -152,6 +152,8 @@ function Content({
   ...props
 }: DropdownContentProps) {
   const { open, triggerRef, contentRef } = useDropdownContext();
+  // A layer above every open overlay, so a menu opened inside a Modal or Drawer is not hidden behind it.
+  const zIndex = useOverlayLayer(open);
   const [style, setStyle] = React.useState<React.CSSProperties>({
     opacity: 0,
     pointerEvents: "none",
@@ -249,13 +251,13 @@ function Content({
   return createPortal(
     <div
       className={cn(
-        "z-50 min-w-40 animate-fade-scale-in rounded-md border border-border bg-background p-1 shadow-md",
+        "min-w-40 animate-fade-scale-in rounded-md border border-border bg-background p-1 shadow-md",
         className,
       )}
       onKeyDown={handleKeyDown}
       ref={contentRef}
       role="menu"
-      style={style}
+      style={{ ...style, zIndex }}
       {...props}
     >
       {children}

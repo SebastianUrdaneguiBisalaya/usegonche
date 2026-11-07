@@ -225,7 +225,7 @@ function Content({
   container,
 }: CommandContentProps) {
   const { open, setOpen } = useCommandContext();
-  const { mounted, visible, animate } = useDialogTransition(open, () =>
+  const { mounted, visible, animate, zIndex } = useDialogTransition(open, () =>
     setOpen(false),
   );
   const contentRef = useRef<HTMLDivElement>(null);
@@ -255,7 +255,8 @@ function Content({
   if (!mounted || !visible) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-150 flex justify-center px-4">
+    // The shared overlay layer (not a fixed `z-150`), so a popover opened from inside it, like a color picker, stacks above it.
+    <div className="fixed inset-0 flex justify-center px-4" style={{ zIndex }}>
       {/* biome-ignore lint/a11y/useSemanticElements: overlay de fondo, requiere ser un div de posicionamiento absoluto, no un <button> */}
       <div
         aria-hidden="true"

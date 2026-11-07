@@ -63,7 +63,7 @@ const OVERLAY_Z_INDEX_STEP = 10;
  * Layering for stacked overlays: returns a `z-index` that is above every overlay already open, so a Modal opened
  * from inside a Drawer (or the other way around) always lands on top without any manual `z-*` override.
  */
-function useOverlayLayer(active: boolean): number {
+export function useOverlayLayer(active: boolean): number {
   const [layer, setLayer] = useState(0);
 
   useEffect(() => {
