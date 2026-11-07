@@ -25,8 +25,11 @@ export async function unwrap<R extends RpcResponse>(request: Promise<R>): Promis
 	return body.data as Data<R>;
 }
 
-/** A 401 on a protected endpoint: the session is over. */
-export const isSessionExpired = (error: unknown): boolean => error instanceof ApiError && error.status === 401;
+/**
+ * A 401 on a protected endpoint: the session is over. A wrong email or password on sign-in is also a 401, but with `invalid_credentials`:
+ * that is a form error to show, not an ended session (treating it as one reloaded sign-in and the toast never appeared).
+ */
+export const isSessionExpired = (error: unknown): boolean => error instanceof ApiError && error.status === 401 && error.code !== 'invalid_credentials';
 
 export const isNotFound = (error: unknown): boolean => error instanceof ApiError && error.status === 404;
 
