@@ -289,7 +289,7 @@
       "30d": "Last 30 days"
     },
     "capture": {
-      "placeholder": "Quick capture... (tasks, ideas, notes, reminders)",
+      "placeholder": "Quick capture... (tasks, ideas, notes)",
       "label": "Quick capture",
       "submit": "Capture"
     },
@@ -951,7 +951,7 @@
     },
     "quickAdd": {
       "label": "Add a task",
-      "placeholder": "Add a task... (e.g. \"Review contract #project !high tomorrow\")",
+      "placeholder": "Add a task... (e.g. \"Review contract #project !high ~1h tomorrow\")",
       "submit": "Add task",
       "needsTitle": "Write what the task is about.",
       "understood": "Understood:",
@@ -1266,9 +1266,9 @@
       "remove": "Remove {{name}}",
       "more": "More actions for {{name}}",
       "uploadTitle": "Add files",
-      "uploadDescription": "They are uploaded straight to storage and attached to this note.",
+      "uploadDescription": "They are uploaded straight to storage and attached here.",
       "limits": "Up to {{max}} files, {{size}} in total ({{used}} used).",
-      "full": "This note already has the maximum number of files.",
+      "full": "The maximum number of files has been reached.",
       "totalExceeded": "Adding this file would exceed {{size}} in total.",
       "sessionLimit": "You can only add {{max}} more files right now.",
       "done": "Done",

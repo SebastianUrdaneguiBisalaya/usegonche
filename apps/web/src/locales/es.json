@@ -289,7 +289,7 @@
       "30d": "Últimos 30 días"
     },
     "capture": {
-      "placeholder": "Captura rápida... (tareas, ideas, notas, recordatorios)",
+      "placeholder": "Captura rápida... (tareas, ideas, notas)",
       "label": "Captura rápida",
       "submit": "Capturar"
     },
@@ -951,7 +951,7 @@
     },
     "quickAdd": {
       "label": "Añadir una tarea",
-      "placeholder": "Añade una tarea... (p. ej. \"Revisar contrato #proyecto !alta mañana\")",
+      "placeholder": "Añade una tarea... (p. ej. \"Revisar contrato #proyecto !alta ~1h mañana\")",
       "submit": "Añadir tarea",
       "needsTitle": "Escribe de qué trata la tarea.",
       "understood": "Entendido:",
@@ -1266,9 +1266,9 @@
       "remove": "Quitar {{name}}",
       "more": "Más acciones para {{name}}",
       "uploadTitle": "Añadir archivos",
-      "uploadDescription": "Se suben directamente al almacenamiento y se adjuntan a esta nota.",
+      "uploadDescription": "Se suben directamente al almacenamiento y se adjuntan aquí.",
       "limits": "Hasta {{max}} archivos, {{size}} en total ({{used}} usados).",
-      "full": "Esta nota ya tiene el máximo de archivos.",
+      "full": "Ya se alcanzó el máximo de archivos.",
       "totalExceeded": "Añadir este archivo superaría {{size}} en total.",
       "sessionLimit": "Solo puedes añadir {{max}} archivos más por ahora.",
       "done": "Listo",
