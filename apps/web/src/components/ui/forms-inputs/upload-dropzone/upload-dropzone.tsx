@@ -894,7 +894,7 @@ function UploadDropzoneTrigger({
           )}
         >
           {acceptedDescription} · {lang.maxSize(formatLimit(maxSize))}
-          {isMulti ? ` · hasta ${maxFiles} ${nounPlural}` : ""}
+          {isMulti ? ` · ${maxFiles} ${nounPlural} max.` : ""}
         </p>
       </div>
     </div>
