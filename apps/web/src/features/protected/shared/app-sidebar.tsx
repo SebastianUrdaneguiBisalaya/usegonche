@@ -16,9 +16,11 @@ import { cn } from '~/components/ui/utils/tailwind/cn';
 import { useLogout, useSession } from '~/features/auth/api';
 import { useTranslate } from '~/hooks/use-translate';
 import { SettingsContent } from '../settings/settings-content';
+import { useDay } from '../today/api';
 import { initialsOf } from './initials';
 import { isActive, primaryNav, secondaryNav } from './navigation';
 import { shortcutKeys } from './shortcut-keys';
+import { useDateTime } from './use-datetime';
 
 interface AppSidebarProps {
 	mobileOpen: boolean;
@@ -30,8 +32,14 @@ const SETTINGS_HOTKEY = 'mod+,';
 
 const avatarInitialsClassName = 'flex items-center justify-center bg-muted text-xs font-semibold text-muted-foreground';
 
-function DailyProgress({ done, total }: { done: number; total: number }) {
+/** Progress of today's plan: its tasks marked done over all of them. Shares the Today page's cache, so it follows every change to the plan or its tasks. */
+function DailyProgress() {
 	const t = useTranslate();
+	const { today } = useDateTime();
+	const day = useDay(today());
+	const items = day.data?.items ?? [];
+	const total = items.length;
+	const done = items.filter(item => item.task.status === 'done').length;
 	const percent = total === 0 ? 0 : Math.round((done / total) * 100);
 	const radius = 26;
 	const circumference = 2 * Math.PI * radius;
@@ -134,7 +142,7 @@ export function AppSidebar({ mobileOpen, onMobileOpenChange, onOpenCommand }: Ap
 					{secondaryNav.map(renderItem)}
 				</Sidebar.Nav>
 
-				{!collapsed && <DailyProgress done={0} total={0} />}
+				{!collapsed && <DailyProgress />}
 
 				<Sidebar.Footer className='gap-1'>
 					<UserProfile>

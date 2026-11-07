@@ -105,10 +105,11 @@ export function useGoalOptions() {
 	return useQuery({ queryFn: () => unwrap(api.goals.$get({ query: { pageSize: '100' } })), queryKey: ['goals', 'options'], staleTime: 60_000 });
 }
 
-/** Everything that depends on tasks refetches after a change (lists, subtasks, the drawer's task). */
+/** Everything that depends on tasks refetches after a change (lists, subtasks, the drawer's task, the day plan and its progress in the sidebar). */
 function useRefreshTasks() {
 	const queryClient = useQueryClient();
-	return () => Promise.all([queryClient.invalidateQueries({ queryKey: ['tasks'] }), queryClient.invalidateQueries({ queryKey: ['projects'] })]);
+	return () =>
+		Promise.all([queryClient.invalidateQueries({ queryKey: ['tasks'] }), queryClient.invalidateQueries({ queryKey: ['projects'] }), queryClient.invalidateQueries({ queryKey: ['planning'] })]);
 }
 
 type Rollback = () => void;
