@@ -11,6 +11,21 @@ import {
 const DEFAULT_GAP = 16;
 
 /**
+ * The closed style, one shared object: setting it again is the same value, so React bails out instead of re-rendering. A fresh object on
+ * every closed mount re-rendered each picker of a table (one per row), and with the table remounting its cells that chained into
+ * "Maximum update depth exceeded".
+ */
+const HIDDEN_STYLE: CSSProperties = {
+  opacity: 0,
+  pointerEvents: "none",
+  position: "fixed",
+};
+
+/** Same position as before: keeps the previous object so scroll/resize events that change nothing do not re-render. */
+const samePosition = (a: CSSProperties, b: CSSProperties): boolean =>
+  a.top === b.top && a.bottom === b.bottom && a.left === b.left && a.position === b.position && a.zIndex === b.zIndex;
+
+/**
  * Fixed-position style for a portaled popover anchored to a trigger, flipping above the trigger
  * when there isn't room below and clamping to the viewport horizontally.
  *
@@ -33,11 +48,7 @@ export function usePopoverPosition(
   },
 ): CSSProperties {
   const gap = options?.gap ?? DEFAULT_GAP;
-  const [style, setStyle] = useState<CSSProperties>({
-    opacity: 0,
-    pointerEvents: "none",
-    position: "fixed",
-  });
+  const [style, setStyle] = useState<CSSProperties>(HIDDEN_STYLE);
 
   const computePosition = useCallback(() => {
     const trigger = triggerRef.current;
@@ -59,7 +70,7 @@ export function usePopoverPosition(
     const spaceAbove = rect.top - gap;
     const openUpward = spaceBelow < contentHeight && spaceAbove > spaceBelow;
 
-    setStyle(
+    const next: CSSProperties =
       openUpward
         ? {
             bottom: viewportHeight - rect.top + gap,
@@ -72,8 +83,8 @@ export function usePopoverPosition(
             position: "fixed",
             top: rect.bottom + gap,
             zIndex: 9999,
-          },
-    );
+          };
+    setStyle(previous => (samePosition(previous, next) ? previous : next));
   }, [
     triggerRef,
     contentRef,
@@ -82,11 +93,7 @@ export function usePopoverPosition(
 
   useLayoutEffect(() => {
     if (!open) {
-      setStyle({
-        opacity: 0,
-        pointerEvents: "none",
-        position: "fixed",
-      });
+      setStyle(HIDDEN_STYLE);
       return;
     }
     computePosition();
