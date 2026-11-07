@@ -186,8 +186,8 @@ function ButtonRoot({
         {loading ? (
           <>
             <ButtonSpinner />
-
-            <ButtonText>{resolvedLang.loadingText}</ButtonText>
+            {/* An empty text would still take the `gap`, pushing the spinner off center in icon buttons. */}
+            {resolvedLang.loadingText && <ButtonText>{resolvedLang.loadingText}</ButtonText>}
           </>
         ) : (
           children
