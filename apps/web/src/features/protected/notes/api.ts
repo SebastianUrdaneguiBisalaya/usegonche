@@ -110,8 +110,14 @@ export function useRestoreRevision() {
 	});
 }
 
-export function useNoteFiles(noteId: string, enabled = true) {
-	return useQuery({ enabled, queryFn: () => unwrap(api.attachments.$get({ query: { noteId, pageSize: '100' } })), queryKey: ['notes', 'files', noteId] });
+/** What a file is attached to: a note or a task (the API accepts exactly one). */
+export type FileTarget = { noteId: string } | { taskId: string };
+
+/** Cache key of the files of a target; the task drawer and the note editor each keep their own. */
+const filesKey = (target: FileTarget) => ('noteId' in target ? ['notes', 'files', target.noteId] : ['tasks', 'files', target.taskId]);
+
+export function useNoteFiles(target: FileTarget, enabled = true) {
+	return useQuery({ enabled, queryFn: () => unwrap(api.attachments.$get({ query: { ...target, pageSize: '100' } })), queryKey: filesKey(target) });
 }
 
 type UploadBody = Body<(typeof api.attachments)['upload-url']['$post']>;
@@ -120,28 +126,28 @@ type UploadBody = Body<(typeof api.attachments)['upload-url']['$post']>;
  * The three steps of an upload: a signed URL from the API, the file straight to Storage, then its metadata is recorded. Resolves with a
  * signed read URL (what the dropzone previews) and the attachment id, so the file can be removed later.
  */
-export async function uploadNoteFile(noteId: string, file: File, onProgress: (percent: number) => void): Promise<{ id: string; url: string }> {
+export async function uploadNoteFile(target: FileTarget, file: File, onProgress: (percent: number) => void): Promise<{ id: string; url: string }> {
 	const mimeType = (file.type || 'application/octet-stream') as UploadBody['mimeType'];
-	const upload = await unwrap(api.attachments['upload-url'].$post({ json: { mimeType, noteId, sizeBytes: file.size } }));
+	const upload = await unwrap(api.attachments['upload-url'].$post({ json: { mimeType, ...target, sizeBytes: file.size } }));
 	await putToStorage(upload.uploadUrl, file, onProgress);
-	const attachment = await unwrap(api.attachments.$post({ json: { mimeType, name: file.name, noteId, path: upload.path, sizeBytes: file.size } }));
+	const attachment = await unwrap(api.attachments.$post({ json: { mimeType, name: file.name, ...target, path: upload.path, sizeBytes: file.size } }));
 	const { url } = await unwrap(api.attachments[':id'].url.$get({ param: { id: attachment.id } }));
 	return { id: attachment.id, url };
 }
 
-export function useDeleteNoteFile(noteId: string) {
+export function useDeleteNoteFile(target: FileTarget) {
 	const queryClient = useQueryClient();
 	return useMutation({
 		meta: { silent: true },
 		mutationFn: (id: string) => unwrap(api.attachments[':id'].$delete({ param: { id } })),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notes', 'files', noteId] }),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: filesKey(target) }),
 	});
 }
 
 /** A fresh signed URL to download a file (the private bucket's links expire). */
 export const noteFileUrl = (id: string) => unwrap(api.attachments[':id'].url.$get({ param: { id } }));
 
-export const refreshNoteFiles = (queryClient: QueryClient, noteId: string) => queryClient.invalidateQueries({ queryKey: ['notes', 'files', noteId] });
+export const refreshNoteFiles = (queryClient: QueryClient, target: FileTarget) => queryClient.invalidateQueries({ queryKey: filesKey(target) });
 
 type RemindersResponse = Awaited<ReturnType<typeof api.reminders.$get>>;
 export type NoteReminder = OkBody<RemindersResponse>['data'][number];

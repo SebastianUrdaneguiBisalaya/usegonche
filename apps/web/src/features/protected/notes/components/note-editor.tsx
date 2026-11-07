@@ -202,7 +202,7 @@ function Draft({ note, onBack, onDelete, onDirtyChange, onRestored }: DraftProps
 					<RichTextEditor.Toolbar className='rounded-t-xl border border-border bg-foreground/[0.03]' />
 					<RichTextEditor.Content className='min-h-56 rounded-b-xl bg-foreground/[0.03]' />
 				</RichTextEditor>
-				<AttachmentsCard noteId={note.id} />
+				<AttachmentsCard target={{ noteId: note.id }} />
 				<RevisionHistory noteId={note.id} onRestored={onRestored} />
 				<NoteReminder noteId={note.id} />
 			</div>

@@ -226,10 +226,6 @@ export function useTaskNotes(taskId: string, enabled: boolean) {
 	return useQuery({ enabled, queryFn: () => unwrap(api.notes.$get({ query: { pageSize: '50', taskId } })), queryKey: ['tasks', 'notes', taskId] });
 }
 
-export function useTaskFiles(taskId: string, enabled: boolean) {
-	return useQuery({ enabled, queryFn: () => unwrap(api.attachments.$get({ query: { pageSize: '50', taskId } })), queryKey: ['tasks', 'files', taskId] });
-}
-
 /** The time blocks planned for the task, all of them (no date range needed when the filter is a task). */
 export function useTaskBlocks(taskId: string, enabled: boolean) {
 	return useQuery({ enabled, queryFn: () => unwrap(api.planning.blocks.$get({ query: { taskId } })), queryKey: ['tasks', 'blocks', taskId] });

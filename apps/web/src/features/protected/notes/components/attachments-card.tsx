@@ -14,7 +14,7 @@ import { Dropdown } from '~/components/ui/overlays-feedback/dropdown/dropdown';
 import { Modal } from '~/components/ui/overlays-feedback/modal/modal';
 import { formatFileSize } from '~/components/ui/utils/files/fileTypes';
 import { useTranslate } from '~/hooks/use-translate';
-import { type NoteAttachment, noteFileUrl, refreshNoteFiles, uploadNoteFile, useDeleteNoteFile, useNoteFiles } from '../api';
+import { type FileTarget, type NoteAttachment, noteFileUrl, refreshNoteFiles, uploadNoteFile, useDeleteNoteFile, useNoteFiles } from '../api';
 
 /** Client-side limits: the API only bounds a single file (`ATTACHMENT_MAX_BYTES`, 50 MB); the count and the running total are enforced here. */
 const MAX_FILES = 10;
@@ -24,15 +24,19 @@ const COLLAPSED_COUNT = 2;
 const GRID = 'grid gap-3 sm:grid-cols-2';
 
 interface AttachmentsCardProps {
-	noteId: string;
+	/** The note or the task the files belong to. */
+	target: FileTarget;
 }
 
-/** Attachments of a note: a compact list (FileIcon, size, download, remove) plus an upload modal that PUTs straight to Supabase Storage. */
-export function AttachmentsCard({ noteId }: AttachmentsCardProps) {
+/**
+ * Attachments of a note or a task: a compact list (FileIcon, size, download, remove) plus an upload modal that PUTs straight to Supabase
+ * Storage.
+ */
+export function AttachmentsCard({ target }: AttachmentsCardProps) {
 	const t = useTranslate();
 	const queryClient = useQueryClient();
-	const files = useNoteFiles(noteId);
-	const remove = useDeleteNoteFile(noteId);
+	const files = useNoteFiles(target);
+	const remove = useDeleteNoteFile(target);
 	const [uploadOpen, setUploadOpen] = useState(false);
 	const [expanded, setExpanded] = useState(false);
 	// Bytes committed by uploads still in flight in the open modal, so concurrent files are checked against the same running total.
@@ -54,11 +58,11 @@ export function AttachmentsCard({ noteId }: AttachmentsCardProps) {
 		const projected = totalBytes + sessionBytesRef.current + file.size;
 		if (projected > MAX_TOTAL_BYTES) throw new Error(t('notes.files.totalExceeded', { size: formatFileSize(MAX_TOTAL_BYTES) }));
 		sessionBytesRef.current += file.size;
-		const result = await uploadNoteFile(noteId, file, onProgress);
+		const result = await uploadNoteFile(target, file, onProgress);
 		return result.url;
 	};
 
-	const handleUploadComplete = () => refreshNoteFiles(queryClient, noteId);
+	const handleUploadComplete = () => refreshNoteFiles(queryClient, target);
 
 	const handleDownload = async (attachment: NoteAttachment) => {
 		try {
