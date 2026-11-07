@@ -98,7 +98,7 @@ export function AgendaCard({ blocks, className, date, isToday }: AgendaCardProps
 				</Button>
 			</div>
 			{/* Stacked (one column) the hours scroll inside a fixed height; side by side they fill the column's height. */}
-			<div className='max-h-[32rem] overflow-y-auto lg:max-h-none lg:min-h-0 lg:flex-1 lg:basis-0' ref={scroller}>
+			<div className='max-h-[32rem] overflow-y-auto py-2 lg:max-h-none lg:min-h-0 lg:flex-1 lg:basis-0' ref={scroller}>
 				<div className='relative ml-14' style={{ height: px(MINUTES_PER_DAY) }}>
 					{HOURS.map(hour => (
 						<button
