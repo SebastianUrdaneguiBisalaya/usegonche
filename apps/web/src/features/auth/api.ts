@@ -12,6 +12,12 @@ export type ResetPasswordInput = Body<(typeof api.auth)['reset-password']['$post
 
 export const sessionKey = ['session'] as const;
 
+/**
+ * Tags the mutations that start a session (sign in, sign up, Google, password reset): while one runs, and until the navigation that follows
+ * finishes, the auth layout shows the full-screen loading screen instead of the form.
+ */
+export const authStepKey = ['auth-step'] as const;
+
 /** What `GET /me` answers: the signed-in user with the profile. */
 export type Session = Data<Awaited<ReturnType<typeof api.me.$get>>>;
 
@@ -44,6 +50,7 @@ function useRefreshSession() {
 export function useLogin() {
 	const refreshSession = useRefreshSession();
 	return useMutation({
+		mutationKey: authStepKey,
 		mutationFn: (json: LoginInput) => unwrap(api.auth.login.$post({ json })),
 		onSuccess: refreshSession,
 	});
@@ -51,6 +58,7 @@ export function useLogin() {
 
 export function useSignup() {
 	return useMutation({
+		mutationKey: authStepKey,
 		mutationFn: (json: SignupInput) => unwrap(api.auth.signup.$post({ json })),
 	});
 }
@@ -65,6 +73,7 @@ export function useForgotPassword() {
 export function useResetPassword() {
 	const refreshSession = useRefreshSession();
 	return useMutation({
+		mutationKey: authStepKey,
 		mutationFn: (json: ResetPasswordInput) => unwrap(api.auth['reset-password'].$post({ json })),
 		onSuccess: refreshSession,
 	});
@@ -82,6 +91,7 @@ export function useLogout() {
 export function useLoginWithGoogle() {
 	const refreshSession = useRefreshSession();
 	return useMutation({
+		mutationKey: authStepKey,
 		mutationFn: (json: GoogleLoginInput) => unwrap(api.auth.google.$post({ json })),
 		onSuccess: refreshSession,
 	});
