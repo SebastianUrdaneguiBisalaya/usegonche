@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/actions-controls/button/button';
 import { Input } from '~/components/ui/forms-inputs/input/input';
-import { Icon } from '~/components/ui/foundations/icon/icon';
 import { Kbd } from '~/components/ui/foundations/kbd/kbd';
 import { Skeleton } from '~/components/ui/foundations/skeleton/skeleton';
 import { Layout } from '~/components/ui/layout/layout/layout';
@@ -16,7 +15,6 @@ import { TargetReminder } from '../../reminders/components/target-reminder';
 import { shortcutKeys } from '../../shared/shortcut-keys';
 import { useDateTime } from '../../shared/use-datetime';
 import { type Task, type UpdateTaskBody, useDeleteTask, useTask, useUpdateTask } from '../api';
-import { statusIcon, taskIcon } from '../display';
 import type { TaskStatus } from '../search-params';
 import { BlockersSection } from './blockers-section';
 import { DependenciesSection } from './dependencies-section';
@@ -99,21 +97,16 @@ function Body({ onClose, onOpenTask, onSetStatus, task }: Omit<TaskDrawerProps, 
 
 	return (
 		<>
-			<Drawer.Header className='items-start'>
-				<Layout.HStack className='min-w-0 flex-1' gap='md'>
-					<span aria-hidden className='flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-foreground/[0.06] text-muted-foreground'>
-						<Icon icon={finished ? statusIcon.done : taskIcon(task.id)} size='lg' />
-					</span>
-					<Layout.Stack className='min-w-0 flex-1' gap='xs'>
-						<Layout.HStack gap='sm' wrap>
-							<PriorityPill priority={task.priority} />
-							{task.blocked && <BlockedTag openBlockers={task.openBlockers} />}
-						</Layout.HStack>
-						<Title onCommit={title => change({ title })} task={task} />
-						<Drawer.Title className='sr-only'>{task.title}</Drawer.Title>
-						<Drawer.Description>{t('tasks.drawer.created', { date: formatDate(task.createdAt) })}</Drawer.Description>
-					</Layout.Stack>
-				</Layout.HStack>
+			<Drawer.Header className='items-center'>
+				<Layout.Stack className='min-w-0 flex-1' gap='xs'>
+					<Layout.HStack className='pl-[9px]' gap='sm' wrap>
+						<PriorityPill priority={task.priority} />
+						{task.blocked && <BlockedTag openBlockers={task.openBlockers} />}
+					</Layout.HStack>
+					<Title onCommit={title => change({ title })} task={task} />
+					<Drawer.Title className='sr-only'>{task.title}</Drawer.Title>
+					<Drawer.Description className='pl-[9px] text-xs'>{t('tasks.drawer.created', { date: formatDate(task.createdAt) })}</Drawer.Description>
+				</Layout.Stack>
 				<Drawer.Close>
 					<Button aria-label={t('tasks.drawer.close')} className='size-9 shrink-0 rounded-full p-0' onClick={onClose} size='icon' variant='ghost'>
 						<Button.Icon icon={X} />

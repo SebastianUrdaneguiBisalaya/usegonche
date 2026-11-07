@@ -33,10 +33,10 @@ export function TaskTabs({ task }: { task: Task }) {
 					</Tabs.Trigger>
 				))}
 			</Tabs.List>
-			<Tabs.Content className='w-full pt-3' value='history'>
+			<Tabs.Content className='min-h-64 w-full pt-3' value='history'>
 				<TaskHistory task={task} />
 			</Tabs.Content>
-			<Tabs.Content className='w-full pt-3' value='notes'>
+			<Tabs.Content className='min-h-64 w-full pt-3' value='notes'>
 				<div className='mb-3 flex justify-end'>
 					<Button onClick={() => setNewNote(true)} type='button' variant='secondary'>
 						<Button.Icon icon={Plus} />
@@ -59,10 +59,10 @@ export function TaskTabs({ task }: { task: Task }) {
 					retryLabel={retry}
 				/>
 			</Tabs.Content>
-			<Tabs.Content className='w-full pt-3' value='files'>
+			<Tabs.Content className='min-h-64 w-full pt-3' value='files'>
 				<AttachmentsCard target={{ taskId: task.id }} />
 			</Tabs.Content>
-			<Tabs.Content className='flex w-full flex-col gap-3 pt-3' value='time'>
+			<Tabs.Content className='flex min-h-64 w-full flex-col gap-3 pt-3' value='time'>
 				<Typography.Span className='text-sm text-muted-foreground'>
 					{task.estimatedMinutes ? t('tasks.drawer.estimate', { minutes: task.estimatedMinutes }) : t('tasks.drawer.noEstimate')}
 				</Typography.Span>
