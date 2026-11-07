@@ -91,7 +91,9 @@ function TabsList({ children, className }: TabsListProps) {
   return (
     <div
       className={cn(
-        "inline-flex w-fit items-center justify-between gap-1 overflow-x-auto rounded-lg bg-muted p-1",
+        // `shrink-0`: with `overflow-x-auto` its minimum height is 0, so inside a flex column with tall content (a drawer body)
+        // it was squashed and the triggers were cut.
+        "inline-flex w-fit shrink-0 items-center justify-between gap-1 overflow-x-auto rounded-lg bg-muted p-1",
         className,
       )}
       role="tablist"
