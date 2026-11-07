@@ -42,7 +42,7 @@ export function GoalFields({ withStatus }: { withStatus?: boolean }) {
 			<Form.Field name='title'>
 				{field => (
 					<Input className={listStyles.field} errorMessage={field.error} maxLength={TITLE_MAX}>
-						<Input.Label>{t('goals.form.title.label')}</Input.Label>
+						<Input.Label required>{t('goals.form.title.label')}</Input.Label>
 						<Input.Field autoComplete='off' placeholder={t('goals.form.title.placeholder')} {...field.inputProps} />
 					</Input>
 				)}

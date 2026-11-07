@@ -27,7 +27,7 @@ export function ProjectFields({ withStatus }: { withStatus?: boolean }) {
 			<Form.Field name='title'>
 				{field => (
 					<Input className={listStyles.field} errorMessage={field.error} maxLength={TITLE_MAX}>
-						<Input.Label>{t('projects.form.title.label')}</Input.Label>
+						<Input.Label required>{t('projects.form.title.label')}</Input.Label>
 						<Input.Field autoComplete='off' placeholder={t('projects.form.title.placeholder')} {...field.inputProps} />
 					</Input>
 				)}

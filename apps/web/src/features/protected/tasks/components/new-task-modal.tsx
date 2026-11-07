@@ -73,7 +73,7 @@ export function NewTaskModal({ onOpenChange, open, status }: NewTaskModalProps) 
 							<Form.Field name='title'>
 								{field => (
 									<Input className={listStyles.field} errorMessage={field.error} maxLength={TITLE_MAX}>
-										<Input.Label>{t('tasks.form.title.label')}</Input.Label>
+										<Input.Label required>{t('tasks.form.title.label')}</Input.Label>
 										<Input.Field autoComplete='off' placeholder={t('tasks.form.title.placeholder')} {...field.inputProps} />
 									</Input>
 								)}
