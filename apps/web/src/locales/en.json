@@ -1849,5 +1849,97 @@
     },
     "backHome": "Back to home",
     "signIn": "Sign in"
+  },
+  "gettingStarted": {
+    "tour": {
+      "next": "Next",
+      "previous": "Back",
+      "done": "Got it",
+      "progress": "{{current}} of {{total}}",
+      "welcome": {
+        "title": "Welcome to useGonche",
+        "description": "A quick tour of where things live and the order to set them up. You can do everything by hand; nothing is mandatory."
+      },
+      "tags": {
+        "title": "1. Tags",
+        "description": "Start here. Tags are labels like \"work\" or \"personal\" that you attach to tasks, projects and notes to filter them later."
+      },
+      "goals": {
+        "title": "2. Goals",
+        "description": "An outcome you want to reach, like \"Launch my portfolio\". Projects and tasks can point to a goal, so you see what moves it forward."
+      },
+      "projects": {
+        "title": "3. Projects",
+        "description": "A body of work with an end, linked to a goal. It groups the tasks that make it happen."
+      },
+      "tasks": {
+        "title": "4. Tasks",
+        "description": "A concrete action you can do. Put it in a project, give it a priority and a due date, and split it into subtasks if needed."
+      },
+      "today": {
+        "title": "5. Today",
+        "description": "Pick the tasks you will work on today against your real capacity, and optionally reserve time for them with blocks in the agenda."
+      },
+      "inbox": {
+        "title": "Inbox",
+        "description": "Capture anything fast, without organizing it. Later, process each item into a task, a project or a note."
+      },
+      "calendar": {
+        "title": "Calendar",
+        "description": "Your events and time blocks by day and week, so plans fit your real schedule."
+      },
+      "notes": {
+        "title": "Notes",
+        "description": "Write notes and link them to the tasks they talk about."
+      },
+      "reflect": {
+        "title": "Reflect",
+        "description": "Daily and weekly review: what was planned versus done, and what to carry over."
+      },
+      "finish": {
+        "title": "Your getting-started checklist",
+        "description": "Follow the checklist at the bottom right: each step checks itself off when you create it."
+      }
+    },
+    "checklist": {
+      "title": "Getting started",
+      "description": "{{done}} of {{total}} done",
+      "open": "Open the getting-started checklist",
+      "minimize": "Minimize the checklist",
+      "skip": "Skip the guide",
+      "completed": "You're all set. The guide is done.",
+      "status": {
+        "completed": "Completed",
+        "active": "Current step",
+        "upcoming": "Upcoming"
+      },
+      "steps": {
+        "tag": {
+          "title": "Create a tag",
+          "description": "Labels like \"work\" or \"personal\" to filter tasks, projects and notes.",
+          "action": "Go to Tags"
+        },
+        "goal": {
+          "title": "Set a goal",
+          "description": "The outcome you want to reach. Projects and tasks will point to it.",
+          "action": "Go to Goals"
+        },
+        "project": {
+          "title": "Create a project",
+          "description": "Group the work for that goal. Link it to the goal you just created.",
+          "action": "Go to Projects"
+        },
+        "task": {
+          "title": "Add a task",
+          "description": "A concrete next action. Put it in your project and give it a priority.",
+          "action": "Go to Tasks"
+        },
+        "plan": {
+          "title": "Plan your day",
+          "description": "On Today, add the task to today's plan. Optionally reserve time with a block in the agenda.",
+          "action": "Go to Today"
+        }
+      }
+    }
   }
 }

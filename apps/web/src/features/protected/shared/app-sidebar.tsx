@@ -90,6 +90,7 @@ export function AppSidebar({ mobileOpen, onMobileOpenChange, onOpenCommand }: Ap
 	const renderItem = (entry: (typeof primaryNav)[number]) => (
 		<Sidebar.NavItem
 			active={isActive(pathname, entry.to)}
+			data-tour={`nav-${entry.id}`}
 			href={entry.to}
 			icon={entry.icon}
 			key={entry.id}
