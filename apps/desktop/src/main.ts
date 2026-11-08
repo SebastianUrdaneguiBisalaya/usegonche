@@ -7,12 +7,12 @@ import { loadWindowState, trackWindowState, windowOptions } from './window-state
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // The app only embeds the web app, it does not ship it. It loads the web app from this URL: the
-// vite dev server by default, or a deployed/self-hosted one through USESHORTLY_WEB_URL.
-const WEB_URL = (process.env.USESHORTLY_WEB_URL ?? 'http://localhost:5173').replace(/\/+$/, '');
+// vite dev server by default, or a deployed/self-hosted one through USEGONCHE_WEB_URL.
+const WEB_URL = (process.env.USEGONCHE_WEB_URL ?? 'http://localhost:5173').replace(/\/+$/, '');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
-const ICON_PNG = path.join(PUBLIC_DIR, 'useshortly-icon.png');
-const ICON_MAC_PNG = path.join(PUBLIC_DIR, 'useshortly-icon-mac.png');
+const ICON_PNG = path.join(PUBLIC_DIR, 'usegonche-icon.png');
+const ICON_MAC_PNG = path.join(PUBLIC_DIR, 'usegonche-icon-mac.png');
 
 let mainWindow: BrowserWindow | null = null;
 
