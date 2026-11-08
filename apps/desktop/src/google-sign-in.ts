@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { shell } from 'electron';
+import { signInPage } from './sign-in-page.js';
 
 const AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 // The user may take a while in the browser (account picker, 2FA), but not forever.
@@ -18,10 +19,6 @@ let cancelPending: (() => void) | null = null;
 
 function base64url(buffer: Buffer) {
 	return buffer.toString('base64url');
-}
-
-function page(message: string) {
-	return `<!doctype html><html><head><meta charset="utf-8"><title>useshortly</title></head><body style="font-family:system-ui,sans-serif;display:grid;place-items:center;height:100vh;margin:0"><p>${message}</p></body></html>`;
 }
 
 /**
@@ -74,7 +71,11 @@ export function signInWithGoogle(clientId: string): Promise<GoogleGrant | null> 
 			res.writeHead(200, {
 				'Content-Type': 'text/html; charset=utf-8',
 			});
-			res.end(page(code ? 'Signed in. You can close this tab and return to useshortly.' : 'Sign-in was cancelled. You can close this tab.'));
+			res.end(
+				code
+					? signInPage('You are', 'signed in.', 'You can close this tab and return to useGonche.')
+					: signInPage('Sign-in', 'was cancelled.', 'You can close this tab and try again from useGonche.')
+			);
 			finish(
 				code
 					? {
